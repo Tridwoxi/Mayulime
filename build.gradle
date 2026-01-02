@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'app.Main'
+}
+
+javafx {
+    version = '23'
+    modules = [ 'javafx.controls', 'javafx.media' ]
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['src']
+        resources.srcDirs += ['assets']
+    }
+}

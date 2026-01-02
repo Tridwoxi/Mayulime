@@ -1,0 +1,10 @@
+*
+
+!*.java
+!*.md
+
+bin/
+build/
+
+!build.gradle
+!.gitignore
