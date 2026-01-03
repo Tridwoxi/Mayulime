@@ -4,6 +4,7 @@
 !*.java
 !*.md
 
+.*
 bin/
 build/
 
