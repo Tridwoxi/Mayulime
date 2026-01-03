@@ -9,16 +9,16 @@ import think.representation.Cell.CellType;
 /**
     Rectangular grid of cells indexed by natural Java (i, j).
  */
-public class Board {
+public final class Board {
 
     private static final record Point(int i, int j) {}
 
     private final Cell[][] cells;
-    private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>
-    private final ArrayList<Point> checkpointList; // In sorted order.
+    private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
+    private final ArrayList<Point> checkpointList; // Sorted by association, ascending.
     private final ArrayList<Point> startList;
 
-    public Board(Cell[][] cells) {
+    public Board(final Cell[][] cells) throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.teleports = new HashMap<>();
         this.checkpointList = new ArrayList<>();
@@ -26,14 +26,14 @@ public class Board {
         initialize();
     }
 
-    public Cell getCell(int i, int j) {
+    public Cell getCell(final int i, final int j) {
         if (i < 0 || i >= getBoundI() || j < 0 || j >= getBoundJ()) {
             throw new IllegalArgumentException("Need coordiantes in bounds.");
         }
         return cells[i][j];
     }
 
-    public Point getDestination(int i, int j) {
+    public Point getDestination(final int i, final int j) {
         if (getCell(i, j).type() != CellType.TELEPORT_IN) {
             throw new IllegalArgumentException("Need teleport from in cell.");
         }
@@ -60,15 +60,16 @@ public class Board {
         if (cells.length == 0 || cells[0] == null || cells[0].length == 0) {
             throw new IllegalArgumentException("Need non-empty array.");
         }
-        HashMap<Integer, Point> outs = new HashMap<>(); // <Association, Teleport>
-        HashMap<Integer, Point> ins = new HashMap<>(); // <Association, Teleport>
-        HashMap<Integer, Point> checks = new HashMap<>(); // <Association, Checkpoint>
+        // <Association, Teleport/Checkpoint location>.
+        final HashMap<Integer, Point> teleIn = new HashMap<>();
+        final HashMap<Integer, Point> teleOut = new HashMap<>();
+        final HashMap<Integer, Point> checks = new HashMap<>();
         for (int i = 0; i < getBoundI(); i++) {
             if (cells[i] == null || cells[i].length != getBoundJ()) {
                 throw new IllegalArgumentException("Need rectangular array.");
             }
             for (int j = 0; j < getBoundJ(); j++) {
-                Cell cell = cells[i][j];
+                final Cell cell = cells[i][j];
                 switch (cell.type()) {
                     case START -> {
                         startList.add(new Point(i, j));
@@ -79,12 +80,12 @@ public class Board {
                         }
                     }
                     case TELEPORT_IN -> {
-                        if (ins.put(cell.association(), new Point(i, j)) != null) {
+                        if (teleIn.put(cell.association(), new Point(i, j)) != null) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
                     case TELEPORT_OUT -> {
-                        if (outs.put(cell.association(), new Point(i, j)) != null) {
+                        if (teleOut.put(cell.association(), new Point(i, j)) != null) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
@@ -92,14 +93,14 @@ public class Board {
                 }
             }
         }
-        if (ins.size() != outs.size()) {
+        if (teleIn.size() != teleOut.size()) {
             throw new IllegalArgumentException("Need teleports of equal count.");
         }
-        for (int key : ins.keySet()) {
-            if (!outs.containsKey(key)) {
+        for (final int key : teleIn.keySet()) {
+            if (!teleOut.containsKey(key)) {
                 throw new IllegalArgumentException("Need teleports to be paired.");
             }
-            teleports.put(ins.get(key), outs.get(key));
+            teleports.put(teleIn.get(key), teleOut.get(key));
         }
         checkpointList.addAll(checks.values());
         checkpointList.sort(
