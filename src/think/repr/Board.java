@@ -17,7 +17,8 @@ public final class Board {
     private final int rubberSupply;
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
     // Sorted by association in ascending order.
-    private final ArrayList<HashSet<Point>> checkpoints;
+    private final ArrayList<HashSet<Point>> checkpoints; // Including starts.
+    private final ArrayList<Point> starts; // Sorted order, top then left.
     private final ArrayList<Point> everything;
 
     public Board(final Cell[][] cells, int rubberSupply)
@@ -26,6 +27,7 @@ public final class Board {
         this.rubberSupply = rubberSupply;
         this.teleports = new HashMap<>();
         this.checkpoints = new ArrayList<>();
+        this.starts = new ArrayList<>();
         this.everything = new ArrayList<>();
         initialize();
     }
@@ -53,6 +55,10 @@ public final class Board {
             throw new IllegalArgumentException("Need teleport from in cell.");
         }
         return teleports.get(point);
+    }
+
+    public ArrayList<Point> getStarts() {
+        return starts;
     }
 
     public ArrayList<HashSet<Point>> getCheckpoints() {
@@ -133,6 +139,11 @@ public final class Board {
         for (Entry<Integer, HashSet<Point>> e : entries) {
             checkpoints.add(e.getValue());
         }
+        starts.addAll(checkpoints.get(0));
+        starts.sort((a, b) -> {
+            final int iResult = Integer.compare(a.i(), b.i());
+            return iResult != 0 ? iResult : Integer.compare(a.j(), b.j());
+        });
         if (rubberSupply < 0) {
             throw new IllegalArgumentException("Need non-negative number of rubbers.");
         }
