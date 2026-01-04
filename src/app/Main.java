@@ -29,6 +29,7 @@ import think.Core;
 import think.repr.Board;
 import think.repr.Cell;
 import think.repr.Parser;
+import think.repr.Point;
 
 public final class Main extends Application {
 
@@ -136,7 +137,7 @@ class BoardDisplay extends Group {
     public BoardDisplay(Board board, double cellSize) {
         for (int i = 0; i < board.getBoundI(); i++) {
             for (int j = 0; j < board.getBoundJ(); j++) {
-                CellDisplay cell = new CellDisplay(board.getCell(i, j), cellSize);
+                CellDisplay cell = new CellDisplay(board.getCell(new Point(i, j)), cellSize);
                 cell.setLayoutX(j * cellSize);
                 cell.setLayoutY(i * cellSize);
                 getChildren().add(cell);

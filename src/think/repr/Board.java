@@ -12,8 +12,6 @@ import think.repr.Cell.CellType;
  */
 public final class Board {
 
-    private static final record Point(int i, int j) {}
-
     private final Cell[][] cells;
     private final int maxRubbers;
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
@@ -28,18 +26,20 @@ public final class Board {
         initialize();
     }
 
-    public Cell getCell(final int i, final int j) {
+    public Cell getCell(final Point point) {
+        final int i = point.i();
+        final int j = point.j();
         if (i < 0 || i >= getBoundI() || j < 0 || j >= getBoundJ()) {
             throw new IllegalArgumentException("Need coordiantes in bounds.");
         }
         return cells[i][j];
     }
 
-    public Point getDestination(final int i, final int j) {
-        if (getCell(i, j).type() != CellType.TELEPORT_IN) {
+    public Point getDestination(final Point point) {
+        if (getCell(point).type() != CellType.TELEPORT_IN) {
             throw new IllegalArgumentException("Need teleport from in cell.");
         }
-        return teleports.get(new Point(i, j));
+        return teleports.get(point);
     }
 
     public ArrayList<HashSet<Point>> getCheckpoints() {
@@ -72,22 +72,23 @@ public final class Board {
             }
             for (int j = 0; j < getBoundJ(); j++) {
                 final Cell cell = cells[i][j];
+                final Point point = new Point(i, j);
                 switch (cell.type()) {
                     case CHECKPOINT -> {
                         if (!checks.containsKey(cell.association())) {
                             checks.put(cell.association(), new HashSet<>());
                         }
-                        if (!checks.get(cell.association()).add(new Point(i, j))) {
+                        if (!checks.get(cell.association()).add(point)) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
                     case TELEPORT_IN -> {
-                        if (teleIn.put(cell.association(), new Point(i, j)) != null) {
+                        if (teleIn.put(cell.association(), point) != null) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
                     case TELEPORT_OUT -> {
-                        if (teleOut.put(cell.association(), new Point(i, j)) != null) {
+                        if (teleOut.put(cell.association(), point) != null) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
