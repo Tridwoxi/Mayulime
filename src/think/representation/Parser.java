@@ -1,0 +1,90 @@
+package think.representation;
+
+import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import think.representation.Cell.CellType;
+
+/**
+    Make board from string specification like (not whitespace-sensitive):
+
+    {@snippet txt :
+        width;
+        height;
+        i,j,cell_type association(optional);
+    }
+
+    For example, a 4 by 4 board with a start in the top left, checkpoint at the bottom
+    right, and finish to the right of the start:
+
+    {@snippet :
+        4;
+        4;
+        0,0,s;
+        3,3,c,1;
+        0,1,f;
+    }
+ */
+public final class Parser {
+
+    private static final HashMap<String, CellType> legend; // <Abbreviation, Cell type>
+
+    private Parser() {}
+
+    public static Board parse(final String source) throws IllegalArgumentException {
+        try (Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
+            final int boundI = s.nextInt();
+            final int boundJ = s.nextInt();
+            final Cell[][] cells = new Cell[boundI][boundJ];
+            for (int i = 0; i < boundI; i++) {
+                for (int j = 0; j < boundJ; j++) {
+                    cells[i][j] = new Cell(CellType.NOTHING, 0);
+                }
+            }
+            while (s.hasNext()) {
+                parseEntry(cells, s.next());
+            }
+            return new Board(cells);
+        } catch (InputMismatchException e) {
+            throw new IllegalArgumentException(e);
+        } catch (NoSuchElementException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private static void parseEntry(final Cell[][] cells, final String entry) {
+        try (Scanner s = new Scanner(entry).useDelimiter("\\s*,\\s*")) {
+            final int i = s.nextInt();
+            final int j = s.nextInt();
+            final String typeToken = s.next();
+            final CellType type = legend.get(typeToken.trim().toUpperCase());
+            if (type == null) {
+                throw new IllegalArgumentException("Unknown cell type: " + typeToken);
+            }
+            if (i < 0 || i >= cells.length || j < 0 || j >= cells[0].length) {
+                throw new IllegalArgumentException("Coordinates out of bounds.");
+            }
+            if (cells[i][j].type() != CellType.NOTHING) {
+                throw new IllegalArgumentException("Cell specified twice.");
+            }
+            int association = 0;
+            if (s.hasNext()) {
+                association = s.nextInt();
+            }
+            cells[i][j] = new Cell(type, association);
+        }
+    }
+
+    static {
+        legend = new HashMap<>();
+        legend.put("B", CellType.BRICK);
+        legend.put("C", CellType.CHECKPOINT);
+        legend.put("F", CellType.FINISH);
+        legend.put("N", CellType.NOTHING);
+        legend.put("R", CellType.RUBBER);
+        legend.put("S", CellType.START);
+        legend.put("I", CellType.TELEPORT_IN);
+        legend.put("O", CellType.TELEPORT_OUT);
+    }
+}
