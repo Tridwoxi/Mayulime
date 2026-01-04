@@ -9,7 +9,6 @@ public record Cell(CellType type, int association) {
         BRICK,
         CHECKPOINT,
         NOTHING,
-        RUBBER,
         TELEPORT_IN,
         TELEPORT_OUT,
     }

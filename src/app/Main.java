@@ -3,7 +3,9 @@ package app;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,16 +30,19 @@ import javafx.stage.Window;
 import think.Core;
 import think.repr.Board;
 import think.repr.Cell;
+import think.repr.Cell.CellType;
 import think.repr.Parser;
 import think.repr.Point;
 
 public final class Main extends Application {
 
     private static Gui gui;
+    private static Stage primaryStage;
 
     @Override
     public void start(final Stage primaryStage) {
-        gui = new Gui();
+        Main.gui = new Gui();
+        Main.primaryStage = primaryStage;
         Scene mainScene = new Scene(gui);
         mainScene.setFill(Color.GRAY);
         primaryStage.setScene(mainScene);
@@ -46,8 +51,11 @@ public final class Main extends Application {
     }
 
     public static void solveProblem(File file) {
+        Board spec;
         try {
-            new Core(Parser.parse(Files.readString(file.toPath())));
+            spec = Parser.parse(Files.readString(file.toPath()));
+            primaryStage.setTitle(file.getName());
+            new Core(spec);
         } catch (IllegalArgumentException e) {
             System.err.println("Bad specification: " + e);
         } catch (IOException e) {
@@ -55,8 +63,12 @@ public final class Main extends Application {
         }
     }
 
-    public static void recieveUpdate(Board board, int score, int remainingRubbers) {
-        gui.showUpdate(board, score, remainingRubbers);
+    public static void recieveUpdate(
+        Board board,
+        HashSet<Point> rubberAssignment,
+        int score
+    ) {
+        gui.showUpdate(board, rubberAssignment, score);
     }
 }
 
@@ -86,12 +98,12 @@ class Gui extends VBox {
         getChildren().addAll(boardDisplay, stats);
     }
 
-    public void showUpdate(Board board, int score, int remainingRubber) {
-        boardDisplay = new BoardDisplay(board, CELL_SIZE);
-        this.scoreDisplay.setText("Score: " + score);
-        this.rubberDisplay.setText("Remaining walls: " + remainingRubber);
+    public void showUpdate(Board board, HashSet<Point> rubberAssignment, int score) {
+        boardDisplay = new BoardDisplay(board, CELL_SIZE, rubberAssignment);
+        scoreDisplay.setText("Score: " + score);
+        final int remaining = board.getRubberSupply() - rubberAssignment.size();
+        rubberDisplay.setText("Remaining walls: " + remaining);
         getChildren().set(0, boardDisplay); // Must target whatever constructor decided.
-
         if (
             getScene() != null &&
             getScene().getWindow() != null &&
@@ -134,23 +146,28 @@ class BoardDisplay extends Group {
 
     public BoardDisplay() {}
 
-    public BoardDisplay(Board board, double cellSize) {
+    public BoardDisplay(Board board, double cellSize, HashSet<Point> rubberAssignment) {
         for (Point point : board.getEverything()) {
-            CellDisplay cell = new CellDisplay(board.getCell(point), cellSize);
+            Cell cellData = board.getCell(point);
+            boolean hasRubber = rubberAssignment.contains(point);
+            CellDisplay cell = new CellDisplay(cellData, cellSize, hasRubber);
             cell.setLayoutY(point.i() * cellSize);
             cell.setLayoutX(point.j() * cellSize);
             getChildren().add(cell);
+            if (cellData.type() != CellType.NOTHING && hasRubber) {
+                System.err.println("Internal error: illegal assignment.");
+                Platform.exit();
+            }
         }
     }
 }
 
 class CellDisplay extends Group {
 
-    public CellDisplay(Cell cell, double cellSize) {
+    public CellDisplay(Cell cell, double cellSize, boolean hasRubber) {
         Rectangle rect = new Rectangle(cellSize, cellSize);
-        rect.setFill(getColor(cell));
+        rect.setFill(getColor(cell, hasRubber));
         rect.setStroke(PatheryColors.BACKGROUND);
-
         if (
             cell.type() == Cell.CellType.CHECKPOINT ||
             cell.type() == Cell.CellType.TELEPORT_IN ||
@@ -168,12 +185,14 @@ class CellDisplay extends Group {
         }
     }
 
-    private Color getColor(Cell cell) {
+    private Color getColor(Cell cell, boolean hasRubber) {
+        if (hasRubber) {
+            return PatheryColors.RUBBER;
+        }
         return switch (cell.type()) {
             case BRICK -> PatheryColors.BRICK;
             case CHECKPOINT -> PatheryColors.CHECKPOINT;
             case NOTHING -> PatheryColors.NOTHING;
-            case RUBBER -> PatheryColors.RUBBER;
             case TELEPORT_IN -> PatheryColors.TELEPORT;
             case TELEPORT_OUT -> PatheryColors.TELEPORT;
         };

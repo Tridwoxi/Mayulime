@@ -8,20 +8,22 @@ import java.util.Objects;
 import think.repr.Cell.CellType;
 
 /**
-    Rectangular grid of cells indexed by natural Java (i, j). Somewhat heavy.
+    Rectangular grid of cells indexed by natural Java (i, j). Somewhat heavy. Serves as
+    problem specification.
  */
 public final class Board {
 
     private final Cell[][] cells;
-    private final int maxRubbers;
+    private final int rubberSupply;
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
     // Sorted by association in ascending order.
     private final ArrayList<HashSet<Point>> checkpoints;
     private final ArrayList<Point> everything;
 
-    public Board(final Cell[][] cells, int maxRubbers) throws IllegalArgumentException {
+    public Board(final Cell[][] cells, int rubberSupply)
+        throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
-        this.maxRubbers = maxRubbers;
+        this.rubberSupply = rubberSupply;
         this.teleports = new HashMap<>();
         this.checkpoints = new ArrayList<>();
         this.everything = new ArrayList<>();
@@ -56,8 +58,8 @@ public final class Board {
         return cells[0].length;
     }
 
-    public int getMaxRubbers() {
-        return maxRubbers;
+    public int getRubberSupply() {
+        return rubberSupply;
     }
 
     public ArrayList<Point> getEverything() {
@@ -122,7 +124,7 @@ public final class Board {
         for (Entry<Integer, HashSet<Point>> e : entries) {
             checkpoints.add(e.getValue());
         }
-        if (maxRubbers < 0) {
+        if (rubberSupply < 0) {
             throw new IllegalArgumentException("Need non-negative number of rubbers.");
         }
     }

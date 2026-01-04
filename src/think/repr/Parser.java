@@ -67,9 +67,6 @@ public final class Parser {
             if (type == null) {
                 throw new IllegalArgumentException("Unknown cell type: " + typeToken);
             }
-            if (type == CellType.RUBBER) {
-                throw new IllegalArgumentException("Can't specify rubbers.");
-            }
             if (i < 0 || i >= cells.length || j < 0 || j >= cells[0].length) {
                 throw new IllegalArgumentException("Coordinates out of bounds.");
             }
@@ -92,7 +89,6 @@ public final class Parser {
         legend.put("B", CellType.BRICK);
         legend.put("C", CellType.CHECKPOINT);
         legend.put("N", CellType.NOTHING);
-        legend.put("R", CellType.RUBBER);
         legend.put("I", CellType.TELEPORT_IN);
         legend.put("O", CellType.TELEPORT_OUT);
     }
