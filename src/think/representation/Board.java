@@ -14,12 +14,14 @@ public final class Board {
     private static final record Point(int i, int j) {}
 
     private final Cell[][] cells;
+    private final int numRubbers;
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
     private final ArrayList<Point> checkpointList; // Sorted by association, ascending.
     private final ArrayList<Point> startList;
 
-    public Board(final Cell[][] cells) throws IllegalArgumentException {
+    public Board(final Cell[][] cells, int numRubbers) throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
+        this.numRubbers = numRubbers;
         this.teleports = new HashMap<>();
         this.checkpointList = new ArrayList<>();
         this.startList = new ArrayList<>();
@@ -108,5 +110,8 @@ public final class Board {
         );
         checkpointList.trimToSize();
         startList.trimToSize();
+        if (numRubbers < 0) {
+            throw new IllegalArgumentException("Need non-negative number of rubbers.");
+        }
     }
 }

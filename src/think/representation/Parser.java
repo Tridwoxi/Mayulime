@@ -10,6 +10,7 @@ import think.representation.Cell.CellType;
     Make board from string specification like (not whitespace-sensitive):
 
     {@snippet txt :
+        num_rubbers;
         width;
         height;
         i,j,cell_type association(optional);
@@ -19,6 +20,7 @@ import think.representation.Cell.CellType;
     right, and finish to the right of the start:
 
     {@snippet :
+        2;
         4;
         4;
         0,0,s;
@@ -34,6 +36,7 @@ public final class Parser {
 
     public static Board parse(final String source) throws IllegalArgumentException {
         try (Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
+            final int numRubbers = s.nextInt();
             final int boundI = s.nextInt();
             final int boundJ = s.nextInt();
             final Cell[][] cells = new Cell[boundI][boundJ];
@@ -45,7 +48,7 @@ public final class Parser {
             while (s.hasNext()) {
                 parseEntry(cells, s.next());
             }
-            return new Board(cells);
+            return new Board(cells, numRubbers);
         } catch (InputMismatchException e) {
             throw new IllegalArgumentException(e);
         } catch (NoSuchElementException e) {
