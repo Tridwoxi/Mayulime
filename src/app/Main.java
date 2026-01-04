@@ -135,7 +135,7 @@ class BoardDisplay extends Group {
     public BoardDisplay() {}
 
     public BoardDisplay(Board board, double cellSize) {
-        for (Point point : board.getPoints()) {
+        for (Point point : board.getEverything()) {
             CellDisplay cell = new CellDisplay(board.getCell(point), cellSize);
             cell.setLayoutY(point.i() * cellSize);
             cell.setLayoutX(point.j() * cellSize);

@@ -17,14 +17,14 @@ public final class Board {
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
     // Sorted by association in ascending order.
     private final ArrayList<HashSet<Point>> checkpoints;
-    private final ArrayList<Point> points;
+    private final ArrayList<Point> everything;
 
     public Board(final Cell[][] cells, int maxRubbers) throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.maxRubbers = maxRubbers;
         this.teleports = new HashMap<>();
         this.checkpoints = new ArrayList<>();
-        this.points = new ArrayList<>();
+        this.everything = new ArrayList<>();
         initialize();
     }
 
@@ -60,8 +60,8 @@ public final class Board {
         return maxRubbers;
     }
 
-    public ArrayList<Point> getPoints() {
-        return points;
+    public ArrayList<Point> getEverything() {
+        return everything;
     }
 
     private void initialize() {
@@ -72,16 +72,16 @@ public final class Board {
         final HashMap<Integer, Point> teleIn = new HashMap<>();
         final HashMap<Integer, Point> teleOut = new HashMap<>();
         final HashMap<Integer, HashSet<Point>> checks = new HashMap<>();
-        points.ensureCapacity(getBoundI() * getBoundJ());
+        everything.ensureCapacity(getBoundI() * getBoundJ());
         for (int i = 0; i < getBoundI(); i++) {
             if (cells[i].length != getBoundJ()) {
                 throw new IllegalArgumentException("Need rectangular array.");
             }
             for (int j = 0; j < getBoundJ(); j++) {
-                points.add(new Point(i, j));
+                everything.add(new Point(i, j));
             }
         }
-        for (Point point : points) {
+        for (Point point : everything) {
             final Cell cell = cells[point.i()][point.j()];
             switch (cell.type()) {
                 case CHECKPOINT -> {
