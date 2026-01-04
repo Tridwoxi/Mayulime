@@ -16,16 +16,15 @@ import think.representation.Cell.CellType;
         i,j,cell_type association(optional);
     }
 
-    For example, a 4 by 4 board with a start in the top left, checkpoint at the bottom
-    right, and finish to the right of the start:
+    For example, a 4 by 4 board with a start checkpoint in the top left, brick in top right, and finish checkpoint in bottom right:
 
     {@snippet :
         2;
         4;
         4;
-        0,0,s;
-        3,3,c,1;
-        0,1,f;
+        0,0,c,1;
+        0,3,b;
+        3,3,c,2;
     }
  */
 public final class Parser {
