@@ -1,6 +1,6 @@
 # Repository guidelines
 
-Consult `README.md` for an overview. If you edit code, do `gradle build` to check the project didn't break.
+Consult `README.md` for an overview. If you edit code, do `./gradlew build` to check the project didn't break.
 
 It is permitted but discouraged to mutate custom classes. Prefer copying with modification instead. If you mutate, prefer to do so privately.
 
