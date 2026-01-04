@@ -50,16 +50,13 @@ class CellDisplay extends Group {
     }
 
     private Color getColor(Cell cell) {
-        // Loosely based on Pathery default colors.
         return switch (cell.type()) {
-            case BRICK -> Color.CORAL;
-            case CHECKPOINT -> Color.PALEGOLDENROD;
-            case FINISH -> Color.BURLYWOOD;
-            case NOTHING -> Color.WHITESMOKE;
-            case RUBBER -> Color.SLATEGRAY;
-            case START -> Color.FORESTGREEN;
-            case TELEPORT_IN -> Color.CADETBLUE;
-            case TELEPORT_OUT -> Color.CORNFLOWERBLUE;
+            case BRICK -> Color.DARKORANGE;
+            case CHECKPOINT -> Color.FIREBRICK;
+            case NOTHING -> Color.WHEAT;
+            case RUBBER -> Color.DARKSLATEGRAY;
+            case TELEPORT_IN -> Color.DARKBLUE;
+            case TELEPORT_OUT -> Color.FORESTGREEN;
         };
     }
 }

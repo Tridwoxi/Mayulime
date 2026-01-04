@@ -1,8 +1,9 @@
 package think.representation;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Objects;
 import think.representation.Cell.CellType;
 
@@ -16,15 +17,14 @@ public final class Board {
     private final Cell[][] cells;
     private final int numRubbers;
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
-    private final ArrayList<Point> checkpointList; // Sorted by association, ascending.
-    private final ArrayList<Point> startList;
+    // Sorted by association in ascending order.
+    private final ArrayList<HashSet<Point>> checkpoints;
 
     public Board(final Cell[][] cells, int numRubbers) throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.numRubbers = numRubbers;
         this.teleports = new HashMap<>();
-        this.checkpointList = new ArrayList<>();
-        this.startList = new ArrayList<>();
+        this.checkpoints = new ArrayList<>();
         initialize();
     }
 
@@ -42,12 +42,8 @@ public final class Board {
         return teleports.get(new Point(i, j));
     }
 
-    public ArrayList<Point> getCheckpointList() {
-        return checkpointList;
-    }
-
-    public ArrayList<Point> getStartList() {
-        return startList;
+    public ArrayList<HashSet<Point>> getCheckpoints() {
+        return checkpoints;
     }
 
     public int getBoundI() {
@@ -62,10 +58,10 @@ public final class Board {
         if (cells.length == 0 || cells[0] == null || cells[0].length == 0) {
             throw new IllegalArgumentException("Need non-empty array.");
         }
-        // <Association, Teleport/Checkpoint location>.
+        // <Association, Teleport location / Checkpoint locations>.
         final HashMap<Integer, Point> teleIn = new HashMap<>();
         final HashMap<Integer, Point> teleOut = new HashMap<>();
-        final HashMap<Integer, Point> checks = new HashMap<>();
+        final HashMap<Integer, HashSet<Point>> checks = new HashMap<>();
         for (int i = 0; i < getBoundI(); i++) {
             if (cells[i] == null || cells[i].length != getBoundJ()) {
                 throw new IllegalArgumentException("Need rectangular array.");
@@ -73,11 +69,11 @@ public final class Board {
             for (int j = 0; j < getBoundJ(); j++) {
                 final Cell cell = cells[i][j];
                 switch (cell.type()) {
-                    case START -> {
-                        startList.add(new Point(i, j));
-                    }
                     case CHECKPOINT -> {
-                        if (checks.put(cell.association(), new Point(i, j)) != null) {
+                        if (!checks.containsKey(cell.association())) {
+                            checks.put(cell.association(), new HashSet<>());
+                        }
+                        if (!checks.get(cell.association()).add(new Point(i, j))) {
                             throw new IllegalArgumentException("Need uniques.");
                         }
                     }
@@ -104,12 +100,14 @@ public final class Board {
             }
             teleports.put(teleIn.get(key), teleOut.get(key));
         }
-        checkpointList.addAll(checks.values());
-        checkpointList.sort(
-            Comparator.comparingInt(p -> getCell(p.i(), p.j()).association())
+        ArrayList<Entry<Integer, HashSet<Point>>> entries = new ArrayList<>(
+            checks.entrySet()
         );
-        checkpointList.trimToSize();
-        startList.trimToSize();
+        entries.sort(Entry.comparingByKey());
+        checkpoints.ensureCapacity(checks.size());
+        for (Entry<Integer, HashSet<Point>> e : entries) {
+            checkpoints.add(e.getValue());
+        }
         if (numRubbers < 0) {
             throw new IllegalArgumentException("Need non-negative number of rubbers.");
         }
