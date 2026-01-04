@@ -33,10 +33,19 @@ public final class Board {
     public Cell getCell(final Point point) {
         final int i = point.i();
         final int j = point.j();
-        if (i < 0 || i >= getBoundI() || j < 0 || j >= getBoundJ()) {
+        if (!contains(point)) {
             throw new IllegalArgumentException("Need coordiantes in bounds.");
         }
         return cells[i][j];
+    }
+
+    public boolean contains(final Point point) {
+        return (
+            point.i() >= 0 &&
+            point.i() < getBoundI() &&
+            point.j() >= 0 &&
+            point.j() < getBoundJ()
+        );
     }
 
     public Point getDestination(final Point point) {
