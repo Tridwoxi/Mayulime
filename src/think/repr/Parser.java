@@ -81,6 +81,9 @@ public final class Parser {
                 association = s.nextInt();
             }
             cells[i][j] = new Cell(type, association);
+            if (s.hasNext()) {
+                throw new IllegalArgumentException("Too many fields.");
+            }
         }
     }
 
