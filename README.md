@@ -1,6 +1,6 @@
 # Pathery solver
 
-This repository contains a system that proposes solutions to a limited variant of the game [Pathery](www.pathery.com). It is not affiliated with Pathery, and the problem it solves is a subset of the full pathery rules.
+This repository contains a system that proposes solutions to a limited variant of the game [Pathery](www.pathery.com). It is not affiliated with Pathery, and the problem it solves is a subset of the complete Pathery rules.
 
 ## Game description
 
