@@ -11,6 +11,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -98,6 +102,18 @@ class Gui extends VBox {
 
     private Button makeButton() {
         Button upload = new Button("Upload problem");
+        upload.setBackground(Background.fill(PatheryColors.BACKGROUND));
+        upload.setBorder(
+            new Border(
+                new BorderStroke(
+                    PatheryColors.FOREGROUND,
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    BorderStroke.THIN
+                )
+            )
+        );
+        upload.setTextFill(PatheryColors.FOREGROUND);
         upload.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
             chooser
