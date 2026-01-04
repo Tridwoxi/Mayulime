@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import javafx.application.Application;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -54,7 +56,7 @@ public final class Main extends Application {
 
 class Gui extends VBox {
 
-    private static final double CELL_SIZE = 20.0; // Pixels.
+    private static final double CELL_SIZE = 50.0; // Pixels.
     private static final double PADDING = 50.0;
     private static final double SPACING = 50.0;
 
@@ -68,17 +70,25 @@ class Gui extends VBox {
         this.scoreDisplay = new Text();
         this.rubberDisplay = new Text();
         setPadding(new Insets(PADDING));
-        getChildren().addAll(
-            boardDisplay, // Must be at position 0 to match with showUpdate.
-            new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton())
-        );
+        setAlignment(Pos.TOP_CENTER);
+        HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
+        stats.setAlignment(Pos.CENTER);
+        getChildren().addAll(boardDisplay, stats);
     }
 
     public void showUpdate(Board board, int score, int remainingRubber) {
         boardDisplay = new BoardDisplay(board, CELL_SIZE);
         this.scoreDisplay.setText("Score: " + score);
         this.rubberDisplay.setText("Remaining walls: " + remainingRubber);
-        getChildren().set(0, boardDisplay);
+        getChildren().set(0, boardDisplay); // Must target whatever constructor decided.
+
+        if (
+            getScene() != null &&
+            getScene().getWindow() != null &&
+            getScene().getWindow() instanceof Stage stage
+        ) {
+            stage.sizeToScene();
+        }
     }
 
     private Button makeButton() {
@@ -128,8 +138,9 @@ class CellDisplay extends Group {
         ) {
             Text label = new Text(String.valueOf(cell.association()));
             label.setFont(Font.font(cellSize * 0.5));
-            label.setX((cellSize - label.getLayoutBounds().getWidth()) * 0.5);
-            label.setY((cellSize + label.getLayoutBounds().getHeight()) * 0.5);
+            Bounds bounds = label.getLayoutBounds();
+            label.setX((cellSize - bounds.getWidth()) * 0.5 - bounds.getMinX());
+            label.setY((cellSize - bounds.getHeight()) * 0.5 - bounds.getMinY());
             getChildren().addAll(rect, label);
         } else {
             getChildren().add(rect);
