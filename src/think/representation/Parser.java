@@ -36,8 +36,8 @@ public final class Parser {
     public static Board parse(final String source) throws IllegalArgumentException {
         try (Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
             final int numRubbers = s.nextInt();
-            final int boundI = s.nextInt();
-            final int boundJ = s.nextInt();
+            final int boundJ = s.nextInt(); // Width.
+            final int boundI = s.nextInt(); // Height.
             final Cell[][] cells = new Cell[boundI][boundJ];
             for (int i = 0; i < boundI; i++) {
                 for (int j = 0; j < boundJ; j++) {
@@ -56,6 +56,9 @@ public final class Parser {
     }
 
     private static void parseEntry(final Cell[][] cells, final String entry) {
+        if (entry.isBlank()) {
+            return;
+        }
         try (Scanner s = new Scanner(entry).useDelimiter("\\s*,\\s*")) {
             final int i = s.nextInt();
             final int j = s.nextInt();
