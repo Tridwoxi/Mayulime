@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -69,6 +70,10 @@ class Gui extends VBox {
         this.boardDisplay = new BoardDisplay();
         this.scoreDisplay = new Text();
         this.rubberDisplay = new Text();
+        scoreDisplay.setFill(PatheryColors.FOREGROUND);
+        rubberDisplay.setFill(PatheryColors.FOREGROUND);
+
+        setBackground(Background.fill(PatheryColors.BACKGROUND));
         setPadding(new Insets(PADDING));
         setAlignment(Pos.TOP_CENTER);
         HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
@@ -129,7 +134,7 @@ class CellDisplay extends Group {
     public CellDisplay(Cell cell, double cellSize) {
         Rectangle rect = new Rectangle(cellSize, cellSize);
         rect.setFill(getColor(cell));
-        rect.setStroke(Color.DARKGRAY);
+        rect.setStroke(PatheryColors.BACKGROUND);
 
         if (
             cell.type() == Cell.CellType.CHECKPOINT ||
@@ -137,6 +142,7 @@ class CellDisplay extends Group {
             cell.type() == Cell.CellType.TELEPORT_OUT
         ) {
             Text label = new Text(String.valueOf(cell.association()));
+            label.setFill(PatheryColors.FOREGROUND);
             label.setFont(Font.font(cellSize * 0.5));
             Bounds bounds = label.getLayoutBounds();
             label.setX((cellSize - bounds.getWidth()) * 0.5 - bounds.getMinX());
@@ -149,12 +155,24 @@ class CellDisplay extends Group {
 
     private Color getColor(Cell cell) {
         return switch (cell.type()) {
-            case BRICK -> Color.DARKORANGE;
-            case CHECKPOINT -> Color.FIREBRICK;
-            case NOTHING -> Color.WHEAT;
-            case RUBBER -> Color.DARKSLATEGRAY;
-            case TELEPORT_IN -> Color.DARKBLUE;
-            case TELEPORT_OUT -> Color.FORESTGREEN;
+            case BRICK -> PatheryColors.BRICK;
+            case CHECKPOINT -> PatheryColors.CHECKPOINT;
+            case NOTHING -> PatheryColors.NOTHING;
+            case RUBBER -> PatheryColors.RUBBER;
+            case TELEPORT_IN -> PatheryColors.TELEPORT;
+            case TELEPORT_OUT -> PatheryColors.TELEPORT;
         };
     }
+}
+
+class PatheryColors {
+
+    // Approximate average color, picked from Pathery.com
+    public static final Color BACKGROUND = Color.web("121212");
+    public static final Color BRICK = Color.web("723736");
+    public static final Color RUBBER = Color.web("3c3d3c");
+    public static final Color NOTHING = Color.web("e2e8eb");
+    public static final Color CHECKPOINT = Color.web("8e4793");
+    public static final Color TELEPORT = Color.web("#214764");
+    public static final Color FOREGROUND = Color.web("dddddd");
 }
