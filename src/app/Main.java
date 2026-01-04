@@ -26,9 +26,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Core;
-import think.representation.Board;
-import think.representation.Cell;
-import think.representation.Parser;
+import think.repr.Board;
+import think.repr.Cell;
+import think.repr.Parser;
 
 public final class Main extends Application {
 

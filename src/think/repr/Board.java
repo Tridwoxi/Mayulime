@@ -1,11 +1,11 @@
-package think.representation;
+package think.repr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Objects;
-import think.representation.Cell.CellType;
+import think.repr.Cell.CellType;
 
 /**
     Rectangular grid of cells indexed by natural Java (i, j).

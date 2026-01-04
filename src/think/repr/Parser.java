@@ -1,10 +1,10 @@
-package think.representation;
+package think.repr;
 
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import think.representation.Cell.CellType;
+import think.repr.Cell.CellType;
 
 /**
     Make board from string specification like (not whitespace-sensitive):

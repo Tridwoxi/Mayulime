@@ -1,7 +1,7 @@
 package think;
 
 import app.Main;
-import think.representation.Board;
+import think.repr.Board;
 
 public class Core {
 

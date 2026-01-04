@@ -1,4 +1,4 @@
-package think.representation;
+package think.repr;
 
 /**
     What is at a position in a pathery board? The association is to pair teleports and
