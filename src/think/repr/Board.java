@@ -8,7 +8,7 @@ import java.util.Objects;
 import think.repr.Cell.CellType;
 
 /**
-    Rectangular grid of cells indexed by natural Java (i, j).
+    Rectangular grid of cells indexed by natural Java (i, j). Somewhat heavy.
  */
 public final class Board {
 
@@ -17,12 +17,14 @@ public final class Board {
     private final HashMap<Point, Point> teleports; // <TeleportFrom, TeleportTo>.
     // Sorted by association in ascending order.
     private final ArrayList<HashSet<Point>> checkpoints;
+    private final ArrayList<Point> points;
 
     public Board(final Cell[][] cells, int maxRubbers) throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.maxRubbers = maxRubbers;
         this.teleports = new HashMap<>();
         this.checkpoints = new ArrayList<>();
+        this.points = new ArrayList<>();
         initialize();
     }
 
@@ -58,42 +60,49 @@ public final class Board {
         return maxRubbers;
     }
 
+    public ArrayList<Point> getPoints() {
+        return points;
+    }
+
     private void initialize() {
-        if (cells.length == 0 || cells[0] == null || cells[0].length == 0) {
+        if (cells.length == 0 || cells[0].length == 0) {
             throw new IllegalArgumentException("Need non-empty array.");
         }
         // <Association, Teleport location / Checkpoint locations>.
         final HashMap<Integer, Point> teleIn = new HashMap<>();
         final HashMap<Integer, Point> teleOut = new HashMap<>();
         final HashMap<Integer, HashSet<Point>> checks = new HashMap<>();
+        points.ensureCapacity(getBoundI() * getBoundJ());
         for (int i = 0; i < getBoundI(); i++) {
-            if (cells[i] == null || cells[i].length != getBoundJ()) {
+            if (cells[i].length != getBoundJ()) {
                 throw new IllegalArgumentException("Need rectangular array.");
             }
             for (int j = 0; j < getBoundJ(); j++) {
-                final Cell cell = cells[i][j];
-                final Point point = new Point(i, j);
-                switch (cell.type()) {
-                    case CHECKPOINT -> {
-                        if (!checks.containsKey(cell.association())) {
-                            checks.put(cell.association(), new HashSet<>());
-                        }
-                        if (!checks.get(cell.association()).add(point)) {
-                            throw new IllegalArgumentException("Need uniques.");
-                        }
+                points.add(new Point(i, j));
+            }
+        }
+        for (Point point : points) {
+            final Cell cell = cells[point.i()][point.j()];
+            switch (cell.type()) {
+                case CHECKPOINT -> {
+                    if (!checks.containsKey(cell.association())) {
+                        checks.put(cell.association(), new HashSet<>());
                     }
-                    case TELEPORT_IN -> {
-                        if (teleIn.put(cell.association(), point) != null) {
-                            throw new IllegalArgumentException("Need uniques.");
-                        }
+                    if (!checks.get(cell.association()).add(point)) {
+                        throw new IllegalArgumentException("Need uniques.");
                     }
-                    case TELEPORT_OUT -> {
-                        if (teleOut.put(cell.association(), point) != null) {
-                            throw new IllegalArgumentException("Need uniques.");
-                        }
-                    }
-                    default -> {}
                 }
+                case TELEPORT_IN -> {
+                    if (teleIn.put(cell.association(), point) != null) {
+                        throw new IllegalArgumentException("Need uniques.");
+                    }
+                }
+                case TELEPORT_OUT -> {
+                    if (teleOut.put(cell.association(), point) != null) {
+                        throw new IllegalArgumentException("Need uniques.");
+                    }
+                }
+                default -> {}
             }
         }
         if (teleIn.size() != teleOut.size()) {

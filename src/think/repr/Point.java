@@ -2,6 +2,9 @@ package think.repr;
 
 import java.util.ArrayList;
 
+/**
+    A lightweight (i, j) index pair used as array[i][j]. For JavaFX, i is Y, and j is X.
+ */
 public record Point(int i, int j) {
     public ArrayList<Point> getNeighbors(final Board board) {
         final ArrayList<Point> neighbors = new ArrayList<>(4);
