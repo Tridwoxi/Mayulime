@@ -27,7 +27,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import think.Core;
+import think.Solver;
 import think.repr.Board;
 import think.repr.Cell;
 import think.repr.Cell.CellType;
@@ -50,25 +50,23 @@ public final class Main extends Application {
         primaryStage.show();
     }
 
-    public static void solveProblem(File file) {
-        Board spec;
+    public static void toSolver(File file) {
+        Board board = null;
         try {
-            spec = Parser.parse(Files.readString(file.toPath()));
-            primaryStage.setTitle(file.getName());
-            new Core(spec);
+            board = Parser.parse(Files.readString(file.toPath()));
         } catch (IllegalArgumentException e) {
             System.err.println("Bad specification: " + e);
         } catch (IOException e) {
             System.err.println("Can't read file.");
         }
+        if (board != null) {
+            Solver.solve(board);
+            primaryStage.setTitle(file.getName());
+        }
     }
 
-    public static void recieveUpdate(
-        Board board,
-        HashSet<Point> rubberAssignment,
-        int score
-    ) {
-        gui.showUpdate(board, rubberAssignment, score);
+    public static void fromSolver(Board board, HashSet<Point> rubbers, int score) {
+        Platform.runLater(() -> gui.showUpdate(board, rubbers, score));
     }
 }
 
@@ -135,7 +133,7 @@ class Gui extends VBox {
             Window active = getScene() == null ? null : getScene().getWindow();
             File chosen = chooser.showOpenDialog(active);
             if (chosen != null) {
-                Main.solveProblem(chosen);
+                Main.toSolver(chosen);
             }
         });
         return upload;
