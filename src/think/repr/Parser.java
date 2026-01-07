@@ -34,7 +34,7 @@ public final class Parser {
     private Parser() {}
 
     public static Board parse(final String source) throws IllegalArgumentException {
-        try (Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
+        try (final Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
             final int numRubbers = s.nextInt();
             final int boundJ = s.nextInt(); // Width.
             final int boundI = s.nextInt(); // Height.
@@ -59,7 +59,7 @@ public final class Parser {
         if (entry.isBlank()) {
             return;
         }
-        try (Scanner s = new Scanner(entry).useDelimiter("\\s*,\\s*")) {
+        try (final Scanner s = new Scanner(entry).useDelimiter("\\s*,\\s*")) {
             final int i = s.nextInt();
             final int j = s.nextInt();
             final String typeToken = s.next();

@@ -14,24 +14,27 @@ public final class Snake {
     private final Board board;
     private final HashSet<Point> rubbers;
 
-    public Snake(Board board, HashSet<Point> rubbers) {
+    public Snake(final Board board, final HashSet<Point> rubbers) {
         this.board = board;
         this.rubbers = rubbers;
     }
 
-    public ArrayList<Point> bfs(Point source, HashSet<Point> destinations) {
+    public ArrayList<Point> bfs(
+        final Point source,
+        final HashSet<Point> destinations
+    ) {
         if (destinations.contains(source)) {
             System.err.println("Internal error: can't path to yourself.");
             Platform.exit();
         }
-        ArrayDeque<Point> queue = new ArrayDeque<>();
-        HashSet<Point> visited = new HashSet<>();
-        HashMap<Point, Point> prev = new HashMap<>();
+        final ArrayDeque<Point> queue = new ArrayDeque<>();
+        final HashSet<Point> visited = new HashSet<>();
+        final HashMap<Point, Point> prev = new HashMap<>();
         visited.add(source);
         queue.add(source);
         while (!queue.isEmpty()) {
-            Point current = queue.removeFirst();
-            for (Point neighbor : current.getNeighbors(board)) {
+            final Point current = queue.removeFirst();
+            for (final Point neighbor : current.getNeighbors(board)) {
                 if (!isOpen(neighbor) || visited.contains(neighbor)) {
                     continue;
                 }
@@ -46,7 +49,7 @@ public final class Snake {
         return new ArrayList<>();
     }
 
-    private boolean isOpen(Point point) {
+    private boolean isOpen(final Point point) {
         return (
             board.contains(point) &&
             board.getCell(point).type() != CellType.BRICK &&
@@ -55,17 +58,17 @@ public final class Snake {
     }
 
     private ArrayList<Point> buildPath(
-        HashMap<Point, Point> prev,
-        Point source,
-        Point destination
+        final HashMap<Point, Point> prev,
+        final Point source,
+        final Point destination
     ) {
-        ArrayList<Point> reversed = new ArrayList<>();
+        final ArrayList<Point> reversed = new ArrayList<>();
         Point current = destination;
         while (!current.equals(source)) {
             reversed.add(current);
             current = prev.get(current);
         }
-        ArrayList<Point> path = new ArrayList<>(reversed.size());
+        final ArrayList<Point> path = new ArrayList<>(reversed.size());
         for (int i = reversed.size() - 1; i >= 0; i--) {
             path.add(reversed.get(i));
         }

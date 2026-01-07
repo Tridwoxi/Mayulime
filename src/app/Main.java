@@ -37,20 +37,21 @@ import think.repr.Point;
 public final class Main extends Application {
 
     private static Gui gui;
+    private static Scene mainScene;
     private static Stage primaryStage;
 
     @Override
     public void start(final Stage primaryStage) {
         Main.gui = new Gui();
         Main.primaryStage = primaryStage;
-        Scene mainScene = new Scene(gui);
+        Main.mainScene = new Scene(gui);
         mainScene.setFill(Color.GRAY);
         primaryStage.setScene(mainScene);
         primaryStage.setTitle("Pathery Solver");
         primaryStage.show();
     }
 
-    public static void toSolver(File file) {
+    public static void toSolver(final File file) {
         Board board = null;
         try {
             board = Parser.parse(Files.readString(file.toPath()));
@@ -65,12 +66,16 @@ public final class Main extends Application {
         }
     }
 
-    public static void fromSolver(Board board, HashSet<Point> rubbers, int score) {
+    public static void fromSolver(
+        final Board board,
+        final HashSet<Point> rubbers,
+        final int score
+    ) {
         Platform.runLater(() -> gui.showUpdate(board, rubbers, score));
     }
 }
 
-class Gui extends VBox {
+final class Gui extends VBox {
 
     private static final double CELL_SIZE = 50.0; // Pixels.
     private static final double PADDING = 50.0;
@@ -91,12 +96,16 @@ class Gui extends VBox {
         setBackground(Background.fill(PatheryColors.BACKGROUND));
         setPadding(new Insets(PADDING));
         setAlignment(Pos.TOP_CENTER);
-        HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
+        final HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
         stats.setAlignment(Pos.CENTER);
         getChildren().addAll(boardDisplay, stats);
     }
 
-    public void showUpdate(Board board, HashSet<Point> rubberAssignment, int score) {
+    public void showUpdate(
+        final Board board,
+        final HashSet<Point> rubberAssignment,
+        final int score
+    ) {
         boardDisplay = new BoardDisplay(board, CELL_SIZE, rubberAssignment);
         scoreDisplay.setText("Score: " + score);
         final int remaining = board.getRubberSupply() - rubberAssignment.size();
@@ -112,7 +121,7 @@ class Gui extends VBox {
     }
 
     private Button makeButton() {
-        Button upload = new Button("Upload problem");
+        final Button upload = new Button("Upload problem");
         upload.setBackground(Background.fill(PatheryColors.BACKGROUND));
         upload.setBorder(
             new Border(
@@ -126,12 +135,12 @@ class Gui extends VBox {
         );
         upload.setTextFill(PatheryColors.FOREGROUND);
         upload.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
+            final FileChooser chooser = new FileChooser();
             chooser
                 .getExtensionFilters()
                 .add(new ExtensionFilter("Pathery level specification", "*.txt"));
-            Window active = getScene() == null ? null : getScene().getWindow();
-            File chosen = chooser.showOpenDialog(active);
+            final Window active = getScene() == null ? null : getScene().getWindow();
+            final File chosen = chooser.showOpenDialog(active);
             if (chosen != null) {
                 Main.toSolver(chosen);
             }
@@ -140,15 +149,19 @@ class Gui extends VBox {
     }
 }
 
-class BoardDisplay extends Group {
+final class BoardDisplay extends Group {
 
     public BoardDisplay() {}
 
-    public BoardDisplay(Board board, double cellSize, HashSet<Point> rubberAssignment) {
-        for (Point point : board.getEverything()) {
-            Cell cellData = board.getCell(point);
-            boolean hasRubber = rubberAssignment.contains(point);
-            CellDisplay cell = new CellDisplay(cellData, cellSize, hasRubber);
+    public BoardDisplay(
+        final Board board,
+        final double cellSize,
+        final HashSet<Point> rubberAssignment
+    ) {
+        for (final Point point : board.getEverything()) {
+            final Cell cellData = board.getCell(point);
+            final boolean hasRubber = rubberAssignment.contains(point);
+            final CellDisplay cell = new CellDisplay(cellData, cellSize, hasRubber);
             cell.setLayoutY(point.i() * cellSize);
             cell.setLayoutX(point.j() * cellSize);
             getChildren().add(cell);
@@ -160,10 +173,10 @@ class BoardDisplay extends Group {
     }
 }
 
-class CellDisplay extends Group {
+final class CellDisplay extends Group {
 
-    public CellDisplay(Cell cell, double cellSize, boolean hasRubber) {
-        Rectangle rect = new Rectangle(cellSize, cellSize);
+    public CellDisplay(final Cell cell, final double cellSize, final boolean hasRubber) {
+        final Rectangle rect = new Rectangle(cellSize, cellSize);
         rect.setFill(getColor(cell, hasRubber));
         rect.setStroke(PatheryColors.BACKGROUND);
         if (
@@ -171,10 +184,10 @@ class CellDisplay extends Group {
             cell.type() == Cell.CellType.TELEPORT_IN ||
             cell.type() == Cell.CellType.TELEPORT_OUT
         ) {
-            Text label = new Text(String.valueOf(cell.association()));
+            final Text label = new Text(String.valueOf(cell.association()));
             label.setFill(PatheryColors.FOREGROUND);
             label.setFont(Font.font(cellSize * 0.5));
-            Bounds bounds = label.getLayoutBounds();
+            final Bounds bounds = label.getLayoutBounds();
             label.setX((cellSize - bounds.getWidth()) * 0.5 - bounds.getMinX());
             label.setY((cellSize - bounds.getHeight()) * 0.5 - bounds.getMinY());
             getChildren().addAll(rect, label);
@@ -183,7 +196,7 @@ class CellDisplay extends Group {
         }
     }
 
-    private Color getColor(Cell cell, boolean hasRubber) {
+    private Color getColor(final Cell cell, final boolean hasRubber) {
         if (hasRubber) {
             return PatheryColors.RUBBER;
         }
@@ -197,7 +210,7 @@ class CellDisplay extends Group {
     }
 }
 
-class PatheryColors {
+final class PatheryColors {
 
     // Approximate average color, picked from Pathery.com
     public static final Color BACKGROUND = Color.web("121212");
@@ -207,4 +220,6 @@ class PatheryColors {
     public static final Color CHECKPOINT = Color.web("8e4793");
     public static final Color TELEPORT = Color.web("#214764");
     public static final Color FOREGROUND = Color.web("dddddd");
+
+    private PatheryColors() {}
 }

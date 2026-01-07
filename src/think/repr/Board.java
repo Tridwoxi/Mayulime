@@ -21,7 +21,7 @@ public final class Board {
     private final ArrayList<Point> starts; // Sorted order, top then left.
     private final ArrayList<Point> everything;
 
-    public Board(final Cell[][] cells, int rubberSupply)
+    public Board(final Cell[][] cells, final int rubberSupply)
         throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.rubberSupply = rubberSupply;
@@ -98,7 +98,7 @@ public final class Board {
                 everything.add(new Point(i, j));
             }
         }
-        for (Point point : everything) {
+        for (final Point point : everything) {
             final Cell cell = cells[point.i()][point.j()];
             switch (cell.type()) {
                 case CHECKPOINT -> {
@@ -131,12 +131,12 @@ public final class Board {
             }
             teleports.put(teleIn.get(key), teleOut.get(key));
         }
-        ArrayList<Entry<Integer, HashSet<Point>>> entries = new ArrayList<>(
+        final ArrayList<Entry<Integer, HashSet<Point>>> entries = new ArrayList<>(
             checks.entrySet()
         );
         entries.sort(Entry.comparingByKey());
         checkpoints.ensureCapacity(checks.size());
-        for (Entry<Integer, HashSet<Point>> e : entries) {
+        for (final Entry<Integer, HashSet<Point>> e : entries) {
             checkpoints.add(e.getValue());
         }
         starts.addAll(checkpoints.get(0));

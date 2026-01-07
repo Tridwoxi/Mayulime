@@ -15,11 +15,11 @@ public final class Solver extends Thread {
     private static volatile Solver WORKER_INSTANCE = null;
     private final Board board;
 
-    private Solver(Board board) {
+    private Solver(final Board board) {
         this.board = board;
     }
 
-    public static synchronized void solve(Board board) {
+    public static synchronized void solve(final Board board) {
         if (!Platform.isFxApplicationThread()) {
             throw new IllegalStateException();
         }
