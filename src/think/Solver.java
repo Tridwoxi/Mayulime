@@ -7,17 +7,13 @@ import think.repr.Problem;
 
 /**
     Problem solver and worker. Should be called from JavaFX Application Thread. Starts
-    a background worker to not block the GUI. If multiple solvers exist, they all
-    manage the same worker.
+    a background worker to not block the GUI.
  */
-public final class Solver extends Thread {
+public final class Solver {
 
-    private static volatile Solver WORKER_INSTANCE = null;
-    private final Problem board;
+    private static Worker WORKER_INSTANCE = null;
 
-    private Solver(final Problem board) {
-        this.board = board;
-    }
+    private Solver() {}
 
     public static synchronized void solve(final Problem board) {
         if (!Platform.isFxApplicationThread()) {
@@ -29,8 +25,17 @@ public final class Solver extends Thread {
                 WORKER_INSTANCE.join();
             } catch (InterruptedException e) {}
         }
-        WORKER_INSTANCE = new Solver(board);
+        WORKER_INSTANCE = new Worker(board);
         WORKER_INSTANCE.start();
+    }
+}
+
+class Worker extends Thread {
+
+    private final Problem board;
+
+    public Worker(final Problem board) {
+        this.board = board;
     }
 
     @Override
