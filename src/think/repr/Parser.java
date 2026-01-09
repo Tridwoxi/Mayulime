@@ -33,7 +33,7 @@ public final class Parser {
 
     private Parser() {}
 
-    public static Board parse(final String source) throws IllegalArgumentException {
+    public static Problem parse(final String source) throws IllegalArgumentException {
         try (final Scanner s = new Scanner(source).useDelimiter("\\s*;\\s*")) {
             final int numRubbers = s.nextInt();
             final int boundJ = s.nextInt(); // Width.
@@ -47,7 +47,7 @@ public final class Parser {
             while (s.hasNext()) {
                 parseEntry(cells, s.next());
             }
-            return new Board(cells, numRubbers);
+            return new Problem(cells, numRubbers);
         } catch (InputMismatchException e) {
             throw new IllegalArgumentException(e);
         } catch (NoSuchElementException e) {

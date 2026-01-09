@@ -5,24 +5,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import javafx.application.Platform;
-import think.repr.Board;
 import think.repr.Cell.CellType;
 import think.repr.Point;
+import think.repr.Problem;
 
 public final class Snake {
 
-    private final Board board;
+    private final Problem board;
     private final HashSet<Point> rubbers;
 
-    public Snake(final Board board, final HashSet<Point> rubbers) {
+    public Snake(final Problem board, final HashSet<Point> rubbers) {
         this.board = board;
         this.rubbers = rubbers;
     }
 
-    public ArrayList<Point> bfs(
-        final Point source,
-        final HashSet<Point> destinations
-    ) {
+    public ArrayList<Point> bfs(final Point source, final HashSet<Point> destinations) {
         if (destinations.contains(source)) {
             System.err.println("Internal error: can't path to yourself.");
             Platform.exit();

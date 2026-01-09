@@ -28,11 +28,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Solver;
-import think.repr.Board;
 import think.repr.Cell;
 import think.repr.Cell.CellType;
 import think.repr.Parser;
 import think.repr.Point;
+import think.repr.Problem;
 
 public final class Main extends Application {
 
@@ -52,7 +52,7 @@ public final class Main extends Application {
     }
 
     public static void toSolver(final File file) {
-        Board board = null;
+        Problem board = null;
         try {
             board = Parser.parse(Files.readString(file.toPath()));
         } catch (IllegalArgumentException e) {
@@ -67,7 +67,7 @@ public final class Main extends Application {
     }
 
     public static void fromSolver(
-        final Board board,
+        final Problem board,
         final HashSet<Point> rubbers,
         final int score
     ) {
@@ -102,7 +102,7 @@ final class Gui extends VBox {
     }
 
     public void showUpdate(
-        final Board board,
+        final Problem board,
         final HashSet<Point> rubberAssignment,
         final int score
     ) {
@@ -154,7 +154,7 @@ final class BoardDisplay extends Group {
     public BoardDisplay() {}
 
     public BoardDisplay(
-        final Board board,
+        final Problem board,
         final double cellSize,
         final HashSet<Point> rubberAssignment
     ) {

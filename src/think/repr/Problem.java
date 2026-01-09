@@ -11,7 +11,7 @@ import think.repr.Cell.CellType;
     Rectangular grid of cells indexed by natural Java (i, j). Somewhat heavy. Serves as
     problem specification.
  */
-public final class Board {
+public final class Problem {
 
     private final Cell[][] cells;
     private final int rubberSupply;
@@ -21,7 +21,7 @@ public final class Board {
     private final ArrayList<Point> starts; // Sorted order, top then left.
     private final ArrayList<Point> everything;
 
-    public Board(final Cell[][] cells, final int rubberSupply)
+    public Problem(final Cell[][] cells, final int rubberSupply)
         throws IllegalArgumentException {
         this.cells = Objects.requireNonNull(cells);
         this.rubberSupply = rubberSupply;
@@ -119,7 +119,8 @@ public final class Board {
                         throw new IllegalArgumentException("Need uniques.");
                     }
                 }
-                default -> {}
+                default -> {
+                }
             }
         }
         if (teleIn.size() != teleOut.size()) {

@@ -3,7 +3,7 @@ package think;
 import app.Main;
 import java.util.HashSet;
 import javafx.application.Platform;
-import think.repr.Board;
+import think.repr.Problem;
 
 /**
     Problem solver and worker. Should be called from JavaFX Application Thread. Starts
@@ -13,13 +13,13 @@ import think.repr.Board;
 public final class Solver extends Thread {
 
     private static volatile Solver WORKER_INSTANCE = null;
-    private final Board board;
+    private final Problem board;
 
-    private Solver(final Board board) {
+    private Solver(final Problem board) {
         this.board = board;
     }
 
-    public static synchronized void solve(final Board board) {
+    public static synchronized void solve(final Problem board) {
         if (!Platform.isFxApplicationThread()) {
             throw new IllegalStateException();
         }
