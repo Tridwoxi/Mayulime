@@ -38,6 +38,8 @@ import think.repr.Problem.InvalidSpecException;
  */
 public final class Main extends Application {
 
+    private static final String NAME = "Tridwoxi's Pathery AI";
+
     // There's only one Main instance, so everything may as well be static. It makes
     // access easier when you don't keep track of instances.
     private static Gui gui;
@@ -51,7 +53,7 @@ public final class Main extends Application {
         Main.mainScene = new Scene(gui);
         mainScene.setFill(Color.GRAY);
         primaryStage.setScene(mainScene);
-        primaryStage.setTitle("Pathery Solver");
+        primaryStage.setTitle(NAME);
         primaryStage.show();
     }
 
