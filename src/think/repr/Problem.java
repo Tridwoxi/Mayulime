@@ -74,21 +74,13 @@ public final class Problem {
             }
         }
 
-        // Build sorted checkpoints. Requires unique (contrary to Pathery's multiple
-        // checkpoints) because it is simpler to write a snake for.
+        // Pathery allows multiple checkpoints with same priority, but it's uncommon,
+        // and harder to write a snake for, so we'll allow only one.
         throwIfNotUniqueOrder(prechecks);
-        prechecks.sort(Comparator.comparingInt(Ordered<Point>::order));
-        this.checkpoints = prechecks.stream().map(Ordered::data).toArray(Point[]::new);
+        this.checkpoints = buildCheckpoints(prechecks);
 
-        // Build cached all points.
-        this.allPoints = new Point[getBoundI() * getBoundJ()];
-        int index = 0;
-        for (int i = 0; i < getBoundI(); i++) {
-            for (int j = 0; j < getBoundJ(); j++) {
-                allPoints[index] = new Point(i, j);
-                index += 1;
-            }
-        }
+        // getBoundI/J only valid after isBrick assigned, so must be called last.
+        this.allPoints = buildAllPoints(getBoundI(), getBoundJ());
     }
 
     // == Getters (please do not mutate mutable things!). ==============================
@@ -164,6 +156,21 @@ public final class Problem {
                 throw new InvalidSpecException();
             }
         }
+    }
+
+    private Point[] buildAllPoints(int boundI, int boundJ) {
+        Point[] points = new Point[boundI * boundJ];
+        for (int i = 0; i < boundI; i++) {
+            for (int j = 0; j < boundJ; j++) {
+                points[i * boundJ + j] = new Point(i, j);
+            }
+        }
+        return points;
+    }
+
+    private Point[] buildCheckpoints(ArrayList<Ordered<Point>> prechecks) {
+        prechecks.sort(Comparator.comparingInt(Ordered<Point>::order));
+        return prechecks.stream().map(Ordered::data).toArray(Point[]::new);
     }
 
     final record Ordered<T>(T data, int order) {}
