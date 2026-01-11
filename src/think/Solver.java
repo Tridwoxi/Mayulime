@@ -16,9 +16,7 @@ public final class Solver {
     private Solver() {}
 
     public static synchronized void solve(final Problem board) {
-        if (!Platform.isFxApplicationThread()) {
-            throw new IllegalStateException();
-        }
+        assert Platform.isFxApplicationThread() : "Application thread is manager.";
         if (WORKER_INSTANCE != null) {
             WORKER_INSTANCE.interrupt();
             try {
