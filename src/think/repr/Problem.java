@@ -58,7 +58,7 @@ public final class Problem {
                 // if-else series because it is based on "looks like". Currently only
                 // checkpoints are patterns so it works, but "force it to be a
                 // checkpoint or throw" will not work for long.
-                final String current = line[i];
+                final String current = line[j];
                 switch (current) {
                     case BRICK -> {
                         isBrick[i][j] = true;
@@ -73,10 +73,14 @@ public final class Problem {
                 }
             }
         }
+
+        // Build sorted checkpoints. Requires unique (contrary to Pathery's multiple
+        // checkpoints) because it is simpler to write a snake for.
         throwIfNotUniqueOrder(prechecks);
         prechecks.sort(Comparator.comparingInt(Ordered<Point>::order));
-        this.checkpoints = prechecks.toArray(Point[]::new);
+        this.checkpoints = prechecks.stream().map(Ordered::data).toArray(Point[]::new);
 
+        // Build cached all points.
         this.allPoints = new Point[getBoundI() * getBoundJ()];
         int index = 0;
         for (int i = 0; i < getBoundI(); i++) {
