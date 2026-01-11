@@ -173,7 +173,7 @@ final class BoardDisplay extends Group {
             final Color color;
             if (checkLabels.containsKey(point)) {
                 color = PatheryColors.CHECKPOINT;
-            } else if (problem.isBrick(point)) {
+            } else if (!problem.isOpen(point)) {
                 color = PatheryColors.BRICK;
             } else if (rubbers.contains(point)) {
                 color = PatheryColors.RUBBER;

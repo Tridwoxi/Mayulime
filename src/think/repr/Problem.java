@@ -20,7 +20,7 @@ public final class Problem {
     private static final String EMPTY = ".";
 
     private final int numRubbers;
-    private final boolean[][] isBrick;
+    private final boolean[][] brickLayout;
     private final Point[] checkpoints; // checkpoints[n] is nth checkpoint.
     private final Point[] allPoints;
 
@@ -46,7 +46,7 @@ public final class Problem {
         final String[] lines = grid.split(DELIM2);
         final int expectedNumCols = getNth(lines, 0).split(DELIM3).length;
         final ArrayList<Ordered<Point>> prechecks = new ArrayList<>();
-        this.isBrick = new boolean[lines.length][expectedNumCols];
+        this.brickLayout = new boolean[lines.length][expectedNumCols];
 
         for (int i = 0; i < lines.length; i++) {
             final String[] line = lines[i].split(DELIM3);
@@ -61,7 +61,7 @@ public final class Problem {
                 final String current = line[j];
                 switch (current) {
                     case BRICK -> {
-                        isBrick[i][j] = true;
+                        brickLayout[i][j] = true;
                     }
                     case EMPTY -> {
                         // no-op: isBrick initialized to all false.
@@ -85,25 +85,21 @@ public final class Problem {
 
     // == Getters (please do not mutate mutable things!). ==============================
 
-    public boolean isBrick(final Point point) {
-        return !contains(point) || isBrick[point.i()][point.j()];
-    }
-
-    public boolean contains(final Point point) {
-        return (
-            point.i() >= 0 &&
+    public boolean isOpen(final Point point) {
+        final boolean isContained = (point.i() >= 0 &&
             point.i() < getBoundI() &&
             point.j() >= 0 &&
-            point.j() < getBoundJ()
-        );
+            point.j() < getBoundJ());
+        final boolean isBrick = brickLayout[point.i()][point.j()];
+        return isContained && !isBrick;
     }
 
     public int getBoundI() {
-        return isBrick.length;
+        return brickLayout.length;
     }
 
     public int getBoundJ() {
-        return isBrick[0].length;
+        return brickLayout[0].length;
     }
 
     public int getNumRubbers() {

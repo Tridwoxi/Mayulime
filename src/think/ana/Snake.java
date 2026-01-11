@@ -32,7 +32,7 @@ public final class Snake {
         while (!queue.isEmpty()) {
             final Point current = queue.removeFirst();
             for (final Point neighbor : current.getNeighbors(board)) {
-                if (!isOpen(neighbor) || visited.contains(neighbor)) {
+                if (!board.isOpen(neighbor) || visited.contains(neighbor)) {
                     continue;
                 }
                 visited.add(neighbor);
@@ -44,12 +44,6 @@ public final class Snake {
             }
         }
         return new ArrayList<>();
-    }
-
-    private boolean isOpen(final Point point) {
-        return (
-            board.contains(point) && !board.isBrick(point) && !rubbers.contains(point)
-        );
     }
 
     private ArrayList<Point> buildPath(
