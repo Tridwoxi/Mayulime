@@ -3,6 +3,7 @@ package app;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.HashSet;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,14 +29,17 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Solver;
-import think.repr.Cell;
-import think.repr.Cell.CellType;
-import think.repr.Parser;
 import think.repr.Point;
 import think.repr.Problem;
+import think.repr.Problem.InvalidSpecException;
 
+/**
+    Application launch point. Connects the GUI to the Solver.
+ */
 public final class Main extends Application {
 
+    // There's only one Main instance, so everything may as well be static. It makes
+    // access easier when you don't keep track of instances.
     private static Gui gui;
     private static Scene mainScene;
     private static Stage primaryStage;
@@ -51,17 +55,19 @@ public final class Main extends Application {
         primaryStage.show();
     }
 
+    // == Connectors. ==================================================================
+
     public static void toSolver(final File file) {
-        Problem board = null;
+        Problem problem = null;
         try {
-            board = Parser.parse(Files.readString(file.toPath()));
-        } catch (IllegalArgumentException e) {
-            System.err.println("Bad specification: " + e);
+            problem = new Problem(Files.readString(file.toPath()));
+        } catch (InvalidSpecException e) {
+            System.err.println("Bad specification.");
         } catch (IOException e) {
             System.err.println("Can't read file.");
         }
-        if (board != null) {
-            Solver.solve(board);
+        if (problem != null) {
+            Solver.solve(problem);
             primaryStage.setTitle(file.getName());
         }
     }
@@ -154,65 +160,61 @@ final class BoardDisplay extends Group {
     public BoardDisplay() {}
 
     public BoardDisplay(
-        final Problem board,
+        final Problem problem,
         final double cellSize,
-        final HashSet<Point> rubberAssignment
+        final HashSet<Point> rubbers
     ) {
-        for (final Point point : board.getEverything()) {
-            final Cell cellData = board.isBrick(point);
-            final boolean hasRubber = rubberAssignment.contains(point);
-            final CellDisplay cell = new CellDisplay(cellData, cellSize, hasRubber);
+        final Point[] checks = problem.getCheckpoints();
+        final HashMap<Point, Integer> checkLabels = new HashMap<>();
+        for (int i = 0; i < checks.length; i++) {
+            checkLabels.put(checks[i], i);
+        }
+        for (final Point point : problem.getAllPoints()) {
+            final Color color;
+            if (checkLabels.containsKey(point)) {
+                color = PatheryColors.CHECKPOINT;
+            } else if (problem.isBrick(point)) {
+                color = PatheryColors.BRICK;
+            } else if (rubbers.contains(point)) {
+                color = PatheryColors.RUBBER;
+            } else {
+                color = PatheryColors.NOTHING;
+            }
+            final String content = checkLabels.containsKey(point)
+                ? checkLabels.get(point).toString()
+                : "";
+            final CellDisplay cell = new CellDisplay(color, cellSize, content);
             cell.setLayoutY(point.i() * cellSize);
             cell.setLayoutX(point.j() * cellSize);
             getChildren().add(cell);
-            if (cellData.type() != CellType.NOTHING && hasRubber) {
-                System.err.println("Internal error: illegal assignment.");
-                Platform.exit();
-            }
         }
     }
 }
 
 final class CellDisplay extends Group {
 
-    public CellDisplay(final Cell cell, final double cellSize, final boolean hasRubber) {
-        final Rectangle rect = new Rectangle(cellSize, cellSize);
-        rect.setFill(getColor(cell, hasRubber));
+    public CellDisplay(final Color color, final double size, final String content) {
+        final Rectangle rect = new Rectangle(size, size);
+        rect.setFill(color);
         rect.setStroke(PatheryColors.BACKGROUND);
-        if (
-            cell.type() == Cell.CellType.CHECKPOINT ||
-            cell.type() == Cell.CellType.TELEPORT_IN ||
-            cell.type() == Cell.CellType.TELEPORT_OUT
-        ) {
-            final Text label = new Text(String.valueOf(cell.association()));
-            label.setFill(PatheryColors.FOREGROUND);
-            label.setFont(Font.font(cellSize * 0.5));
-            final Bounds bounds = label.getLayoutBounds();
-            label.setX((cellSize - bounds.getWidth()) * 0.5 - bounds.getMinX());
-            label.setY((cellSize - bounds.getHeight()) * 0.5 - bounds.getMinY());
-            getChildren().addAll(rect, label);
-        } else {
+        if (content.isBlank()) {
             getChildren().add(rect);
+            return;
         }
-    }
-
-    private Color getColor(final Cell cell, final boolean hasRubber) {
-        if (hasRubber) {
-            return PatheryColors.RUBBER;
-        }
-        return switch (cell.type()) {
-            case BRICK -> PatheryColors.BRICK;
-            case CHECKPOINT -> PatheryColors.CHECKPOINT;
-            case NOTHING -> PatheryColors.NOTHING;
-            case TELEPORT_IN -> PatheryColors.TELEPORT;
-            case TELEPORT_OUT -> PatheryColors.TELEPORT;
-        };
+        final Text label = new Text(content);
+        label.setFill(PatheryColors.FOREGROUND);
+        label.setFont(Font.font(size * 0.5));
+        final Bounds bounds = label.getLayoutBounds();
+        label.setX((size - bounds.getWidth()) * 0.5 - bounds.getMinX());
+        label.setY((size - bounds.getHeight()) * 0.5 - bounds.getMinY());
+        getChildren().addAll(rect, label);
     }
 }
 
 final class PatheryColors {
 
-    // Approximate average color, picked from Pathery.com
+    // Approximate average color, picked from Pathery.com. As I add more features, I
+    // hope to use all these colors, but for now most are extra.
     public static final Color BACKGROUND = Color.web("121212");
     public static final Color BRICK = Color.web("723736");
     public static final Color RUBBER = Color.web("3c3d3c");
