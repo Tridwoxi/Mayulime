@@ -1,11 +1,13 @@
 # Pathery solver
 
-This repository contains a system that proposes solutions to a limited variant of the game [Pathery](www.pathery.com). It is not affiliated with Pathery, and the problem it solves is a subset of the complete Pathery rules.
+This repository contains a system that proposes solutions problems from the game [Pathery](https://www.pathery.com).
+
+This repository is not affiliated with Pathery. For ease of programming, it uses a simplified variant of the complete Pathery rules.
 
 ## Game description
 
-A snake exists on a rectangular grid. It begins at one of the checkpoints tied for the lowest number, then makes its way to a checkpoint tied for the next lowest number, until it reaches a checkpoint with every number. Player solutions are scored by the number of steps the snake takes.
+The world is a rectangular grid of open cells, rubbers, bricks, and uniquely-numbered checkpoints. The world is initially devoid of rubbers. The player must convert a given number of open cells to rubber cells.
 
-The snake moves one step at a time, either up, right, down, or left (but not diagonally). If multiple checkpoints have the lowest value, the snake starts at the one which yields the lowest score. If all routes are equal, the snake prefers to go up, then right, then down, then left.
+A snake makes its way from each checkpoint to the next in ascending order. It moves one step at a time either up, right, down, or left (but not diagonally). The snake cannot visit cells with bricks or rubbers on them. The snake takes the shortest path.
 
-The snake cannot step on tiles with walls. The system places some immovable walls, and the player has a finite number of additional walls they may add to delay the snake. If the snake steps on a teleport-in tile, it exhausts that tile so it may not be activated again, then emerges at the corresponding teleport-out tile without consuming a step.
+The player's goal is to maximize the number of steps the snake takes. If the snake cannot reach a checkpoint, the player loses.
