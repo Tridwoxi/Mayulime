@@ -44,7 +44,7 @@ public final class Problem {
         // checkpoint. More features to be added...
         final String grid = getNth(sections, 1);
         final String[] lines = grid.split(DELIM2);
-        final int expectedNumCols = getNth(lines, 0).length();
+        final int expectedNumCols = getNth(lines, 0).split(DELIM3).length;
         final ArrayList<Ordered<Point>> prechecks = new ArrayList<>();
         this.isBrick = new boolean[lines.length][expectedNumCols];
 
