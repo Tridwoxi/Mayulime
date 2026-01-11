@@ -15,6 +15,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.named('run') {
+    jvmArgs '-ea'
+}
+
 application {
     mainClass = 'app.Main'
 }
