@@ -22,4 +22,13 @@ public record Point(int i, int j) {
         }
         return neighbors;
     }
+
+    /**
+        Two points are neighbors iff they are adjacent horizontally or vertically (Von
+        Neumann neighborhood). Points are not neighbors of themselves. Neighbor-ness is
+        symmetric. Assumes but does not verify that points are on the same board.
+     */
+    public boolean isNeighbor(final Point other) {
+        return Math.abs(this.i - other.i) + Math.abs(this.j - other.j) == 1;
+    }
 }
