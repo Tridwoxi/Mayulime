@@ -21,7 +21,10 @@ public final class Problem {
 
     private final int numRubbers;
     private final boolean[][] isBrick;
-    private final Point[] checkpoints;
+    private final Point[] checkpoints; // checkpoints[n] is nth checkpoint.
+    private final Point[] allPoints;
+
+    // == Constructor and parser. ======================================================
 
     // If a specification is invalid, it is unrecoverable from the problem's point of
     // view, so it is only the caller that can handle it. It is a lot of redundant work
@@ -73,6 +76,15 @@ public final class Problem {
         throwIfNotUniqueOrder(prechecks);
         prechecks.sort(Comparator.comparingInt(Ordered<Point>::order));
         this.checkpoints = prechecks.toArray(Point[]::new);
+
+        this.allPoints = new Point[getBoundI() * getBoundJ()];
+        int index = 0;
+        for (int i = 0; i < getBoundI(); i++) {
+            for (int j = 0; j < getBoundJ(); j++) {
+                allPoints[index] = new Point(i, j);
+                index += 1;
+            }
+        }
     }
 
     // == Getters (please do not mutate mutable things!). ==============================
@@ -104,6 +116,10 @@ public final class Problem {
 
     public Point[] getCheckpoints() {
         return checkpoints;
+    }
+
+    public Point[] getAllPoints() {
+        return allPoints;
     }
 
     // == Parsing tools. ===============================================================
