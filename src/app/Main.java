@@ -108,7 +108,7 @@ final class Gui extends VBox {
     ) {
         boardDisplay = new BoardDisplay(board, CELL_SIZE, rubberAssignment);
         scoreDisplay.setText("Score: " + score);
-        final int remaining = board.getRubberSupply() - rubberAssignment.size();
+        final int remaining = board.getNumRubbers() - rubberAssignment.size();
         rubberDisplay.setText("Remaining walls: " + remaining);
         getChildren().set(0, boardDisplay); // Must target whatever constructor decided.
         if (
@@ -159,7 +159,7 @@ final class BoardDisplay extends Group {
         final HashSet<Point> rubberAssignment
     ) {
         for (final Point point : board.getEverything()) {
-            final Cell cellData = board.getCell(point);
+            final Cell cellData = board.isBrick(point);
             final boolean hasRubber = rubberAssignment.contains(point);
             final CellDisplay cell = new CellDisplay(cellData, cellSize, hasRubber);
             cell.setLayoutY(point.i() * cellSize);

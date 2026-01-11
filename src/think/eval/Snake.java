@@ -49,7 +49,7 @@ public final class Snake {
     private boolean isOpen(final Point point) {
         return (
             board.contains(point) &&
-            board.getCell(point).type() != CellType.BRICK &&
+            board.isBrick(point).type() != CellType.BRICK &&
             !rubbers.contains(point)
         );
     }
