@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import javafx.application.Platform;
-import think.repr.Cell.CellType;
 import think.repr.Point;
 import think.repr.Problem;
 
+// TODO: what's even happening here??
 public final class Snake {
 
     private final Problem board;
@@ -48,9 +48,7 @@ public final class Snake {
 
     private boolean isOpen(final Point point) {
         return (
-            board.contains(point) &&
-            board.isBrick(point).type() != CellType.BRICK &&
-            !rubbers.contains(point)
+            board.contains(point) && !board.isBrick(point) && !rubbers.contains(point)
         );
     }
 
