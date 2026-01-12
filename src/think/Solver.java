@@ -1,5 +1,7 @@
 package think;
 
+import app.Main;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,7 @@ public final class Solver {
 
     public static void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
+        Main.recieve(problem, new HashSet<>(0), 0);
         stop();
         go(problem);
     }

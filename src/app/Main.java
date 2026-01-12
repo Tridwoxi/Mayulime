@@ -88,6 +88,7 @@ public final class Main extends Application {
         final HashSet<Point> rubbers,
         final int score
     ) {
+        assert problem.getNumRubbers() >= rubbers.size();
         Platform.runLater(() -> gui.showUpdate(problem, rubbers, score));
     }
 }
