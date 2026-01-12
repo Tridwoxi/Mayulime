@@ -25,6 +25,7 @@ public final class Problem {
     private final Grid<Boolean> isBrick;
     private final ArrayList<Point> checkpoints;
     private final ArrayList<Point> allPoints;
+    private final HashSet<Point> emptyPoints;
 
     // == Constructor and parser. ======================================================
 
@@ -50,6 +51,8 @@ public final class Problem {
         final ArrayList<Ordered> prechecks = new ArrayList<>();
         final int numCells = numRows * numCols;
         final ArrayList<Boolean> cells = Tools.fill(false, numCells);
+        this.emptyPoints = new HashSet<>();
+
         for (int i = 0; i < lines.size(); i++) {
             final ArrayList<String> row = lines.get(i);
             for (int j = 0; j < row.size(); j++) {
@@ -59,7 +62,7 @@ public final class Problem {
                         cells.set(i * numCols + j, true);
                     }
                     case EMPTY -> {
-                        // no-op: isBrick initialized to all false.
+                        emptyPoints.add(new Point(i, j));
                     }
                     default -> {
                         final int order = strToInt(cell);
@@ -88,7 +91,7 @@ public final class Problem {
         }
     }
 
-    // == Getters (please do not mutate mutable things!). ==============================
+    // == Getters ======================================================================
 
     public boolean isBrick(Point point) {
         return isBrick.getCell(point);
@@ -107,11 +110,16 @@ public final class Problem {
     }
 
     public ArrayList<Point> getCheckpoints() {
+        // Possible optimization: if nobody wants to mutate, then return it directly.
         return new ArrayList<>(checkpoints);
     }
 
     public ArrayList<Point> getAllPoints() {
         return new ArrayList<>(allPoints);
+    }
+
+    public HashSet<Point> getEmptyPoints() {
+        return new HashSet<>(emptyPoints);
     }
 
     // == Parsing tools. ===============================================================
