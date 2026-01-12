@@ -2,6 +2,7 @@ package think.ana;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.function.BiFunction;
 import think.repr.Grid;
 import think.repr.Point;
 import think.repr.Problem;
@@ -28,7 +29,6 @@ public final class Snake {
         final Point source
     ) {
         assert legalRun(problem, rubbers, source);
-
         // -1 is sentinel unreachable value. Chosen because adding connected distance
         // grids with unreachable cells maintains the invariant that unreachable cells
         // are negative (this is untrue if the source cannot reach the destination).
@@ -38,7 +38,6 @@ public final class Snake {
             problem.getBoundI(),
             problem.getBoundJ()
         );
-
         // We use breadth-first search because we visit every reachable point and it
         // has slightly less overhead than A-star. "distances" also visited set.
         final ArrayDeque<Point> frontier = new ArrayDeque<>();
@@ -57,6 +56,15 @@ public final class Snake {
                 }
             }
         }
+        final BiFunction<Point, Point, Boolean> consistent = (p, n) ->
+            distances.getCell(p) == -1 ||
+            distances.getCell(n) == -1 ||
+            Math.abs(distances.getCell(p) - distances.getCell(n)) <= 1;
+        assert distances
+            .pointStream()
+            .allMatch(p ->
+                p.getNeighbors(problem).stream().allMatch((n -> consistent.apply(p, n)))
+            );
         assert distances.getCell(source) == 0;
         return distances;
     }

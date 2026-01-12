@@ -2,6 +2,8 @@ package think.repr;
 
 import java.util.ArrayList;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import think.ana.Tools;
 
 /**
@@ -64,6 +66,16 @@ public final class Grid<T> {
 
     public int getSize() {
         return cells.size();
+    }
+
+    public Stream<T> elemStream() {
+        return cells.stream();
+    }
+
+    public Stream<Point> pointStream() {
+        return IntStream.range(0, cells.size()).mapToObj(k ->
+            new Point(k / boundJ, k % boundJ)
+        );
     }
 
     public static <A, B, C> Grid<C> combine(
