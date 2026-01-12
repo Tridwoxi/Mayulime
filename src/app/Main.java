@@ -95,20 +95,17 @@ final class Gui extends VBox {
 
     private ProblemDisplay problemDisplay;
     private final Text scoreDisplay;
-    private final Text rubberDisplay;
 
     public Gui() {
         super(SPACING);
         this.problemDisplay = new ProblemDisplay();
         this.scoreDisplay = new Text();
-        this.rubberDisplay = new Text();
         scoreDisplay.setFill(PatheryColors.FOREGROUND);
-        rubberDisplay.setFill(PatheryColors.FOREGROUND);
 
         setBackground(Background.fill(PatheryColors.BACKGROUND));
         setPadding(new Insets(PADDING));
         setAlignment(Pos.TOP_CENTER);
-        final HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
+        final HBox stats = new HBox(SPACING, scoreDisplay, makeButton());
         stats.setAlignment(Pos.CENTER);
         getChildren().addAll(problemDisplay, stats);
     }
@@ -120,8 +117,6 @@ final class Gui extends VBox {
     ) {
         problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubbers);
         scoreDisplay.setText("Score: " + score);
-        final int remaining = problem.getNumRubbers() - rubbers.size();
-        rubberDisplay.setText("Remaining walls: " + remaining);
         assert getChildren().get(0) instanceof ProblemDisplay;
         getChildren().set(0, problemDisplay);
         if (
