@@ -167,33 +167,28 @@ final class ProblemDisplay extends Group {
         final double cellSize,
         final HashSet<Point> rubbers
     ) {
-        final int boundI = problem.getBoundI();
-        final int boundJ = problem.getBoundJ();
         final ArrayList<Point> checks = problem.getCheckpoints();
         final HashMap<Point, Integer> checkLabels = new HashMap<>();
         for (int i = 0; i < checks.size(); i++) {
             checkLabels.put(checks.get(i), i);
         }
-        for (int i = 0; i < boundI; i++) {
-            for (int j = 0; j < boundJ; j++) {
-                final Point point = new Point(i, j);
-                final int label = checkLabels.getOrDefault(point, -1);
-                final Color color;
-                if (label != -1) {
-                    color = PatheryColors.CHECKPOINT;
-                } else if (problem.isBrick(point)) {
-                    color = PatheryColors.BRICK;
-                } else if (rubbers.contains(point)) {
-                    color = PatheryColors.RUBBER;
-                } else {
-                    color = PatheryColors.NOTHING;
-                }
-                final String content = label != -1 ? Integer.toString(label) : "";
-                final CellDisplay cell = new CellDisplay(color, cellSize, content);
-                cell.setLayoutY(i * cellSize);
-                cell.setLayoutX(j * cellSize);
-                getChildren().add(cell);
+        for (final Point point : problem.getAllPoints()) {
+            final int label = checkLabels.getOrDefault(point, -1);
+            final Color color;
+            if (label != -1) {
+                color = PatheryColors.CHECKPOINT;
+            } else if (problem.isBrick(point)) {
+                color = PatheryColors.BRICK;
+            } else if (rubbers.contains(point)) {
+                color = PatheryColors.RUBBER;
+            } else {
+                color = PatheryColors.NOTHING;
             }
+            final String content = label != -1 ? Integer.toString(label) : "";
+            final CellDisplay cell = new CellDisplay(color, cellSize, content);
+            cell.setLayoutY(point.i() * cellSize);
+            cell.setLayoutX(point.j() * cellSize);
+            getChildren().add(cell);
         }
     }
 }
