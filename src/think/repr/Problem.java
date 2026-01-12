@@ -92,7 +92,7 @@ public final class Problem {
 
     // == Parsing tools. ===============================================================
 
-    private int strToInt(String s) throws InvalidSpecException {
+    private int strToInt(final String s) throws InvalidSpecException {
         try {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {
@@ -100,7 +100,7 @@ public final class Problem {
         }
     }
 
-    private <T> T getNth(T[] array, int n) throws InvalidSpecException {
+    private <T> T getNth(final T[] array, final int n) throws InvalidSpecException {
         try {
             return array[n];
         } catch (IndexOutOfBoundsException e) {
@@ -108,7 +108,7 @@ public final class Problem {
         }
     }
 
-    private String filterWhitespace(String dirty) {
+    private String filterWhitespace(final String dirty) {
         return dirty
             .codePoints()
             .filter(c -> !Character.isWhitespace(c))
@@ -120,17 +120,17 @@ public final class Problem {
             .toString();
     }
 
-    private void throwIfNotUniqueOrder(Collection<Ordered> sequence)
+    private void throwIfNotUniqueOrder(final Collection<Ordered> sequence)
         throws InvalidSpecException {
-        HashSet<Integer> seen = new HashSet<>();
-        for (Ordered item : sequence) {
+        final HashSet<Integer> seen = new HashSet<>();
+        for (final Ordered item : sequence) {
             if (!seen.add(item.order())) {
                 throw new InvalidSpecException();
             }
         }
     }
 
-    private long[] buildCheckpoints(ArrayList<Ordered> prechecks) {
+    private long[] buildCheckpoints(final ArrayList<Ordered> prechecks) {
         return prechecks
             .stream()
             .sorted(Comparator.comparingInt(Ordered::order))

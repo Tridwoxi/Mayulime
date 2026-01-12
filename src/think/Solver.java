@@ -28,7 +28,7 @@ public final class Solver {
     }
 }
 
-class Worker extends Thread {
+final class Worker extends Thread {
 
     private final Problem board;
 

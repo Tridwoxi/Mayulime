@@ -9,19 +9,19 @@ public final class Grid {
     private final int boundI;
     private final int boundJ;
 
-    public Grid(boolean[] cells, int boundI, int boundJ) {
+    public Grid(final boolean[] cells, final int boundI, final int boundJ) {
         assert cells.length == boundI * boundJ;
         this.cells = cells.clone();
         this.boundI = boundI;
         this.boundJ = boundJ;
     }
 
-    public boolean getCell(int i, int j) {
+    public boolean getCell(final int i, final int j) {
         assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
         return cells[i * boundJ + j];
     }
 
-    public boolean getCell(long packed) {
+    public boolean getCell(final long packed) {
         return getCell(unpackI(packed), unpackJ(packed));
     }
 
@@ -33,19 +33,19 @@ public final class Grid {
         return boundJ;
     }
 
-    public static long pack(int i, int j) {
+    public static long pack(final int i, final int j) {
         return ((long) i << 32) | j;
     }
 
-    public static int unpackI(long packed) {
+    public static int unpackI(final long packed) {
         return (int) (packed >> 32);
     }
 
-    public static int unpackJ(long packed) {
+    public static int unpackJ(final long packed) {
         return (int) packed;
     }
 
-    public static boolean isNeighbor(long a, long b) {
+    public static boolean isNeighbor(final long a, final long b) {
         return (
             Math.abs(unpackI(a) - unpackI(b)) + Math.abs(unpackJ(a) - unpackJ(b)) == 1
         );

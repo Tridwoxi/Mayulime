@@ -17,20 +17,19 @@ public record Route(long source, long destination, long[] steps) {
         }
     }
 
-    public static Route fromChain(Route[] routes) {
+    public static Route fromChain(final Route[] routes) {
         assert routes.length > 0 : "Can't make a route of nothing.";
         for (int i = 0; i < routes.length - 1; i++) {
             assert routes[i].destination == routes[i + 1].source : "Must be connected";
         }
         final long source = routes[0].source;
         final long destination = routes[routes.length - 1].destination;
-
         int length = 0;
-        for (Route route : routes) {
-            length += route.steps.length;
+        for (final Route route : routes) {
             if (route.steps.length == 0) {
                 return new Route(source, destination, BLOCKED);
             }
+            length += route.steps.length;
         }
         final long[] steps = new long[length];
         int index = 0;

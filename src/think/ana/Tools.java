@@ -7,7 +7,7 @@ import java.util.stream.StreamSupport;
 /**
     Small miscellany.
  */
-public class Tools {
+public final class Tools {
 
     public static record Pair<T>(T a, T b) {}
 
@@ -41,8 +41,8 @@ public class Tools {
 
         @Override
         public Pair<T> next() {
-            T b = iterator.next();
-            Pair<T> pair = new Pair<>(a, b);
+            final T b = iterator.next();
+            final Pair<T> pair = new Pair<>(a, b);
             a = b;
             return pair;
         }
