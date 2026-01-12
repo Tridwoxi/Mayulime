@@ -1,6 +1,7 @@
 package think.repr;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 import think.ana.Tools;
 
 /**
@@ -42,5 +43,29 @@ public final class Grid<T> {
 
     public int getBoundJ() {
         return boundJ;
+    }
+
+    public T getNth(final int index) {
+        assert index >= 0 && index < cells.size();
+        return cells.get(index);
+    }
+
+    public int getSize() {
+        return cells.size();
+    }
+
+    public static <A, B, C> Grid<C> combine(
+        Grid<A> a,
+        Grid<B> b,
+        BiFunction<A, B, C> combiner
+    ) {
+        assert a.getBoundI() == b.getBoundI();
+        assert a.getBoundJ() == b.getBoundJ();
+        assert a.getSize() == b.getSize();
+        final ArrayList<C> cells = new ArrayList<>(a.getSize());
+        for (int i = 0; i < a.getSize(); i++) {
+            cells.add(combiner.apply(a.getNth(i), b.getNth(i)));
+        }
+        return new Grid<>(cells, a.getBoundI(), a.getBoundJ());
     }
 }
