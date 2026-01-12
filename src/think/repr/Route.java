@@ -1,6 +1,7 @@
 package think.repr;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import think.ana.Tools;
 
 /**
@@ -8,7 +9,7 @@ import think.ana.Tools;
     or empty steps if the route is blocked. Routes are board- and assignment-specific.
  */
 public record Route(Point source, Point destination, ArrayList<Point> steps) {
-    private static final ArrayList<Point> BLOCKED = new ArrayList<>();
+    private static final ArrayList<Point> BLOCKED = new ArrayList<>(0);
 
     public Route {
         // Both zero-length direct paths and nonzero-length circular chains are illegal
@@ -18,6 +19,7 @@ public record Route(Point source, Point destination, ArrayList<Point> steps) {
             assert steps.getFirst().isNeighbor(source) : "First step must be neighbor.";
             assert steps.getLast() == destination : "Must end at destination.";
         }
+        assert Tools.pairwiseStream(steps).allMatch(p -> p.a().isNeighbor(p.b()));
     }
 
     public static Route fromChain(final ArrayList<Route> routes) {
@@ -25,18 +27,17 @@ public record Route(Point source, Point destination, ArrayList<Point> steps) {
         assert Tools.pairwiseStream(routes).allMatch(
             pair -> pair.a().destination == pair.b().source
         ) : "Must be connected";
+
         final Point source = routes.getFirst().source;
         final Point destination = routes.getLast().destination;
         if (routes.stream().anyMatch(route -> route.steps.isEmpty())) {
             return new Route(source, destination, BLOCKED);
         }
-        final int length = routes
+        final ArrayList<ArrayList<Point>> steps2d = routes
             .stream()
-            .mapToInt(route -> route.steps.size())
-            .sum();
-        final ArrayList<Point> steps = new ArrayList<>(length);
-        routes.forEach(route -> steps.addAll(route.steps));
-        assert steps.size() == length : "Route chain steps miscounted.";
+            .map(route -> route.steps)
+            .collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<Point> steps = Tools.flatten(steps2d);
         return new Route(source, destination, steps);
     }
 

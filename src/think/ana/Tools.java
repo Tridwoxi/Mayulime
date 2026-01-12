@@ -28,6 +28,14 @@ public final class Tools {
         return pairwiseStream(lists).allMatch(p -> p.a.size() == p.b.size());
     }
 
+    public static <T> ArrayList<T> fill(T elem, int size) {
+        final ArrayList<T> result = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            result.add(elem);
+        }
+        return result;
+    }
+
     // == Pairwise. ====================================================================
 
     public static record Pair<T>(T a, T b) {}

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import think.ana.Tools;
 
 /**
     Simplified Pathery problem specification.
@@ -37,22 +38,22 @@ public final class Problem {
         this.numRubbers = strToInt(metadata);
 
         final String grid = getNth(sections, 1);
-        final ArrayList<String> lines = splitToList(grid, ROW_DELIM);
+        final ArrayList<ArrayList<String>> lines = splitToList(grid, ROW_DELIM)
+            .stream()
+            .map(line -> splitToList(line, CELL_DELIM))
+            .collect(Collectors.toCollection(ArrayList::new));
+        if (!Tools.rectangular(lines)) {
+            throw new InvalidSpecException();
+        }
         final int numRows = lines.size();
-        final int numCols = splitToList(getNth(lines, 0), CELL_DELIM).size();
+        final int numCols = getNth(lines, 0).size();
         final ArrayList<Ordered> prechecks = new ArrayList<>();
         final int numCells = numRows * numCols;
-        final ArrayList<Boolean> cells = new ArrayList<>(numCells);
-        for (int index = 0; index < numCells; index++) {
-            cells.add(false);
-        }
+        final ArrayList<Boolean> cells = Tools.fill(false, numCells);
         for (int i = 0; i < lines.size(); i++) {
-            final ArrayList<String> line = splitToList(lines.get(i), CELL_DELIM);
-            if (line.size() != numCols) {
-                throw new InvalidSpecException(); // <- Enforces rectangle.
-            }
-            for (int j = 0; j < line.size(); j++) {
-                final String cell = line.get(j);
+            final ArrayList<String> row = lines.get(i);
+            for (int j = 0; j < row.size(); j++) {
+                final String cell = row.get(j);
                 switch (cell) {
                     case BRICK -> {
                         cells.set(i * numCols + j, true);
