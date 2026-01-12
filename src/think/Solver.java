@@ -3,6 +3,7 @@ package think;
 import app.Main;
 import java.util.HashSet;
 import javafx.application.Platform;
+import think.repr.Point;
 import think.repr.Problem;
 
 /**
@@ -15,7 +16,7 @@ public final class Solver {
 
     private Solver() {}
 
-    public static synchronized void solve(final Problem board) {
+    public static synchronized void solve(final Problem problem) {
         assert Platform.isFxApplicationThread() : "Application thread is manager.";
         if (WORKER_INSTANCE != null) {
             WORKER_INSTANCE.interrupt();
@@ -23,21 +24,21 @@ public final class Solver {
                 WORKER_INSTANCE.join();
             } catch (InterruptedException e) {}
         }
-        WORKER_INSTANCE = new Worker(board);
+        WORKER_INSTANCE = new Worker(problem);
         WORKER_INSTANCE.start();
     }
 }
 
 final class Worker extends Thread {
 
-    private final Problem board;
+    private final Problem problem;
 
-    public Worker(final Problem board) {
-        this.board = board;
+    public Worker(final Problem problem) {
+        this.problem = problem;
     }
 
     @Override
     public void run() {
-        Main.recieve(board, new HashSet<Long>(), 0);
+        Main.recieve(problem, new HashSet<Point>(), 0);
     }
 }

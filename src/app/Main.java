@@ -30,7 +30,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Solver;
-import think.repr.Grid;
+import think.repr.Point;
 import think.repr.Problem;
 import think.repr.Problem.InvalidSpecException;
 
@@ -81,7 +81,7 @@ public final class Main extends Application {
 
     public static void recieve(
         final Problem problem,
-        final HashSet<Long> rubbers,
+        final HashSet<Point> rubbers,
         final int score
     ) {
         Platform.runLater(() -> gui.showUpdate(problem, rubbers, score));
@@ -113,7 +113,7 @@ final class Gui extends VBox {
 
     public void showUpdate(
         final Problem problem,
-        final HashSet<Long> rubbers,
+        final HashSet<Point> rubbers,
         final int score
     ) {
         problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubbers);
@@ -165,25 +165,25 @@ final class ProblemDisplay extends Group {
     public ProblemDisplay(
         final Problem problem,
         final double cellSize,
-        final HashSet<Long> rubbers
+        final HashSet<Point> rubbers
     ) {
         final int boundI = problem.getBoundI();
         final int boundJ = problem.getBoundJ();
-        final ArrayList<Long> checks = problem.getCheckpoints();
-        final HashMap<Long, Integer> checkLabels = new HashMap<>();
+        final ArrayList<Point> checks = problem.getCheckpoints();
+        final HashMap<Point, Integer> checkLabels = new HashMap<>();
         for (int i = 0; i < checks.size(); i++) {
             checkLabels.put(checks.get(i), i);
         }
         for (int i = 0; i < boundI; i++) {
             for (int j = 0; j < boundJ; j++) {
-                final long packed = Grid.pack(i, j);
-                final int label = checkLabels.getOrDefault(packed, -1);
+                final Point point = new Point(i, j);
+                final int label = checkLabels.getOrDefault(point, -1);
                 final Color color;
                 if (label != -1) {
                     color = PatheryColors.CHECKPOINT;
                 } else if (problem.isBrick(i, j)) {
                     color = PatheryColors.BRICK;
-                } else if (rubbers.contains(packed)) {
+                } else if (rubbers.contains(point)) {
                     color = PatheryColors.RUBBER;
                 } else {
                     color = PatheryColors.NOTHING;

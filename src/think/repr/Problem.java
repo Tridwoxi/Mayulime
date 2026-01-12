@@ -22,7 +22,7 @@ public final class Problem {
 
     private final int numRubbers;
     private final Grid isBrick;
-    private final ArrayList<Long> checkpoints;
+    private final ArrayList<Point> checkpoints;
 
     // == Constructor and parser. ======================================================
 
@@ -61,7 +61,7 @@ public final class Problem {
                     }
                     default -> {
                         final int order = strToInt(cell);
-                        prechecks.add(new Ordered(Grid.pack(i, j), order));
+                        prechecks.add(new Ordered(new Point(i, j), order));
                     }
                 }
             }
@@ -92,7 +92,7 @@ public final class Problem {
         return numRubbers;
     }
 
-    public ArrayList<Long> getCheckpoints() {
+    public ArrayList<Point> getCheckpoints() {
         return new ArrayList<>(checkpoints);
     }
 
@@ -137,7 +137,7 @@ public final class Problem {
         }
     }
 
-    private ArrayList<Long> buildCheckpoints(final ArrayList<Ordered> prechecks) {
+    private ArrayList<Point> buildCheckpoints(final ArrayList<Ordered> prechecks) {
         return prechecks
             .stream()
             .sorted(Comparator.comparingInt(Ordered::order))
@@ -151,5 +151,5 @@ public final class Problem {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    final record Ordered(long value, int order) {}
+    final record Ordered(Point value, int order) {}
 }

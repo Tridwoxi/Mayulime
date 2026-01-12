@@ -3,7 +3,7 @@ package think.repr;
 import java.util.ArrayList;
 
 /**
-    2D grid of cells represented in 1D for performance. Points are packed longs.
+    2D grid of cells represented in 1D for performance.
  */
 public final class Grid {
 
@@ -23,8 +23,8 @@ public final class Grid {
         return cells.get(i * boundJ + j);
     }
 
-    public boolean getCell(final long packed) {
-        return getCell(unpackI(packed), unpackJ(packed));
+    public boolean getCell(final Point point) {
+        return getCell(point.i(), point.j());
     }
 
     public int getBoundI() {
@@ -33,23 +33,5 @@ public final class Grid {
 
     public int getBoundJ() {
         return boundJ;
-    }
-
-    public static long pack(final int i, final int j) {
-        return ((long) i << 32) | j;
-    }
-
-    public static int unpackI(final long packed) {
-        return (int) (packed >> 32);
-    }
-
-    public static int unpackJ(final long packed) {
-        return (int) packed;
-    }
-
-    public static boolean isNeighbor(final long a, final long b) {
-        return (
-            Math.abs(unpackI(a) - unpackI(b)) + Math.abs(unpackJ(a) - unpackJ(b)) == 1
-        );
     }
 }
