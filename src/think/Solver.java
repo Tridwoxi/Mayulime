@@ -38,6 +38,6 @@ class Worker extends Thread {
 
     @Override
     public void run() {
-        Main.fromSolver(board, new HashSet<>(), 0);
+        Main.recieve(board, new HashSet<Long>(), 0);
     }
 }

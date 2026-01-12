@@ -29,7 +29,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Solver;
-import think.repr.Point;
+import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.InvalidSpecException;
 
@@ -48,6 +48,10 @@ public final class Main extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+            Platform.exit();
+        });
         Main.gui = new Gui();
         Main.primaryStage = primaryStage;
         Main.mainScene = new Scene(gui);
@@ -59,7 +63,7 @@ public final class Main extends Application {
 
     // == Connectors. ==================================================================
 
-    public static void toSolver(final File file) {
+    public static void send(final File file) {
         Problem problem = null;
         try {
             problem = new Problem(Files.readString(file.toPath()));
@@ -74,9 +78,9 @@ public final class Main extends Application {
         }
     }
 
-    public static void fromSolver(
+    public static void recieve(
         final Problem problem,
-        final HashSet<Point> rubbers,
+        final HashSet<Long> rubbers,
         final int score
     ) {
         Platform.runLater(() -> gui.showUpdate(problem, rubbers, score));
@@ -111,14 +115,15 @@ final class Gui extends VBox {
 
     public void showUpdate(
         final Problem problem,
-        final HashSet<Point> rubberAssignment,
+        final HashSet<Long> rubbers,
         final int score
     ) {
-        problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubberAssignment);
+        problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubbers);
         scoreDisplay.setText("Score: " + score);
-        final int remaining = problem.getNumRubbers() - rubberAssignment.size();
+        final int remaining = problem.getNumRubbers() - rubbers.size();
         rubberDisplay.setText("Remaining walls: " + remaining);
-        getChildren().set(0, problemDisplay); // Must target whatever constructor decided.
+        assert getChildren().get(0) instanceof ProblemDisplay;
+        getChildren().set(0, problemDisplay);
         if (
             getScene() != null &&
             getScene().getWindow() != null &&
@@ -146,11 +151,11 @@ final class Gui extends VBox {
             final FileChooser chooser = new FileChooser();
             chooser
                 .getExtensionFilters()
-                .add(new ExtensionFilter("Pathery level specification", "*.txt"));
+                .add(new ExtensionFilter("Pathery level specification", "*.tpai"));
             final Window active = getScene() == null ? null : getScene().getWindow();
             final File chosen = chooser.showOpenDialog(active);
             if (chosen != null) {
-                Main.toSolver(chosen);
+                Main.send(chosen);
             }
         });
         return upload;
@@ -164,31 +169,35 @@ final class ProblemDisplay extends Group {
     public ProblemDisplay(
         final Problem problem,
         final double cellSize,
-        final HashSet<Point> rubbers
+        final HashSet<Long> rubbers
     ) {
-        final Point[] checks = problem.getCheckpoints();
-        final HashMap<Point, Integer> checkLabels = new HashMap<>();
+        final int boundI = problem.getBoundI();
+        final int boundJ = problem.getBoundJ();
+        final long[] checks = problem.getCheckpoints();
+        final HashMap<Long, Integer> checkLabels = new HashMap<>();
         for (int i = 0; i < checks.length; i++) {
             checkLabels.put(checks[i], i);
         }
-        for (final Point point : problem.getAllPoints()) {
-            final Color color;
-            if (checkLabels.containsKey(point)) {
-                color = PatheryColors.CHECKPOINT;
-            } else if (!problem.isOpen(point)) {
-                color = PatheryColors.BRICK;
-            } else if (rubbers.contains(point)) {
-                color = PatheryColors.RUBBER;
-            } else {
-                color = PatheryColors.NOTHING;
+        for (int i = 0; i < boundI; i++) {
+            for (int j = 0; j < boundJ; j++) {
+                final long packed = Grid.pack(i, j);
+                final int label = checkLabels.getOrDefault(packed, -1);
+                final Color color;
+                if (label != -1) {
+                    color = PatheryColors.CHECKPOINT;
+                } else if (problem.isBrick(i, j)) {
+                    color = PatheryColors.BRICK;
+                } else if (rubbers.contains(packed)) {
+                    color = PatheryColors.RUBBER;
+                } else {
+                    color = PatheryColors.NOTHING;
+                }
+                final String content = label != -1 ? Integer.toString(label) : "";
+                final CellDisplay cell = new CellDisplay(color, cellSize, content);
+                cell.setLayoutY(i * cellSize);
+                cell.setLayoutX(j * cellSize);
+                getChildren().add(cell);
             }
-            final String content = checkLabels.containsKey(point)
-                ? checkLabels.get(point).toString()
-                : "";
-            final CellDisplay cell = new CellDisplay(color, cellSize, content);
-            cell.setLayoutY(point.i() * cellSize);
-            cell.setLayoutX(point.j() * cellSize);
-            getChildren().add(cell);
         }
     }
 }

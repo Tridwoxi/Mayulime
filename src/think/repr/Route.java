@@ -1,58 +1,53 @@
 package think.repr;
 
-import java.util.ArrayList;
-import think.ana.Tools;
-
 /**
     A sequence of steps to get from a source (exclusive) to a destination (inclusive),
     or empty steps if the route is blocked. Routes are board- and assignment-specific.
  */
-public record Route(
-    Problem problem,
-    Assignment assignment,
-    Point source,
-    Point destination,
-    ArrayList<Point> steps
-) {
+public record Route(long source, long destination, long[] steps) {
+    private static final long[] BLOCKED = new long[0];
+
     public Route {
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a point on a board is always interesting for exactly one reason.
-        assert !source.equals(destination) : "Cannot path to yourself.";
-        if (!steps.isEmpty()) {
-            assert steps.getFirst().isNeighbor(source) : "First step must be neighbor.";
-            assert steps.getLast().equals(destination) : "Must end at destination.";
+        assert source != destination : "Cannot path to yourself.";
+        if (steps.length != 0) {
+            assert Grid.isNeighbor(source, steps[0]) : "First step must be neighbor.";
+            assert steps[steps.length - 1] == destination : "Must end at destination.";
         }
     }
 
-    public static Route fromChain(ArrayList<Route> routes) {
-        assert !routes.isEmpty() : "Can't make a route of nothing.";
-        assert Tools.pairwiseStream(routes).allMatch(p ->
-            p.a().destination.equals(p.b().source)
-        ) : "Routes must be connected.";
-        assert Tools.pairwiseStream(routes).allMatch(
-            p ->
-                p.a().problem.equals(p.b().problem) &&
-                p.a().assignment.equals(p.b().assignment)
-        ) : "Routes must have the same assignment and problem.";
-
-        ArrayList<Point> steps = new ArrayList<>();
-        if (routes.stream().allMatch(p -> p.possible())) {
-            routes.forEach(r -> steps.addAll(r.steps));
+    public static Route fromChain(Route[] routes) {
+        assert routes.length > 0 : "Can't make a route of nothing.";
+        for (int i = 0; i < routes.length - 1; i++) {
+            assert routes[i].destination == routes[i + 1].source : "Must be connected";
         }
-        return new Route(
-            routes.getFirst().problem,
-            routes.getFirst().assignment,
-            routes.getFirst().source,
-            routes.getLast().destination,
-            new ArrayList<>(0)
-        );
+        final long source = routes[0].source;
+        final long destination = routes[routes.length - 1].destination;
+
+        int length = 0;
+        for (Route route : routes) {
+            length += route.steps.length;
+            if (route.steps.length == 0) {
+                return new Route(source, destination, BLOCKED);
+            }
+        }
+        final long[] steps = new long[length];
+        int index = 0;
+        for (final Route route : routes) {
+            for (final long x : route.steps) {
+                steps[index] = x;
+                index += 1;
+            }
+        }
+        return new Route(source, destination, steps);
     }
 
     public int length() {
-        return steps.size();
+        return steps.length;
     }
 
     public boolean possible() {
-        return steps.size() > 0;
+        return steps.length > 0;
     }
 }

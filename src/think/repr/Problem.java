@@ -12,106 +12,82 @@ public final class Problem {
 
     public static final class InvalidSpecException extends Exception {}
 
-    private static final String DELIM1 = ";;;";
-    private static final String DELIM2 = ";;";
-    private static final String DELIM3 = ";";
-
+    private static final String SECTION_DELIM = ";;;";
+    private static final String ROW_DELIM = ";;";
+    private static final String CELL_DELIM = ";";
     private static final String BRICK = "#";
     private static final String EMPTY = ".";
 
     private final int numRubbers;
-    private final boolean[][] brickLayout;
-    private final Point[] checkpoints; // checkpoints[n] is nth checkpoint.
-    private final Point[] allPoints;
+    private final Grid isBrick;
+    private final long[] checkpoints;
 
     // == Constructor and parser. ======================================================
 
-    // If a specification is invalid, it is unrecoverable from the problem's point of
-    // view, so it is only the caller that can handle it. It is a lot of redundant work
-    // to check if a problem is valid, so I found begging for forgiveness cleaner.
     public Problem(final String specification) throws InvalidSpecException {
         // Whitespace is tricky to work with since it's scattered around and invisible.
-        // Custom delimiters are uglier but more extensible because there are an
-        // unlimited number of them.
+        // Custom delimiters are uglier but more extensible.
         final String clean = filterWhitespace(specification);
-        final String[] sections = clean.split(DELIM1);
+        final String[] sections = clean.split(SECTION_DELIM);
 
-        // Metadata: just an integer for number of rubbers.
         final String metadata = getNth(sections, 0);
         this.numRubbers = strToInt(metadata);
 
-        // Grid: rectangular 2d array where elements are either a brick, empty, or
-        // checkpoint. More features to be added...
         final String grid = getNth(sections, 1);
-        final String[] lines = grid.split(DELIM2);
-        final int expectedNumCols = getNth(lines, 0).split(DELIM3).length;
-        final ArrayList<Ordered<Point>> prechecks = new ArrayList<>();
-        this.brickLayout = new boolean[lines.length][expectedNumCols];
-
+        final String[] lines = grid.split(ROW_DELIM);
+        final int numRows = lines.length;
+        final int numCols = getNth(lines, 0).split(CELL_DELIM).length;
+        final ArrayList<Ordered> prechecks = new ArrayList<>();
+        final boolean[] cells = new boolean[numRows * numCols];
         for (int i = 0; i < lines.length; i++) {
-            final String[] line = lines[i].split(DELIM3);
-            if (line.length != expectedNumCols) {
+            final String[] line = lines[i].split(CELL_DELIM);
+            if (line.length != numCols) {
                 throw new InvalidSpecException(); // <- Enforces rectangle.
             }
             for (int j = 0; j < line.length; j++) {
-                // When more features are added, this switch should probably become an
-                // if-else series because it is based on "looks like". Currently only
-                // checkpoints are patterns so it works, but "force it to be a
-                // checkpoint or throw" will not work for long.
-                final String current = line[j];
-                switch (current) {
+                final String cell = line[j];
+                switch (cell) {
                     case BRICK -> {
-                        brickLayout[i][j] = true;
+                        cells[i * numCols + j] = true;
                     }
                     case EMPTY -> {
                         // no-op: isBrick initialized to all false.
                     }
                     default -> {
-                        final int order = strToInt(current);
-                        prechecks.add(new Ordered<>(new Point(i, j), order));
+                        final int order = strToInt(cell);
+                        prechecks.add(new Ordered(Grid.pack(i, j), order));
                     }
                 }
             }
         }
+        this.isBrick = new Grid(cells, numRows, numCols);
 
         // Pathery allows multiple checkpoints with same priority, but it's uncommon,
         // and harder to write a snake for, so we'll allow only one.
         throwIfNotUniqueOrder(prechecks);
         this.checkpoints = buildCheckpoints(prechecks);
-
-        // getBoundI/J only valid after isBrick assigned, so must be called last.
-        this.allPoints = buildAllPoints(getBoundI(), getBoundJ());
     }
 
     // == Getters (please do not mutate mutable things!). ==============================
 
-    public boolean isOpen(final Point point) {
-        final boolean isContained = (point.i() >= 0 &&
-            point.i() < getBoundI() &&
-            point.j() >= 0 &&
-            point.j() < getBoundJ());
-        final boolean isBrick = brickLayout[point.i()][point.j()];
-        return isContained && !isBrick;
+    public boolean isBrick(final int i, final int j) {
+        return isBrick.getCell(i, j);
     }
 
     public int getBoundI() {
-        return brickLayout.length;
+        return isBrick.getBoundI();
     }
 
     public int getBoundJ() {
-        return brickLayout[0].length;
+        return isBrick.getBoundJ();
     }
 
     public int getNumRubbers() {
         return numRubbers;
     }
 
-    public Point[] getCheckpoints() {
+    public long[] getCheckpoints() {
         return checkpoints;
-    }
-
-    public Point[] getAllPoints() {
-        return allPoints;
     }
 
     // == Parsing tools. ===============================================================
@@ -134,7 +110,7 @@ public final class Problem {
 
     private String filterWhitespace(String dirty) {
         return dirty
-            .chars()
+            .codePoints()
             .filter(c -> !Character.isWhitespace(c))
             .collect(
                 StringBuilder::new,
@@ -144,30 +120,23 @@ public final class Problem {
             .toString();
     }
 
-    private <T> void throwIfNotUniqueOrder(Collection<Ordered<T>> sequence)
+    private void throwIfNotUniqueOrder(Collection<Ordered> sequence)
         throws InvalidSpecException {
         HashSet<Integer> seen = new HashSet<>();
-        for (Ordered<T> item : sequence) {
+        for (Ordered item : sequence) {
             if (!seen.add(item.order())) {
                 throw new InvalidSpecException();
             }
         }
     }
 
-    private Point[] buildAllPoints(int boundI, int boundJ) {
-        Point[] points = new Point[boundI * boundJ];
-        for (int i = 0; i < boundI; i++) {
-            for (int j = 0; j < boundJ; j++) {
-                points[i * boundJ + j] = new Point(i, j);
-            }
-        }
-        return points;
+    private long[] buildCheckpoints(ArrayList<Ordered> prechecks) {
+        return prechecks
+            .stream()
+            .sorted(Comparator.comparingInt(Ordered::order))
+            .mapToLong(Ordered::value)
+            .toArray();
     }
 
-    private Point[] buildCheckpoints(ArrayList<Ordered<Point>> prechecks) {
-        prechecks.sort(Comparator.comparingInt(Ordered<Point>::order));
-        return prechecks.stream().map(Ordered::data).toArray(Point[]::new);
-    }
-
-    final record Ordered<T>(T data, int order) {}
+    final record Ordered(long value, int order) {}
 }
