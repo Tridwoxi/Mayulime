@@ -37,6 +37,13 @@ public final class Grid<T> {
         return cells.get(i * boundJ + j);
     }
 
+    public void setCell(final Point point, final T value) {
+        final int i = point.i();
+        final int j = point.j();
+        assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
+        cells.set(i * boundJ + j, value);
+    }
+
     public int getBoundI() {
         return boundI;
     }
@@ -48,6 +55,11 @@ public final class Grid<T> {
     public T getNth(final int index) {
         assert index >= 0 && index < cells.size();
         return cells.get(index);
+    }
+
+    public void setNth(final int index, final T value) {
+        assert index >= 0 && index < cells.size();
+        cells.set(index, value);
     }
 
     public int getSize() {
