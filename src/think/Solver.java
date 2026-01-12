@@ -17,7 +17,7 @@ public final class Solver {
     private Solver() {}
 
     public static synchronized void solve(final Problem problem) {
-        assert Platform.isFxApplicationThread() : "Application thread is manager.";
+        assert Platform.isFxApplicationThread();
         if (WORKER_INSTANCE != null) {
             WORKER_INSTANCE.interrupt();
             try {

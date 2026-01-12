@@ -58,7 +58,7 @@ public final class Snake {
         while (!current.equals(source)) {
             steps.add(current);
             final Point next = parents.get(current);
-            assert next != null : "Reached node must have a parent.";
+            assert next != null;
             current = next;
         }
         Collections.reverse(steps);

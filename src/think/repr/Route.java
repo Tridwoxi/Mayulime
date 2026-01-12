@@ -14,19 +14,19 @@ public record Route(Point source, Point destination, ArrayList<Point> steps) {
     public Route {
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a point on a board is always interesting for exactly one reason.
-        assert source != destination : "Cannot path to yourself.";
+        assert source != destination;
         if (!steps.isEmpty()) {
-            assert steps.getFirst().isNeighbor(source) : "First step must be neighbor.";
-            assert steps.getLast() == destination : "Must end at destination.";
+            assert steps.getFirst().isNeighbor(source);
+            assert steps.getLast() == destination;
         }
         assert Tools.pairwiseStream(steps).allMatch(p -> p.a().isNeighbor(p.b()));
     }
 
     public static Route fromChain(final ArrayList<Route> routes) {
-        assert routes.size() > 0 : "Can't make a route of nothing.";
+        assert routes.size() > 0;
         assert Tools.pairwiseStream(routes).allMatch(
             pair -> pair.a().destination == pair.b().source
-        ) : "Must be connected";
+        );
 
         final Point source = routes.getFirst().source;
         final Point destination = routes.getLast().destination;
