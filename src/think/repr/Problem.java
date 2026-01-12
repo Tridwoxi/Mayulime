@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
     Simplified Pathery problem specification.
@@ -20,7 +22,7 @@ public final class Problem {
 
     private final int numRubbers;
     private final Grid isBrick;
-    private final long[] checkpoints;
+    private final ArrayList<Long> checkpoints;
 
     // == Constructor and parser. ======================================================
 
@@ -28,27 +30,31 @@ public final class Problem {
         // Whitespace is tricky to work with since it's scattered around and invisible.
         // Custom delimiters are uglier but more extensible.
         final String clean = filterWhitespace(specification);
-        final String[] sections = clean.split(SECTION_DELIM);
+        final ArrayList<String> sections = splitToList(clean, SECTION_DELIM);
 
         final String metadata = getNth(sections, 0);
         this.numRubbers = strToInt(metadata);
 
         final String grid = getNth(sections, 1);
-        final String[] lines = grid.split(ROW_DELIM);
-        final int numRows = lines.length;
-        final int numCols = getNth(lines, 0).split(CELL_DELIM).length;
+        final ArrayList<String> lines = splitToList(grid, ROW_DELIM);
+        final int numRows = lines.size();
+        final int numCols = splitToList(getNth(lines, 0), CELL_DELIM).size();
         final ArrayList<Ordered> prechecks = new ArrayList<>();
-        final boolean[] cells = new boolean[numRows * numCols];
-        for (int i = 0; i < lines.length; i++) {
-            final String[] line = lines[i].split(CELL_DELIM);
-            if (line.length != numCols) {
+        final int numCells = numRows * numCols;
+        final ArrayList<Boolean> cells = new ArrayList<>(numCells);
+        for (int index = 0; index < numCells; index++) {
+            cells.add(false);
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            final ArrayList<String> line = splitToList(lines.get(i), CELL_DELIM);
+            if (line.size() != numCols) {
                 throw new InvalidSpecException(); // <- Enforces rectangle.
             }
-            for (int j = 0; j < line.length; j++) {
-                final String cell = line[j];
+            for (int j = 0; j < line.size(); j++) {
+                final String cell = line.get(j);
                 switch (cell) {
                     case BRICK -> {
-                        cells[i * numCols + j] = true;
+                        cells.set(i * numCols + j, true);
                     }
                     case EMPTY -> {
                         // no-op: isBrick initialized to all false.
@@ -86,8 +92,8 @@ public final class Problem {
         return numRubbers;
     }
 
-    public long[] getCheckpoints() {
-        return checkpoints;
+    public ArrayList<Long> getCheckpoints() {
+        return new ArrayList<>(checkpoints);
     }
 
     // == Parsing tools. ===============================================================
@@ -100,9 +106,10 @@ public final class Problem {
         }
     }
 
-    private <T> T getNth(final T[] array, final int n) throws InvalidSpecException {
+    private <T> T getNth(final ArrayList<T> list, final int n)
+        throws InvalidSpecException {
         try {
-            return array[n];
+            return list.get(n);
         } catch (IndexOutOfBoundsException e) {
             throw new InvalidSpecException();
         }
@@ -130,12 +137,18 @@ public final class Problem {
         }
     }
 
-    private long[] buildCheckpoints(final ArrayList<Ordered> prechecks) {
+    private ArrayList<Long> buildCheckpoints(final ArrayList<Ordered> prechecks) {
         return prechecks
             .stream()
             .sorted(Comparator.comparingInt(Ordered::order))
-            .mapToLong(Ordered::value)
-            .toArray();
+            .map(Ordered::value)
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private ArrayList<String> splitToList(final String input, final String delimiter) {
+        return Pattern.compile(Pattern.quote(delimiter))
+            .splitAsStream(input)
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     final record Ordered(long value, int order) {}

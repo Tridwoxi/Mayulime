@@ -3,6 +3,7 @@ package app;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import javafx.application.Application;
@@ -168,10 +169,10 @@ final class ProblemDisplay extends Group {
     ) {
         final int boundI = problem.getBoundI();
         final int boundJ = problem.getBoundJ();
-        final long[] checks = problem.getCheckpoints();
+        final ArrayList<Long> checks = problem.getCheckpoints();
         final HashMap<Long, Integer> checkLabels = new HashMap<>();
-        for (int i = 0; i < checks.length; i++) {
-            checkLabels.put(checks[i], i);
+        for (int i = 0; i < checks.size(); i++) {
+            checkLabels.put(checks.get(i), i);
         }
         for (int i = 0; i < boundI; i++) {
             for (int j = 0; j < boundJ; j++) {
