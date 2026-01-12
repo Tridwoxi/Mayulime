@@ -21,7 +21,7 @@ public final class Problem {
     private static final String EMPTY = ".";
 
     private final int numRubbers;
-    private final Grid isBrick;
+    private final Grid<Boolean> isBrick;
     private final ArrayList<Point> checkpoints;
 
     // == Constructor and parser. ======================================================
@@ -66,7 +66,7 @@ public final class Problem {
                 }
             }
         }
-        this.isBrick = new Grid(cells, numRows, numCols);
+        this.isBrick = new Grid<>(cells, numRows, numCols);
 
         // Pathery allows multiple checkpoints with same priority, but it's uncommon,
         // and harder to write a snake for, so we'll allow only one.
@@ -76,8 +76,8 @@ public final class Problem {
 
     // == Getters (please do not mutate mutable things!). ==============================
 
-    public boolean isBrick(final int i, final int j) {
-        return isBrick.getCell(i, j);
+    public boolean isBrick(Point point) {
+        return isBrick.getCell(point);
     }
 
     public int getBoundI() {

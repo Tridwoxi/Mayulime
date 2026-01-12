@@ -1,30 +1,39 @@
 package think.repr;
 
 import java.util.ArrayList;
+import think.ana.Tools;
 
 /**
-    2D grid of cells represented in 1D for performance.
+    Rectangular 2D grid of cells represented in 1D for performance. Useless, really,
+    since we're boxing things anyway, but it is nice to have a grid of sorts.
  */
-public final class Grid {
+public final class Grid<T> {
 
-    private final ArrayList<Boolean> cells;
+    private final ArrayList<T> cells;
     private final int boundI;
     private final int boundJ;
 
-    public Grid(final ArrayList<Boolean> cells, final int boundI, final int boundJ) {
+    public Grid(final ArrayList<T> cells, final int boundI, final int boundJ) {
         assert cells.size() == boundI * boundJ;
         this.cells = new ArrayList<>(cells);
         this.boundI = boundI;
         this.boundJ = boundJ;
     }
 
-    public boolean getCell(final int i, final int j) {
-        assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
-        return cells.get(i * boundJ + j);
+    public Grid(final ArrayList<ArrayList<T>> cells) {
+        this(
+            Tools.flatten(cells),
+            cells.size(),
+            cells.isEmpty() ? 0 : cells.getFirst().size()
+        );
+        assert Tools.rectangular(cells);
     }
 
-    public boolean getCell(final Point point) {
-        return getCell(point.i(), point.j());
+    public T getCell(final Point point) {
+        final int i = point.i();
+        final int j = point.j();
+        assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
+        return cells.get(i * boundJ + j);
     }
 
     public int getBoundI() {

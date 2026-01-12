@@ -1,5 +1,6 @@
 package think.ana;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -8,6 +9,26 @@ import java.util.stream.StreamSupport;
     Small miscellany.
  */
 public final class Tools {
+
+    // == List manipulation. ===========================================================
+
+    public static <T> ArrayList<T> flatten(ArrayList<ArrayList<T>> lists) {
+        final int length = lists
+            .stream()
+            .mapToInt(x -> x.size())
+            .sum();
+        final ArrayList<T> result = new ArrayList<>(length);
+        for (ArrayList<T> list : lists) {
+            result.addAll(list);
+        }
+        return result;
+    }
+
+    public static <T> boolean rectangular(ArrayList<ArrayList<T>> lists) {
+        return pairwiseStream(lists).allMatch(p -> p.a.size() == p.b.size());
+    }
+
+    // == Pairwise. ====================================================================
 
     public static record Pair<T>(T a, T b) {}
 

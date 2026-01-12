@@ -181,7 +181,7 @@ final class ProblemDisplay extends Group {
                 final Color color;
                 if (label != -1) {
                     color = PatheryColors.CHECKPOINT;
-                } else if (problem.isBrick(i, j)) {
+                } else if (problem.isBrick(point)) {
                     color = PatheryColors.BRICK;
                 } else if (rubbers.contains(point)) {
                     color = PatheryColors.RUBBER;
