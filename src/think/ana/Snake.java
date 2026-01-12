@@ -1,9 +1,6 @@
 package think.ana;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import think.repr.Grid;
 import think.repr.Point;
@@ -18,62 +15,11 @@ public final class Snake {
         final Point source,
         final Point destination
     ) {
-        // Standard breadth-first search. TODO: delete, replace with astar.
+        // Breadth-first search finds the shortest path on an unweighted grid.
         assert source != destination;
-        assert !problem.isBrick(source);
-        assert !problem.isBrick(destination);
-        assert !rubbers.contains(source);
-        assert !rubbers.contains(destination);
-        assert rubbers
-            .stream()
-            .allMatch(
-                p ->
-                    p.i() >= 0 &&
-                    p.i() < problem.getBoundI() &&
-                    p.j() >= 0 &&
-                    p.j() < problem.getBoundJ()
-            );
-        assert rubbers.stream().noneMatch(problem::isBrick);
-
-        final HashSet<Point> visited = new HashSet<>();
-        final HashMap<Point, Point> parents = new HashMap<>();
-        final ArrayDeque<Point> frontier = new ArrayDeque<>();
-        visited.add(source);
-        frontier.add(source);
-        boolean reached = false;
-        while (!frontier.isEmpty() && !reached) {
-            final Point current = frontier.removeFirst();
-            for (final Point neighbor : current.getNeighbors(problem)) {
-                if (
-                    visited.contains(neighbor) ||
-                    problem.isBrick(neighbor) ||
-                    rubbers.contains(neighbor)
-                ) {
-                    continue;
-                }
-                visited.add(neighbor);
-                parents.put(neighbor, current);
-                if (neighbor.equals(destination)) {
-                    reached = true;
-                    break;
-                }
-                frontier.add(neighbor);
-            }
-        }
-
-        if (!reached) {
-            return new Route(source, destination, new ArrayList<>(0));
-        }
-        final ArrayList<Point> steps = new ArrayList<>();
-        Point current = destination;
-        while (!current.equals(source)) {
-            steps.add(current);
-            final Point next = parents.get(current);
-            assert next != null;
-            current = next;
-        }
-        Collections.reverse(steps);
-        return new Route(source, destination, steps);
+        assert legalRun(problem, rubbers, source);
+        assert legalRun(problem, rubbers, destination);
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public Grid<Integer> distances(
@@ -81,7 +27,7 @@ public final class Snake {
         final HashSet<Point> rubbers,
         final Point source
     ) {
-        assert isOpen(problem, rubbers, source);
+        assert legalRun(problem, rubbers, source);
 
         // -1 is sentinel unreachable value. Chosen because adding connected distance
         // grids with unreachable cells maintains the invariant that unreachable cells
@@ -121,5 +67,24 @@ public final class Snake {
         final Point point
     ) {
         return !problem.isBrick(point) && !rubbers.contains(point);
+    }
+
+    private static boolean legalRun(
+        final Problem problem,
+        final HashSet<Point> rubbers,
+        final Point source
+    ) {
+        final boolean openStart = !problem.isBrick(source) && !rubbers.contains(source);
+        final boolean allIn = rubbers
+            .stream()
+            .allMatch(
+                p ->
+                    p.i() >= 0 &&
+                    p.i() < problem.getBoundI() &&
+                    p.j() >= 0 &&
+                    p.j() < problem.getBoundJ()
+            );
+        final boolean noOverlap = rubbers.stream().noneMatch(p -> problem.isBrick(p));
+        return openStart && allIn && noOverlap;
     }
 }

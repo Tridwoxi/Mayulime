@@ -35,6 +35,10 @@ public record Point(int i, int j) {
         symmetric. Assumes but does not verify that points are on the same board.
      */
     public boolean isNeighbor(final Point other) {
-        return Math.abs(this.i - other.i) + Math.abs(this.j - other.j) == 1;
+        return manhattan(other) == 1;
+    }
+
+    public int manhattan(final Point other) {
+        return Math.abs(this.i - other.i) + Math.abs(this.j - other.j);
     }
 }
