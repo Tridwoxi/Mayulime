@@ -13,14 +13,15 @@ public final class Tools {
     // == List manipulation. ===========================================================
 
     public static <T> ArrayList<T> flatten(ArrayList<ArrayList<T>> lists) {
-        final int length = lists
+        final int size = lists
             .stream()
             .mapToInt(x -> x.size())
             .sum();
-        final ArrayList<T> result = new ArrayList<>(length);
+        final ArrayList<T> result = new ArrayList<>(size);
         for (ArrayList<T> list : lists) {
             result.addAll(list);
         }
+        assert result.size() == size;
         return result;
     }
 
@@ -33,6 +34,7 @@ public final class Tools {
         for (int i = 0; i < size; i++) {
             result.add(elem);
         }
+        assert result.size() == size;
         return result;
     }
 

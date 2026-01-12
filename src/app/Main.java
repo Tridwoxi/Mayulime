@@ -167,6 +167,8 @@ final class ProblemDisplay extends Group {
         final double cellSize,
         final HashSet<Point> rubbers
     ) {
+        assert cellSize > 0.0;
+        assert rubbers.size() <= problem.getNumRubbers();
         final ArrayList<Point> checks = problem.getCheckpoints();
         final HashMap<Point, Integer> checkLabels = new HashMap<>();
         for (int i = 0; i < checks.size(); i++) {

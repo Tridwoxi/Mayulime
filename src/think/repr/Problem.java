@@ -75,6 +75,17 @@ public final class Problem {
         // and harder to write a snake for, so we'll allow only one.
         throwIfNotUniqueOrder(prechecks);
         this.checkpoints = buildCheckpoints(prechecks);
+
+        // Pathery also allows more rubbers than possible, since the player may choose
+        // to not assign rubbers. But I will require a full assignment.
+        final int numBricks = (int) cells
+            .stream()
+            .filter(b -> b)
+            .count();
+        final int numCheckpoints = checkpoints.size();
+        if (numBricks + numCheckpoints + numRubbers > numCells) {
+            throw new InvalidSpecException();
+        }
     }
 
     // == Getters (please do not mutate mutable things!). ==============================

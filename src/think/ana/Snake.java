@@ -23,6 +23,15 @@ public final class Snake {
         assert !problem.isBrick(destination);
         assert !rubbers.contains(source);
         assert !rubbers.contains(destination);
+        assert rubbers
+            .stream()
+            .allMatch(p ->
+                p.i() >= 0 &&
+                p.i() < problem.getBoundI() &&
+                p.j() >= 0 &&
+                p.j() < problem.getBoundJ()
+            );
+        assert rubbers.stream().noneMatch(problem::isBrick);
 
         final HashSet<Point> visited = new HashSet<>();
         final HashMap<Point, Point> parents = new HashMap<>();
