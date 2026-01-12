@@ -1,10 +1,8 @@
 package think;
 
-import app.Main;
-import java.util.HashSet;
 import javafx.application.Platform;
-import think.repr.Point;
 import think.repr.Problem;
+import think.stra.Blind;
 
 /**
     Problem solver and worker. Should be called from JavaFX Application Thread. Starts
@@ -39,6 +37,6 @@ final class Worker extends Thread {
 
     @Override
     public void run() {
-        Main.recieve(problem, new HashSet<Point>(), 0);
+        new Blind(problem);
     }
 }
