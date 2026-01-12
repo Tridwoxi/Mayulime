@@ -75,11 +75,11 @@ public final class Main extends Application {
     }
 
     public static void fromSolver(
-        final Problem board,
+        final Problem problem,
         final HashSet<Point> rubbers,
         final int score
     ) {
-        Platform.runLater(() -> gui.showUpdate(board, rubbers, score));
+        Platform.runLater(() -> gui.showUpdate(problem, rubbers, score));
     }
 }
 
@@ -89,13 +89,13 @@ final class Gui extends VBox {
     private static final double PADDING = 50.0;
     private static final double SPACING = 50.0;
 
-    private BoardDisplay boardDisplay;
+    private ProblemDisplay problemDisplay;
     private final Text scoreDisplay;
     private final Text rubberDisplay;
 
     public Gui() {
         super(SPACING);
-        this.boardDisplay = new BoardDisplay();
+        this.problemDisplay = new ProblemDisplay();
         this.scoreDisplay = new Text();
         this.rubberDisplay = new Text();
         scoreDisplay.setFill(PatheryColors.FOREGROUND);
@@ -106,19 +106,19 @@ final class Gui extends VBox {
         setAlignment(Pos.TOP_CENTER);
         final HBox stats = new HBox(SPACING, scoreDisplay, rubberDisplay, makeButton());
         stats.setAlignment(Pos.CENTER);
-        getChildren().addAll(boardDisplay, stats);
+        getChildren().addAll(problemDisplay, stats);
     }
 
     public void showUpdate(
-        final Problem board,
+        final Problem problem,
         final HashSet<Point> rubberAssignment,
         final int score
     ) {
-        boardDisplay = new BoardDisplay(board, CELL_SIZE, rubberAssignment);
+        problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubberAssignment);
         scoreDisplay.setText("Score: " + score);
-        final int remaining = board.getNumRubbers() - rubberAssignment.size();
+        final int remaining = problem.getNumRubbers() - rubberAssignment.size();
         rubberDisplay.setText("Remaining walls: " + remaining);
-        getChildren().set(0, boardDisplay); // Must target whatever constructor decided.
+        getChildren().set(0, problemDisplay); // Must target whatever constructor decided.
         if (
             getScene() != null &&
             getScene().getWindow() != null &&
@@ -157,11 +157,11 @@ final class Gui extends VBox {
     }
 }
 
-final class BoardDisplay extends Group {
+final class ProblemDisplay extends Group {
 
-    public BoardDisplay() {}
+    public ProblemDisplay() {}
 
-    public BoardDisplay(
+    public ProblemDisplay(
         final Problem problem,
         final double cellSize,
         final HashSet<Point> rubbers
