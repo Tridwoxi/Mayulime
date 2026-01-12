@@ -8,17 +8,19 @@ import java.util.ArrayList;
 public record Point(int i, int j) {
     public ArrayList<Point> getNeighbors(final Problem board) {
         final ArrayList<Point> neighbors = new ArrayList<>(4);
+        final Point[] allPoints = board.getAllPoints();
+        final int boundJ = board.getBoundJ();
         if (i - 1 >= 0) {
-            neighbors.add(new Point(i - 1, j));
+            neighbors.add(allPoints[(i - 1) * boundJ + j]);
         }
-        if (j + 1 < board.getBoundJ()) {
-            neighbors.add(new Point(i, j + 1));
+        if (j + 1 < boundJ) {
+            neighbors.add(allPoints[i * boundJ + j + 1]);
         }
         if (i + 1 < board.getBoundI()) {
-            neighbors.add(new Point(i + 1, j));
+            neighbors.add(allPoints[(i + 1) * boundJ + j]);
         }
         if (j - 1 >= 0) {
-            neighbors.add(new Point(i, j - 1));
+            neighbors.add(allPoints[i * boundJ + j - 1]);
         }
         return neighbors;
     }
