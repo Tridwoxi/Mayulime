@@ -23,6 +23,7 @@ public final class Problem {
     private final int numRubbers;
     private final Grid<Boolean> isBrick;
     private final ArrayList<Point> checkpoints;
+    private final ArrayList<Point> allPoints;
 
     // == Constructor and parser. ======================================================
 
@@ -67,6 +68,7 @@ public final class Problem {
             }
         }
         this.isBrick = new Grid<>(cells, numRows, numCols);
+        this.allPoints = buildAllPoints(numRows, numCols);
 
         // Pathery allows multiple checkpoints with same priority, but it's uncommon,
         // and harder to write a snake for, so we'll allow only one.
@@ -94,6 +96,10 @@ public final class Problem {
 
     public ArrayList<Point> getCheckpoints() {
         return new ArrayList<>(checkpoints);
+    }
+
+    public ArrayList<Point> getAllPoints() {
+        return new ArrayList<>(allPoints);
     }
 
     // == Parsing tools. ===============================================================
@@ -143,6 +149,17 @@ public final class Problem {
             .sorted(Comparator.comparingInt(Ordered::order))
             .map(Ordered::value)
             .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private ArrayList<Point> buildAllPoints(final int boundI, final int boundJ) {
+        final ArrayList<Point> points = new ArrayList<>(boundI * boundJ);
+        for (int i = 0; i < boundI; i++) {
+            for (int j = 0; j < boundJ; j++) {
+                points.add(new Point(i, j));
+            }
+        }
+        assert points.size() == boundI * boundJ;
+        return points;
     }
 
     private ArrayList<String> splitToList(final String input, final String delimiter) {
