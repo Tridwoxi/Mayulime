@@ -59,6 +59,10 @@ public final class Main extends Application {
         mainScene.setFill(Color.GRAY);
         primaryStage.setScene(mainScene);
         primaryStage.setTitle(NAME);
+        primaryStage.setOnCloseRequest(event -> {
+            Solver.stop();
+            Platform.exit();
+        });
         primaryStage.show();
     }
 

@@ -1,51 +1,41 @@
 package think;
 
-import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import think.repr.Problem;
 import think.stra.Blind;
 
 /**
     Problem solver and worker. Should be called from JavaFX Application Thread. Starts
-    a background worker to not block the GUI.
+    background workers to not block the GUI.
  */
 public final class Solver {
 
-    private static final ArrayList<Thread> ACTIVE_WORKERS = new ArrayList<>();
+    private static ExecutorService tasks = Executors.newCachedThreadPool();
 
     private Solver() {}
 
-    public static synchronized void solve(final Problem problem) {
+    public static void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
-        stopWorkers();
-        buildWorkers(problem);
-        startWorkers();
+        stop();
+        go(problem);
     }
 
-    private static void stopWorkers() {
-        for (final Thread worker : ACTIVE_WORKERS) {
-            worker.interrupt();
-            try {
-                worker.join();
-            } catch (InterruptedException e) {}
+    public static void stop() {
+        tasks.shutdownNow();
+        try {
+            tasks.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        ACTIVE_WORKERS.clear();
     }
 
-    private static void buildWorkers(final Problem problem) {
-        ACTIVE_WORKERS.add(
-            new Thread() {
-                @Override
-                public void run() {
-                    new Blind(problem);
-                }
-            }
-        );
-    }
-
-    private static void startWorkers() {
-        for (final Thread worker : ACTIVE_WORKERS) {
-            worker.start();
+    private static void go(final Problem problem) {
+        if (tasks.isShutdown() || tasks.isTerminated()) {
+            tasks = Executors.newCachedThreadPool();
         }
+        tasks.submit(() -> new Blind(problem));
     }
 }
