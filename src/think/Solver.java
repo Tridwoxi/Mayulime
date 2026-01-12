@@ -1,5 +1,6 @@
 package think;
 
+import java.util.ArrayList;
 import javafx.application.Platform;
 import think.repr.Problem;
 import think.stra.Blind;
@@ -10,33 +11,41 @@ import think.stra.Blind;
  */
 public final class Solver {
 
-    private static Worker WORKER_INSTANCE = null;
+    private static final ArrayList<Thread> ACTIVE_WORKERS = new ArrayList<>();
 
     private Solver() {}
 
     public static synchronized void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
-        if (WORKER_INSTANCE != null) {
-            WORKER_INSTANCE.interrupt();
+        stopWorkers();
+        buildWorkers(problem);
+        startWorkers();
+    }
+
+    private static void stopWorkers() {
+        for (final Thread worker : ACTIVE_WORKERS) {
+            worker.interrupt();
             try {
-                WORKER_INSTANCE.join();
+                worker.join();
             } catch (InterruptedException e) {}
         }
-        WORKER_INSTANCE = new Worker(problem);
-        WORKER_INSTANCE.start();
-    }
-}
-
-final class Worker extends Thread {
-
-    private final Problem problem;
-
-    public Worker(final Problem problem) {
-        this.problem = problem;
+        ACTIVE_WORKERS.clear();
     }
 
-    @Override
-    public void run() {
-        new Blind(problem);
+    private static void buildWorkers(final Problem problem) {
+        ACTIVE_WORKERS.add(
+            new Thread() {
+                @Override
+                public void run() {
+                    new Blind(problem);
+                }
+            }
+        );
+    }
+
+    private static void startWorkers() {
+        for (final Thread worker : ACTIVE_WORKERS) {
+            worker.start();
+        }
     }
 }
