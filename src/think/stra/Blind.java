@@ -1,14 +1,15 @@
 package think.stra;
 
-import app.Main;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import think.Solver;
 import think.ana.Snake;
 import think.ana.Tools;
 import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Problem;
+import think.repr.Route;
 
 /**
     Guess blindly. It'll work eventually, trust!! Often capable of tying the best
@@ -17,11 +18,9 @@ import think.repr.Problem;
 public final class Blind {
 
     private final Problem problem;
-    private int bestScore;
 
     public Blind(final Problem problem) {
         this.problem = problem;
-        this.bestScore = 0;
         run();
     }
 
@@ -29,9 +28,8 @@ public final class Blind {
         while (true) {
             final HashSet<Cell> guess = guess();
             final int eval = eval(guess);
-            if (eval > bestScore) {
-                bestScore = eval;
-                Main.recieve(problem, guess, eval);
+            if (Solver.beatsBest(eval)) {
+                Solver.claimSolution(problem, guess, eval);
             }
         }
     }
@@ -46,12 +44,11 @@ public final class Blind {
         int sum = 0;
         final Snake snake = new Snake();
         for (final Pair<Cell> p : Tools.pairwise(problem.getCheckpoints()).toList()) {
-            final int length = snake.travel(problem, rubbers, p.a(), p.b()).length();
-            if (length == 0) {
+            final Route route = snake.travel(problem, rubbers, p.a(), p.b());
+            if (!route.possible()) {
                 return 0;
-            } else {
-                sum += length;
             }
+            sum += route.length();
         }
         return sum;
     }

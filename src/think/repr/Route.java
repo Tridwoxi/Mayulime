@@ -41,6 +41,7 @@ public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
     }
 
     public int length() {
+        assert possible() : "Caller should check with Route::possible() first.";
         return steps.size();
     }
 
