@@ -14,20 +14,19 @@ public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
     public Route {
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
-        assert start != end;
+        assert !start.equals(end);
         if (!steps.isEmpty()) {
             assert steps.getFirst().isNeighbor(start);
-            assert steps.getLast() == end;
+            assert steps.getLast().equals(end);
         }
         assert Tools.pairwiseStream(steps).allMatch(p -> p.a().isNeighbor(p.b()));
     }
 
     public static Route fromChain(final ArrayList<Route> routes) {
         assert routes.size() > 0;
-        assert Tools.pairwiseStream(routes).allMatch(
-            pair -> pair.a().end == pair.b().start
+        assert Tools.pairwiseStream(routes).allMatch(pair ->
+            pair.a().end.equals(pair.b().start)
         );
-
         final Cell start = routes.getFirst().start;
         final Cell end = routes.getLast().end;
         if (routes.stream().anyMatch(route -> route.steps.isEmpty())) {
