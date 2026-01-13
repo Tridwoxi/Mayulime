@@ -3,13 +3,14 @@ package think.repr;
 import java.util.ArrayList;
 
 /**
-    A lightweight (i, j) index pair used as grid.get(i).get(j). For JavaFX, i is Y, and
-    j is X.
+    A lightweight (i, j) index pair used conceptually as grid.get(i).get(j). For
+    JavaFX, i is Y, and j is X. Cells are not defined outside of a grid.
  */
 public record Cell(int i, int j) {
     public ArrayList<Cell> getNeighbors(final Problem problem) {
         // Potential optimization: get Cell instances from problem to reuse them,
         // reducing GC pressure. Reasonable because this method is important to BFS.
+        assert problem.containsCell(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
         final int boundI = problem.getBoundI();
         final int boundJ = problem.getBoundJ();
@@ -25,6 +26,7 @@ public record Cell(int i, int j) {
         if (j - 1 >= 0) {
             neighbors.add(new Cell(i, j - 1));
         }
+        assert neighbors.stream().allMatch(problem::containsCell);
         return neighbors;
     }
 

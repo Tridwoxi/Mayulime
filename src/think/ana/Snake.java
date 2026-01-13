@@ -8,6 +8,9 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Route;
 
+/**
+    Distance evaluator. Simulates the Pathery snake.
+ */
 public final class Snake {
 
     public Route travel(
@@ -69,6 +72,11 @@ public final class Snake {
         return distances;
     }
 
+    /**
+        A cell is open iff it is not a brick or rubber. A cell is empty iff it is open
+        and not a checkpoint. Snakes may only step on open cells. Rubbers may only be
+        placed on empty cells. The set of open cells is a superset of empty cells.
+     */
     private static boolean isOpen(
         final Problem problem,
         final HashSet<Cell> rubbers,
@@ -82,17 +90,10 @@ public final class Snake {
         final HashSet<Cell> rubbers,
         final Cell source
     ) {
-        final boolean openStart = !problem.isBrick(source) && !rubbers.contains(source);
-        final boolean allIn = rubbers
-            .stream()
-            .allMatch(
-                p ->
-                    p.i() >= 0 &&
-                    p.i() < problem.getBoundI() &&
-                    p.j() >= 0 &&
-                    p.j() < problem.getBoundJ()
-            );
-        final boolean noOverlap = rubbers.stream().noneMatch(p -> problem.isBrick(p));
-        return openStart && allIn && noOverlap;
+        final boolean sourceIn = problem.containsCell(source);
+        final boolean openSource = isOpen(problem, rubbers, source);
+        final boolean rubbersIn = rubbers.stream().allMatch(problem::containsCell);
+        final boolean noOverlap = rubbers.stream().noneMatch(problem::isBrick);
+        return sourceIn && openSource && rubbersIn && noOverlap;
     }
 }

@@ -7,8 +7,9 @@ import java.util.stream.Stream;
 import think.ana.Tools;
 
 /**
-    Rectangular 2D grid of cells represented in 1D for performance. Useless, really,
-    since we're boxing things anyway, but it is nice to have a grid of sorts.
+    Rectangular 2D grid of cells. Implemented as 1D grid for less pointer chasing
+    (silly micro-optimization). Potential performance improvement: turn everything into
+    arrays to avoid cost of boxing primitive types.
  */
 public final class Grid<T> {
 
@@ -44,6 +45,10 @@ public final class Grid<T> {
         final int j = cell.j();
         assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
         cells.set(i * boundJ + j, value);
+    }
+
+    public boolean containsCell(final Cell cell) {
+        return cell.i() >= 0 && cell.i() < boundI && cell.j() >= 0 && cell.j() < boundJ;
     }
 
     public int getBoundI() {

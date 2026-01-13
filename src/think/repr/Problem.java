@@ -97,6 +97,10 @@ public final class Problem {
         return isBrick.getCell(cell);
     }
 
+    public boolean containsCell(final Cell cell) {
+        return isBrick.containsCell(cell);
+    }
+
     public int getBoundI() {
         return isBrick.getBoundI();
     }
