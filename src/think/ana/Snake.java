@@ -1,8 +1,13 @@
 package think.ana;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import think.ana.Tools.AStarQueue;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -19,8 +24,6 @@ public final class Snake {
         final Cell start,
         final Cell end
     ) {
-        throw new UnsupportedOperationException("This code is incorrect.");
-        /*
         assert !start.equals(end);
         assert legalRun(problem, rubbers, start);
         assert legalRun(problem, rubbers, end);
@@ -33,12 +36,8 @@ public final class Snake {
         final HashMap<Cell, Cell> parents = new HashMap<>();
         final HashMap<Cell, Integer> gScore = new HashMap<>();
         gScore.put(start, 0);
-        final HashMap<Cell, Integer> fScore = new HashMap<>();
-        fScore.put(start, heuristic.apply(start));
-        final PriorityQueue<Cell> frontier = new PriorityQueue<>(
-            Comparator.comparingInt(cell -> fScore.getOrDefault(cell, Integer.MAX_VALUE))
-        );
-        frontier.add(start);
+        final AStarQueue<Cell> frontier = new AStarQueue<>();
+        frontier.add(start, heuristic.apply(start));
 
         final Function<Cell, ArrayList<Cell>> reconstruct = current -> {
             final ArrayList<Cell> path = new ArrayList<>();
@@ -53,29 +52,31 @@ public final class Snake {
 
         while (!frontier.isEmpty()) {
             final Cell current = frontier.remove();
-            if (gScore.get(current) + heuristic.apply(current) != fScore.get(current)) {
-                continue; // fScore is wrong, so this is a duplicate.
-            }
             if (current.equals(end)) {
                 return new Route(start, end, reconstruct.apply(current));
             }
+            final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
+            assert gScoreCurrent != Integer.MAX_VALUE;
             for (final Cell neighbor : current.getNeighbors(problem)) {
                 if (!isOpen(problem, rubbers, neighbor)) {
                     continue;
                 }
-                final int dontOverflow = Integer.MAX_VALUE - 1;
-                final int gScoreNew = gScore.getOrDefault(current, dontOverflow) + 1;
+                final int gScoreNew = gScoreCurrent + 1;
                 final int gScoreOld = gScore.getOrDefault(neighbor, Integer.MAX_VALUE);
-                if (gScoreNew < gScoreOld) {
-                    parents.put(neighbor, current);
-                    gScore.put(neighbor, gScoreNew);
-                    fScore.put(neighbor, gScoreNew + heuristic.apply(neighbor));
-                    frontier.add(neighbor); // This could be a duplicate.
+                if (gScoreNew >= gScoreOld) {
+                    continue;
+                }
+                parents.put(neighbor, current);
+                gScore.put(neighbor, gScoreNew);
+                final int fScoreNew = gScoreNew + heuristic.apply(neighbor);
+                if (frontier.contains(neighbor)) {
+                    frontier.decrease(neighbor, fScoreNew);
+                } else {
+                    frontier.add(neighbor, fScoreNew);
                 }
             }
         }
         return new Route(start, end, new ArrayList<>(0));
-        */
     }
 
     public Grid<Integer> distances(

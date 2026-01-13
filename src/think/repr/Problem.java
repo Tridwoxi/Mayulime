@@ -2,12 +2,11 @@ package think.repr;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import think.ana.Tools;
-import think.ana.Tools.Ordered;
+import think.ana.Tools.UniOrdered;
 
 /**
     Simplified Pathery problem specification.
@@ -49,7 +48,7 @@ public final class Problem {
         }
         final int numRows = lines.size();
         final int numCols = getNth(lines, 0).size();
-        final ArrayList<Ordered<Cell>> prechecks = new ArrayList<>();
+        final ArrayList<UniOrdered<Cell>> prechecks = new ArrayList<>();
         final int numCells = numRows * numCols;
         final ArrayList<Boolean> cells = Tools.fill(false, numCells);
         this.emptyCells = new HashSet<>();
@@ -67,7 +66,7 @@ public final class Problem {
                     }
                     default -> {
                         final int order = strToInt(cell);
-                        prechecks.add(new Ordered<>(new Cell(i, j), order));
+                        prechecks.add(new UniOrdered<>(new Cell(i, j), order));
                     }
                 }
             }
@@ -75,10 +74,10 @@ public final class Problem {
         this.isBrick = new Grid<>(cells, numRows, numCols);
         this.allCells = buildAllCells(numRows, numCols);
 
-        // Pathery allows multiple checkpoints with same priority, but it's uncommon,
-        // and harder to write a snake for, so we'll allow only one.
+        // Pathery allows multiple checkpoints with same order, but it's uncommon, and
+        // harder to write a snake for, so we'll allow only one.
         throwIfNotUniqueOrder(prechecks);
-        this.checkpoints = buildCheckpoints(prechecks);
+        this.checkpoints = buildChecks(prechecks);
 
         // Pathery also allows more rubbers than possible, since the player may choose
         // to not assign rubbers. But I will require a full assignment.
@@ -158,21 +157,21 @@ public final class Problem {
             .toString();
     }
 
-    private <T> void throwIfNotUniqueOrder(final Collection<Ordered<T>> sequence)
+    private <T> void throwIfNotUniqueOrder(final Collection<UniOrdered<T>> sequence)
         throws InvalidSpecException {
         final HashSet<Integer> seen = new HashSet<>();
-        for (final Ordered<T> item : sequence) {
-            if (!seen.add(item.priority())) {
+        for (final UniOrdered<T> item : sequence) {
+            if (!seen.add(item.order1())) {
                 throw new InvalidSpecException();
             }
         }
     }
 
-    private <T> ArrayList<T> buildCheckpoints(final ArrayList<Ordered<T>> prechecks) {
+    private <T> ArrayList<T> buildChecks(final ArrayList<UniOrdered<T>> prechecks) {
         return prechecks
             .stream()
-            .sorted(Comparator.comparingInt(Ordered::priority))
-            .map(Ordered::item)
+            .sorted()
+            .map(UniOrdered::item)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 

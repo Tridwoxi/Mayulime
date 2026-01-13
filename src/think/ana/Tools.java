@@ -30,10 +30,10 @@ public final class Tools {
         return pairwiseStream(lists).allMatch(p -> p.a.size() == p.b.size());
     }
 
-    public static <T> ArrayList<T> fill(T elem, int size) {
+    public static <T> ArrayList<T> fill(T item, int size) {
         final ArrayList<T> result = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            result.add(elem);
+            result.add(item);
         }
         assert result.size() == size;
         return result;
@@ -80,23 +80,51 @@ public final class Tools {
         }
     }
 
-    // == AStarQueue. ==================================================================
+    // == Ordering. ====================================================================
 
-    public static record Ordered<T>(T item, int priority) {}
+    public static record UniOrdered<T>(
+        T item,
+        int order1
+    ) implements Comparable<UniOrdered<T>> {
+        @Override
+        public int compareTo(final UniOrdered<T> other) {
+            return Integer.compare(order1, other.order1);
+        }
+    }
+
+    public static record BiOrdered<T>(
+        T item,
+        int order1,
+        int order2
+    ) implements Comparable<BiOrdered<T>> {
+        @Override
+        public int compareTo(final BiOrdered<T> other) {
+            final int cmpPriority = Integer.compare(order1, other.order1);
+            if (cmpPriority != 0) {
+                return cmpPriority;
+            }
+            return Integer.compare(order2, other.order2);
+        }
+    }
+
+    // == AStarQueue. ==================================================================
 
     public static final class AStarQueue<T> {
 
-        private final ArrayList<Ordered<T>> heap;
+        private final ArrayList<BiOrdered<T>> heap;
         private final HashMap<T, Integer> indices;
+        private int tiebreaker;
 
         public AStarQueue() {
             this.heap = new ArrayList<>();
             this.indices = new HashMap<>();
+            this.tiebreaker = 0;
         }
 
         public void add(T item, int priority) {
             assert !indices.containsKey(item);
-            heap.add(new Ordered<>(item, priority));
+            assert tiebreaker != Integer.MAX_VALUE;
+            heap.add(new BiOrdered<>(item, priority, tiebreaker++));
             final int index = heap.size() - 1;
             indices.put(item, index);
             bubbleUp(index);
@@ -108,14 +136,15 @@ public final class Tools {
 
         public int priority(T item) {
             assert contains(item);
-            return heap.get(indices.get(item)).priority();
+            return heap.get(indices.get(item)).order1();
         }
 
         public void decrease(T item, int priority) {
             assert indices.containsKey(item);
-            assert priority < heap.get(indices.get(item)).priority();
             final int index = indices.get(item);
-            heap.set(index, new Ordered<>(item, priority));
+            assert priority < heap.get(index).order1();
+            final int order2 = heap.get(index).order2();
+            heap.set(index, new BiOrdered<>(item, priority, order2));
             bubbleUp(index);
         }
 
@@ -125,8 +154,8 @@ public final class Tools {
 
         public T remove() {
             assert !heap.isEmpty();
-            final Ordered<T> min = heap.getFirst();
-            final Ordered<T> last = heap.removeLast();
+            final BiOrdered<T> min = heap.getFirst();
+            final BiOrdered<T> last = heap.removeLast();
             indices.remove(min.item);
             if (heap.isEmpty()) {
                 return min.item;
@@ -141,7 +170,7 @@ public final class Tools {
             int walk = index;
             while (walk > 0) {
                 final int parent = (walk - 1) / 2;
-                if (heap.get(walk).priority() >= heap.get(parent).priority()) {
+                if (!lessThan(walk, parent)) {
                     break;
                 }
                 swap(walk, parent);
@@ -155,16 +184,10 @@ public final class Tools {
                 final int left = 2 * walk + 1;
                 final int right = 2 * walk + 2;
                 int smallest = walk;
-                if (
-                    left < heap.size() &&
-                    heap.get(left).priority() < heap.get(smallest).priority()
-                ) {
+                if (left < heap.size() && lessThan(left, smallest)) {
                     smallest = left;
                 }
-                if (
-                    right < heap.size() &&
-                    heap.get(right).priority() < heap.get(smallest).priority()
-                ) {
+                if (right < heap.size() && lessThan(right, smallest)) {
                     smallest = right;
                 }
                 if (smallest == walk) {
@@ -175,9 +198,15 @@ public final class Tools {
             }
         }
 
+        private boolean lessThan(int i, int j) {
+            final BiOrdered<T> left = heap.get(i);
+            final BiOrdered<T> right = heap.get(j);
+            return left.compareTo(right) < 0;
+        }
+
         private void swap(int i, int j) {
             assert i != j;
-            final Ordered<T> tmp = heap.get(i);
+            final BiOrdered<T> tmp = heap.get(i);
             heap.set(i, heap.get(j));
             heap.set(j, tmp);
             indices.put(heap.get(i).item(), i);

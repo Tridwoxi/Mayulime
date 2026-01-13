@@ -73,7 +73,7 @@ public final class Grid<T> {
         return cells.size();
     }
 
-    public Stream<T> elemStream() {
+    public Stream<T> itemSteam() {
         return cells.stream();
     }
 
