@@ -32,7 +32,7 @@ public final class Snake {
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
         // If we are not seeing those grids, then use breadth-first search. The
-        // manhattan distance heuristic is fast, consistent, and admissible.
+        // Manhattan distance heuristic is fast, consistent, and admissible.
         final Function<Cell, Integer> heuristic = c -> c.manhattan(end);
 
         final HashMap<Cell, Cell> parents = new HashMap<>();

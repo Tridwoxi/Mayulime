@@ -118,7 +118,7 @@ public final class Tools {
     ) implements Comparable<UniOrdered<T>> {
         @Override
         public int compareTo(final UniOrdered<T> other) {
-            return Integer.compare(order1, other.order1);
+            return Integer.compare(this.order1, other.order1);
         }
     }
 
@@ -129,11 +129,11 @@ public final class Tools {
     ) implements Comparable<BiOrdered<T>> {
         @Override
         public int compareTo(final BiOrdered<T> other) {
-            final int cmpPriority = Integer.compare(order1, other.order1);
-            if (cmpPriority != 0) {
-                return cmpPriority;
+            final int first = Integer.compare(this.order1, other.order1);
+            if (first != 0) {
+                return first;
             }
-            return Integer.compare(order2, other.order2);
+            return Integer.compare(this.order2, other.order2);
         }
     }
 }
