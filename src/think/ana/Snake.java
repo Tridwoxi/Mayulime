@@ -3,8 +3,8 @@ package think.ana;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.function.BiFunction;
+import think.repr.Cell;
 import think.repr.Grid;
-import think.repr.Point;
 import think.repr.Problem;
 import think.repr.Route;
 
@@ -12,21 +12,21 @@ public final class Snake {
 
     public Route travel(
         final Problem problem,
-        final HashSet<Point> rubbers,
-        final Point source,
-        final Point destination
+        final HashSet<Cell> rubbers,
+        final Cell start,
+        final Cell end
     ) {
         // Breadth-first search finds the shortest path on an unweighted grid.
-        assert source != destination;
-        assert legalRun(problem, rubbers, source);
-        assert legalRun(problem, rubbers, destination);
+        assert start != end;
+        assert legalRun(problem, rubbers, start);
+        assert legalRun(problem, rubbers, end);
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public Grid<Integer> distances(
         final Problem problem,
-        final HashSet<Point> rubbers,
-        final Point source
+        final HashSet<Cell> rubbers,
+        final Cell source
     ) {
         assert legalRun(problem, rubbers, source);
         // -1 is sentinel unreachable value. Chosen because adding connected distance
@@ -34,19 +34,19 @@ public final class Snake {
         // are negative (this is untrue if the source cannot reach the destination).
         // Cells with rubbers or bricks on them are unreachable.
         final Grid<Integer> distances = new Grid<>(
-            Tools.fill(-1, problem.getAllPoints().size()),
+            Tools.fill(-1, problem.getAllCells().size()),
             problem.getBoundI(),
             problem.getBoundJ()
         );
         // We use breadth-first search because we visit every reachable point and it
         // has slightly less overhead than A-star. "distances" also visited set.
-        final ArrayDeque<Point> frontier = new ArrayDeque<>();
+        final ArrayDeque<Cell> frontier = new ArrayDeque<>();
         frontier.add(source);
         distances.setCell(source, 0);
         while (!frontier.isEmpty()) {
-            final Point current = frontier.removeFirst();
+            final Cell current = frontier.removeFirst();
             assert distances.getCell(current) >= 0;
-            for (final Point neighbor : current.getNeighbors(problem)) {
+            for (final Cell neighbor : current.getNeighbors(problem)) {
                 if (
                     isOpen(problem, rubbers, neighbor) &&
                     distances.getCell(neighbor) == -1
@@ -56,12 +56,12 @@ public final class Snake {
                 }
             }
         }
-        final BiFunction<Point, Point, Boolean> consistent = (p, n) ->
+        final BiFunction<Cell, Cell, Boolean> consistent = (p, n) ->
             distances.getCell(p) == -1 ||
             distances.getCell(n) == -1 ||
             Math.abs(distances.getCell(p) - distances.getCell(n)) <= 1;
         assert distances
-            .pointStream()
+            .cellStream()
             .allMatch(p ->
                 p.getNeighbors(problem).stream().allMatch((n -> consistent.apply(p, n)))
             );
@@ -71,16 +71,16 @@ public final class Snake {
 
     private static boolean isOpen(
         final Problem problem,
-        final HashSet<Point> rubbers,
-        final Point point
+        final HashSet<Cell> rubbers,
+        final Cell cell
     ) {
-        return !problem.isBrick(point) && !rubbers.contains(point);
+        return !problem.isBrick(cell) && !rubbers.contains(cell);
     }
 
     private static boolean legalRun(
         final Problem problem,
-        final HashSet<Point> rubbers,
-        final Point source
+        final HashSet<Cell> rubbers,
+        final Cell source
     ) {
         final boolean openStart = !problem.isBrick(source) && !rubbers.contains(source);
         final boolean allIn = rubbers

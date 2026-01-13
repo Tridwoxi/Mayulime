@@ -30,7 +30,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import think.Solver;
-import think.repr.Point;
+import think.repr.Cell;
 import think.repr.Problem;
 import think.repr.Problem.InvalidSpecException;
 
@@ -85,7 +85,7 @@ public final class Main extends Application {
 
     public static void recieve(
         final Problem problem,
-        final HashSet<Point> rubbers,
+        final HashSet<Cell> rubbers,
         final int score
     ) {
         assert problem.getNumRubbers() >= rubbers.size();
@@ -118,7 +118,7 @@ final class Gui extends VBox {
 
     public void showUpdate(
         final Problem problem,
-        final HashSet<Point> rubbers,
+        final HashSet<Cell> rubbers,
         final int score
     ) {
         problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubbers);
@@ -170,32 +170,32 @@ final class ProblemDisplay extends Group {
     public ProblemDisplay(
         final Problem problem,
         final double cellSize,
-        final HashSet<Point> rubbers
+        final HashSet<Cell> rubbers
     ) {
         assert cellSize > 0.0;
         assert rubbers.size() <= problem.getNumRubbers();
-        final ArrayList<Point> checks = problem.getCheckpoints();
-        final HashMap<Point, Integer> checkLabels = new HashMap<>();
+        final ArrayList<Cell> checks = problem.getCheckpoints();
+        final HashMap<Cell, Integer> checkLabels = new HashMap<>();
         for (int i = 0; i < checks.size(); i++) {
             checkLabels.put(checks.get(i), i);
         }
-        for (final Point point : problem.getAllPoints()) {
-            final int label = checkLabels.getOrDefault(point, -1);
+        for (final Cell cell : problem.getAllCells()) {
+            final int label = checkLabels.getOrDefault(cell, -1);
             final Color color;
             if (label != -1) {
                 color = PatheryColors.CHECKPOINT;
-            } else if (problem.isBrick(point)) {
+            } else if (problem.isBrick(cell)) {
                 color = PatheryColors.BRICK;
-            } else if (rubbers.contains(point)) {
+            } else if (rubbers.contains(cell)) {
                 color = PatheryColors.RUBBER;
             } else {
                 color = PatheryColors.NOTHING;
             }
             final String content = label != -1 ? Integer.toString(label) : "";
-            final CellDisplay cell = new CellDisplay(color, cellSize, content);
-            cell.setLayoutY(point.i() * cellSize);
-            cell.setLayoutX(point.j() * cellSize);
-            getChildren().add(cell);
+            final CellDisplay cellDisplay = new CellDisplay(color, cellSize, content);
+            cellDisplay.setLayoutY(cell.i() * cellSize);
+            cellDisplay.setLayoutX(cell.j() * cellSize);
+            getChildren().add(cellDisplay);
         }
     }
 }

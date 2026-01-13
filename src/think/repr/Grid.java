@@ -32,16 +32,16 @@ public final class Grid<T> {
         assert Tools.rectangular(cells);
     }
 
-    public T getCell(final Point point) {
-        final int i = point.i();
-        final int j = point.j();
+    public T getCell(final Cell cell) {
+        final int i = cell.i();
+        final int j = cell.j();
         assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
         return cells.get(i * boundJ + j);
     }
 
-    public void setCell(final Point point, final T value) {
-        final int i = point.i();
-        final int j = point.j();
+    public void setCell(final Cell cell, final T value) {
+        final int i = cell.i();
+        final int j = cell.j();
         assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
         cells.set(i * boundJ + j, value);
     }
@@ -72,9 +72,9 @@ public final class Grid<T> {
         return cells.stream();
     }
 
-    public Stream<Point> pointStream() {
+    public Stream<Cell> cellStream() {
         return IntStream.range(0, cells.size()).mapToObj(k ->
-            new Point(k / boundJ, k % boundJ)
+            new Cell(k / boundJ, k % boundJ)
         );
     }
 

@@ -23,9 +23,9 @@ public final class Problem {
 
     private final int numRubbers;
     private final Grid<Boolean> isBrick;
-    private final ArrayList<Point> checkpoints;
-    private final ArrayList<Point> allPoints;
-    private final HashSet<Point> emptyPoints;
+    private final ArrayList<Cell> checkpoints;
+    private final ArrayList<Cell> allCells;
+    private final HashSet<Cell> emptyCells;
 
     // == Constructor and parser. ======================================================
 
@@ -51,7 +51,7 @@ public final class Problem {
         final ArrayList<Ordered> prechecks = new ArrayList<>();
         final int numCells = numRows * numCols;
         final ArrayList<Boolean> cells = Tools.fill(false, numCells);
-        this.emptyPoints = new HashSet<>();
+        this.emptyCells = new HashSet<>();
 
         for (int i = 0; i < lines.size(); i++) {
             final ArrayList<String> row = lines.get(i);
@@ -62,17 +62,17 @@ public final class Problem {
                         cells.set(i * numCols + j, true);
                     }
                     case EMPTY -> {
-                        emptyPoints.add(new Point(i, j));
+                        emptyCells.add(new Cell(i, j));
                     }
                     default -> {
                         final int order = strToInt(cell);
-                        prechecks.add(new Ordered(new Point(i, j), order));
+                        prechecks.add(new Ordered(new Cell(i, j), order));
                     }
                 }
             }
         }
         this.isBrick = new Grid<>(cells, numRows, numCols);
-        this.allPoints = buildAllPoints(numRows, numCols);
+        this.allCells = buildAllCells(numRows, numCols);
 
         // Pathery allows multiple checkpoints with same priority, but it's uncommon,
         // and harder to write a snake for, so we'll allow only one.
@@ -93,8 +93,8 @@ public final class Problem {
 
     // == Getters ======================================================================
 
-    public boolean isBrick(Point point) {
-        return isBrick.getCell(point);
+    public boolean isBrick(Cell cell) {
+        return isBrick.getCell(cell);
     }
 
     public int getBoundI() {
@@ -109,17 +109,17 @@ public final class Problem {
         return numRubbers;
     }
 
-    public ArrayList<Point> getCheckpoints() {
+    public ArrayList<Cell> getCheckpoints() {
         // Possible optimization: if nobody wants to mutate, then return it directly.
         return new ArrayList<>(checkpoints);
     }
 
-    public ArrayList<Point> getAllPoints() {
-        return new ArrayList<>(allPoints);
+    public ArrayList<Cell> getAllCells() {
+        return new ArrayList<>(allCells);
     }
 
-    public HashSet<Point> getEmptyPoints() {
-        return new HashSet<>(emptyPoints);
+    public HashSet<Cell> getEmptyCells() {
+        return new HashSet<>(emptyCells);
     }
 
     // == Parsing tools. ===============================================================
@@ -163,7 +163,7 @@ public final class Problem {
         }
     }
 
-    private ArrayList<Point> buildCheckpoints(final ArrayList<Ordered> prechecks) {
+    private ArrayList<Cell> buildCheckpoints(final ArrayList<Ordered> prechecks) {
         return prechecks
             .stream()
             .sorted(Comparator.comparingInt(Ordered::order))
@@ -171,15 +171,15 @@ public final class Problem {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private ArrayList<Point> buildAllPoints(final int boundI, final int boundJ) {
-        final ArrayList<Point> points = new ArrayList<>(boundI * boundJ);
+    private ArrayList<Cell> buildAllCells(final int boundI, final int boundJ) {
+        final ArrayList<Cell> cells = new ArrayList<>(boundI * boundJ);
         for (int i = 0; i < boundI; i++) {
             for (int j = 0; j < boundJ; j++) {
-                points.add(new Point(i, j));
+                cells.add(new Cell(i, j));
             }
         }
-        assert points.size() == boundI * boundJ;
-        return points;
+        assert cells.size() == boundI * boundJ;
+        return cells;
     }
 
     private ArrayList<String> splitToList(final String input, final String delimiter) {
@@ -188,5 +188,5 @@ public final class Problem {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    final record Ordered(Point value, int order) {}
+    final record Ordered(Cell value, int order) {}
 }
