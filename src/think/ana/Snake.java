@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import think.ana.Tools.AStarQueue;
+import think.ana.Tools.BiOrdered;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -25,19 +26,30 @@ public final class Snake {
         final Cell end
     ) {
         assert !start.equals(end);
-        assert legalRun(problem, rubbers, start);
-        assert legalRun(problem, rubbers, end);
+        assert isLegalRun(problem, rubbers, start);
+        assert isLegalRun(problem, rubbers, end);
 
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
-        // If we are not seeing those grids, then use breadth-first search.
+        // If we are not seeing those grids, then use breadth-first search. The
+        // manhattan distance heuristic is fast, consistent, and admissible.
         final Function<Cell, Integer> heuristic = c -> c.manhattan(end);
 
         final HashMap<Cell, Cell> parents = new HashMap<>();
         final HashMap<Cell, Integer> gScore = new HashMap<>();
         gScore.put(start, 0);
-        final AStarQueue<Cell> frontier = new AStarQueue<>();
-        frontier.add(start, heuristic.apply(start));
+
+        // LIFO tiebreaker causes DFS instead of BFS when multiple paths have equal
+        // length, such as traveling diagonally with no obstacles. On a 10 by 10 grid,
+        // getting from (0, 0) to (9, 9) adds 35 cells to the frontier instead of all
+        // 100 with a FIFO tiebreaker.
+        final PriorityQueue<BiOrdered<Cell>> frontier = new PriorityQueue<>();
+        int tiebreaker = 0;
+        frontier.add(new BiOrdered<>(start, heuristic.apply(start), tiebreaker--));
+
+        // Keeping an set of visited cells to prevents balloning the frontier and is
+        // simpler and faster than a custom PriorityQueue with a decreaseKey operation.
+        final HashSet<Cell> internal = new HashSet<>();
 
         final Function<Cell, ArrayList<Cell>> reconstruct = current -> {
             final ArrayList<Cell> path = new ArrayList<>();
@@ -51,7 +63,11 @@ public final class Snake {
         };
 
         while (!frontier.isEmpty()) {
-            final Cell current = frontier.remove();
+            final BiOrdered<Cell> node = frontier.remove();
+            final Cell current = node.item();
+            if (!internal.add(current)) {
+                continue;
+            }
             if (current.equals(end)) {
                 return new Route(start, end, reconstruct.apply(current));
             }
@@ -63,17 +79,13 @@ public final class Snake {
                 }
                 final int gScoreNew = gScoreCurrent + 1;
                 final int gScoreOld = gScore.getOrDefault(neighbor, Integer.MAX_VALUE);
-                if (gScoreNew >= gScoreOld) {
+                if (gScoreNew >= gScoreOld || internal.contains(neighbor)) {
                     continue;
                 }
                 parents.put(neighbor, current);
                 gScore.put(neighbor, gScoreNew);
                 final int fScoreNew = gScoreNew + heuristic.apply(neighbor);
-                if (frontier.contains(neighbor)) {
-                    frontier.decrease(neighbor, fScoreNew);
-                } else {
-                    frontier.add(neighbor, fScoreNew);
-                }
+                frontier.add(new BiOrdered<>(neighbor, fScoreNew, tiebreaker--));
             }
         }
         return new Route(start, end, new ArrayList<>(0));
@@ -84,7 +96,7 @@ public final class Snake {
         final HashSet<Cell> rubbers,
         final Cell source
     ) {
-        assert legalRun(problem, rubbers, source);
+        assert isLegalRun(problem, rubbers, source);
 
         // -1 is sentinel unreachable value. Chosen because adding connected distance
         // grids with unreachable cells maintains the invariant that unreachable cells
@@ -142,7 +154,7 @@ public final class Snake {
         return !problem.isBrick(cell) && !rubbers.contains(cell);
     }
 
-    private static boolean legalRun(
+    private static boolean isLegalRun(
         final Problem problem,
         final HashSet<Cell> rubbers,
         final Cell source
