@@ -1,8 +1,8 @@
 package think.ana;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -59,7 +59,7 @@ public final class Tools {
         private final Iterator<T> iterator;
         private T a; // Pair.a, the first of its two items.
 
-        Pairwise(final Iterable<T> items) {
+        public Pairwise(final Iterable<T> items) {
             this.iterator = items.iterator();
             if (this.iterator.hasNext()) {
                 this.a = this.iterator.next();
@@ -82,28 +82,106 @@ public final class Tools {
 
     // == AStarQueue. ==================================================================
 
-    public final class AStarQueue<T> {
+    public static record Ordered<T>(T item, int priority) {}
 
-        private Function<T, Integer> scorer;
+    public static final class AStarQueue<T> {
 
-        public AStarQueue(Function<T, Integer> scorer) {
-            this.scorer = scorer;
+        private final ArrayList<Ordered<T>> heap;
+        private final HashMap<T, Integer> indices;
+
+        public AStarQueue() {
+            this.heap = new ArrayList<>();
+            this.indices = new HashMap<>();
         }
 
-        public void add(T item) {
-            throw new UnsupportedOperationException("Not implemented yet");
+        public void add(T item, int priority) {
+            assert !indices.containsKey(item);
+            heap.add(new Ordered<>(item, priority));
+            final int index = heap.size() - 1;
+            indices.put(item, index);
+            bubbleUp(index);
         }
 
-        public T remove() {
-            throw new UnsupportedOperationException("Not implemented yet");
+        public boolean contains(T item) {
+            return indices.containsKey(item);
         }
 
-        public void update(T item) {
-            throw new UnsupportedOperationException("Not implemented yet");
+        public int priority(T item) {
+            assert contains(item);
+            return heap.get(indices.get(item)).priority();
+        }
+
+        public void decrease(T item, int priority) {
+            assert indices.containsKey(item);
+            assert priority < heap.get(indices.get(item)).priority();
+            final int index = indices.get(item);
+            heap.set(index, new Ordered<>(item, priority));
+            bubbleUp(index);
         }
 
         public boolean isEmpty() {
-            throw new UnsupportedOperationException("Not implemented yet");
+            return heap.isEmpty();
+        }
+
+        public T remove() {
+            assert !heap.isEmpty();
+            final Ordered<T> min = heap.getFirst();
+            final Ordered<T> last = heap.removeLast();
+            indices.remove(min.item);
+            if (heap.isEmpty()) {
+                return min.item;
+            }
+            heap.set(0, last);
+            indices.put(last.item(), 0);
+            bubbleDown(0);
+            return min.item;
+        }
+
+        private void bubbleUp(final int index) {
+            int walk = index;
+            while (walk > 0) {
+                final int parent = (walk - 1) / 2;
+                if (heap.get(walk).priority() >= heap.get(parent).priority()) {
+                    break;
+                }
+                swap(walk, parent);
+                walk = parent;
+            }
+        }
+
+        private void bubbleDown(final int index) {
+            int walk = index;
+            while (true) {
+                final int left = 2 * walk + 1;
+                final int right = 2 * walk + 2;
+                int smallest = walk;
+                if (
+                    left < heap.size() &&
+                    heap.get(left).priority() < heap.get(smallest).priority()
+                ) {
+                    smallest = left;
+                }
+                if (
+                    right < heap.size() &&
+                    heap.get(right).priority() < heap.get(smallest).priority()
+                ) {
+                    smallest = right;
+                }
+                if (smallest == walk) {
+                    break;
+                }
+                swap(walk, smallest);
+                walk = smallest;
+            }
+        }
+
+        private void swap(int i, int j) {
+            assert i != j;
+            final Ordered<T> tmp = heap.get(i);
+            heap.set(i, heap.get(j));
+            heap.set(j, tmp);
+            indices.put(heap.get(i).item(), i);
+            indices.put(heap.get(j).item(), j);
         }
     }
 }
