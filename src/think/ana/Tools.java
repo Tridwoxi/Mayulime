@@ -118,13 +118,17 @@ public final class Tools {
         public AStarQueue() {
             this.heap = new ArrayList<>();
             this.indices = new HashMap<>();
+            // LIFO tiebreaker causes DFS instead of BFS when multiple paths have equal
+            // length, such as traveling diagonally with no obstacles. On a 10 by 10
+            // grid, getting from (0, 0) to (9, 9) adds 35 cells to the frontier
+            // instead of all 100 with a FIFO tiebreaker.
             this.tiebreaker = 0;
         }
 
         public void add(T item, int priority) {
             assert !indices.containsKey(item);
-            assert tiebreaker != Integer.MAX_VALUE;
-            heap.add(new BiOrdered<>(item, priority, tiebreaker++));
+            assert tiebreaker != Integer.MIN_VALUE;
+            heap.add(new BiOrdered<>(item, priority, tiebreaker--));
             final int index = heap.size() - 1;
             indices.put(item, index);
             bubbleUp(index);
