@@ -2,6 +2,7 @@ package think.ana;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -76,6 +77,33 @@ public final class Tools {
             final Pair<T> pair = new Pair<>(a, b);
             a = b;
             return pair;
+        }
+    }
+
+    // == AStarQueue. ==================================================================
+
+    public final class AStarQueue<T> {
+
+        private Function<T, Integer> scorer;
+
+        public AStarQueue(Function<T, Integer> scorer) {
+            this.scorer = scorer;
+        }
+
+        public void add(T item) {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+
+        public T remove() {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+
+        public void update(T item) {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+
+        public boolean isEmpty() {
+            throw new UnsupportedOperationException("Not implemented yet");
         }
     }
 }

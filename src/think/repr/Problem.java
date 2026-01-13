@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import think.ana.Tools;
+import think.ana.Tools.Ordered;
 
 /**
     Simplified Pathery problem specification.
@@ -48,7 +49,7 @@ public final class Problem {
         }
         final int numRows = lines.size();
         final int numCols = getNth(lines, 0).size();
-        final ArrayList<Ordered> prechecks = new ArrayList<>();
+        final ArrayList<Ordered<Cell>> prechecks = new ArrayList<>();
         final int numCells = numRows * numCols;
         final ArrayList<Boolean> cells = Tools.fill(false, numCells);
         this.emptyCells = new HashSet<>();
@@ -66,7 +67,7 @@ public final class Problem {
                     }
                     default -> {
                         final int order = strToInt(cell);
-                        prechecks.add(new Ordered(new Cell(i, j), order));
+                        prechecks.add(new Ordered<>(new Cell(i, j), order));
                     }
                 }
             }
@@ -157,21 +158,21 @@ public final class Problem {
             .toString();
     }
 
-    private void throwIfNotUniqueOrder(final Collection<Ordered> sequence)
+    private <T> void throwIfNotUniqueOrder(final Collection<Ordered<T>> sequence)
         throws InvalidSpecException {
         final HashSet<Integer> seen = new HashSet<>();
-        for (final Ordered item : sequence) {
-            if (!seen.add(item.order())) {
+        for (final Ordered<T> item : sequence) {
+            if (!seen.add(item.priority())) {
                 throw new InvalidSpecException();
             }
         }
     }
 
-    private ArrayList<Cell> buildCheckpoints(final ArrayList<Ordered> prechecks) {
+    private <T> ArrayList<T> buildCheckpoints(final ArrayList<Ordered<T>> prechecks) {
         return prechecks
             .stream()
-            .sorted(Comparator.comparingInt(Ordered::order))
-            .map(Ordered::value)
+            .sorted(Comparator.comparingInt(Ordered::priority))
+            .map(Ordered::item)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -191,6 +192,4 @@ public final class Problem {
             .splitAsStream(input)
             .collect(Collectors.toCollection(ArrayList::new));
     }
-
-    final record Ordered(Cell value, int order) {}
 }
