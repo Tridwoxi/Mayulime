@@ -28,7 +28,7 @@ public final class Tools {
     }
 
     public static <T> boolean rectangular(ArrayList<ArrayList<T>> lists) {
-        return pairwiseStream(lists).allMatch(p -> p.a.size() == p.b.size());
+        return pairwise(lists).allMatch(p -> p.a.size() == p.b.size());
     }
 
     public static <T> ArrayList<T> fill(T item, int size) {
@@ -82,38 +82,32 @@ public final class Tools {
     /**
         Same as Python's `itertools.pairwise`.
      */
-    public static <T> Iterable<Pair<T>> pairwise(final Iterable<T> items) {
-        return () -> new Pairwise<>(items);
-    }
+    public static <T> Stream<Pair<T>> pairwise(final Iterable<T> items) {
+        final Iterator<T> source = items.iterator();
+        if (!source.hasNext()) {
+            return Stream.empty();
+        }
+        final T first = source.next();
+        final Iterator<Pair<T>> iterator = new Iterator<>() {
+            private T previous = first;
 
-    public static <T> Stream<Pair<T>> pairwiseStream(final Iterable<T> items) {
-        return StreamSupport.stream(pairwise(items).spliterator(), false);
-    }
-
-    private static final class Pairwise<T> implements Iterator<Pair<T>> {
-
-        private final Iterator<T> iterator;
-        private T a; // Pair.a, the first of its two items.
-
-        public Pairwise(final Iterable<T> items) {
-            this.iterator = items.iterator();
-            if (this.iterator.hasNext()) {
-                this.a = this.iterator.next();
+            @Override
+            public boolean hasNext() {
+                return source.hasNext();
             }
-        }
 
-        @Override
-        public boolean hasNext() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public Pair<T> next() {
-            final T b = iterator.next();
-            final Pair<T> pair = new Pair<>(a, b);
-            a = b;
-            return pair;
-        }
+            @Override
+            public Pair<T> next() {
+                final T next = source.next();
+                final Pair<T> pair = new Pair<>(previous, next);
+                previous = next;
+                return pair;
+            }
+        };
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(iterator, 0),
+            false
+        );
     }
 
     // == Ordering. ====================================================================

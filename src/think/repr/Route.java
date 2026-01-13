@@ -19,12 +19,12 @@ public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
             assert steps.getFirst().isNeighbor(start);
             assert steps.getLast().equals(end);
         }
-        assert Tools.pairwiseStream(steps).allMatch(p -> p.a().isNeighbor(p.b()));
+        assert Tools.pairwise(steps).allMatch(p -> p.a().isNeighbor(p.b()));
     }
 
     public static Route fromChain(final ArrayList<Route> routes) {
         assert routes.size() > 0;
-        assert Tools.pairwiseStream(routes).allMatch(pair ->
+        assert Tools.pairwise(routes).allMatch(pair ->
             pair.a().end.equals(pair.b().start)
         );
         final Cell start = routes.getFirst().start;
