@@ -20,7 +20,7 @@ import think.stra.Blind;
  */
 public final class Solver {
 
-    private static ExecutorService tasks = Executors.newCachedThreadPool();
+    private static ExecutorService tasks = newExecutor();
     private static Problem activeProblem;
     private static int bestScore = 0;
 
@@ -48,9 +48,20 @@ public final class Solver {
 
     private static void go(final Problem problem) {
         if (tasks.isShutdown() || tasks.isTerminated()) {
-            tasks = Executors.newCachedThreadPool();
+            tasks = newExecutor();
         }
         tasks.submit(() -> new Blind(problem));
+    }
+
+    private static ExecutorService newExecutor() {
+        // Making a thread a daemon means when the GUI window is closed, the
+        // application is happy to terminate. When these threads are not daemons, the
+        // user is forced to keyboard interrupt or kill Java.
+        return Executors.newCachedThreadPool(runnable -> {
+            final Thread thread = new Thread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        });
     }
 
     // == Communication. ===============================================================
