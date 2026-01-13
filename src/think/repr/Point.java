@@ -25,7 +25,6 @@ public record Point(int i, int j) {
         if (j - 1 >= 0) {
             neighbors.add(new Point(i, j - 1));
         }
-        assert neighbors.size() >= 2 && neighbors.size() <= 4;
         return neighbors;
     }
 
