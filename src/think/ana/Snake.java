@@ -19,11 +19,63 @@ public final class Snake {
         final Cell start,
         final Cell end
     ) {
-        // Breadth-first search finds the shortest path on an unweighted grid.
-        assert start != end;
+        throw new UnsupportedOperationException("This code is incorrect.");
+        /*
+        assert !start.equals(end);
         assert legalRun(problem, rubbers, start);
         assert legalRun(problem, rubbers, end);
-        throw new UnsupportedOperationException("Not implemented yet");
+
+        // We use A-star search (tree-search version) because for sparse grids with
+        // connected start and end, it explores less nodes than breadth-first search.
+        // If these assumptions are untrue, then use breadth-first search.
+        final Function<Cell, Integer> heuristic = c -> c.manhattan(end);
+
+        final HashMap<Cell, Cell> parents = new HashMap<>();
+        final HashMap<Cell, Integer> gScore = new HashMap<>();
+        gScore.put(start, 0);
+        final HashMap<Cell, Integer> fScore = new HashMap<>();
+        fScore.put(start, heuristic.apply(start));
+        final PriorityQueue<Cell> frontier = new PriorityQueue<>(
+            Comparator.comparingInt(cell -> fScore.getOrDefault(cell, Integer.MAX_VALUE))
+        );
+        frontier.add(start);
+
+        final Function<Cell, ArrayList<Cell>> reconstruct = current -> {
+            final ArrayList<Cell> path = new ArrayList<>();
+            while (parents.containsKey(current)) {
+                path.add(current);
+                current = parents.get(current);
+            }
+            Collections.reverse(path);
+            assert !path.contains(start) && path.contains(end);
+            return path;
+        };
+
+        while (!frontier.isEmpty()) {
+            final Cell current = frontier.remove();
+            if (gScore.get(current) + heuristic.apply(current) != fScore.get(current)) {
+                continue; // fScore is wrong, so this is a duplicate.
+            }
+            if (current.equals(end)) {
+                return new Route(start, end, reconstruct.apply(current));
+            }
+            for (final Cell neighbor : current.getNeighbors(problem)) {
+                if (!isOpen(problem, rubbers, neighbor)) {
+                    continue;
+                }
+                final int dontOverflow = Integer.MAX_VALUE - 1;
+                final int gScoreNew = gScore.getOrDefault(current, dontOverflow) + 1;
+                final int gScoreOld = gScore.getOrDefault(neighbor, Integer.MAX_VALUE);
+                if (gScoreNew < gScoreOld) {
+                    parents.put(neighbor, current);
+                    gScore.put(neighbor, gScoreNew);
+                    fScore.put(neighbor, gScoreNew + heuristic.apply(neighbor));
+                    frontier.add(neighbor); // This could be a duplicate.
+                }
+            }
+        }
+        return new Route(start, end, new ArrayList<>(0));
+        */
     }
 
     public Grid<Integer> distances(
@@ -32,6 +84,7 @@ public final class Snake {
         final Cell source
     ) {
         assert legalRun(problem, rubbers, source);
+
         // -1 is sentinel unreachable value. Chosen because adding connected distance
         // grids with unreachable cells maintains the invariant that unreachable cells
         // are negative (this is untrue if the source cannot reach the destination).
@@ -41,11 +94,13 @@ public final class Snake {
             problem.getBoundI(),
             problem.getBoundJ()
         );
+
         // We use breadth-first search because we visit every reachable point and it
         // has slightly less overhead than A-star. "distances" also visited set.
         final ArrayDeque<Cell> frontier = new ArrayDeque<>();
         frontier.add(source);
         distances.setCell(source, 0);
+
         while (!frontier.isEmpty()) {
             final Cell current = frontier.removeFirst();
             assert distances.getCell(current) >= 0;
@@ -59,6 +114,7 @@ public final class Snake {
                 }
             }
         }
+
         final BiFunction<Cell, Cell, Boolean> consistent = (p, n) ->
             distances.getCell(p) == -1 ||
             distances.getCell(n) == -1 ||
