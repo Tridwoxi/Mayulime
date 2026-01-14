@@ -2,13 +2,14 @@ package think.ana;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Spliterators;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
-    Small miscellany.
+    General purpose utility functions. Tpai-specific code must go in its own class.
  */
 public final class Tools {
 
@@ -43,8 +44,8 @@ public final class Tools {
     // == Randoms. =====================================================================
 
     /**
-        Lazily stream items in a random order. Does not modify underyling list, but is
-        sensitive to changes in it.
+        Lazily stream items in a random order. It is undefined behavior to modify the
+        underlying list.
      */
     public static <T> Stream<T> randomly(final ArrayList<T> items) {
         final int size = items.size();
@@ -134,6 +135,46 @@ public final class Tools {
                 return first;
             }
             return Integer.compare(this.order2, other.order2);
+        }
+    }
+
+    // == Counter. =====================================================================
+
+    /**
+        Counts number of occurrences of items in an iterable. Preserves insertion order.
+     */
+    public static final class Counter<T> {
+
+        private final LinkedHashMap<T, Integer> counts;
+
+        public Counter(final Iterable<T> items) {
+            this.counts = new LinkedHashMap<>();
+            items.forEach(item -> counts.merge(item, 1, Integer::sum));
+        }
+
+        public boolean containsItem(final T item) {
+            return counts.containsKey(item);
+        }
+
+        public int getCount(final T item) {
+            return counts.getOrDefault(item, 0);
+        }
+
+        public Stream<T> itemStream() {
+            return counts.keySet().stream();
+        }
+
+        public int totalCount() {
+            // Potential optimization: If this method is called repeatedly, keep sum as
+            // a field to avoid recomputation.
+            return counts.values().stream().reduce(0, Integer::sum);
+        }
+
+        public void addAll(Counter<T> other) {
+            assert this != other;
+            other.counts.forEach((item, count) ->
+                this.counts.merge(item, count, Integer::sum)
+            );
         }
     }
 }
