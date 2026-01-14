@@ -147,6 +147,10 @@ public final class Tools {
 
         private final LinkedHashMap<T, Integer> counts;
 
+        public Counter() {
+            this.counts = new LinkedHashMap<>();
+        }
+
         public Counter(final Iterable<T> items) {
             this.counts = new LinkedHashMap<>();
             items.forEach(item -> counts.merge(item, 1, Integer::sum));

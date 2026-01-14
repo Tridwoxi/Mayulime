@@ -1,17 +1,24 @@
 package think.repr;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import think.ana.Tools;
+import think.ana.Tools.Counter;
 
 /**
-    A sequence of steps to get from a start (exclusive) to an end (inclusive),
-    or empty steps if the route is blocked. Routes are problem- and assignment-specific.
+    Result of a Snake's travels from start (exclusive) to end (inclusive). Steps will be empty if the route is blocked. Routes are problem- and assignment-specific.
  */
-public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
-    private static final ArrayList<Cell> BLOCKED = new ArrayList<>(0);
+public class Route {
 
-    public Route {
+    private final Cell start;
+    private final Cell end;
+    private final Counter<Cell> steps;
+    private final int length;
+
+    public Route(Cell start, Cell end, ArrayList<Cell> steps) {
+        this.start = start;
+        this.end = end;
+        this.steps = new Counter<>(steps);
+        this.length = steps.size();
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
         assert !start.equals(end);
@@ -20,6 +27,24 @@ public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
             assert steps.getLast().equals(end);
         }
         assert Tools.pairwise(steps).allMatch(p -> p.a().isNeighbor(p.b()));
+        assert steps.size() == this.steps.totalCount();
+    }
+
+    private Route(Cell start, Cell end, Counter<Cell> steps) {
+        // TODO: validation.
+        this.start = start;
+        this.end = end;
+        this.steps = steps;
+        this.length = steps.totalCount();
+    }
+
+    public int length() {
+        assert possible() : "Caller should check with Route::possible() first.";
+        return length;
+    }
+
+    public boolean possible() {
+        return length > 0;
     }
 
     public static Route fromChain(final ArrayList<Route> routes) {
@@ -29,23 +54,15 @@ public record Route(Cell start, Cell end, ArrayList<Cell> steps) {
         );
         final Cell start = routes.getFirst().start;
         final Cell end = routes.getLast().end;
-        if (routes.stream().anyMatch(route -> route.steps.isEmpty())) {
-            return new Route(start, end, BLOCKED);
+        final Counter<Cell> steps = new Counter<>();
+        if (routes.stream().allMatch(route -> route.possible())) {
+            routes.forEach(route -> steps.addAll(route.steps));
+            assert routes
+                .stream()
+                .mapToInt(route -> route.steps.totalCount())
+                .sum() ==
+            steps.totalCount();
         }
-        final ArrayList<ArrayList<Cell>> steps2d = routes
-            .stream()
-            .map(route -> route.steps)
-            .collect(Collectors.toCollection(ArrayList::new));
-        final ArrayList<Cell> steps = Tools.flatten(steps2d);
         return new Route(start, end, steps);
-    }
-
-    public int length() {
-        assert possible() : "Caller should check with Route::possible() first.";
-        return steps.size();
-    }
-
-    public boolean possible() {
-        return !steps.isEmpty();
     }
 }
