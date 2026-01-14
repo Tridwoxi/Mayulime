@@ -15,13 +15,9 @@ public class Route {
     private final int length;
 
     public Route(Cell start, Cell end, ArrayList<Cell> steps) {
-        this.start = start;
-        this.end = end;
-        this.steps = new Counter<>(steps);
-        this.length = steps.size();
+        this(start, end, new Counter<>(steps));
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
-        assert !start.equals(end);
         if (!steps.isEmpty()) {
             assert steps.getFirst().isNeighbor(start);
             assert steps.getLast().equals(end);
@@ -31,7 +27,7 @@ public class Route {
     }
 
     private Route(Cell start, Cell end, Counter<Cell> steps) {
-        // TODO: validation.
+        assert !start.equals(end);
         this.start = start;
         this.end = end;
         this.steps = steps;
