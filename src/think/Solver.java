@@ -28,7 +28,7 @@ public final class Solver {
     public static void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
         activeProblem = problem;
-        Main.recieve(problem, new HashSet<>(0), 0);
+        Main.getInstance().recieve(problem, new HashSet<>(0), 0);
         stop();
         bestScore = 0;
         go(problem);
@@ -96,7 +96,7 @@ public final class Solver {
         synchronized (Solver.class) {
             if (beatsBest(actualScore)) {
                 bestScore = actualScore;
-                Main.recieve(problem, rubbers, actualScore);
+                Main.getInstance().recieve(problem, rubbers, actualScore);
             }
         }
     }

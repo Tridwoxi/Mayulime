@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
@@ -40,12 +41,20 @@ import think.repr.Problem.InvalidSpecException;
 public final class Main extends Application {
 
     private static final String NAME = "Tridwoxi's Pathery AI";
+    private static final AtomicReference<Main> INSTANCE = new AtomicReference<>();
 
-    // There's only one Main instance, so everything may as well be static. It makes
-    // access easier when you don't keep track of instances.
-    private static Gui gui;
-    private static Scene scene;
-    private static Stage stage;
+    private Gui gui;
+
+    public Main() {
+        final boolean success = INSTANCE.compareAndSet(null, this);
+        assert success;
+    }
+
+    public static Main getInstance() {
+        final Main stored = INSTANCE.get();
+        assert stored != null;
+        return stored;
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -53,9 +62,8 @@ public final class Main extends Application {
             exception.printStackTrace();
             Platform.exit();
         });
-        Main.gui = new Gui();
-        Main.stage = primaryStage;
-        Main.scene = new Scene(gui);
+        this.gui = new Gui();
+        final Scene scene = new Scene(gui);
         scene.setFill(Color.GRAY);
         primaryStage.setScene(scene);
         primaryStage.setTitle(NAME);
@@ -68,7 +76,7 @@ public final class Main extends Application {
 
     // == Connectors. ==================================================================
 
-    public static void send(final File file) {
+    public void send(final File file) {
         Problem problem = null;
         try {
             problem = new Problem(Files.readString(file.toPath()));
@@ -79,11 +87,15 @@ public final class Main extends Application {
         }
         if (problem != null) {
             Solver.solve(problem);
-            stage.setTitle(file.getName());
+            final Window window =
+                gui.getScene() == null ? null : gui.getScene().getWindow();
+            if (window instanceof Stage activeStage) {
+                activeStage.setTitle(file.getName());
+            }
         }
     }
 
-    public static void recieve(
+    public void recieve(
         final Problem problem,
         final HashSet<Cell> rubbers,
         final int score
@@ -155,7 +167,7 @@ final class Gui extends VBox {
             final Window active = getScene() == null ? null : getScene().getWindow();
             final File chosen = chooser.showOpenDialog(active);
             if (chosen != null) {
-                Main.send(chosen);
+                Main.getInstance().send(chosen);
             }
         });
         return upload;
