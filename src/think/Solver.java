@@ -17,9 +17,9 @@ import think.stra.Blind;
  */
 public final class Solver {
 
-    private static ExecutorService tasks = newExecutor();
-    private static Problem activeProblem;
-    private static int bestScore = 0;
+    private static volatile ExecutorService tasks = null;
+    private static volatile Problem activeProblem = null;
+    private static volatile int bestScore = 0;
 
     private Solver() {}
 
@@ -28,13 +28,16 @@ public final class Solver {
     public static void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
         activeProblem = problem;
-        bestScore = 0;
         Main.recieve(problem, new HashSet<>(0), 0);
         stop();
+        bestScore = 0;
         go(problem);
     }
 
     public static void stop() {
+        if (tasks == null) {
+            return;
+        }
         tasks.shutdownNow();
         try {
             tasks.awaitTermination(1, TimeUnit.SECONDS);
@@ -44,7 +47,7 @@ public final class Solver {
     }
 
     private static void go(final Problem problem) {
-        if (tasks.isShutdown() || tasks.isTerminated()) {
+        if (tasks == null || tasks.isShutdown() || tasks.isTerminated()) {
             tasks = newExecutor();
         }
         // Unlike submit, execute will propagate exceptions into the FX Thread. Since
@@ -77,7 +80,12 @@ public final class Solver {
         final HashSet<Cell> rubbers,
         final int claimedScore
     ) {
-        assert activeProblem != null && activeProblem == problem;
+        // This guard is tripped when the user uploads a new problem but worker threads
+        // are still running, so workers propose solutions to the old (stale) problem.
+        if (activeProblem != problem) {
+            return;
+        }
+        assert activeProblem != null;
         assert isValidAssignment(problem, rubbers);
         final int actualScore = Snake.evaluate(problem, rubbers);
         assert actualScore == claimedScore;
