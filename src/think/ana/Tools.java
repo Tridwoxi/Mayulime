@@ -13,9 +13,11 @@ import java.util.stream.StreamSupport;
  */
 public final class Tools {
 
+    private Tools() {}
+
     // == List manipulation. ===========================================================
 
-    public static <T> ArrayList<T> flatten(ArrayList<ArrayList<T>> lists) {
+    public static <T> ArrayList<T> flatten(final ArrayList<ArrayList<T>> lists) {
         final int size = lists
             .stream()
             .mapToInt(x -> x.size())
@@ -28,11 +30,11 @@ public final class Tools {
         return result;
     }
 
-    public static <T> boolean rectangular(ArrayList<ArrayList<T>> lists) {
+    public static <T> boolean rectangular(final ArrayList<ArrayList<T>> lists) {
         return pairwise(lists).allMatch(p -> p.a.size() == p.b.size());
     }
 
-    public static <T> ArrayList<T> fill(T item, int size) {
+    public static <T> ArrayList<T> fill(final T item, final int size) {
         final ArrayList<T> result = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             result.add(item);
@@ -78,7 +80,7 @@ public final class Tools {
 
     // == Pairwise. ====================================================================
 
-    public static record Pair<T>(T a, T b) {}
+    public record Pair<T>(T a, T b) {}
 
     /**
         Same as Python's `itertools.pairwise`.
@@ -113,7 +115,7 @@ public final class Tools {
 
     // == Ordering. ====================================================================
 
-    public static record UniOrdered<T>(
+    public record UniOrdered<T>(
         T item,
         int order1
     ) implements Comparable<UniOrdered<T>> {
@@ -123,7 +125,7 @@ public final class Tools {
         }
     }
 
-    public static record BiOrdered<T>(
+    public record BiOrdered<T>(
         T item,
         int order1,
         int order2
@@ -174,7 +176,7 @@ public final class Tools {
             return counts.values().stream().reduce(0, Integer::sum);
         }
 
-        public void addAll(Counter<T> other) {
+        public void addAll(final Counter<T> other) {
             assert this != other;
             other.counts.forEach((item, count) ->
                 this.counts.merge(item, count, Integer::sum)

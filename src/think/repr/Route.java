@@ -7,14 +7,14 @@ import think.ana.Tools.Counter;
 /**
     Result of a Snake's travels from start (exclusive) to end (inclusive). Steps will be empty if the route is blocked. Routes are problem- and assignment-specific.
  */
-public class Route {
+public final class Route {
 
     private final Cell start;
     private final Cell end;
     private final Counter<Cell> steps;
     private final int length;
 
-    public Route(Cell start, Cell end, ArrayList<Cell> steps) {
+    public Route(final Cell start, final Cell end, final ArrayList<Cell> steps) {
         this(start, end, new Counter<>(steps));
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
@@ -26,7 +26,7 @@ public class Route {
         assert steps.size() == this.steps.totalCount();
     }
 
-    private Route(Cell start, Cell end, Counter<Cell> steps) {
+    private Route(final Cell start, final Cell end, final Counter<Cell> steps) {
         assert !start.equals(end);
         this.start = start;
         this.end = end;

@@ -93,7 +93,7 @@ public final class Problem {
 
     // == Getters ======================================================================
 
-    public boolean isBrick(Cell cell) {
+    public boolean isBrick(final Cell cell) {
         return isBrick.getCell(cell);
     }
 

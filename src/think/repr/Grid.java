@@ -84,9 +84,9 @@ public final class Grid<T> {
     }
 
     public static <A, B, C> Grid<C> combine(
-        Grid<A> a,
-        Grid<B> b,
-        BiFunction<A, B, C> combiner
+        final Grid<A> a,
+        final Grid<B> b,
+        final BiFunction<A, B, C> combiner
     ) {
         assert a.getBoundI() == b.getBoundI();
         assert a.getBoundJ() == b.getBoundJ();

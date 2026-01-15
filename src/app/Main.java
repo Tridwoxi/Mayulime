@@ -44,8 +44,8 @@ public final class Main extends Application {
     // There's only one Main instance, so everything may as well be static. It makes
     // access easier when you don't keep track of instances.
     private static Gui gui;
-    private static Scene mainScene;
-    private static Stage primaryStage;
+    private static Scene scene;
+    private static Stage stage;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -54,10 +54,10 @@ public final class Main extends Application {
             Platform.exit();
         });
         Main.gui = new Gui();
-        Main.primaryStage = primaryStage;
-        Main.mainScene = new Scene(gui);
-        mainScene.setFill(Color.GRAY);
-        primaryStage.setScene(mainScene);
+        Main.stage = primaryStage;
+        Main.scene = new Scene(gui);
+        scene.setFill(Color.GRAY);
+        primaryStage.setScene(scene);
         primaryStage.setTitle(NAME);
         primaryStage.setOnCloseRequest(event -> {
             Solver.stop();
@@ -79,7 +79,7 @@ public final class Main extends Application {
         }
         if (problem != null) {
             Solver.solve(problem);
-            primaryStage.setTitle(file.getName());
+            stage.setTitle(file.getName());
         }
     }
 
@@ -101,7 +101,7 @@ final class Gui extends VBox {
     private ProblemDisplay problemDisplay;
     private final Text scoreDisplay;
 
-    public Gui() {
+    Gui() {
         super(SPACING);
         this.problemDisplay = new ProblemDisplay();
         this.scoreDisplay = new Text();
@@ -164,9 +164,9 @@ final class Gui extends VBox {
 
 final class ProblemDisplay extends Group {
 
-    public ProblemDisplay() {}
+    ProblemDisplay() {}
 
-    public ProblemDisplay(
+    ProblemDisplay(
         final Problem problem,
         final double cellSize,
         final HashSet<Cell> rubbers
@@ -201,7 +201,9 @@ final class ProblemDisplay extends Group {
 
 final class CellDisplay extends Group {
 
-    public CellDisplay(final Color color, final double size, final String content) {
+    private static final double HALF = 0.5;
+
+    CellDisplay(final Color color, final double size, final String content) {
         final Rectangle rect = new Rectangle(size, size);
         rect.setFill(color);
         rect.setStroke(PatheryColors.BACKGROUND);
@@ -211,10 +213,10 @@ final class CellDisplay extends Group {
         }
         final Text label = new Text(content);
         label.setFill(PatheryColors.FOREGROUND);
-        label.setFont(Font.font(size * 0.5));
+        label.setFont(Font.font(size * HALF));
         final Bounds bounds = label.getLayoutBounds();
-        label.setX((size - bounds.getWidth()) * 0.5 - bounds.getMinX());
-        label.setY((size - bounds.getHeight()) * 0.5 - bounds.getMinY());
+        label.setX((size - bounds.getWidth()) * HALF - bounds.getMinX());
+        label.setY((size - bounds.getHeight()) * HALF - bounds.getMinY());
         getChildren().addAll(rect, label);
     }
 }
