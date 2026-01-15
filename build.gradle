@@ -4,6 +4,7 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'checkstyle'
+    id 'com.github.spotbugs' version '6.4.8'
 }
 
 java {
@@ -22,7 +23,7 @@ repositories {
 }
 
 tasks.named('run') {
-    dependsOn 'checkstyleMain', 'checkstyleTest'
+    dependsOn 'checkstyleMain', 'spotbugsMain'
     jvmArgs '-ea'
 }
 
