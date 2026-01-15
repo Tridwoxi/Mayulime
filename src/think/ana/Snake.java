@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import think.ana.Tools.BiOrdered;
+import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -19,7 +21,22 @@ import think.repr.Route;
  */
 public final class Snake {
 
-    public Route travel(
+    private Snake() {}
+
+    public static int eval(final Problem problem, final HashSet<Cell> rubbers) {
+        int sum = 0;
+        final Stream<Pair<Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
+        for (final Pair<Cell> pair : pairs.toList()) {
+            final Route route = travel(problem, rubbers, pair.a(), pair.b());
+            if (!route.possible()) {
+                return 0;
+            }
+            sum += route.length();
+        }
+        return sum;
+    }
+
+    public static Route travel(
         final Problem problem,
         final HashSet<Cell> rubbers,
         final Cell start,
@@ -91,7 +108,7 @@ public final class Snake {
         return new Route(start, end, new ArrayList<>(0));
     }
 
-    public Grid<Integer> distances(
+    public static Grid<Integer> distances(
         final Problem problem,
         final HashSet<Cell> rubbers,
         final Cell source
