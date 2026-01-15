@@ -10,24 +10,25 @@ import think.repr.Cell;
 import think.repr.Problem;
 
 /**
-    Guess blindly. It'll work eventually, trust!! Often capable of tying the best
-    human score on simples given a minute or two.
+    Guess blindly. This strategy exists as a proof of concept and should be removed in
+    a later version. It is not efficient and usually takes minutes to tie the best
+    human score on a Simple.
  */
-public final class Blind {
+public final class Blind implements Runnable {
 
     private final Problem problem;
 
     public Blind(final Problem problem) {
         this.problem = problem;
-        run();
     }
 
-    private void run() {
+    @Override
+    public void run() {
         while (true) {
             final HashSet<Cell> guess = guess();
-            final int eval = Snake.eval(problem, guess);
+            final int eval = Snake.evaluate(problem, guess);
             if (Solver.beatsBest(eval)) {
-                Solver.claimSolution(problem, guess, eval);
+                Solver.claimImprovement(problem, guess, eval);
             }
         }
     }

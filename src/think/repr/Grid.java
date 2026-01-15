@@ -14,14 +14,14 @@ import think.ana.Tools;
 public final class Grid<T> {
 
     private final ArrayList<T> cells;
-    private final int boundI;
-    private final int boundJ;
+    private final int rowBound;
+    private final int colBound;
 
-    public Grid(final ArrayList<T> cells, final int boundI, final int boundJ) {
-        assert cells.size() == boundI * boundJ;
+    public Grid(final ArrayList<T> cells, final int rowBound, final int colBound) {
+        assert cells.size() == rowBound * colBound;
         this.cells = new ArrayList<>(cells);
-        this.boundI = boundI;
-        this.boundJ = boundJ;
+        this.rowBound = rowBound;
+        this.colBound = colBound;
     }
 
     public Grid(final ArrayList<ArrayList<T>> cells) {
@@ -34,29 +34,34 @@ public final class Grid<T> {
     }
 
     public T getCell(final Cell cell) {
-        final int i = cell.i();
-        final int j = cell.j();
-        assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
-        return cells.get(i * boundJ + j);
+        final int row = cell.row();
+        final int col = cell.col();
+        assert row >= 0 && row < rowBound && col >= 0 && col < colBound;
+        return cells.get(row * colBound + col);
     }
 
     public void setCell(final Cell cell, final T value) {
-        final int i = cell.i();
-        final int j = cell.j();
-        assert i >= 0 && i < boundI && j >= 0 && j < boundJ;
-        cells.set(i * boundJ + j, value);
+        final int row = cell.row();
+        final int col = cell.col();
+        assert row >= 0 && row < rowBound && col >= 0 && col < colBound;
+        cells.set(row * colBound + col, value);
     }
 
     public boolean containsCell(final Cell cell) {
-        return cell.i() >= 0 && cell.i() < boundI && cell.j() >= 0 && cell.j() < boundJ;
+        return (
+            cell.row() >= 0 &&
+            cell.row() < rowBound &&
+            cell.col() >= 0 &&
+            cell.col() < colBound
+        );
     }
 
-    public int getBoundI() {
-        return boundI;
+    public int getRowBound() {
+        return rowBound;
     }
 
-    public int getBoundJ() {
-        return boundJ;
+    public int getColBound() {
+        return colBound;
     }
 
     public T getNth(final int index) {
@@ -78,23 +83,23 @@ public final class Grid<T> {
     }
 
     public Stream<Cell> cellStream() {
-        return IntStream.range(0, cells.size()).mapToObj(k ->
-            new Cell(k / boundJ, k % boundJ)
+        return IntStream.range(0, cells.size()).mapToObj(index ->
+            new Cell(index / colBound, index % colBound)
         );
     }
 
-    public static <A, B, C> Grid<C> combine(
-        final Grid<A> a,
-        final Grid<B> b,
-        final BiFunction<A, B, C> combiner
+    public static <F, S, R> Grid<R> combine(
+        final Grid<F> first,
+        final Grid<S> second,
+        final BiFunction<F, S, R> combiner
     ) {
-        assert a.getBoundI() == b.getBoundI();
-        assert a.getBoundJ() == b.getBoundJ();
-        assert a.getSize() == b.getSize();
-        final ArrayList<C> cells = new ArrayList<>(a.getSize());
-        for (int i = 0; i < a.getSize(); i++) {
-            cells.add(combiner.apply(a.getNth(i), b.getNth(i)));
+        assert first.getRowBound() == second.getRowBound();
+        assert first.getColBound() == second.getColBound();
+        assert first.getSize() == second.getSize();
+        final ArrayList<R> cells = new ArrayList<>(first.getSize());
+        for (int index = 0; index < first.getSize(); index++) {
+            cells.add(combiner.apply(first.getNth(index), second.getNth(index)));
         }
-        return new Grid<>(cells, a.getBoundI(), a.getBoundJ());
+        return new Grid<>(cells, first.getRowBound(), first.getColBound());
     }
 }

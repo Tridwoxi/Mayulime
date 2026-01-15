@@ -67,7 +67,7 @@ def is_connected(grid: Grid, start: Position, goal: Position) -> bool:  # Standa
 
 
 def all_connected(grid: Grid, checkpoints: list[Position]) -> bool:
-    return all(is_connected(grid, a, b) for a, b in pairwise(checkpoints))
+    return all(is_connected(grid, start, end) for start, end in pairwise(checkpoints))
 
 
 def generate_problem(
@@ -82,14 +82,16 @@ def generate_problem(
             BRICK if random.random() < brick_probability else EMPTY
         )
 
-    if any(x <= 0 for x in (height, width, max_attempts)):
+    if any(value <= 0 for value in (height, width, max_attempts)):
         raise ValueError
     if checkpoint_count not in range(2, height * width):
         raise ValueError
     for _ in range(max_attempts):
         checkpoints = random.sample(range(height * width), checkpoint_count)
-        checkpoints = [(i // width, i % width) for i in checkpoints]
-        checkpoint_map = {v: i for i, v in enumerate(checkpoints)}
+        checkpoints = [
+            (position // width, position % width) for position in checkpoints
+        ]
+        checkpoint_map = {position: index for index, position in enumerate(checkpoints)}
         grid = [[pick_cell(row, col) for col in range(width)] for row in range(height)]
         if all_connected(grid, checkpoints):
             return grid

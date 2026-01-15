@@ -49,8 +49,8 @@ public final class Main extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            e.printStackTrace();
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+            exception.printStackTrace();
             Platform.exit();
         });
         Main.gui = new Gui();
@@ -72,9 +72,9 @@ public final class Main extends Application {
         Problem problem = null;
         try {
             problem = new Problem(Files.readString(file.toPath()));
-        } catch (InvalidSpecException e) {
+        } catch (InvalidSpecException exception) {
             System.err.println("Bad specification.");
-        } catch (IOException e) {
+        } catch (IOException exception) {
             System.err.println("Can't read file.");
         }
         if (problem != null) {
@@ -175,8 +175,8 @@ final class ProblemDisplay extends Group {
         assert rubbers.size() <= problem.getNumRubbers();
         final ArrayList<Cell> checks = problem.getCheckpoints();
         final HashMap<Cell, Integer> checkLabels = new HashMap<>();
-        for (int i = 0; i < checks.size(); i++) {
-            checkLabels.put(checks.get(i), i);
+        for (int index = 0; index < checks.size(); index++) {
+            checkLabels.put(checks.get(index), index);
         }
         for (final Cell cell : problem.getAllCells()) {
             final int label = checkLabels.getOrDefault(cell, -1);
@@ -192,8 +192,8 @@ final class ProblemDisplay extends Group {
             }
             final String content = label != -1 ? Integer.toString(label) : "";
             final CellDisplay cellDisplay = new CellDisplay(color, cellSize, content);
-            cellDisplay.setLayoutY(cell.i() * cellSize);
-            cellDisplay.setLayoutX(cell.j() * cellSize);
+            cellDisplay.setLayoutY(cell.row() * cellSize);
+            cellDisplay.setLayoutX(cell.col() * cellSize);
             getChildren().add(cellDisplay);
         }
     }

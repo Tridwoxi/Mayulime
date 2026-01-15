@@ -1,10 +1,12 @@
 # Repository guidelines
 
-Consult `README.md` for an overview. If you edit code, do `./gradlew build` to check the project didn't break.
+Consult `README.md` for an overview. If you edit code, run `./gradlew build` as a test.
 
 Do not worry about constant-factor performance wins. Prefer ArrayLists, Streams, and high-level abstraction.
 
-Use `assert` statements for things that should never fail: these serve as Errors and indicate a programming mistake. `throw` custom Exceptions for things that might fail.
+Use `assert` statements for invariants liberally. Assertion errors are programmer errors. `throw` custom exceptions for things that might fail but are not programmer errors and can be handled.
+
+Use descriptive variable names. Never use one letter variable names. Abbreviation is acceptable but discouraged unless easily understood.
 
 Make all constant variables and custom classes `final`. It is a design error to extend custom classes. You may still extend library classes.
 

@@ -17,17 +17,17 @@ import think.repr.Problem;
 import think.repr.Route;
 
 /**
-    Distance evaluator. Simulates the Pathery snake.
+    Pathfinding and distance evaluation. Simulates the Pathery snake.
  */
 public final class Snake {
 
     private Snake() {}
 
-    public static int eval(final Problem problem, final HashSet<Cell> rubbers) {
+    public static int evaluate(final Problem problem, final HashSet<Cell> rubbers) {
         int sum = 0;
         final Stream<Pair<Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
         for (final Pair<Cell> pair : pairs.toList()) {
-            final Route route = travel(problem, rubbers, pair.a(), pair.b());
+            final Route route = travel(problem, rubbers, pair.first(), pair.second());
             if (!route.possible()) {
                 return 0;
             }
@@ -50,7 +50,7 @@ public final class Snake {
         // connected start and end, it explores less nodes than breadth-first search.
         // If we are not seeing those grids, then use breadth-first search. The
         // Manhattan distance heuristic is fast, consistent, and admissible.
-        final Function<Cell, Integer> heuristic = c -> c.manhattan(end);
+        final Function<Cell, Integer> heuristic = state -> state.manhattanTo(end);
 
         final HashMap<Cell, Cell> parents = new HashMap<>();
         final HashMap<Cell, Integer> gScore = new HashMap<>();
@@ -121,8 +121,8 @@ public final class Snake {
         // Cells with rubbers or bricks on them are unreachable.
         final Grid<Integer> distances = new Grid<>(
             Tools.fill(-1, problem.getAllCells().size()),
-            problem.getBoundI(),
-            problem.getBoundJ()
+            problem.getRowBound(),
+            problem.getColBound()
         );
 
         // We use breadth-first search because we visit every reachable point and it
@@ -145,14 +145,17 @@ public final class Snake {
             }
         }
 
-        final BiFunction<Cell, Cell, Boolean> consistent = (p, n) ->
-            distances.getCell(p) == -1 ||
-            distances.getCell(n) == -1 ||
-            Math.abs(distances.getCell(p) - distances.getCell(n)) <= 1;
+        final BiFunction<Cell, Cell, Boolean> consistent = (cell, neighbor) ->
+            distances.getCell(cell) == -1 ||
+            distances.getCell(neighbor) == -1 ||
+            Math.abs(distances.getCell(cell) - distances.getCell(neighbor)) <= 1;
         assert distances
             .cellStream()
-            .allMatch(p ->
-                p.getNeighbors(problem).stream().allMatch((n -> consistent.apply(p, n)))
+            .allMatch(cell ->
+                cell
+                    .getNeighbors(problem)
+                    .stream()
+                    .allMatch((neighbor -> consistent.apply(cell, neighbor)))
             );
         assert distances.getCell(source) == 0;
         return distances;

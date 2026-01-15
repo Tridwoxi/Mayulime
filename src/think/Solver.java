@@ -12,8 +12,8 @@ import think.repr.Problem;
 import think.stra.Blind;
 
 /**
-    Problem solver and worker. Should be called from JavaFX Application Thread. Starts
-    background workers to not block the GUI.
+    Strategy manager and bridge from backend to GUI. Must be called from JavaFX
+    Application Thread. Workers run in background to not block the GUI.
  */
 public final class Solver {
 
@@ -38,7 +38,7 @@ public final class Solver {
         tasks.shutdownNow();
         try {
             tasks.awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
     }
@@ -47,7 +47,9 @@ public final class Solver {
         if (tasks.isShutdown() || tasks.isTerminated()) {
             tasks = newExecutor();
         }
-        tasks.submit(() -> new Blind(problem));
+        // Unlike submit, execute will propagate exceptions into the FX Thread. Since
+        // we use assertions to catch correctness issues, these exceptions must be seen.
+        tasks.execute(new Blind(problem));
     }
 
     private static ExecutorService newExecutor() {
@@ -70,17 +72,19 @@ public final class Solver {
         }
     }
 
-    public static void claimSolution(
+    public static void claimImprovement(
         final Problem problem,
         final HashSet<Cell> rubbers,
         final int claimedScore
     ) {
         assert activeProblem != null && activeProblem == problem;
         assert isValidAssignment(problem, rubbers);
-        final int actualScore = Snake.eval(problem, rubbers);
+        final int actualScore = Snake.evaluate(problem, rubbers);
         assert actualScore == claimedScore;
-        // Strategies may occasionally falsely claim their score beats the bestScore
-        // because of concurrency problems. This is fine, and we'll just ignore that.
+        // Strategies should only claim to have improved upon the best solution if they
+        // have actually done so. However, since this is a concurrent program and
+        // evaluation is seperate from this method, strategies might lie. Such is
+        // unavoidable, and we'll simply check for lies and ignore them.
         synchronized (Solver.class) {
             if (beatsBest(actualScore)) {
                 bestScore = actualScore;

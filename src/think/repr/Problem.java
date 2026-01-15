@@ -53,20 +53,20 @@ public final class Problem {
         final ArrayList<Boolean> cells = Tools.fill(false, numCells);
         this.emptyCells = new HashSet<>();
 
-        for (int i = 0; i < lines.size(); i++) {
-            final ArrayList<String> row = lines.get(i);
-            for (int j = 0; j < row.size(); j++) {
-                final String cell = row.get(j);
+        for (int row = 0; row < lines.size(); row++) {
+            final ArrayList<String> line = lines.get(row);
+            for (int col = 0; col < line.size(); col++) {
+                final String cell = line.get(col);
                 switch (cell) {
                     case BRICK -> {
-                        cells.set(i * numCols + j, true);
+                        cells.set(row * numCols + col, true);
                     }
                     case EMPTY -> {
-                        emptyCells.add(new Cell(i, j));
+                        emptyCells.add(new Cell(row, col));
                     }
                     default -> {
                         final int order = strToInt(cell);
-                        prechecks.add(new UniOrdered<>(new Cell(i, j), order));
+                        prechecks.add(new UniOrdered<>(new Cell(row, col), order));
                     }
                 }
             }
@@ -83,7 +83,7 @@ public final class Problem {
         // to not assign rubbers. But I will require a full assignment.
         final int numBricks = (int) cells
             .stream()
-            .filter(b -> b)
+            .filter(value -> value)
             .count();
         final int numCheckpoints = checkpoints.size();
         if (numBricks + numCheckpoints + numRubbers > numCells) {
@@ -101,12 +101,12 @@ public final class Problem {
         return isBrick.containsCell(cell);
     }
 
-    public int getBoundI() {
-        return isBrick.getBoundI();
+    public int getRowBound() {
+        return isBrick.getRowBound();
     }
 
-    public int getBoundJ() {
-        return isBrick.getBoundJ();
+    public int getColBound() {
+        return isBrick.getColBound();
     }
 
     public int getNumRubbers() {
@@ -128,19 +128,19 @@ public final class Problem {
 
     // == Parsing tools. ===============================================================
 
-    private int strToInt(final String s) throws InvalidSpecException {
+    private int strToInt(final String string) throws InvalidSpecException {
         try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
+            return Integer.parseInt(string);
+        } catch (NumberFormatException exception) {
             throw new InvalidSpecException();
         }
     }
 
-    private <T> T getNth(final ArrayList<T> list, final int n)
+    private <T> T getNth(final ArrayList<T> list, final int nth)
         throws InvalidSpecException {
         try {
-            return list.get(n);
-        } catch (IndexOutOfBoundsException e) {
+            return list.get(nth);
+        } catch (IndexOutOfBoundsException exception) {
             throw new InvalidSpecException();
         }
     }
@@ -148,7 +148,7 @@ public final class Problem {
     private String filterWhitespace(final String dirty) {
         return dirty
             .codePoints()
-            .filter(c -> !Character.isWhitespace(c))
+            .filter(character -> !Character.isWhitespace(character))
             .collect(
                 StringBuilder::new,
                 StringBuilder::appendCodePoint,
@@ -175,14 +175,14 @@ public final class Problem {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private ArrayList<Cell> buildAllCells(final int boundI, final int boundJ) {
-        final ArrayList<Cell> cells = new ArrayList<>(boundI * boundJ);
-        for (int i = 0; i < boundI; i++) {
-            for (int j = 0; j < boundJ; j++) {
-                cells.add(new Cell(i, j));
+    private ArrayList<Cell> buildAllCells(final int rowBound, final int colBound) {
+        final ArrayList<Cell> cells = new ArrayList<>(rowBound * colBound);
+        for (int row = 0; row < rowBound; row++) {
+            for (int col = 0; col < colBound; col++) {
+                cells.add(new Cell(row, col));
             }
         }
-        assert cells.size() == boundI * boundJ;
+        assert cells.size() == rowBound * colBound;
         return cells;
     }
 

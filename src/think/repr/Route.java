@@ -22,7 +22,9 @@ public final class Route {
             assert steps.getFirst().isNeighbor(start);
             assert steps.getLast().equals(end);
         }
-        assert Tools.pairwise(steps).allMatch(p -> p.a().isNeighbor(p.b()));
+        assert Tools.pairwise(steps).allMatch(pair ->
+            pair.first().isNeighbor(pair.second())
+        );
         assert steps.size() == this.steps.totalCount();
     }
 
@@ -46,7 +48,7 @@ public final class Route {
     public static Route fromChain(final ArrayList<Route> routes) {
         assert routes.size() > 0;
         assert Tools.pairwise(routes).allMatch(pair ->
-            pair.a().end.equals(pair.b().start)
+            pair.first().end.equals(pair.second().start)
         );
         final Cell start = routes.getFirst().start;
         final Cell end = routes.getLast().end;
