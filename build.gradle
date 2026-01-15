@@ -3,6 +3,7 @@ plugins {
     id 'eclipse'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'checkstyle'
 }
 
 java {
@@ -11,11 +12,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+checkstyle {
+    toolVersion = "13.0.0"
+    configFile = file("checkstyle.xml")
+}
+
 repositories {
     mavenCentral()
 }
 
 tasks.named('run') {
+    dependsOn 'checkstyleMain', 'checkstyleTest'
     jvmArgs '-ea'
 }
 
