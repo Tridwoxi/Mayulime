@@ -28,7 +28,7 @@ public final class Blind implements Runnable {
             final HashSet<Cell> guess = guess();
             final int eval = Snake.evaluate(problem, guess);
             if (Solver.beatsBest(eval)) {
-                Solver.claimImprovement(problem, guess, eval);
+                Solver.claimBetter(Blind.class, problem, guess, eval);
             }
         }
     }

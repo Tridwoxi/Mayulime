@@ -96,11 +96,12 @@ public final class Main extends Application {
     }
 
     public void recieve(
+        final Class<? extends Runnable> strategyClass,
         final Problem problem,
         final HashSet<Cell> rubbers,
         final int score
     ) {
-        Platform.runLater(() -> gui.showUpdate(problem, rubbers, score));
+        Platform.runLater(() -> gui.showUpdate(strategyClass, problem, rubbers, score));
     }
 }
 
@@ -121,19 +122,20 @@ final class Gui extends VBox {
 
         setBackground(Background.fill(PatheryColors.BACKGROUND));
         setPadding(new Insets(PADDING));
-        setAlignment(Pos.TOP_CENTER);
+        setAlignment(Pos.CENTER);
         final HBox stats = new HBox(SPACING, scoreDisplay, makeButton());
         stats.setAlignment(Pos.CENTER);
         getChildren().addAll(problemDisplay, stats);
     }
 
     public void showUpdate(
+        final Class<? extends Runnable> strategyClass,
         final Problem problem,
         final HashSet<Cell> rubbers,
         final int score
     ) {
         problemDisplay = new ProblemDisplay(problem, CELL_SIZE, rubbers);
-        scoreDisplay.setText("Score: " + score);
+        scoreDisplay.setText("Score " + score + " by " + strategyClass.getSimpleName());
         assert getChildren().get(0) instanceof ProblemDisplay;
         getChildren().set(0, problemDisplay);
         if (

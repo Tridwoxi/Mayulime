@@ -28,7 +28,7 @@ public final class Solver {
     public static void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
         activeProblem = problem;
-        Main.getInstance().recieve(problem, new HashSet<>(0), 0);
+        Main.getInstance().recieve(Runnable.class, problem, new HashSet<>(0), 0);
         stop();
         bestScore = 0;
         go(problem);
@@ -75,7 +75,8 @@ public final class Solver {
         }
     }
 
-    public static void claimImprovement(
+    public static void claimBetter(
+        final Class<? extends Runnable> strategyClass,
         final Problem problem,
         final HashSet<Cell> rubbers,
         final int claimedScore
@@ -96,7 +97,7 @@ public final class Solver {
         synchronized (Solver.class) {
             if (beatsBest(actualScore)) {
                 bestScore = actualScore;
-                Main.getInstance().recieve(problem, rubbers, actualScore);
+                Main.getInstance().recieve(strategyClass, problem, rubbers, actualScore);
             }
         }
     }
