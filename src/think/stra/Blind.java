@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import think.Solver;
-import think.ana.Snake;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -25,11 +24,7 @@ public final class Blind implements Runnable {
     @Override
     public void run() {
         while (true) {
-            final HashSet<Cell> guess = guess();
-            final int eval = Snake.evaluate(problem, guess);
-            if (Solver.beatsBest(eval)) {
-                Solver.claimBetter(Blind.class, problem, guess, eval);
-            }
+            Solver.consider(Blind.class, problem, guess());
         }
     }
 

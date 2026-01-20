@@ -20,7 +20,7 @@ public final class Solver {
 
     private static volatile ExecutorService tasks = null;
     private static volatile Problem activeProblem = null;
-    private static volatile int bestScore = 0;
+    private static volatile int topScore = 0;
 
     private Solver() {}
 
@@ -31,7 +31,7 @@ public final class Solver {
         activeProblem = problem;
         Main.getInstance().recieve(Runnable.class, problem, new HashSet<>(0), 0);
         stop();
-        bestScore = 0;
+        topScore = 0;
         go(problem);
     }
 
@@ -70,37 +70,28 @@ public final class Solver {
 
     // == Communication. ===============================================================
 
-    public static boolean beatsBest(final int score) {
-        assert activeProblem != null;
-        synchronized (Solver.class) {
-            return score > bestScore;
-        }
+    public static int getTopScore() {
+        return topScore;
     }
 
-    public static void claimBetter(
+    public static void consider(
         final Class<? extends Runnable> strategyClass,
         final Problem problem,
-        final HashSet<Cell> rubbers,
-        final int claimedScore
+        final HashSet<Cell> rubbers
     ) {
+        assert activeProblem != null;
         // This guard is tripped when the user uploads a new problem but worker threads
         // are still running, so workers propose solutions to the old (stale) problem.
         if (activeProblem != problem) {
             return;
         }
-        assert activeProblem != null;
         final HashSet<Cell> copy = new HashSet<>(rubbers);
         assert isValidAssignment(problem, copy);
-        final int actualScore = Snake.evaluate(problem, copy);
-        assert actualScore == claimedScore;
-        // Strategies should only claim to have improved upon the best solution if they
-        // have actually done so. However, since this is a concurrent program and
-        // evaluation is seperate from this method, strategies might lie. Such is
-        // unavoidable, and we'll simply check for lies and ignore them.
+        final int score = Snake.evaluate(problem, copy);
         synchronized (Solver.class) {
-            if (beatsBest(actualScore)) {
-                bestScore = actualScore;
-                Main.getInstance().recieve(strategyClass, problem, copy, actualScore);
+            if (score > topScore) {
+                topScore = score;
+                Main.getInstance().recieve(strategyClass, problem, copy, score);
             }
         }
     }

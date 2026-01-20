@@ -3,7 +3,6 @@ package think.stra;
 import java.util.ArrayList;
 import java.util.HashSet;
 import think.Solver;
-import think.ana.Snake;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -27,10 +26,7 @@ public final class Climb implements Runnable {
                     break improvement_cycle;
                 }
             }
-            final int eval = Snake.evaluate(problem, rubbers);
-            if (Solver.beatsBest(eval)) {
-                Solver.claimBetter(Climb.class, problem, rubbers, eval);
-            }
+            Solver.consider(Climb.class, problem, rubbers);
             reset();
         }
     }
