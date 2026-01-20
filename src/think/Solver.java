@@ -87,8 +87,9 @@ public final class Solver {
             return;
         }
         assert activeProblem != null;
-        assert isValidAssignment(problem, rubbers);
-        final int actualScore = Snake.evaluate(problem, rubbers);
+        final HashSet<Cell> copy = new HashSet<>(rubbers);
+        assert isValidAssignment(problem, copy);
+        final int actualScore = Snake.evaluate(problem, copy);
         assert actualScore == claimedScore;
         // Strategies should only claim to have improved upon the best solution if they
         // have actually done so. However, since this is a concurrent program and
@@ -97,7 +98,7 @@ public final class Solver {
         synchronized (Solver.class) {
             if (beatsBest(actualScore)) {
                 bestScore = actualScore;
-                Main.getInstance().recieve(strategyClass, problem, rubbers, actualScore);
+                Main.getInstance().recieve(strategyClass, problem, copy, actualScore);
             }
         }
     }

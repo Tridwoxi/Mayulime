@@ -101,9 +101,7 @@ public final class Main extends Application {
         final HashSet<Cell> rubbers,
         final int score
     ) {
-        Platform.runLater(() ->
-            gui.showUpdate(strategyClass, problem, new HashSet<>(rubbers), score)
-        );
+        Platform.runLater(() -> gui.showUpdate(strategyClass, problem, rubbers, score));
     }
 }
 
