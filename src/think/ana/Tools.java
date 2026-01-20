@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Spliterators;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -43,6 +44,12 @@ public final class Tools {
         }
         assert result.size() == size;
         return result;
+    }
+
+    public static <T> Stream<UniOrdered<T>> enumerate(final ArrayList<T> list) {
+        return IntStream.range(0, list.size()).mapToObj(index ->
+            new UniOrdered<>(list.get(index), index)
+        );
     }
 
     // == Randoms. =====================================================================

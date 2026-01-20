@@ -24,8 +24,6 @@ Genetic algorithm should use sets of connected rubbers as features, rather than 
 
 Use the existing Pathery file format. End support for ".tpai" files. Delete create.py (http://beta.pathery.net superior).
 
-The frontend works in mysterious ways. Consider deleting half of it.
+Center the upload problem button before a problem has been uploaded.
 
 Bricks and rubbers to become system and player walls
-
-Solver::consider replaces beatsBest and claimBetter
