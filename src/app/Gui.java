@@ -62,9 +62,10 @@ public final class Gui extends Scene {
         setFill(PatheryColors.BACKGROUND);
         root.setPadding(new Insets(PADDING_PX));
         root.setAlignment(Pos.CENTER);
-        root.setSpacing(SPACING_PX);
+        root.setSpacing(0.0);
         root.setBackground(Background.fill(PatheryColors.BACKGROUND));
         root.getChildren().addAll(gameDisplay, statsDisplay);
+        hideGame();
     }
 
     public void update(
@@ -73,8 +74,21 @@ public final class Gui extends Scene {
         final HashSet<Cell> rubbers,
         final int score
     ) {
+        showGame();
         gameDisplay.setGame(problem, rubbers);
         statsDisplay.setScore(score, strategyClass.getSimpleName());
+    }
+
+    private void hideGame() {
+        gameDisplay.setManaged(false);
+        gameDisplay.setVisible(false);
+        root.setSpacing(0.0);
+    }
+
+    private void showGame() {
+        gameDisplay.setManaged(true);
+        gameDisplay.setVisible(true);
+        root.setSpacing(SPACING_PX);
     }
 }
 
@@ -152,12 +166,26 @@ final class StatsDisplay extends HBox {
         this.scoreDisplay = new ScoreDisplay();
         this.buttonDisplay = new ButtonDisplay();
         setAlignment(Pos.CENTER);
-        setSpacing(Gui.SPACING_PX);
+        hideScore();
+        setSpacing(0.0);
         getChildren().addAll(scoreDisplay, buttonDisplay);
     }
 
     public void setScore(final int score, final String submitter) {
+        showScore();
         scoreDisplay.setScore(score, submitter);
+    }
+
+    private void hideScore() {
+        scoreDisplay.setManaged(false);
+        scoreDisplay.setVisible(false);
+        setSpacing(0.0);
+    }
+
+    private void showScore() {
+        scoreDisplay.setManaged(true);
+        scoreDisplay.setVisible(true);
+        setSpacing(Gui.SPACING_PX);
     }
 }
 
