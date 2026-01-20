@@ -10,6 +10,7 @@ import think.ana.Snake;
 import think.repr.Cell;
 import think.repr.Problem;
 import think.stra.Blind;
+import think.stra.Climb;
 
 /**
     Strategy manager and bridge from backend to GUI. Must be called from JavaFX
@@ -53,6 +54,7 @@ public final class Solver {
         // Unlike submit, execute will propagate exceptions into the FX Thread. Since
         // we use assertions to catch correctness issues, these exceptions must be seen.
         tasks.execute(new Blind(problem));
+        tasks.execute(new Climb(problem));
     }
 
     private static ExecutorService newExecutor() {
