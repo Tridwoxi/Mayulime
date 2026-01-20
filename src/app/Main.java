@@ -19,6 +19,8 @@ import think.repr.Problem.InvalidSpecException;
 public final class Main extends Application {
 
     private static final String NAME = "Tridwoxi's Pathery AI";
+    private static final double MIN_WIDTH_PX = 480.0;
+    private static final double MIN_HEIGHT_PX = 320.0;
     private static final AtomicReference<Main> INSTANCE = new AtomicReference<>();
 
     private Gui gui;
@@ -44,6 +46,10 @@ public final class Main extends Application {
         this.gui = new Gui();
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
+        primaryStage.setMinWidth(MIN_WIDTH_PX);
+        primaryStage.setMinHeight(MIN_HEIGHT_PX);
+        primaryStage.setWidth(MIN_WIDTH_PX);
+        primaryStage.setHeight(MIN_HEIGHT_PX);
         primaryStage.setOnCloseRequest(event -> {
             Solver.getInstance().stop();
             Platform.exit();
