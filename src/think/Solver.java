@@ -18,15 +18,21 @@ import think.stra.Climb;
  */
 public final class Solver {
 
-    private static volatile ExecutorService tasks = null;
-    private static volatile Problem activeProblem = null;
-    private static volatile int topScore = 0;
+    private static final Solver INSTANCE = new Solver();
+
+    private volatile ExecutorService tasks = null;
+    private volatile Problem activeProblem = null;
+    private volatile int topScore = 0;
 
     private Solver() {}
 
+    public static Solver getInstance() {
+        return INSTANCE;
+    }
+
     // == Strategy management. =========================================================
 
-    public static void solve(final Problem problem) {
+    public void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
         activeProblem = problem;
         Main.getInstance().recieve(Runnable.class, problem, new HashSet<>(0), 0);
@@ -35,7 +41,7 @@ public final class Solver {
         go(problem);
     }
 
-    public static void stop() {
+    public void stop() {
         if (tasks == null) {
             return;
         }
@@ -47,7 +53,7 @@ public final class Solver {
         }
     }
 
-    private static void go(final Problem problem) {
+    private void go(final Problem problem) {
         if (tasks == null || tasks.isShutdown() || tasks.isTerminated()) {
             tasks = newExecutor();
         }
@@ -57,7 +63,7 @@ public final class Solver {
         tasks.execute(new Climb(problem));
     }
 
-    private static ExecutorService newExecutor() {
+    private ExecutorService newExecutor() {
         // Making a thread a daemon means when the GUI window is closed, the
         // application is happy to terminate. When these threads are not daemons, the
         // user is forced to keyboard interrupt or kill Java.
@@ -70,11 +76,11 @@ public final class Solver {
 
     // == Communication. ===============================================================
 
-    public static int getTopScore() {
+    public int getTopScore() {
         return topScore;
     }
 
-    public static void consider(
+    public void consider(
         final Class<? extends Runnable> strategyClass,
         final Problem problem,
         final HashSet<Cell> rubbers
@@ -88,7 +94,7 @@ public final class Solver {
         final HashSet<Cell> copy = new HashSet<>(rubbers);
         assert isValidAssignment(problem, copy);
         final int score = Snake.evaluate(problem, copy);
-        synchronized (Solver.class) {
+        synchronized (this) {
             if (score > topScore) {
                 topScore = score;
                 Main.getInstance().recieve(strategyClass, problem, copy, score);
@@ -96,7 +102,7 @@ public final class Solver {
         }
     }
 
-    private static boolean isValidAssignment(
+    private boolean isValidAssignment(
         final Problem problem,
         final HashSet<Cell> rubbers
     ) {

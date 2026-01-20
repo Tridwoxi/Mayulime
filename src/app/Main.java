@@ -68,7 +68,7 @@ public final class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle(NAME);
         primaryStage.setOnCloseRequest(event -> {
-            Solver.stop();
+            Solver.getInstance().stop();
             Platform.exit();
         });
         primaryStage.show();
@@ -86,7 +86,7 @@ public final class Main extends Application {
             System.err.println("Can't read file.");
         }
         if (problem != null) {
-            Solver.solve(problem);
+            Solver.getInstance().solve(problem);
             final Window window =
                 gui.getScene() == null ? null : gui.getScene().getWindow();
             if (window instanceof Stage activeStage) {

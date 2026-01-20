@@ -24,7 +24,7 @@ public final class Blind implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Solver.consider(Blind.class, problem, guess());
+            Solver.getInstance().consider(Blind.class, problem, guess());
         }
     }
 

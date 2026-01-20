@@ -26,7 +26,7 @@ public final class Climb implements Runnable {
                     break improvement_cycle;
                 }
             }
-            Solver.consider(Climb.class, problem, rubbers);
+            Solver.getInstance().consider(Climb.class, problem, rubbers);
             reset();
         }
     }
