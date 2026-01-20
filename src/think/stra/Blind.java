@@ -3,7 +3,7 @@ package think.stra;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-import think.Solver;
+import think.Manager;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -24,7 +24,7 @@ public final class Blind implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Solver.getInstance().consider(Blind.class, problem, guess());
+            Manager.getInstance().consider(Blind.class, problem, guess());
         }
     }
 

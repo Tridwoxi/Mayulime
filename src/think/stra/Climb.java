@@ -2,7 +2,7 @@ package think.stra;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import think.Solver;
+import think.Manager;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -26,7 +26,7 @@ public final class Climb implements Runnable {
                     break improvement_cycle;
                 }
             }
-            Solver.getInstance().consider(Climb.class, problem, rubbers);
+            Manager.getInstance().consider(Climb.class, problem, rubbers);
             reset();
         }
     }

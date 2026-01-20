@@ -13,20 +13,20 @@ import think.stra.Blind;
 import think.stra.Climb;
 
 /**
-    Strategy manager and bridge from backend to GUI. Must be called from JavaFX
-    Application Thread. Workers run in background to not block the GUI.
+    Strategy controller. Must be called from JavaFX Application Thread. Workers run in
+    background to not block the GUI.
  */
-public final class Solver {
+public final class Manager {
 
-    private static final Solver INSTANCE = new Solver();
+    private static final Manager INSTANCE = new Manager();
 
     private volatile ExecutorService tasks = null;
     private volatile Problem activeProblem = null;
     private volatile int topScore = 0;
 
-    private Solver() {}
+    private Manager() {}
 
-    public static Solver getInstance() {
+    public static Manager getInstance() {
         return INSTANCE;
     }
 

@@ -14,9 +14,9 @@ The player's goal is to maximize the total number of steps the snake takes. If t
 
 ## Architecture
 
-The system is a JavaFX Application, which is launched from and has its GUI defined in `src/app/Main.java`. Problems the user uploads are given to the solver.
+The system is a JavaFX Application, which is launched from `src/app/Main.java`. Problems the user uploads are given to the manager.
 
-`src/think/Solver.java` manages background threads to solve a problem. It uses strategies from `src/think/stra/` and runs indefinitely, occasionally sending the GUI updates.
+`src/think/Manager.java` manages background threads to solve a problem. It uses strategies from `src/think/stra/` and runs indefinitely, occasionally sending the GUI updates.
 
 Strategies read the representation of the problem and its features, which live in `src/think/repr/`. It applies analysis tools, which live in `src/think/ana`, to come up with better solutions.
 

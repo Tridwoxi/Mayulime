@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import think.Solver;
+import think.Manager;
 import think.repr.Cell;
 import think.repr.Problem;
 import think.repr.Problem.InvalidSpecException;
 
 /**
-    Application launch point and communication hub.
+    Application launch point. Connects Gui (frontend) to Manager (backend).
  */
 public final class Main extends Application {
 
@@ -51,7 +51,7 @@ public final class Main extends Application {
         primaryStage.setWidth(MIN_WIDTH_PX);
         primaryStage.setHeight(MIN_HEIGHT_PX);
         primaryStage.setOnCloseRequest(event -> {
-            Solver.getInstance().stop();
+            Manager.getInstance().stop();
             Platform.exit();
         });
         primaryStage.show();
@@ -69,7 +69,7 @@ public final class Main extends Application {
             System.err.println("Can't read file.");
         }
         if (problem != null) {
-            Solver.getInstance().solve(problem);
+            Manager.getInstance().solve(problem);
             if (gui.getWindow() instanceof Stage stage) {
                 stage.setTitle(file.getName());
             }
