@@ -23,5 +23,3 @@ Genetic algorithm should use sets of connected player walls as features, rather 
 ## Support
 
 Use the existing Pathery file format. End support for ".tpai" files. Delete create.py (http://beta.pathery.net superior).
-
-Center the upload problem button before a problem has been uploaded.

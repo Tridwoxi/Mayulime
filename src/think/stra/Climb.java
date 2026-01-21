@@ -21,7 +21,7 @@ public final class Climb implements Strategy {
 
     @Override
     public void run() {
-        while (true) {
+        while (isAlive()) {
             improvement_cycle: while (true) {
                 if (!improve()) {
                     break improvement_cycle;

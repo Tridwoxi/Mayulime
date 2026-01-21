@@ -20,8 +20,18 @@ public final class Manager {
 
     public interface Strategy extends Runnable {
         String getName();
+
+        default boolean isAlive() {
+            // When the user decides to work on a new problem, we want to kill all the
+            // workers for the old problem. There's no safe way to do that. Instead, we
+            // must politely ask them to check if they should stop, ideally (but not
+            // required) as often as STOP_TIME_MS so they free their resources before
+            // work on the next problem begins. Do not override this method.
+            return !Thread.currentThread().isInterrupted();
+        }
     }
 
+    private static final long STOP_TIME_MS = 500L;
     private static final Manager INSTANCE = new Manager();
 
     private volatile ExecutorService tasks;
@@ -64,7 +74,7 @@ public final class Manager {
         }
         tasks.shutdownNow();
         try {
-            tasks.awaitTermination(1, TimeUnit.SECONDS);
+            tasks.awaitTermination(STOP_TIME_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }

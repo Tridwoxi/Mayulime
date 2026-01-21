@@ -24,7 +24,7 @@ public final class Blind implements Strategy {
 
     @Override
     public void run() {
-        while (true) {
+        while (isAlive()) {
             Manager.getInstance().consider(this, problem, guess());
         }
     }
