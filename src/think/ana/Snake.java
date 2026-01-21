@@ -155,7 +155,7 @@ public final class Snake {
                 cell
                     .getNeighbors(problem)
                     .stream()
-                    .allMatch((neighbor -> consistent.apply(cell, neighbor)))
+                    .allMatch(neighbor -> consistent.apply(cell, neighbor))
             );
         assert distances.getCell(source) == 0;
         return distances;

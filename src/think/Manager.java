@@ -20,11 +20,15 @@ public final class Manager {
 
     private static final Manager INSTANCE = new Manager();
 
-    private volatile ExecutorService tasks = null;
-    private volatile Problem activeProblem = null;
-    private volatile int topScore = 0;
+    private volatile ExecutorService tasks;
+    private volatile Problem activeProblem;
+    private volatile int topScore;
 
-    private Manager() {}
+    private Manager() {
+        this.tasks = null;
+        this.activeProblem = null;
+        this.topScore = 0;
+    }
 
     public static Manager getInstance() {
         return INSTANCE;

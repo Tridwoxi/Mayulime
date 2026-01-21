@@ -10,6 +10,7 @@
     <module name="RegexpOnFilename" />
     <module name="RegexpSingleline" />
     <module name="TreeWalker">
+
         <module name="AbbreviationAsWordInName" />
         <module name="AbstractClassName" />
         <module name="AnnotationLocation" />
@@ -105,50 +106,51 @@
         <module name="TypeName" />
         <module name="UncommentedMain" />
         <module name="VisibilityModifier" />
+        <module name="ExplicitInitialization" />
+        <module name="SuppressWarnings" />
+        <module name="TodoComment" />
     </module>
     <!--
         == Disabled modules ==
 
-        To review:
-            <module name="AnnotationOnSameLine" />
-            <module name="AvoidInlineConditionals" />
-            <module name="ClassMemberImpliedModifier" />
-            <module name="EmptyLineSeparator" />
-            <module name="ExplicitInitialization" />
-            <module name="IllegalToken" />
-            <module name="IllegalType" />
-            <module name="ImportControl" />
-            <module name="Indentation" />
-            <module name="LambdaBodyLength" />
-            <module name="MissingCtor" />
-            <module name="OuterTypeNumber" />
-            <module name="ReturnCount" />
-            <module name="SeparatorWrap" />
-            <module name="SuppressWarnings" />
-            <module name="TodoComment" />
-            <module name="UnnecessaryParentheses" />
+        [Javadoc related]
 
-        Javadoc related:
-            <module name="JavadocBlockTagLocation" />
-            <module name="JavadocContentLocation" />
-            <module name="JavadocLeadingAsteriskAlign" />
-            <module name="JavadocMethod" />
-            <module name="JavadocMissingLeadingAsterisk" />
-            <module name="JavadocMissingWhitespaceAfterAsterisk" />
-            <module name="JavadocParagraph" />
-            <module name="JavadocStyle" />
-            <module name="JavadocTagContinuationIndentation" />
-            <module name="JavadocType" />
-            <module name="JavadocVariable" />
-            <module name="MissingJavadocMethod" />
-            <module name="MissingJavadocPackage" />
-            <module name="MissingJavadocType" />
-            <module name="JavadocPackage" />
+        <module name="JavadocBlockTagLocation" />
+        <module name="JavadocContentLocation" />
+        <module name="JavadocLeadingAsteriskAlign" />
+        <module name="JavadocMethod" />
+        <module name="JavadocMissingLeadingAsterisk" />
+        <module name="JavadocMissingWhitespaceAfterAsterisk" />
+        <module name="JavadocParagraph" />
+        <module name="JavadocStyle" />
+        <module name="JavadocTagContinuationIndentation" />
+        <module name="JavadocType" />
+        <module name="JavadocVariable" />
+        <module name="MissingJavadocMethod" />
+        <module name="MissingJavadocPackage" />
+        <module name="MissingJavadocType" />
+        <module name="JavadocPackage" />
 
-        Formatting related:
-            <module name="LineLength" />
+        [Formatting related]
 
-        Other ignored:
-            <module name="HiddenField" />
+        <module name="AnnotationOnSameLine" />
+        <module name="LineLength" />
+        <module name="UnnecessaryParentheses" />
+        <module name="EmptyLineSeparator" />
+        <module name="Indentation" />
+        <module name="SeparatorWrap" />
+
+        [Other ignored]
+
+        <module name="HiddenField" />
+        <module name="ClassMemberImpliedModifier" />
+        <module name="AvoidInlineConditionals" />
+        <module name="ImportControl" />
+        <module name="IllegalToken" />
+        <module name="ReturnCount" />
+        <module name="MissingCtor" />
+        <module name="OuterTypeNumber" />
+        <module name="LambdaBodyLength" />
+        <module name="IllegalType" />
     -->
 </module>
