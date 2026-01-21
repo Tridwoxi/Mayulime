@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import think.Manager;
+import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -13,7 +14,7 @@ import think.repr.Problem;
     a later version. It is not efficient and usually takes minutes to tie the best
     human score on a Simple.
  */
-public final class Blind implements Runnable {
+public final class Blind implements Strategy {
 
     private final Problem problem;
 
@@ -24,7 +25,7 @@ public final class Blind implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Manager.getInstance().consider(Blind.class, problem, guess());
+            Manager.getInstance().consider(this, problem, guess());
         }
     }
 
@@ -32,5 +33,10 @@ public final class Blind implements Runnable {
         return Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
             .limit(problem.getNumPlayerWalls())
             .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Override
+    public String getName() {
+        return "guessing randomly";
     }
 }

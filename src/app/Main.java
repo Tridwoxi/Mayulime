@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import think.Manager;
+import think.Manager.Strategy;
 import think.repr.Cell;
 import think.repr.Problem;
 import think.repr.Problem.InvalidSpecException;
@@ -77,13 +78,13 @@ public final class Main extends Application {
     }
 
     public void recieve(
-        final Class<? extends Runnable> strategyClass,
+        final Strategy submitter,
         final Problem problem,
         final HashSet<Cell> playerWalls,
         final int score
     ) {
         Platform.runLater(() -> {
-            gui.update(strategyClass, problem, playerWalls, score);
+            gui.update(submitter, problem, playerWalls, score);
             if (gui.getWindow() instanceof Stage stage) {
                 stage.sizeToScene();
             }

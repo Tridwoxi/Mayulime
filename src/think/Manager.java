@@ -18,6 +18,10 @@ import think.stra.Climb;
  */
 public final class Manager {
 
+    public interface Strategy extends Runnable {
+        String getName();
+    }
+
     private static final Manager INSTANCE = new Manager();
 
     private volatile ExecutorService tasks;
@@ -38,8 +42,17 @@ public final class Manager {
 
     public void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
+        final Strategy nobody = new Strategy() {
+            @Override
+            public void run() {}
+
+            @Override
+            public String getName() {
+                return "nobody";
+            }
+        };
         activeProblem = problem;
-        Main.getInstance().recieve(Runnable.class, problem, new HashSet<>(0), 0);
+        Main.getInstance().recieve(nobody, problem, new HashSet<>(0), 0);
         stop();
         topScore = 0;
         go(problem);
@@ -85,7 +98,7 @@ public final class Manager {
     }
 
     public void consider(
-        final Class<? extends Runnable> strategyClass,
+        final Strategy submitter,
         final Problem problem,
         final HashSet<Cell> playerWalls
     ) {
@@ -101,7 +114,7 @@ public final class Manager {
         synchronized (this) {
             if (score > topScore) {
                 topScore = score;
-                Main.getInstance().recieve(strategyClass, problem, copy, score);
+                Main.getInstance().recieve(submitter, problem, copy, score);
             }
         }
     }

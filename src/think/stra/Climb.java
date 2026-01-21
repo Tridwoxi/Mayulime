@@ -3,11 +3,12 @@ package think.stra;
 import java.util.ArrayList;
 import java.util.HashSet;
 import think.Manager;
+import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
 
-public final class Climb implements Runnable {
+public final class Climb implements Strategy {
 
     private final Problem problem;
     private final HashSet<Cell> playerWalls;
@@ -26,7 +27,7 @@ public final class Climb implements Runnable {
                     break improvement_cycle;
                 }
             }
-            Manager.getInstance().consider(Climb.class, problem, playerWalls);
+            Manager.getInstance().consider(this, problem, playerWalls);
             reset();
         }
     }
@@ -40,5 +41,10 @@ public final class Climb implements Runnable {
         Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
             .limit(problem.getNumPlayerWalls())
             .forEach(cell -> playerWalls.add(cell));
+    }
+
+    @Override
+    public String getName() {
+        return "random restart hill climbing";
     }
 }

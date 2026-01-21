@@ -25,6 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
+import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
@@ -69,14 +70,14 @@ public final class Gui extends Scene {
     }
 
     public void update(
-        final Class<? extends Runnable> strategyClass,
+        final Strategy submitter,
         final Problem problem,
         final HashSet<Cell> playerWalls,
         final int score
     ) {
         showGame();
         gameDisplay.setGame(problem, playerWalls);
-        statsDisplay.setScore(score, strategyClass.getSimpleName());
+        statsDisplay.setScore(score, submitter.getName());
     }
 
     private void hideGame() {
