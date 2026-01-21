@@ -10,11 +10,11 @@ import think.repr.Problem;
 public final class Climb implements Runnable {
 
     private final Problem problem;
-    private final HashSet<Cell> rubbers;
+    private final HashSet<Cell> playerWalls;
 
     public Climb(final Problem problem) {
         this.problem = problem;
-        this.rubbers = new HashSet<>();
+        this.playerWalls = new HashSet<>();
         reset();
     }
 
@@ -26,7 +26,7 @@ public final class Climb implements Runnable {
                     break improvement_cycle;
                 }
             }
-            Manager.getInstance().consider(Climb.class, problem, rubbers);
+            Manager.getInstance().consider(Climb.class, problem, playerWalls);
             reset();
         }
     }
@@ -36,9 +36,9 @@ public final class Climb implements Runnable {
     }
 
     public void reset() {
-        rubbers.clear();
+        playerWalls.clear();
         Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
-            .limit(problem.getNumRubbers())
-            .forEach(cell -> rubbers.add(cell));
+            .limit(problem.getNumPlayerWalls())
+            .forEach(cell -> playerWalls.add(cell));
     }
 }

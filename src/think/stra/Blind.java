@@ -30,7 +30,7 @@ public final class Blind implements Runnable {
 
     private HashSet<Cell> guess() {
         return Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
-            .limit(problem.getNumRubbers())
+            .limit(problem.getNumPlayerWalls())
             .collect(Collectors.toCollection(HashSet::new));
     }
 }

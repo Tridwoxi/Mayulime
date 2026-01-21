@@ -18,11 +18,11 @@ public final class Problem {
     private static final String SECTION_DELIM = ";;;";
     private static final String ROW_DELIM = ";;";
     private static final String CELL_DELIM = ";";
-    private static final String BRICK = "#";
+    private static final String SYSTEM_WALL = "#";
     private static final String EMPTY = ".";
 
-    private final int numRubbers;
-    private final Grid<Boolean> isBrick;
+    private final int numPlayerWalls;
+    private final Grid<Boolean> isSystemWall;
     private final ArrayList<Cell> checkpoints;
     private final ArrayList<Cell> allCells;
     private final HashSet<Cell> emptyCells;
@@ -36,7 +36,7 @@ public final class Problem {
         final ArrayList<String> sections = splitToList(clean, SECTION_DELIM);
 
         final String metadata = getNth(sections, 0);
-        this.numRubbers = strToInt(metadata);
+        this.numPlayerWalls = strToInt(metadata);
 
         final String grid = getNth(sections, 1);
         final ArrayList<ArrayList<String>> lines = splitToList(grid, ROW_DELIM)
@@ -58,7 +58,7 @@ public final class Problem {
             for (int col = 0; col < line.size(); col++) {
                 final String cell = line.get(col);
                 switch (cell) {
-                    case BRICK -> {
+                    case SYSTEM_WALL -> {
                         cells.set(row * numCols + col, true);
                     }
                     case EMPTY -> {
@@ -71,7 +71,7 @@ public final class Problem {
                 }
             }
         }
-        this.isBrick = new Grid<>(cells, numRows, numCols);
+        this.isSystemWall = new Grid<>(cells, numRows, numCols);
         this.allCells = buildAllCells(numRows, numCols);
 
         // Pathery allows multiple checkpoints with same order, but it's uncommon, and
@@ -79,38 +79,38 @@ public final class Problem {
         throwIfNotUniqueOrder(prechecks);
         this.checkpoints = buildChecks(prechecks);
 
-        // Pathery also allows more rubbers than possible, since the player may choose
-        // to not assign rubbers. But I will require a full assignment.
-        final int numBricks = (int) cells
+        // Pathery also allows more player walls than possible, since the player may
+        // choose to not assign player walls. But I will require a full assignment.
+        final int numSystemWalls = (int) cells
             .stream()
             .filter(value -> value)
             .count();
         final int numCheckpoints = checkpoints.size();
-        if (numBricks + numCheckpoints + numRubbers > numCells) {
+        if (numSystemWalls + numCheckpoints + numPlayerWalls > numCells) {
             throw new InvalidSpecException();
         }
     }
 
     // == Getters ======================================================================
 
-    public boolean isBrick(final Cell cell) {
-        return isBrick.getCell(cell);
+    public boolean isSystemWall(final Cell cell) {
+        return isSystemWall.getCell(cell);
     }
 
     public boolean containsCell(final Cell cell) {
-        return isBrick.containsCell(cell);
+        return isSystemWall.containsCell(cell);
     }
 
     public int getRowBound() {
-        return isBrick.getRowBound();
+        return isSystemWall.getRowBound();
     }
 
     public int getColBound() {
-        return isBrick.getColBound();
+        return isSystemWall.getColBound();
     }
 
-    public int getNumRubbers() {
-        return numRubbers;
+    public int getNumPlayerWalls() {
+        return numPlayerWalls;
     }
 
     public ArrayList<Cell> getCheckpoints() {

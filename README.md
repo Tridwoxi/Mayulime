@@ -6,9 +6,9 @@ This repository is not affiliated with Pathery. For ease of programming, it uses
 
 ## Task specification
 
-The world is a rectangular grid of empty cells, rubbers, bricks, and uniquely-numbered checkpoints. The world is initially devoid of rubbers. The player must convert a given number of empty cells to rubber cells.
+The world is a rectangular grid of empty cells, player walls, system walls, and uniquely-numbered checkpoints. The world is initially devoid of player walls. The player must convert a given number of empty cells to player wall cells.
 
-A snake makes its way from each checkpoint to the next in ascending order. It moves one step at a time either up, right, down, or left (but not diagonally). The snake cannot visit cells with bricks or rubbers on them. The snake takes a shortest path.
+A snake makes its way from each checkpoint to the next in ascending order. It moves one step at a time either up, right, down, or left (but not diagonally). The snake cannot visit cells with system walls or player walls on them. The snake takes a shortest path.
 
 The player's goal is to maximize the total number of steps the snake takes. If the snake cannot reach a checkpoint, the player loses.
 

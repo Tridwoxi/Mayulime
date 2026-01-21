@@ -71,11 +71,11 @@ public final class Gui extends Scene {
     public void update(
         final Class<? extends Runnable> strategyClass,
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final int score
     ) {
         showGame();
-        gameDisplay.setGame(problem, rubbers);
+        gameDisplay.setGame(problem, playerWalls);
         statsDisplay.setScore(score, strategyClass.getSimpleName());
     }
 
@@ -98,7 +98,7 @@ final class GameDisplay extends Group {
 
     GameDisplay() {}
 
-    public void setGame(final Problem problem, final HashSet<Cell> rubbers) {
+    public void setGame(final Problem problem, final HashSet<Cell> playerWalls) {
         final HashMap<Cell, Integer> checkpoints = new HashMap<>();
         Tools.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
             checkpoints.put(uniordered.item(), uniordered.order1())
@@ -106,15 +106,15 @@ final class GameDisplay extends Group {
 
         final Function<Cell, ColorString> getColorString = cell -> {
             // These cases must be disjoint, but it is not our responsibility to check.
-            if (problem.isBrick(cell)) {
-                return new ColorString(PatheryColors.BRICK, "");
+            if (problem.isSystemWall(cell)) {
+                return new ColorString(PatheryColors.SYSTEM_WALL, "");
             }
             if (checkpoints.containsKey(cell)) {
                 final String content = checkpoints.get(cell).toString();
                 return new ColorString(PatheryColors.CHECKPOINT, content);
             }
-            if (rubbers.contains(cell)) {
-                return new ColorString(PatheryColors.RUBBER, "");
+            if (playerWalls.contains(cell)) {
+                return new ColorString(PatheryColors.PLAYER_WALL, "");
             }
             return new ColorString(PatheryColors.EMPTY, "");
         };
@@ -236,8 +236,8 @@ final class PatheryColors {
 
     // Approximate average color, picked from Pathery.com's default color theme.
     public static final Color BACKGROUND = Color.web("121212");
-    public static final Color BRICK = Color.web("723736");
-    public static final Color RUBBER = Color.web("3c3d3c");
+    public static final Color SYSTEM_WALL = Color.web("723736");
+    public static final Color PLAYER_WALL = Color.web("3c3d3c");
     public static final Color EMPTY = Color.web("e2e8eb");
     public static final Color CHECKPOINT = Color.web("8e4793");
     public static final Color TELEPORT = Color.web("#214764");

@@ -87,7 +87,7 @@ public final class Manager {
     public void consider(
         final Class<? extends Runnable> strategyClass,
         final Problem problem,
-        final HashSet<Cell> rubbers
+        final HashSet<Cell> playerWalls
     ) {
         assert activeProblem != null;
         // This guard is tripped when the user uploads a new problem but worker threads
@@ -95,7 +95,7 @@ public final class Manager {
         if (activeProblem != problem) {
             return;
         }
-        final HashSet<Cell> copy = new HashSet<>(rubbers);
+        final HashSet<Cell> copy = new HashSet<>(playerWalls);
         assert isValidAssignment(problem, copy);
         final int score = Snake.evaluate(problem, copy);
         synchronized (this) {
@@ -108,10 +108,10 @@ public final class Manager {
 
     private boolean isValidAssignment(
         final Problem problem,
-        final HashSet<Cell> rubbers
+        final HashSet<Cell> playerWalls
     ) {
-        final boolean limited = rubbers.size() <= problem.getNumRubbers();
-        final boolean within = problem.getEmptyCells().containsAll(rubbers);
+        final boolean limited = playerWalls.size() <= problem.getNumPlayerWalls();
+        final boolean within = problem.getEmptyCells().containsAll(playerWalls);
         return limited && within;
     }
 }

@@ -23,11 +23,16 @@ public final class Snake {
 
     private Snake() {}
 
-    public static int evaluate(final Problem problem, final HashSet<Cell> rubbers) {
+    public static int evaluate(final Problem problem, final HashSet<Cell> playerWalls) {
         int sum = 0;
         final Stream<Pair<Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
         for (final Pair<Cell> pair : pairs.toList()) {
-            final Route route = travel(problem, rubbers, pair.first(), pair.second());
+            final Route route = travel(
+                problem,
+                playerWalls,
+                pair.first(),
+                pair.second()
+            );
             if (!route.possible()) {
                 return 0;
             }
@@ -38,13 +43,13 @@ public final class Snake {
 
     public static Route travel(
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final Cell start,
         final Cell end
     ) {
         assert !start.equals(end);
-        assert isLegalRun(problem, rubbers, start);
-        assert isLegalRun(problem, rubbers, end);
+        assert isLegalRun(problem, playerWalls, start);
+        assert isLegalRun(problem, playerWalls, end);
 
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
@@ -91,7 +96,7 @@ public final class Snake {
             final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
             assert gScoreCurrent != Integer.MAX_VALUE;
             for (final Cell neighbor : current.getNeighbors(problem)) {
-                if (!isOpen(problem, rubbers, neighbor)) {
+                if (!isOpen(problem, playerWalls, neighbor)) {
                     continue;
                 }
                 final int gScoreNew = gScoreCurrent + 1;
@@ -110,15 +115,15 @@ public final class Snake {
 
     public static Grid<Integer> distances(
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final Cell source
     ) {
-        assert isLegalRun(problem, rubbers, source);
+        assert isLegalRun(problem, playerWalls, source);
 
         // -1 is sentinel unreachable value. Chosen because adding connected distance
         // grids with unreachable cells maintains the invariant that unreachable cells
         // are negative (this is untrue if the source cannot reach the destination).
-        // Cells with rubbers or bricks on them are unreachable.
+        // Cells with player or system walls on them are unreachable.
         final Grid<Integer> distances = new Grid<>(
             Tools.fill(-1, problem.getAllCells().size()),
             problem.getRowBound(),
@@ -136,7 +141,7 @@ public final class Snake {
             assert distances.getCell(current) >= 0;
             for (final Cell neighbor : current.getNeighbors(problem)) {
                 if (
-                    isOpen(problem, rubbers, neighbor) &&
+                    isOpen(problem, playerWalls, neighbor) &&
                     distances.getCell(neighbor) == -1
                 ) {
                     distances.setCell(neighbor, distances.getCell(current) + 1);
@@ -162,27 +167,30 @@ public final class Snake {
     }
 
     /**
-        A cell is open iff it is not a brick or rubber. A cell is empty iff it is open
-        and not a checkpoint. Snakes may only step on open cells. Rubbers may only be
-        placed on empty cells. The set of open cells is a superset of empty cells.
+        A cell is open iff it is not a system wall or player wall. A cell is empty iff
+        it is open and not a checkpoint. Snakes may only step on open cells. Player
+        walls may only be placed on empty cells. The set of open cells is a superset of
+        empty cells.
      */
     private static boolean isOpen(
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final Cell cell
     ) {
-        return !problem.isBrick(cell) && !rubbers.contains(cell);
+        return !problem.isSystemWall(cell) && !playerWalls.contains(cell);
     }
 
     private static boolean isLegalRun(
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final Cell source
     ) {
         final boolean sourceIn = problem.containsCell(source);
-        final boolean openSource = isOpen(problem, rubbers, source);
-        final boolean rubbersIn = rubbers.stream().allMatch(problem::containsCell);
-        final boolean noOverlap = rubbers.stream().noneMatch(problem::isBrick);
-        return sourceIn && openSource && rubbersIn && noOverlap;
+        final boolean openSource = isOpen(problem, playerWalls, source);
+        final boolean playerWallsIn = playerWalls
+            .stream()
+            .allMatch(problem::containsCell);
+        final boolean noOverlap = playerWalls.stream().noneMatch(problem::isSystemWall);
+        return sourceIn && openSource && playerWallsIn && noOverlap;
     }
 }

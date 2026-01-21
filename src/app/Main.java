@@ -79,11 +79,11 @@ public final class Main extends Application {
     public void recieve(
         final Class<? extends Runnable> strategyClass,
         final Problem problem,
-        final HashSet<Cell> rubbers,
+        final HashSet<Cell> playerWalls,
         final int score
     ) {
         Platform.runLater(() -> {
-            gui.update(strategyClass, problem, rubbers, score);
+            gui.update(strategyClass, problem, playerWalls, score);
             if (gui.getWindow() instanceof Stage stage) {
                 stage.sizeToScene();
             }
