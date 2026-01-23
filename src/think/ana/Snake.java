@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import think.ana.Tools.BiOrdered;
 import think.ana.Tools.Pair;
@@ -149,19 +150,7 @@ public final class Snake {
                 }
             }
         }
-
-        final BiFunction<Cell, Cell, Boolean> consistent = (cell, neighbor) ->
-            distances.getCell(cell) == -1 ||
-            distances.getCell(neighbor) == -1 ||
-            Math.abs(distances.getCell(cell) - distances.getCell(neighbor)) <= 1;
-        assert distances
-            .cellStream()
-            .allMatch(cell ->
-                cell
-                    .getNeighbors(problem)
-                    .stream()
-                    .allMatch(neighbor -> consistent.apply(cell, neighbor))
-            );
+        assert isConsistent(distances, problem);
         assert distances.getCell(source) == 0;
         return distances;
     }
@@ -192,5 +181,21 @@ public final class Snake {
             .allMatch(problem::containsCell);
         final boolean noOverlap = playerWalls.stream().noneMatch(problem::isSystemWall);
         return sourceIn && openSource && playerWallsIn && noOverlap;
+    }
+
+    private static boolean isConsistent(
+        final Grid<Integer> distances,
+        final Problem problem
+    ) {
+        final BiFunction<Cell, Cell, Boolean> edgeConsistent = (cell, neighbor) ->
+            distances.getCell(cell) == -1 ||
+            distances.getCell(neighbor) == -1 ||
+            Math.abs(distances.getCell(cell) - distances.getCell(neighbor)) <= 1;
+        final Predicate<Cell> cellConsistent = cell ->
+            cell
+                .getNeighbors(problem)
+                .stream()
+                .allMatch(neighbor -> edgeConsistent.apply(cell, neighbor));
+        return distances.cellStream().allMatch(cellConsistent);
     }
 }
