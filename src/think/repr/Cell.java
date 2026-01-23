@@ -3,7 +3,7 @@ package think.repr;
 import java.util.ArrayList;
 
 /**
-    A lightweight (row, col) index pair used conceptually as grid.get(row).get(col). For
+    A lightweight (row, col) index pair used conceptually as item = grid[row][col]. For
     JavaFX, row is Y, and col is X. Cells are not defined outside of a grid.
  */
 public record Cell(int row, int col) {

@@ -7,12 +7,13 @@ import java.util.stream.Stream;
 import think.ana.Tools;
 
 /**
-    Rectangular 2D grid of cells. Implemented as 1D grid for less pointer chasing
-    (silly micro-optimization). Potential performance improvement: turn everything into
-    arrays to avoid cost of boxing primitive types.
+    Rectangular two-dimensional grid. No minimum size. Grids store "T"s, which have a
+    "Cell" as their location.
  */
 public final class Grid<T> {
 
+    // Potential optimization: use a primitive boolean[] or int[] to avoid unboxing
+    // costs. Since grids are used in hot loops, the speedup may be significant.
     private final ArrayList<T> cells;
     private final int rowBound;
     private final int colBound;
@@ -34,17 +35,22 @@ public final class Grid<T> {
     }
 
     public T getCell(final Cell cell) {
-        final int row = cell.row();
-        final int col = cell.col();
-        assert row >= 0 && row < rowBound && col >= 0 && col < colBound;
-        return cells.get(row * colBound + col);
+        assert containsCell(cell);
+        return cells.get(cell.row() * colBound + cell.col());
     }
 
     public void setCell(final Cell cell, final T value) {
-        final int row = cell.row();
-        final int col = cell.col();
-        assert row >= 0 && row < rowBound && col >= 0 && col < colBound;
-        cells.set(row * colBound + col, value);
+        assert containsCell(cell);
+        cells.set(cell.row() * colBound + cell.col(), value);
+    }
+
+    public void swapCells(final Cell first, final Cell second) {
+        assert containsCell(first) && containsCell(second);
+        final int firstIndex = first.row() * colBound + first.col();
+        final int secondIndex = second.row() * colBound + second.col();
+        final T firstHolder = cells.get(firstIndex);
+        cells.set(firstIndex, cells.get(secondIndex));
+        cells.set(secondIndex, firstHolder);
     }
 
     public boolean containsCell(final Cell cell) {
@@ -64,20 +70,6 @@ public final class Grid<T> {
         return colBound;
     }
 
-    public T getNth(final int index) {
-        assert index >= 0 && index < cells.size();
-        return cells.get(index);
-    }
-
-    public void setNth(final int index, final T value) {
-        assert index >= 0 && index < cells.size();
-        cells.set(index, value);
-    }
-
-    public int getSize() {
-        return cells.size();
-    }
-
     public Stream<T> itemSteam() {
         return cells.stream();
     }
@@ -95,11 +87,10 @@ public final class Grid<T> {
     ) {
         assert first.getRowBound() == second.getRowBound();
         assert first.getColBound() == second.getColBound();
-        assert first.getSize() == second.getSize();
-        final ArrayList<R> cells = new ArrayList<>(first.getSize());
-        for (int index = 0; index < first.getSize(); index++) {
-            cells.add(combiner.apply(first.getNth(index), second.getNth(index)));
+        final ArrayList<R> results = new ArrayList<>(first.cells.size());
+        for (int index = 0; index < first.cells.size(); index++) {
+            results.add(combiner.apply(first.cells.get(index), second.cells.get(index)));
         }
-        return new Grid<>(cells, first.getRowBound(), first.getColBound());
+        return new Grid<>(results, first.getRowBound(), first.getColBound());
     }
 }
