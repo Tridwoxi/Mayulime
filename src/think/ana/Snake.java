@@ -188,8 +188,8 @@ public final class Snake {
         final Problem problem
     ) {
         final BiFunction<Cell, Cell, Boolean> edgeConsistent = (cell, neighbor) ->
-            distances.getCell(cell) == -1 ||
-            distances.getCell(neighbor) == -1 ||
+            distances.getCell(cell) <= -1 ||
+            distances.getCell(neighbor) <= -1 ||
             Math.abs(distances.getCell(cell) - distances.getCell(neighbor)) <= 1;
         final Predicate<Cell> cellConsistent = cell ->
             cell
