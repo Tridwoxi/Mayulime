@@ -62,7 +62,7 @@ public final class Manager {
             }
         };
         activeProblem = problem;
-        Main.getInstance().recieve(nobody, problem, new HashSet<>(0), 0);
+        Main.getInstance().receive(nobody, problem, new HashSet<>(0), 0);
         stop();
         topScore = 0;
         go(problem);
@@ -124,7 +124,7 @@ public final class Manager {
         synchronized (this) {
             if (score > topScore) {
                 topScore = score;
-                Main.getInstance().recieve(submitter, problem, copy, score);
+                Main.getInstance().receive(submitter, problem, copy, score);
             }
         }
     }

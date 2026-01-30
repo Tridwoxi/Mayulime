@@ -77,7 +77,7 @@ public final class Main extends Application {
         }
     }
 
-    public void recieve(
+    public void receive(
         final Strategy submitter,
         final Problem problem,
         final HashSet<Cell> playerWalls,
