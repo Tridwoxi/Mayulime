@@ -11,8 +11,8 @@
 # Include documentation.
 !*.md
 
-# Include custom file format (as examples).
-!*.tpai
+# Include Pathery MapCode format.
+!*.mapcode
 
 # Keep extensionless hooks because Git expects these exact filenames under
 # core.hooksPath. This list must be manually maintained.

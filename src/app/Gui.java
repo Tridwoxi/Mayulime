@@ -206,8 +206,8 @@ final class ScoreDisplay extends Text {
 final class ButtonDisplay extends Button {
 
     private static final String TEXT = "Upload problem";
-    private static final String FORMAT_NAME = "Pathery level specification";
-    private static final String FORMAT_EXT = "*.tpai";
+    private static final String FORMAT_NAME = "Pathery MapCode";
+    private static final String FORMAT_EXT = "*.mapcode";
 
     ButtonDisplay() {
         super(TEXT);
