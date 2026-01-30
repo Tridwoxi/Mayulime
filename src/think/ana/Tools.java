@@ -3,6 +3,7 @@ package think.ana;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
@@ -52,6 +53,16 @@ public final class Tools {
         );
     }
 
+    private static <T> Stream<T> toStream(final Iterator<T> iterator) {
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(
+                iterator,
+                Spliterator.ORDERED + Spliterator.NONNULL
+            ),
+            false
+        );
+    }
+
     // == Randoms. =====================================================================
 
     /**
@@ -81,26 +92,23 @@ public final class Tools {
                 return items.get(index);
             }
         };
-        return StreamSupport.stream(
-            Spliterators.spliteratorUnknownSize(iterator, 0),
-            false
-        );
+        return toStream(iterator);
     }
 
     // == Pairwise. ====================================================================
 
-    public record Pair<T>(T first, T second) {}
+    public record Pair<F, S>(F first, S second) {}
 
     /**
         Same as Python's `itertools.pairwise`.
      */
-    public static <T> Stream<Pair<T>> pairwise(final Iterable<T> items) {
+    public static <T> Stream<Pair<T, T>> pairwise(final Iterable<T> items) {
         final Iterator<T> source = items.iterator();
         if (!source.hasNext()) {
             return Stream.empty();
         }
         final T first = source.next();
-        final Iterator<Pair<T>> iterator = new Iterator<>() {
+        final Iterator<Pair<T, T>> iterator = new Iterator<>() {
             private T previous = first;
 
             @Override
@@ -109,17 +117,41 @@ public final class Tools {
             }
 
             @Override
-            public Pair<T> next() {
+            public Pair<T, T> next() {
                 final T next = source.next();
-                final Pair<T> pair = new Pair<>(previous, next);
+                final Pair<T, T> pair = new Pair<>(previous, next);
                 previous = next;
                 return pair;
             }
         };
-        return StreamSupport.stream(
-            Spliterators.spliteratorUnknownSize(iterator, 0),
-            false
-        );
+        return toStream(iterator);
+    }
+
+    // == Zip. ====================================================================
+
+    /**
+        Same as Python's `zip` with two arguments and strict=True. Lazily throws
+        NoSuchElementException if iterables are of unequal length.
+     */
+    public static <F, S> Stream<Pair<F, S>> zip(
+        final Iterable<F> firsts,
+        final Iterable<S> seconds
+    ) {
+        final Iterator<F> firstIterator = firsts.iterator();
+        final Iterator<S> secondIterator = seconds.iterator();
+
+        final Iterator<Pair<F, S>> iterator = new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return firstIterator.hasNext() || secondIterator.hasNext();
+            }
+
+            @Override
+            public Pair<F, S> next() {
+                return new Pair<>(firstIterator.next(), secondIterator.next());
+            }
+        };
+        return toStream(iterator);
     }
 
     // == Ordering. ====================================================================

@@ -26,8 +26,8 @@ public final class Snake {
 
     public static int evaluate(final Problem problem, final HashSet<Cell> playerWalls) {
         int sum = 0;
-        final Stream<Pair<Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
-        for (final Pair<Cell> pair : pairs.toList()) {
+        final Stream<Pair<Cell, Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
+        for (final Pair<Cell, Cell> pair : pairs.toList()) {
             final Route route = travel(
                 problem,
                 playerWalls,

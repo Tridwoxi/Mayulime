@@ -70,7 +70,7 @@ public final class Grid<T> {
         return colBound;
     }
 
-    public Stream<T> itemSteam() {
+    public Stream<T> itemStream() {
         return cells.stream();
     }
 
