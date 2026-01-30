@@ -31,7 +31,7 @@ public final class Blind implements Strategy {
 
     private HashSet<Cell> guess() {
         return Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
-            .limit(problem.getNumPlayerWalls())
+            .limit(problem.getPlayerWallSupply())
             .collect(Collectors.toCollection(HashSet::new));
     }
 

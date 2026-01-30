@@ -12,7 +12,7 @@ import think.Manager;
 import think.Manager.Strategy;
 import think.repr.Cell;
 import think.repr.Problem;
-import think.repr.Problem.InvalidSpecException;
+import think.repr.Problem.BadMapCodeException;
 
 /**
     Application launch point. Connects Gui (frontend) to Manager (backend).
@@ -64,8 +64,8 @@ public final class Main extends Application {
         Problem problem = null;
         try {
             problem = new Problem(Files.readString(file.toPath()));
-        } catch (InvalidSpecException exception) {
-            System.err.println("Bad specification.");
+        } catch (BadMapCodeException exception) {
+            System.err.println("Bad MapCode.");
         } catch (IOException exception) {
             System.err.println("Can't read file.");
         }

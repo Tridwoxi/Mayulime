@@ -39,7 +39,7 @@ public final class Climb implements Strategy {
     public void reset() {
         playerWalls.clear();
         Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
-            .limit(problem.getNumPlayerWalls())
+            .limit(problem.getPlayerWallSupply())
             .forEach(cell -> playerWalls.add(cell));
     }
 

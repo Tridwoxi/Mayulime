@@ -133,7 +133,7 @@ public final class Manager {
         final Problem problem,
         final HashSet<Cell> playerWalls
     ) {
-        final boolean limited = playerWalls.size() <= problem.getNumPlayerWalls();
+        final boolean limited = playerWalls.size() <= problem.getPlayerWallSupply();
         final boolean within = problem.getEmptyCells().containsAll(playerWalls);
         return limited && within;
     }

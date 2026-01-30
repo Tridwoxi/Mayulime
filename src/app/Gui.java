@@ -121,16 +121,18 @@ final class GameDisplay extends Group {
         };
 
         getChildren().clear();
-        for (Cell cell : problem.getAllCells()) {
-            final ColorString colorString = getColorString.apply(cell);
-            final CellDisplay cellDisplay = new CellDisplay(
-                colorString.color(),
-                colorString.string()
-            );
-            cellDisplay.setLayoutY(cell.row() * Gui.CELL_SIZE_PX);
-            cellDisplay.setLayoutX(cell.col() * Gui.CELL_SIZE_PX);
-            getChildren().add(cellDisplay);
-        }
+        problem
+            .getAllCells()
+            .forEach(cell -> {
+                final ColorString colorString = getColorString.apply(cell);
+                final CellDisplay cellDisplay = new CellDisplay(
+                    colorString.color(),
+                    colorString.string()
+                );
+                cellDisplay.setLayoutY(cell.row() * Gui.CELL_SIZE_PX);
+                cellDisplay.setLayoutX(cell.col() * Gui.CELL_SIZE_PX);
+                getChildren().add(cellDisplay);
+            });
     }
 }
 

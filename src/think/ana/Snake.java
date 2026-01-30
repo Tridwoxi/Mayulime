@@ -126,7 +126,7 @@ public final class Snake {
         // are negative (this is untrue if the source cannot reach the destination).
         // Cells with player or system walls on them are unreachable.
         final Grid<Integer> distances = new Grid<>(
-            Tools.fill(-1, problem.getAllCells().size()),
+            Tools.fill(-1, problem.getRowBound() * problem.getColBound()),
             problem.getRowBound(),
             problem.getColBound()
         );
