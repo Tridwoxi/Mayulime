@@ -7,6 +7,7 @@ import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
 
 public final class Climb implements Strategy {
 
@@ -38,7 +39,7 @@ public final class Climb implements Strategy {
 
     public void reset() {
         playerWalls.clear();
-        Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
+        Tools.randomly(problem.where(Feature.EMPTY, new ArrayList<>()))
             .limit(problem.getPlayerWallSupply())
             .forEach(cell -> playerWalls.add(cell));
     }

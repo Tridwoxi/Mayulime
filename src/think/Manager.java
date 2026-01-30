@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import think.ana.Snake;
 import think.repr.Cell;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
 import think.stra.Blind;
 import think.stra.Climb;
 
@@ -134,7 +135,9 @@ public final class Manager {
         final HashSet<Cell> playerWalls
     ) {
         final boolean limited = playerWalls.size() <= problem.getPlayerWallSupply();
-        final boolean within = problem.getEmptyCells().containsAll(playerWalls);
+        final boolean within = problem
+            .where(Feature.EMPTY, new HashSet<>())
+            .containsAll(playerWalls);
         return limited && within;
     }
 }

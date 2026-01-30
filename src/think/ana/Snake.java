@@ -196,6 +196,6 @@ public final class Snake {
                 .getNeighbors(problem)
                 .stream()
                 .allMatch(neighbor -> edgeConsistent.apply(cell, neighbor));
-        return distances.cellStream().allMatch(cellConsistent);
+        return distances.stream().map(Pair::second).allMatch(cellConsistent);
     }
 }

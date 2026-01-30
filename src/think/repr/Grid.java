@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import think.ana.Tools.Pair;
 
 /**
     Rectangular two-dimensional grid. No minimum size. Grids store items of type "T",
@@ -38,6 +39,14 @@ public final class Grid<T> {
         items.set(cell.row() * numCols + cell.col(), item);
     }
 
+    public int getNumRows() {
+        return numRows;
+    }
+
+    public int getNumCols() {
+        return numCols;
+    }
+
     public boolean inBounds(final Cell cell) {
         return (
             cell.row() >= 0 &&
@@ -47,21 +56,9 @@ public final class Grid<T> {
         );
     }
 
-    public int getNumRows() {
-        return numRows;
-    }
-
-    public int getNumCols() {
-        return numCols;
-    }
-
-    public Stream<T> itemStream() {
-        return items.stream();
-    }
-
-    public Stream<Cell> cellStream() {
+    public Stream<Pair<T, Cell>> stream() {
         return IntStream.range(0, items.size()).mapToObj(index ->
-            new Cell(index / numCols, index % numCols)
+            new Pair<>(items.get(index), new Cell(index / numCols, index % numCols))
         );
     }
 

@@ -1,11 +1,12 @@
 package think.repr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import think.ana.Tools;
+import think.ana.Tools.Pair;
 
 /**
     Simplified Pathery problem specification.
@@ -14,7 +15,7 @@ public final class Problem {
 
     public static final class BadMapCodeException extends Exception {}
 
-    public enum FeatureType {
+    public enum Feature {
         EMPTY,
         CHECKPOINT,
         SYSTEM_WALL,
@@ -43,10 +44,9 @@ public final class Problem {
     private final int numRows;
     private final int numCols;
     private final int playerWallSupply;
-    private final Grid<FeatureType> featureTypes;
+    private final Grid<Feature> features;
     private final ArrayList<Cell> checkpoints;
     private final HashMap<Cell, Cell> teleports;
-    private final HashSet<Cell> emptyCells;
 
     // == Parser (constructor). ========================================================
 
@@ -116,10 +116,7 @@ public final class Problem {
 
         // == Grid parsing: temporary data holders. ==
         final String[] features = parts[1].split(PERIOD_OR_COMMA_REGEX);
-        final ArrayList<FeatureType> cells = Tools.fill(
-            FeatureType.EMPTY,
-            numRows * numCols
-        );
+        final ArrayList<Feature> cells = Tools.fill(Feature.EMPTY, numRows * numCols);
         // checks is 1-indexed, while telIns/Outs is 0-indexed.
         final ArrayList<Cell> checks = Tools.fill(
             Cell.OUT_OF_BOUNDS,
@@ -149,37 +146,37 @@ public final class Problem {
                     require(annotation == 1);
                     require(checks.get(0) == Cell.OUT_OF_BOUNDS);
                     checks.set(0, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, FeatureType.CHECKPOINT);
+                    cells.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case FINISH_SYMBOL -> {
                     require(annotation == 1);
                     require(checks.get(NUM_CHECKPOINTS + 1).equals(Cell.OUT_OF_BOUNDS));
                     checks.set(NUM_CHECKPOINTS + 1, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, FeatureType.CHECKPOINT);
+                    cells.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case WALL_SYMBOL -> {
                     final int wallType1 = 1;
                     final int wallType3 = 3;
                     require(annotation == wallType1 || annotation == wallType3);
-                    cells.set(traversingIndex, FeatureType.SYSTEM_WALL);
+                    cells.set(traversingIndex, Feature.SYSTEM_WALL);
                 }
                 case CHECKPOINT_SYMBOL -> {
                     require(annotation >= 1 && annotation <= NUM_CHECKPOINTS);
                     require(checks.get(annotation).equals(Cell.OUT_OF_BOUNDS));
                     checks.set(annotation, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, FeatureType.CHECKPOINT);
+                    cells.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case TELEPORT_IN_SYMBOL -> {
                     require(annotation >= 1 && annotation <= NUM_TELEPORTS);
                     require(telIns.get(annotation - 1).equals(Cell.OUT_OF_BOUNDS));
                     telIns.set(annotation - 1, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, FeatureType.TELEPORT_IN);
+                    cells.set(traversingIndex, Feature.TELEPORT_IN);
                 }
                 case TELEPORT_OUT_SYMBOL -> {
                     require(annotation >= 1 && annotation <= NUM_TELEPORTS);
                     require(telOuts.get(annotation - 1).equals(Cell.OUT_OF_BOUNDS));
                     telOuts.set(annotation - 1, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, FeatureType.TELEPORT_OUT);
+                    cells.set(traversingIndex, Feature.TELEPORT_OUT);
                 }
                 default -> {
                     require(false);
@@ -202,7 +199,7 @@ public final class Problem {
         require(pairedTels && hasStart && hasEnd);
 
         // == Grid parsing: building. ==
-        this.featureTypes = new Grid<>(cells, numRows, numCols);
+        this.features = new Grid<>(cells, numRows, numCols);
         this.checkpoints = new ArrayList<>();
         checks
             .stream()
@@ -214,10 +211,6 @@ public final class Problem {
             .forEachOrdered(pair -> {
                 teleports.put(pair.first(), pair.second());
             });
-        this.emptyCells = new HashSet<>();
-        this.featureTypes.cellStream()
-            .filter(cell -> featureTypes.get(cell) == FeatureType.EMPTY)
-            .forEach(emptyCells::add);
     }
 
     private static void require(final Boolean condition) throws BadMapCodeException {
@@ -243,17 +236,17 @@ public final class Problem {
 
     // == Public API. ==================================================================
 
-    public FeatureType getFeatureType(final Cell cell) {
-        assert featureTypes.inBounds(cell);
-        return featureTypes.get(cell);
+    public Feature getFeatureType(final Cell cell) {
+        assert features.inBounds(cell);
+        return features.get(cell);
     }
 
     public boolean containsCell(final Cell cell) {
-        return featureTypes.inBounds(cell);
+        return features.inBounds(cell);
     }
 
     public boolean isSystemWall(final Cell cell) {
-        return getFeatureType(cell) == FeatureType.SYSTEM_WALL;
+        return getFeatureType(cell) == Feature.SYSTEM_WALL;
     }
 
     public int getNumRows() {
@@ -276,11 +269,19 @@ public final class Problem {
         return new HashMap<>(teleports);
     }
 
-    public HashSet<Cell> getEmptyCells() {
-        return new HashSet<>(emptyCells);
+    public <C extends Collection<Cell>> C where(
+        final Feature type,
+        final C emptyCollection
+    ) {
+        assert emptyCollection.isEmpty();
+        features
+            .stream()
+            .filter(pair -> pair.first() == type)
+            .forEach(pair -> emptyCollection.add(pair.second()));
+        return emptyCollection;
     }
 
     public Stream<Cell> getAllCells() {
-        return featureTypes.cellStream();
+        return features.stream().map(Pair::second);
     }
 }

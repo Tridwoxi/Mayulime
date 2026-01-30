@@ -8,6 +8,7 @@ import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
 
 /**
     Guess blindly. This strategy exists as a proof of concept and should be removed in
@@ -30,7 +31,7 @@ public final class Blind implements Strategy {
     }
 
     private HashSet<Cell> guess() {
-        return Tools.randomly(new ArrayList<>(problem.getEmptyCells()))
+        return Tools.randomly(problem.where(Feature.EMPTY, new ArrayList<>()))
             .limit(problem.getPlayerWallSupply())
             .collect(Collectors.toCollection(HashSet::new));
     }
