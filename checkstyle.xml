@@ -9,8 +9,8 @@
     <module name="RegexpHeader" />
     <module name="RegexpOnFilename" />
     <module name="RegexpSingleline" />
+    <module name="SuppressWarningsFilter" />
     <module name="TreeWalker">
-
         <module name="AbbreviationAsWordInName" />
         <module name="AbstractClassName" />
         <module name="AnnotationLocation" />
@@ -75,7 +75,6 @@
         <module name="MethodParamPad" />
         <module name="MethodTypeParameterName" />
         <module name="MissingDeprecated" />
-        <module name="MissingNullCaseInSwitch" />
         <module name="MissingOverride" />
         <module name="MissingSwitchDefault" />
         <module name="ModifiedControlVariable" />
@@ -101,8 +100,8 @@
         <module name="StringLiteralEquality" />
         <module name="SuperClone" />
         <module name="SuperFinalize" />
+        <module name="SuppressWarningsHolder" />
         <module name="ThrowsCount" />
-        <module name="TrailingComment" />
         <module name="TypeName" />
         <module name="UncommentedMain" />
         <module name="VisibilityModifier" />
@@ -152,5 +151,7 @@
         <module name="OuterTypeNumber" />
         <module name="LambdaBodyLength" />
         <module name="IllegalType" />
+        <module name="TrailingComment" />
+        <module name="MissingNullCaseInSwitch" />
     -->
 </module>
