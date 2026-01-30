@@ -40,8 +40,8 @@ public final class Problem {
     private static final String TELEPORT_IN_SYMBOL = "t";
     private static final String TELEPORT_OUT_SYMBOL = "u";
 
-    private final int rowBound;
-    private final int colBound;
+    private final int numRows;
+    private final int numCols;
     private final int playerWallSupply;
     private final Grid<FeatureType> featureTypes;
     private final ArrayList<Cell> checkpoints;
@@ -107,18 +107,18 @@ public final class Problem {
         // == Metadata parsing. ==
         final String[] metadata = parts[0].split(PERIOD_REGEX, -1);
         require(metadata.length == NUM_METADATA_PARTS);
-        this.colBound = strToInt(metadata[0]);
-        this.rowBound = strToInt(metadata[1]);
+        this.numCols = strToInt(metadata[0]);
+        this.numRows = strToInt(metadata[1]);
         this.playerWallSupply = strToInt(metadata[2]);
         final Function<Integer, Cell> indexToCell = index -> {
-            return new Cell(index / colBound, index % colBound);
+            return new Cell(index / numCols, index % numCols);
         };
 
         // == Grid parsing: temporary data holders. ==
         final String[] features = parts[1].split(PERIOD_OR_COMMA_REGEX);
         final ArrayList<FeatureType> cells = Tools.fill(
             FeatureType.EMPTY,
-            rowBound * colBound
+            numRows * numCols
         );
         // checks is 1-indexed, while telIns/Outs is 0-indexed.
         final ArrayList<Cell> checks = Tools.fill(
@@ -134,7 +134,7 @@ public final class Problem {
             if (feature.isBlank()) {
                 continue;
             }
-            require(traversingIndex < rowBound * colBound);
+            require(traversingIndex < numRows * numCols);
             if (feature.matches(DIGITS_REGEX)) {
                 traversingIndex += strToInt(feature);
                 continue;
@@ -187,7 +187,7 @@ public final class Problem {
             }
             traversingIndex += 1;
         }
-        require(traversingIndex <= rowBound * colBound);
+        require(traversingIndex <= numRows * numCols);
 
         // == Grid parsing: semantic validation. ==
         final boolean pairedTels = Tools.zip(telIns, telOuts).allMatch(
@@ -202,7 +202,7 @@ public final class Problem {
         require(pairedTels && hasStart && hasEnd);
 
         // == Grid parsing: building. ==
-        this.featureTypes = new Grid<>(cells, rowBound, colBound);
+        this.featureTypes = new Grid<>(cells, numRows, numCols);
         this.checkpoints = new ArrayList<>();
         checks
             .stream()
@@ -216,7 +216,7 @@ public final class Problem {
             });
         this.emptyCells = new HashSet<>();
         this.featureTypes.cellStream()
-            .filter(cell -> featureTypes.getCell(cell) == FeatureType.EMPTY)
+            .filter(cell -> featureTypes.get(cell) == FeatureType.EMPTY)
             .forEach(emptyCells::add);
     }
 
@@ -244,24 +244,24 @@ public final class Problem {
     // == Public API. ==================================================================
 
     public FeatureType getFeatureType(final Cell cell) {
-        assert featureTypes.containsCell(cell);
-        return featureTypes.getCell(cell);
+        assert featureTypes.inBounds(cell);
+        return featureTypes.get(cell);
     }
 
     public boolean containsCell(final Cell cell) {
-        return featureTypes.containsCell(cell);
+        return featureTypes.inBounds(cell);
     }
 
     public boolean isSystemWall(final Cell cell) {
         return getFeatureType(cell) == FeatureType.SYSTEM_WALL;
     }
 
-    public int getRowBound() {
-        return rowBound;
+    public int getNumRows() {
+        return numRows;
     }
 
-    public int getColBound() {
-        return colBound;
+    public int getNumCols() {
+        return numCols;
     }
 
     public int getPlayerWallSupply() {

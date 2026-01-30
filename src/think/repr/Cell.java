@@ -14,8 +14,8 @@ public record Cell(int row, int col) {
         // reducing GC pressure. Reasonable because this method is important to BFS.
         assert problem.containsCell(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
-        final int rowBound = problem.getRowBound();
-        final int colBound = problem.getColBound();
+        final int rowBound = problem.getNumRows();
+        final int colBound = problem.getNumCols();
         if (row - 1 >= 0) {
             neighbors.add(new Cell(row - 1, col));
         }

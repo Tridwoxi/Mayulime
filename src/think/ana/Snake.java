@@ -126,32 +126,32 @@ public final class Snake {
         // are negative (this is untrue if the source cannot reach the destination).
         // Cells with player or system walls on them are unreachable.
         final Grid<Integer> distances = new Grid<>(
-            Tools.fill(-1, problem.getRowBound() * problem.getColBound()),
-            problem.getRowBound(),
-            problem.getColBound()
+            Tools.fill(-1, problem.getNumRows() * problem.getNumCols()),
+            problem.getNumRows(),
+            problem.getNumCols()
         );
 
         // We use breadth-first search because we visit every reachable point and it
         // has slightly less overhead than A-star. "distances" also visited set.
         final ArrayDeque<Cell> frontier = new ArrayDeque<>();
         frontier.add(source);
-        distances.setCell(source, 0);
+        distances.set(source, 0);
 
         while (!frontier.isEmpty()) {
             final Cell current = frontier.removeFirst();
-            assert distances.getCell(current) >= 0;
+            assert distances.get(current) >= 0;
             for (final Cell neighbor : current.getNeighbors(problem)) {
                 if (
                     isOpen(problem, playerWalls, neighbor) &&
-                    distances.getCell(neighbor) == -1
+                    distances.get(neighbor) == -1
                 ) {
-                    distances.setCell(neighbor, distances.getCell(current) + 1);
+                    distances.set(neighbor, distances.get(current) + 1);
                     frontier.add(neighbor);
                 }
             }
         }
         assert isConsistent(distances, problem);
-        assert distances.getCell(source) == 0;
+        assert distances.get(source) == 0;
         return distances;
     }
 
@@ -188,9 +188,9 @@ public final class Snake {
         final Problem problem
     ) {
         final BiFunction<Cell, Cell, Boolean> edgeConsistent = (cell, neighbor) ->
-            distances.getCell(cell) <= -1 ||
-            distances.getCell(neighbor) <= -1 ||
-            Math.abs(distances.getCell(cell) - distances.getCell(neighbor)) <= 1;
+            distances.get(cell) <= -1 ||
+            distances.get(neighbor) <= -1 ||
+            Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
         final Predicate<Cell> cellConsistent = cell ->
             cell
                 .getNeighbors(problem)

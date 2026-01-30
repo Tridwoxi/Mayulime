@@ -4,70 +4,55 @@ import java.util.ArrayList;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import think.ana.Tools;
 
 /**
-    Rectangular two-dimensional grid. No minimum size. Grids store "T"s, which have a
-    "Cell" as their location.
+    Rectangular two-dimensional grid. No minimum size. Grids store items of type "T",
+    which have a "Cell" as their location.
  */
 public final class Grid<T> {
 
     // Potential optimization: use a primitive boolean[] or int[] to avoid unboxing
     // costs. Since grids are used in hot loops, the speedup may be significant.
     private final ArrayList<T> items;
-    private final int rowBound;
-    private final int colBound;
+    private final int numRows;
+    private final int numCols;
 
-    public Grid(final ArrayList<T> cells, final int rowBound, final int colBound) {
-        assert cells.size() == rowBound * colBound;
-        this.items = new ArrayList<>(cells);
-        this.rowBound = rowBound;
-        this.colBound = colBound;
+    public Grid(final ArrayList<T> items, final int numRows, final int numCols) {
+        assert items.size() == numRows * numCols && numRows >= 0;
+        this.items = new ArrayList<>(items);
+        this.numRows = numRows;
+        this.numCols = numCols;
     }
 
-    public Grid(final ArrayList<ArrayList<T>> cells) {
-        this(
-            Tools.flatten(cells),
-            cells.size(),
-            cells.isEmpty() ? 0 : cells.getFirst().size()
-        );
-        assert Tools.rectangular(cells);
+    public Grid(final Grid<T> grid) {
+        this(grid.items, grid.numRows, grid.numCols);
     }
 
-    public T getCell(final Cell cell) {
-        assert containsCell(cell);
-        return items.get(cell.row() * colBound + cell.col());
+    public T get(final Cell cell) {
+        assert inBounds(cell);
+        return items.get(cell.row() * numCols + cell.col());
     }
 
-    public void setCell(final Cell cell, final T value) {
-        assert containsCell(cell);
-        items.set(cell.row() * colBound + cell.col(), value);
+    public void set(final Cell cell, final T item) {
+        assert inBounds(cell);
+        items.set(cell.row() * numCols + cell.col(), item);
     }
 
-    public void swapCells(final Cell first, final Cell second) {
-        assert containsCell(first) && containsCell(second);
-        final int firstIndex = first.row() * colBound + first.col();
-        final int secondIndex = second.row() * colBound + second.col();
-        final T firstHolder = items.get(firstIndex);
-        items.set(firstIndex, items.get(secondIndex));
-        items.set(secondIndex, firstHolder);
-    }
-
-    public boolean containsCell(final Cell cell) {
+    public boolean inBounds(final Cell cell) {
         return (
             cell.row() >= 0 &&
-            cell.row() < rowBound &&
+            cell.row() < numRows &&
             cell.col() >= 0 &&
-            cell.col() < colBound
+            cell.col() < numCols
         );
     }
 
-    public int getRowBound() {
-        return rowBound;
+    public int getNumRows() {
+        return numRows;
     }
 
-    public int getColBound() {
-        return colBound;
+    public int getNumCols() {
+        return numCols;
     }
 
     public Stream<T> itemStream() {
@@ -76,7 +61,7 @@ public final class Grid<T> {
 
     public Stream<Cell> cellStream() {
         return IntStream.range(0, items.size()).mapToObj(index ->
-            new Cell(index / colBound, index % colBound)
+            new Cell(index / numCols, index % numCols)
         );
     }
 
@@ -85,12 +70,12 @@ public final class Grid<T> {
         final Grid<S> second,
         final BiFunction<F, S, R> combiner
     ) {
-        assert first.getRowBound() == second.getRowBound();
-        assert first.getColBound() == second.getColBound();
+        assert first.getNumRows() == second.getNumRows();
+        assert first.getNumCols() == second.getNumCols();
         final ArrayList<R> results = new ArrayList<>(first.items.size());
         for (int index = 0; index < first.items.size(); index++) {
             results.add(combiner.apply(first.items.get(index), second.items.get(index)));
         }
-        return new Grid<>(results, first.getRowBound(), first.getColBound());
+        return new Grid<>(results, first.getNumRows(), first.getNumCols());
     }
 }
