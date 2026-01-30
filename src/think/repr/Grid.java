@@ -14,13 +14,13 @@ public final class Grid<T> {
 
     // Potential optimization: use a primitive boolean[] or int[] to avoid unboxing
     // costs. Since grids are used in hot loops, the speedup may be significant.
-    private final ArrayList<T> cells;
+    private final ArrayList<T> items;
     private final int rowBound;
     private final int colBound;
 
     public Grid(final ArrayList<T> cells, final int rowBound, final int colBound) {
         assert cells.size() == rowBound * colBound;
-        this.cells = new ArrayList<>(cells);
+        this.items = new ArrayList<>(cells);
         this.rowBound = rowBound;
         this.colBound = colBound;
     }
@@ -36,21 +36,21 @@ public final class Grid<T> {
 
     public T getCell(final Cell cell) {
         assert containsCell(cell);
-        return cells.get(cell.row() * colBound + cell.col());
+        return items.get(cell.row() * colBound + cell.col());
     }
 
     public void setCell(final Cell cell, final T value) {
         assert containsCell(cell);
-        cells.set(cell.row() * colBound + cell.col(), value);
+        items.set(cell.row() * colBound + cell.col(), value);
     }
 
     public void swapCells(final Cell first, final Cell second) {
         assert containsCell(first) && containsCell(second);
         final int firstIndex = first.row() * colBound + first.col();
         final int secondIndex = second.row() * colBound + second.col();
-        final T firstHolder = cells.get(firstIndex);
-        cells.set(firstIndex, cells.get(secondIndex));
-        cells.set(secondIndex, firstHolder);
+        final T firstHolder = items.get(firstIndex);
+        items.set(firstIndex, items.get(secondIndex));
+        items.set(secondIndex, firstHolder);
     }
 
     public boolean containsCell(final Cell cell) {
@@ -71,11 +71,11 @@ public final class Grid<T> {
     }
 
     public Stream<T> itemStream() {
-        return cells.stream();
+        return items.stream();
     }
 
     public Stream<Cell> cellStream() {
-        return IntStream.range(0, cells.size()).mapToObj(index ->
+        return IntStream.range(0, items.size()).mapToObj(index ->
             new Cell(index / colBound, index % colBound)
         );
     }
@@ -87,9 +87,9 @@ public final class Grid<T> {
     ) {
         assert first.getRowBound() == second.getRowBound();
         assert first.getColBound() == second.getColBound();
-        final ArrayList<R> results = new ArrayList<>(first.cells.size());
-        for (int index = 0; index < first.cells.size(); index++) {
-            results.add(combiner.apply(first.cells.get(index), second.cells.get(index)));
+        final ArrayList<R> results = new ArrayList<>(first.items.size());
+        for (int index = 0; index < first.items.size(); index++) {
+            results.add(combiner.apply(first.items.get(index), second.items.get(index)));
         }
         return new Grid<>(results, first.getRowBound(), first.getColBound());
     }

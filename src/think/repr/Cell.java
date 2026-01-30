@@ -7,6 +7,8 @@ import java.util.ArrayList;
     JavaFX, row is Y, and col is X. Cells are not defined outside of a grid.
  */
 public record Cell(int row, int col) {
+    public static final Cell OUT_OF_BOUNDS = new Cell(-1, -1);
+
     public ArrayList<Cell> getNeighbors(final Problem problem) {
         // Potential optimization: get Cell instances from problem to reuse them,
         // reducing GC pressure. Reasonable because this method is important to BFS.
