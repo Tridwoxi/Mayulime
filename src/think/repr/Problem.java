@@ -105,7 +105,7 @@ public final class Problem {
         require(parts.length == 2);
 
         // == Metadata parsing. ==
-        final String[] metadata = parts[0].split(PERIOD_REGEX);
+        final String[] metadata = parts[0].split(PERIOD_REGEX, -1);
         require(metadata.length == NUM_METADATA_PARTS);
         this.colBound = strToInt(metadata[0]);
         this.rowBound = strToInt(metadata[1]);
@@ -131,11 +131,10 @@ public final class Problem {
 
         // == Grid parsing: feature traversal and syntax validation. ==
         for (final String feature : features) {
-            require(traversingIndex < rowBound * colBound);
             if (feature.isBlank()) {
-                // ^ Strictly "isEmpty()", but let's forgive a bit of whitespace.
                 continue;
             }
+            require(traversingIndex < rowBound * colBound);
             if (feature.matches(DIGITS_REGEX)) {
                 traversingIndex += strToInt(feature);
                 continue;
@@ -188,7 +187,7 @@ public final class Problem {
             }
             traversingIndex += 1;
         }
-        require(traversingIndex < rowBound * colBound);
+        require(traversingIndex <= rowBound * colBound);
 
         // == Grid parsing: semantic validation. ==
         final boolean pairedTels = Tools.zip(telIns, telOuts).allMatch(
