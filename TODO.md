@@ -23,5 +23,3 @@ Genetic algorithm should use sets of connected player walls as features, rather 
 ## Support
 
 Problem supports teleports, but rest of the system is not yet there.
-
-Solution class.

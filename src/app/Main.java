@@ -3,16 +3,16 @@ package app;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import think.Manager;
-import think.Manager.Strategy;
-import think.repr.Cell;
+import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
+import think.repr.Problem.Feature;
+import think.stra.Strategy;
 
 /**
     Application launch point. Connects Gui (frontend) to Manager (backend).
@@ -51,10 +51,6 @@ public final class Main extends Application {
         primaryStage.setMinHeight(MIN_HEIGHT_PX);
         primaryStage.setWidth(MIN_WIDTH_PX);
         primaryStage.setHeight(MIN_HEIGHT_PX);
-        primaryStage.setOnCloseRequest(event -> {
-            Manager.getInstance().stop();
-            Platform.exit();
-        });
         primaryStage.show();
     }
 
@@ -80,11 +76,11 @@ public final class Main extends Application {
     public void receive(
         final Strategy submitter,
         final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Grid<Feature> solution,
         final int score
     ) {
         Platform.runLater(() -> {
-            gui.update(submitter, problem, playerWalls, score);
+            gui.update(submitter, problem, solution, score);
             if (gui.getWindow() instanceof Stage stage) {
                 stage.sizeToScene();
             }

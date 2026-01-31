@@ -1,7 +1,9 @@
 package think.repr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import think.ana.Tools.Pair;
@@ -60,6 +62,21 @@ public final class Grid<T> {
         return IntStream.range(0, items.size()).mapToObj(index ->
             new Pair<>(items.get(index), new Cell(index / numCols, index % numCols))
         );
+    }
+
+    public Stream<Cell> where(final Predicate<T> predicate) {
+        return stream()
+            .filter(pair -> predicate.test(pair.first()))
+            .map(Pair::second);
+    }
+
+    public <C extends Collection<Cell>> C where(
+        final Predicate<T> predicate,
+        final C emptyCollection
+    ) {
+        assert emptyCollection.isEmpty();
+        where(predicate).forEach(emptyCollection::add);
+        return emptyCollection;
     }
 
     public static <F, S, R> Grid<R> combine(

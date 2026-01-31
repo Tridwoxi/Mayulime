@@ -9,12 +9,13 @@ import java.util.PriorityQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import think.ana.Tools.BiOrdered;
 import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
 import think.repr.Route;
 
 /**
@@ -24,33 +25,23 @@ public final class Snake {
 
     private Snake() {}
 
-    public static int evaluate(final Problem problem, final HashSet<Cell> playerWalls) {
-        int sum = 0;
-        final Stream<Pair<Cell, Cell>> pairs = Tools.pairwise(problem.getCheckpoints());
-        for (final Pair<Cell, Cell> pair : pairs.toList()) {
-            final Route route = travel(
-                problem,
-                playerWalls,
-                pair.first(),
-                pair.second()
-            );
-            if (!route.possible()) {
-                return 0;
-            }
-            sum += route.length();
-        }
-        return sum;
+    public static int evaluate(final Problem problem, final Grid<Feature> solution) {
+        final ArrayList<Route> routes = Tools.pairwise(problem.getCheckpoints())
+            .map(pair -> travel(problem, solution, pair.first(), pair.second()))
+            .collect(Collectors.toCollection(ArrayList::new));
+        final Route combined = Route.fromChain(routes);
+        return combined.possible() ? combined.length() : 0;
     }
 
     public static Route travel(
-        final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Problem problem, // <- Unused for now.
+        final Grid<Feature> solution,
         final Cell start,
         final Cell end
     ) {
         assert !start.equals(end);
-        assert isLegalRun(problem, playerWalls, start);
-        assert isLegalRun(problem, playerWalls, end);
+        assert isLegalRun(problem, solution, start);
+        assert isLegalRun(problem, solution, end);
 
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
@@ -97,7 +88,7 @@ public final class Snake {
             final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
             assert gScoreCurrent != Integer.MAX_VALUE;
             for (final Cell neighbor : current.getNeighbors(problem)) {
-                if (!isOpen(problem, playerWalls, neighbor)) {
+                if (!isOpen(problem, solution, neighbor)) {
                     continue;
                 }
                 final int gScoreNew = gScoreCurrent + 1;
@@ -116,19 +107,21 @@ public final class Snake {
 
     public static Grid<Integer> distances(
         final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Grid<Feature> solution,
         final Cell source
     ) {
-        assert isLegalRun(problem, playerWalls, source);
+        assert isLegalRun(problem, solution, source);
 
-        // -1 is sentinel unreachable value. Chosen because adding connected distance
-        // grids with unreachable cells maintains the invariant that unreachable cells
-        // are negative (this is untrue if the source cannot reach the destination).
-        // Cells with player or system walls on them are unreachable.
+        // Negative numbers are represent "unreachable". Adding two distance grids with
+        // connected sources maintains the invariant that unreachable cells are
+        // negative. If the distance grids are not connected, the invariant does not
+        // hold. Cells that are not open are marked as unreachable.
+        final int numRows = problem.getCachedInitial().getNumRows();
+        final int numCols = problem.getCachedInitial().getNumCols();
         final Grid<Integer> distances = new Grid<>(
-            Tools.fill(-1, problem.getNumRows() * problem.getNumCols()),
-            problem.getNumRows(),
-            problem.getNumCols()
+            Tools.fill(-1, numRows * numCols),
+            numRows,
+            numCols
         );
 
         // We use breadth-first search because we visit every reachable point and it
@@ -142,8 +135,7 @@ public final class Snake {
             assert distances.get(current) >= 0;
             for (final Cell neighbor : current.getNeighbors(problem)) {
                 if (
-                    isOpen(problem, playerWalls, neighbor) &&
-                    distances.get(neighbor) == -1
+                    isOpen(problem, solution, neighbor) && distances.get(neighbor) <= -1
                 ) {
                     distances.set(neighbor, distances.get(current) + 1);
                     frontier.add(neighbor);
@@ -156,31 +148,35 @@ public final class Snake {
     }
 
     /**
-        A cell is open iff it is not a system wall or player wall. A cell is empty iff
-        it is open and not a checkpoint. Snakes may only step on open cells. Player
-        walls may only be placed on empty cells. The set of open cells is a superset of
-        empty cells.
+        A cell is open iff it does not contain a system wall or player wall. A cell is
+        empty iff it is open and not a checkpoint or teleport. Snakes may only step on
+        open cells. Player walls may only be placed on empty cells. The set of open
+        cells is an improper superset of the set of empty cells.
      */
     private static boolean isOpen(
         final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Grid<Feature> solution,
         final Cell cell
     ) {
-        return !problem.isSystemWall(cell) && !playerWalls.contains(cell);
+        return switch (solution.get(cell)) {
+            case EMPTY -> true;
+            case CHECKPOINT -> true;
+            case SYSTEM_WALL -> false;
+            case PLAYER_WALL -> false;
+            case TELEPORT_IN -> true;
+            case TELEPORT_OUT -> true;
+        };
     }
 
     private static boolean isLegalRun(
         final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Grid<Feature> solution,
         final Cell source
     ) {
-        final boolean sourceIn = problem.containsCell(source);
-        final boolean openSource = isOpen(problem, playerWalls, source);
-        final boolean playerWallsIn = playerWalls
-            .stream()
-            .allMatch(problem::containsCell);
-        final boolean noOverlap = playerWalls.stream().noneMatch(problem::isSystemWall);
-        return sourceIn && openSource && playerWallsIn && noOverlap;
+        final boolean valid = problem.isValid(solution);
+        final boolean sourceIn = problem.getCachedInitial().inBounds(source);
+        final boolean openSource = isOpen(problem, solution, source);
+        return valid && sourceIn && openSource;
     }
 
     private static boolean isConsistent(

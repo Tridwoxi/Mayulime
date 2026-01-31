@@ -1,15 +1,14 @@
 package think.repr;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 import think.ana.Tools;
-import think.ana.Tools.Pair;
 
 /**
-    Simplified Pathery problem specification.
+    Simplified Pathery problem parser. Structurally, the unification of problem
+    metadata and its initial grid.
  */
 public final class Problem {
 
@@ -44,7 +43,7 @@ public final class Problem {
     private final int numRows;
     private final int numCols;
     private final int playerWallSupply;
-    private final Grid<Feature> features;
+    private final Grid<Feature> initial;
     private final ArrayList<Cell> checkpoints;
     private final HashMap<Cell, Cell> teleports;
 
@@ -199,7 +198,7 @@ public final class Problem {
         require(pairedTels && hasStart && hasEnd);
 
         // == Grid parsing: building. ==
-        this.features = new Grid<>(cells, numRows, numCols);
+        this.initial = new Grid<>(cells, numRows, numCols);
         this.checkpoints = new ArrayList<>();
         checks
             .stream()
@@ -236,25 +235,12 @@ public final class Problem {
 
     // == Public API. ==================================================================
 
-    public Feature getFeatureType(final Cell cell) {
-        assert features.inBounds(cell);
-        return features.get(cell);
+    public Grid<Feature> getCachedInitial() {
+        return initial; // It is undefined behavior to modify the returned grid.
     }
 
-    public boolean containsCell(final Cell cell) {
-        return features.inBounds(cell);
-    }
-
-    public boolean isSystemWall(final Cell cell) {
-        return getFeatureType(cell) == Feature.SYSTEM_WALL;
-    }
-
-    public int getNumRows() {
-        return numRows;
-    }
-
-    public int getNumCols() {
-        return numCols;
+    public Grid<Feature> getAnotherInitial() {
+        return new Grid<>(initial);
     }
 
     public int getPlayerWallSupply() {
@@ -269,19 +255,23 @@ public final class Problem {
         return new HashMap<>(teleports);
     }
 
-    public <C extends Collection<Cell>> C where(
-        final Feature type,
-        final C emptyCollection
-    ) {
-        assert emptyCollection.isEmpty();
-        features
-            .stream()
-            .filter(pair -> pair.first() == type)
-            .forEach(pair -> emptyCollection.add(pair.second()));
-        return emptyCollection;
-    }
-
-    public Stream<Cell> getAllCells() {
-        return features.stream().map(Pair::second);
+    public boolean isValid(final Grid<Feature> solution) {
+        final Predicate<Cell> legalMove = cell -> {
+            final boolean unchanged = initial.get(cell) == solution.get(cell);
+            final boolean assigned =
+                initial.get(cell) == Feature.EMPTY &&
+                solution.get(cell) == Feature.PLAYER_WALL;
+            return unchanged || assigned;
+        };
+        final boolean enoughSupply =
+            solution.where(Feature.PLAYER_WALL::equals).count() <= playerWallSupply;
+        final boolean sameSize =
+            initial.getNumRows() == solution.getNumRows() &&
+            initial.getNumCols() == solution.getNumCols();
+        return (
+            sameSize &&
+            enoughSupply &&
+            initial.stream().allMatch(pair -> legalMove.test(pair.second()))
+        );
     }
 }

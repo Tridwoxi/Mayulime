@@ -12,23 +12,23 @@ public record Cell(int row, int col) {
     public ArrayList<Cell> getNeighbors(final Problem problem) {
         // Potential optimization: get Cell instances from problem to reuse them,
         // reducing GC pressure. Reasonable because this method is important to BFS.
-        assert problem.containsCell(this);
+        assert problem.getCachedInitial().inBounds(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
-        final int rowBound = problem.getNumRows();
-        final int colBound = problem.getNumCols();
+        final int numRows = problem.getCachedInitial().getNumRows();
+        final int numCols = problem.getCachedInitial().getNumCols();
         if (row - 1 >= 0) {
             neighbors.add(new Cell(row - 1, col));
         }
-        if (col + 1 < colBound) {
+        if (col + 1 < numCols) {
             neighbors.add(new Cell(row, col + 1));
         }
-        if (row + 1 < rowBound) {
+        if (row + 1 < numRows) {
             neighbors.add(new Cell(row + 1, col));
         }
         if (col - 1 >= 0) {
             neighbors.add(new Cell(row, col - 1));
         }
-        assert neighbors.stream().allMatch(problem::containsCell);
+        assert neighbors.stream().allMatch(problem.getCachedInitial()::inBounds);
         return neighbors;
     }
 

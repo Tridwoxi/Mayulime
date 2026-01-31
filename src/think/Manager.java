@@ -1,17 +1,18 @@
 package think;
 
 import app.Main;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
 import javafx.application.Platform;
 import think.ana.Snake;
-import think.repr.Cell;
+import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.stra.Blind;
-import think.stra.Climb;
+import think.stra.BlankSolution;
+import think.stra.RandomGuesser;
+import think.stra.Strategy;
 
 /**
     Strategy controller. Must be called from JavaFX Application Thread. Workers run in
@@ -19,29 +20,24 @@ import think.stra.Climb;
  */
 public final class Manager {
 
-    public interface Strategy extends Runnable {
-        String getName();
-
-        default boolean isAlive() {
-            // When the user decides to work on a new problem, we want to kill all the
-            // workers for the old problem. There's no safe way to do that. Instead, we
-            // must politely ask them to check if they should stop, ideally (but not
-            // required) as often as STOP_TIME_MS so they free their resources before
-            // work on the next problem begins. Do not override this method.
-            return !Thread.currentThread().isInterrupted();
-        }
-    }
-
-    private static final long STOP_TIME_MS = 500L;
     private static final Manager INSTANCE = new Manager();
-
-    private volatile ExecutorService tasks;
-    private volatile Problem activeProblem;
+    private final ExecutorService executor;
+    private final ArrayList<Strategy> workers;
+    private volatile Problem currentProblem;
     private volatile int topScore;
 
     private Manager() {
-        this.tasks = null;
-        this.activeProblem = null;
+        // "The shutdown sequence begins when all started non-daemon threads have
+        // terminated.". Workers that spin longer than we want shouldn't prevent Java
+        // from shutting down, so we'll make them into daemons.
+        final ThreadFactory factory = task -> {
+            final Thread thread = new Thread(task);
+            thread.setDaemon(true);
+            return thread;
+        };
+        this.executor = Executors.newCachedThreadPool(factory);
+        this.workers = new ArrayList<>();
+        this.currentProblem = null;
         this.topScore = 0;
     }
 
@@ -53,53 +49,23 @@ public final class Manager {
 
     public void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
-        final Strategy nobody = new Strategy() {
-            @Override
-            public void run() {}
-
-            @Override
-            public String getName() {
-                return "nobody";
-            }
-        };
-        activeProblem = problem;
-        Main.getInstance().receive(nobody, problem, new HashSet<>(0), 0);
-        stop();
+        // Once the user uploads a new problem, the old workers are useless. I don't
+        // know how to kill them, so we must kindly ask for them to stop. I believe
+        // that once they stop, the ExecutorService will throw them out, and that will
+        // free up resources.
+        currentProblem = problem;
+        workers.forEach(worker -> worker.pleaseDie());
+        workers.clear();
         topScore = 0;
-        go(problem);
+        addWorker(new BlankSolution(problem));
+        addWorker(new RandomGuesser(problem));
     }
 
-    public void stop() {
-        if (tasks == null) {
-            return;
-        }
-        tasks.shutdownNow();
-        try {
-            tasks.awaitTermination(STOP_TIME_MS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private void go(final Problem problem) {
-        if (tasks == null || tasks.isShutdown() || tasks.isTerminated()) {
-            tasks = newExecutor();
-        }
+    private void addWorker(final Strategy worker) {
+        workers.add(worker);
         // Unlike submit, execute will propagate exceptions into the FX Thread. Since
         // we use assertions to catch correctness issues, these exceptions must be seen.
-        tasks.execute(new Blind(problem));
-        tasks.execute(new Climb(problem));
-    }
-
-    private ExecutorService newExecutor() {
-        // Making a thread a daemon means when the GUI window is closed, the
-        // application is happy to terminate. When these threads are not daemons, the
-        // user is forced to keyboard interrupt or kill Java.
-        return Executors.newCachedThreadPool(runnable -> {
-            final Thread thread = new Thread(runnable);
-            thread.setDaemon(true);
-            return thread;
-        });
+        executor.execute(worker);
     }
 
     // == Communication. ===============================================================
@@ -111,16 +77,15 @@ public final class Manager {
     public void consider(
         final Strategy submitter,
         final Problem problem,
-        final HashSet<Cell> playerWalls
+        final Grid<Feature> solution
     ) {
-        assert activeProblem != null;
+        assert currentProblem != null;
         // This guard is tripped when the user uploads a new problem but worker threads
         // are still running, so workers propose solutions to the old (stale) problem.
-        if (activeProblem != problem) {
+        if (currentProblem != problem) {
             return;
         }
-        final HashSet<Cell> copy = new HashSet<>(playerWalls);
-        assert isValidAssignment(problem, copy);
+        final Grid<Feature> copy = new Grid<>(solution);
         final int score = Snake.evaluate(problem, copy);
         synchronized (this) {
             if (score > topScore) {
@@ -128,16 +93,5 @@ public final class Manager {
                 Main.getInstance().receive(submitter, problem, copy, score);
             }
         }
-    }
-
-    private boolean isValidAssignment(
-        final Problem problem,
-        final HashSet<Cell> playerWalls
-    ) {
-        final boolean limited = playerWalls.size() <= problem.getPlayerWallSupply();
-        final boolean within = problem
-            .where(Feature.EMPTY, new HashSet<>())
-            .containsAll(playerWalls);
-        return limited && within;
     }
 }

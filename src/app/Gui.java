@@ -2,8 +2,6 @@ package app;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.function.Function;
 import javafx.event.Event;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -25,10 +23,12 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import think.Manager.Strategy;
 import think.ana.Tools;
 import think.repr.Cell;
+import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
+import think.stra.Strategy;
 
 /**
     Display the game and its stats. Scene graph:
@@ -72,11 +72,11 @@ public final class Gui extends Scene {
     public void update(
         final Strategy submitter,
         final Problem problem,
-        final HashSet<Cell> playerWalls,
+        final Grid<Feature> solution,
         final int score
     ) {
         showGame();
-        gameDisplay.setGame(problem, playerWalls);
+        gameDisplay.setGame(problem, solution);
         statsDisplay.setScore(score, submitter.getName());
     }
 
@@ -95,44 +95,45 @@ public final class Gui extends Scene {
 
 final class GameDisplay extends Group {
 
-    private record ColorString(Color color, String string) {}
-
     GameDisplay() {}
 
-    public void setGame(final Problem problem, final HashSet<Cell> playerWalls) {
+    public void setGame(final Problem problem, final Grid<Feature> solution) {
         final HashMap<Cell, Integer> checkpoints = new HashMap<>();
         Tools.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
             checkpoints.put(uniordered.item(), uniordered.order1())
         );
-
-        final Function<Cell, ColorString> getColorString = cell -> {
-            // These cases must be disjoint, but it is not our responsibility to check.
-            if (problem.isSystemWall(cell)) {
-                return new ColorString(PatheryColors.SYSTEM_WALL, "");
-            }
-            if (checkpoints.containsKey(cell)) {
-                final String content = checkpoints.get(cell).toString();
-                return new ColorString(PatheryColors.CHECKPOINT, content);
-            }
-            if (playerWalls.contains(cell)) {
-                return new ColorString(PatheryColors.PLAYER_WALL, "");
-            }
-            return new ColorString(PatheryColors.EMPTY, "");
-        };
-
         getChildren().clear();
-        problem
-            .getAllCells()
-            .forEach(cell -> {
-                final ColorString colorString = getColorString.apply(cell);
+        solution
+            .stream()
+            .forEachOrdered(pair -> {
+                final Feature feature = pair.first();
+                final Cell cell = pair.second();
                 final CellDisplay cellDisplay = new CellDisplay(
-                    colorString.color(),
-                    colorString.string()
+                    toColor(feature),
+                    toLabel(checkpoints, cell)
                 );
                 cellDisplay.setLayoutY(cell.row() * Gui.CELL_SIZE_PX);
                 cellDisplay.setLayoutX(cell.col() * Gui.CELL_SIZE_PX);
                 getChildren().add(cellDisplay);
             });
+    }
+
+    private Color toColor(final Feature feature) {
+        return switch (feature) {
+            case EMPTY -> PatheryColors.EMPTY;
+            case CHECKPOINT -> PatheryColors.CHECKPOINT;
+            case SYSTEM_WALL -> PatheryColors.SYSTEM_WALL;
+            case PLAYER_WALL -> PatheryColors.PLAYER_WALL;
+            case TELEPORT_IN -> PatheryColors.TELEPORT;
+            case TELEPORT_OUT -> PatheryColors.TELEPORT;
+        };
+    }
+
+    private String toLabel(final HashMap<Cell, Integer> checkpoints, final Cell cell) {
+        if (checkpoints.containsKey(cell)) {
+            return checkpoints.get(cell).toString();
+        }
+        return "";
     }
 }
 
