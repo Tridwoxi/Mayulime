@@ -80,7 +80,7 @@ public final class Grid<T> {
         final C emptyCollection
     ) {
         assert emptyCollection.isEmpty();
-        where(predicate).forEach(emptyCollection::add);
+        where(predicate).forEachOrdered(emptyCollection::add);
         return emptyCollection;
     }
 

@@ -32,7 +32,7 @@ public final class RandomGuesser extends Strategy {
             .where(Feature.EMPTY::equals, new ArrayList<>());
         Tools.randomly(emptyCells)
             .limit(getProblem().getPlayerWallSupply())
-            .forEach(cell -> guess.set(cell, Feature.PLAYER_WALL));
+            .forEachOrdered(cell -> guess.set(cell, Feature.PLAYER_WALL));
         return guess;
     }
 }

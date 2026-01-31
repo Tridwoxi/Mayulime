@@ -97,6 +97,13 @@ public final class Gui extends Scene {
 
 final class GameDisplay extends Group {
 
+    // These labels can be anything, but using whatever code the Pathery MapCode uses
+    // is probably most understandable. To avoid clutter, only these cell types are
+    // labeled. Like, labeling system walls would just be noise.
+    private static final String TELEPORT_IN = "t";
+    private static final String TELEPORT_OUT = "u";
+    private static final String CHECKPOINT = "c";
+
     GameDisplay() {}
 
     public void setGame(final Problem problem, final Grid<Feature> solution) {
@@ -148,12 +155,12 @@ final class GameDisplay extends Group {
                 case TELEPORT_IN -> {
                     assert teleports.containsKey(cell);
                     association[0] += 1;
-                    labels.set(cell, "t" + association[0]);
-                    labels.set(teleports.get(cell), "u" + association[0]);
+                    labels.set(cell, TELEPORT_IN + association[0]);
+                    labels.set(teleports.get(cell), TELEPORT_OUT + association[0]);
                 }
                 case CHECKPOINT -> {
                     assert checkpoints.containsKey(cell);
-                    labels.set(cell, "c" + checkpoints.get(cell));
+                    labels.set(cell, CHECKPOINT + checkpoints.get(cell));
                 }
                 default -> {
                     // Do nothing.
