@@ -2,6 +2,7 @@ package app;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.function.Consumer;
 import javafx.event.Event;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -24,6 +25,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 import think.ana.Tools;
+import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -98,11 +100,8 @@ final class GameDisplay extends Group {
     GameDisplay() {}
 
     public void setGame(final Problem problem, final Grid<Feature> solution) {
-        final HashMap<Cell, Integer> checkpoints = new HashMap<>();
-        Tools.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
-            checkpoints.put(uniordered.item(), uniordered.order1())
-        );
         getChildren().clear();
+        final Grid<String> labels = makeLabels(problem);
         solution
             .stream()
             .forEachOrdered(pair -> {
@@ -110,7 +109,7 @@ final class GameDisplay extends Group {
                 final Cell cell = pair.second();
                 final CellDisplay cellDisplay = new CellDisplay(
                     toColor(feature),
-                    toLabel(checkpoints, cell)
+                    labels.get(cell)
                 );
                 cellDisplay.setLayoutY(cell.row() * Gui.CELL_SIZE_PX);
                 cellDisplay.setLayoutX(cell.col() * Gui.CELL_SIZE_PX);
@@ -118,7 +117,7 @@ final class GameDisplay extends Group {
             });
     }
 
-    private Color toColor(final Feature feature) {
+    private static Color toColor(final Feature feature) {
         return switch (feature) {
             case EMPTY -> PatheryColors.EMPTY;
             case CHECKPOINT -> PatheryColors.CHECKPOINT;
@@ -129,11 +128,40 @@ final class GameDisplay extends Group {
         };
     }
 
-    private String toLabel(final HashMap<Cell, Integer> checkpoints, final Cell cell) {
-        if (checkpoints.containsKey(cell)) {
-            return checkpoints.get(cell).toString();
-        }
-        return "";
+    private static Grid<String> makeLabels(final Problem problem) {
+        // The backend was foolish enough to forget the order of teleports, so we
+        // cannot assign teleports their orignal labels. Fortunately, teleports are
+        // unordered, so we'll just assign arbritrary associations.
+        final int[] association = { 0 }; // Effectively final hack.
+        final Grid<String> labels = new Grid<String>(
+            "",
+            problem.getCachedInitial().getNumRows(),
+            problem.getCachedInitial().getNumCols()
+        );
+        final HashMap<Cell, Integer> checkpoints = new HashMap<>();
+        Tools.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
+            checkpoints.put(uniordered.item(), uniordered.order1())
+        );
+        final HashMap<Cell, Cell> teleports = problem.getTeleports();
+        final Consumer<Cell> assign = cell -> {
+            switch (problem.getCachedInitial().get(cell)) {
+                case TELEPORT_IN -> {
+                    assert teleports.containsKey(cell);
+                    association[0] += 1;
+                    labels.set(cell, "t" + association[0]);
+                    labels.set(teleports.get(cell), "u" + association[0]);
+                }
+                case CHECKPOINT -> {
+                    assert checkpoints.containsKey(cell);
+                    labels.set(cell, "c" + checkpoints.get(cell));
+                }
+                default -> {
+                    // Do nothing.
+                }
+            }
+        };
+        problem.getCachedInitial().stream().map(Pair::second).forEachOrdered(assign);
+        return labels;
     }
 }
 
