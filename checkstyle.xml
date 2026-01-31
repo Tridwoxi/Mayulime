@@ -12,7 +12,6 @@
     <module name="SuppressWarningsFilter" />
     <module name="TreeWalker">
         <module name="AbbreviationAsWordInName" />
-        <module name="AbstractClassName" />
         <module name="AnnotationLocation" />
         <module name="AnnotationUseStyle" />
         <module name="AnonInnerLength" />
@@ -141,6 +140,7 @@
 
         [Other ignored]
 
+        <module name="AbstractClassName" />
         <module name="HiddenField" />
         <module name="ClassMemberImpliedModifier" />
         <module name="AvoidInlineConditionals" />
