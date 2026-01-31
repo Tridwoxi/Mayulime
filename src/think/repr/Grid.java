@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import think.ana.Tools;
 import think.ana.Tools.Pair;
 
 /**
@@ -25,6 +26,10 @@ public final class Grid<T> {
         this.items = new ArrayList<>(items);
         this.numRows = numRows;
         this.numCols = numCols;
+    }
+
+    public Grid(final T item, final int numRows, final int numCols) {
+        this(Tools.fill(item, numRows * numCols), numRows, numCols);
     }
 
     public Grid(final Grid<T> grid) {

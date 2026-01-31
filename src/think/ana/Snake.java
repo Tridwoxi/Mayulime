@@ -117,11 +117,7 @@ public final class Snake {
         // hold. Cells that are not open are marked as unreachable.
         final int numRows = problem.getCachedInitial().getNumRows();
         final int numCols = problem.getCachedInitial().getNumCols();
-        final Grid<Integer> distances = new Grid<>(
-            Tools.fill(-1, numRows * numCols),
-            numRows,
-            numCols
-        );
+        final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
 
         // We use breadth-first search because we visit every reachable point and it
         // has slightly less overhead than A-star. "distances" also visited set.
