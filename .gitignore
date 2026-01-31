@@ -14,8 +14,8 @@
 # Include Pathery MapCode format.
 !*.mapcode
 
-# Keep extensionless hooks because Git expects these exact filenames under
-# core.hooksPath. This list must be manually maintained.
+# Include extensionless hooks. Git expects these exact filenames under core.hooksPath.
+# This list must be manually maintained.
 !hooks/pre-commit
 !hooks/commit-msg
 
@@ -31,3 +31,4 @@ gradle/
 !build.gradle
 !.gitignore
 !checkstyle.xml
+!spotbugs-exclude.xml

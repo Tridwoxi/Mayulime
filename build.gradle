@@ -13,6 +13,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+spotbugs {
+    excludeFilter = file("spotbugs-exclude.xml")
+}
+
 checkstyle {
     toolVersion = "13.0.0"
     configFile = file("checkstyle.xml")
