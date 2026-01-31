@@ -29,8 +29,7 @@ public final class Snake {
         final ArrayList<Route> routes = Tools.pairwise(problem.getCheckpoints())
             .map(pair -> travel(problem, solution, pair.first(), pair.second()))
             .collect(Collectors.toCollection(ArrayList::new));
-        final Route combined = Route.fromChain(routes);
-        return combined.possible() ? combined.length() : 0;
+        return Route.cumulativeLength(routes);
     }
 
     public static Route travel(

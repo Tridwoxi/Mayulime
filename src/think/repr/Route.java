@@ -1,8 +1,8 @@
 package think.repr;
 
 import java.util.ArrayList;
+import java.util.stream.Stream;
 import think.ana.Tools;
-import think.ana.Tools.Counter;
 
 /**
     Result of a Snake's travels from start (exclusive) to end (inclusive). Steps will be empty if the route is blocked. Routes are problem- and assignment-specific.
@@ -11,11 +11,12 @@ public final class Route {
 
     private final Cell start;
     private final Cell end;
-    private final Counter<Cell> steps;
-    private final int length;
+    private final ArrayList<Cell> steps;
 
     public Route(final Cell start, final Cell end, final ArrayList<Cell> steps) {
-        this(start, end, new Counter<>(steps));
+        this.start = start;
+        this.end = end;
+        this.steps = new ArrayList<>(steps);
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
         if (!steps.isEmpty()) {
@@ -25,42 +26,40 @@ public final class Route {
         assert Tools.pairwise(steps).allMatch(pair ->
             pair.first().isNeighbor(pair.second())
         );
-        assert steps.size() == this.steps.totalCount();
     }
 
-    private Route(final Cell start, final Cell end, final Counter<Cell> steps) {
-        assert !start.equals(end);
-        this.start = start;
-        this.end = end;
-        this.steps = steps;
-        this.length = steps.totalCount();
+    public int getLength() {
+        assert isPossible() : "Caller should check with Route::isPossible() first.";
+        return steps.size();
     }
 
-    public int length() {
-        assert possible() : "Caller should check with Route::possible() first.";
-        return length;
+    public boolean isPossible() {
+        return steps.size() > 0;
     }
 
-    public boolean possible() {
-        return length > 0;
+    public Cell getStart() {
+        return start;
     }
 
-    public static Route fromChain(final ArrayList<Route> routes) {
-        assert routes.size() > 0;
-        assert Tools.pairwise(routes).allMatch(pair ->
-            pair.first().end.equals(pair.second().start)
-        );
-        final Cell start = routes.getFirst().start;
-        final Cell end = routes.getLast().end;
-        final Counter<Cell> steps = new Counter<>();
-        if (routes.stream().allMatch(route -> route.possible())) {
-            routes.forEach(route -> steps.addAll(route.steps));
-            assert routes
-                .stream()
-                .mapToInt(route -> route.steps.totalCount())
-                .sum() ==
-            steps.totalCount();
+    public Cell getEnd() {
+        return end;
+    }
+
+    public Stream<Cell> walk() {
+        return steps.stream();
+    }
+
+    public static int cumulativeLength(final ArrayList<Route> routes) {
+        if (routes.stream().allMatch(route -> route.isPossible())) {
+            return routes.stream().mapToInt(Route::getLength).sum();
         }
-        return new Route(start, end, steps);
+        return 0;
+    }
+
+    public static Stream<Cell> cumulativeWalk(final ArrayList<Route> routes) {
+        if (routes.stream().allMatch(route -> route.isPossible())) {
+            return routes.stream().flatMap(Route::walk);
+        }
+        return Stream.empty();
     }
 }
