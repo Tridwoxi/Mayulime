@@ -44,6 +44,7 @@ public final class App extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
+        assert Test.runAllTests();
         this.gui = new Gui();
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
