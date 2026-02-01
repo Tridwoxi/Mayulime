@@ -65,7 +65,6 @@
         <module name="LeftCurly" />
         <module name="LocalFinalVariableName" />
         <module name="LocalVariableName" />
-        <module name="MagicNumber" />
         <module name="MatchXpath" />
         <module name="MemberName" />
         <module name="MethodCount" />
@@ -109,10 +108,7 @@
         <module name="TodoComment" />
     </module>
     <!--
-        == Disabled modules ==
-
-        [Javadoc related]
-
+        == Javadoc ==
         <module name="JavadocBlockTagLocation" />
         <module name="JavadocContentLocation" />
         <module name="JavadocLeadingAsteriskAlign" />
@@ -129,8 +125,7 @@
         <module name="MissingJavadocType" />
         <module name="JavadocPackage" />
 
-        [Formatting related]
-
+        == Formatting ==
         <module name="AnnotationOnSameLine" />
         <module name="LineLength" />
         <module name="UnnecessaryParentheses" />
@@ -138,20 +133,20 @@
         <module name="Indentation" />
         <module name="SeparatorWrap" />
 
-        [Other ignored]
-
+        == Other ignored ==
         <module name="AbstractClassName" />
-        <module name="HiddenField" />
-        <module name="ClassMemberImpliedModifier" />
         <module name="AvoidInlineConditionals" />
-        <module name="ImportControl" />
+        <module name="ClassMemberImpliedModifier" />
+        <module name="HiddenField" />
         <module name="IllegalToken" />
-        <module name="ReturnCount" />
-        <module name="MissingCtor" />
-        <module name="OuterTypeNumber" />
-        <module name="LambdaBodyLength" />
         <module name="IllegalType" />
-        <module name="TrailingComment" />
+        <module name="ImportControl" />
+        <module name="LambdaBodyLength" />
+        <module name="MagicNumber" />
+        <module name="MissingCtor" />
         <module name="MissingNullCaseInSwitch" />
+        <module name="OuterTypeNumber" />
+        <module name="ReturnCount" />
+        <module name="TrailingComment" />
     -->
 </module>

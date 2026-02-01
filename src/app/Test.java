@@ -19,7 +19,6 @@ import think.repr.Problem.Feature;
     and because I can't get my language server and JUnit to be friends. Regrettably,
     this couples the test running to the system running.
  */
-@SuppressWarnings("checkstyle:MagicNumber")
 final class Test {
 
     private static final String EXAMPLE = """

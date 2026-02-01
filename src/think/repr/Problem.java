@@ -32,6 +32,7 @@ public final class Problem {
     private static final int NUM_METADATA_PARTS = 7;
     private static final int NUM_CHECKPOINTS = 14;
     private static final int NUM_TELEPORTS = 7;
+    private static final int MAX_NAME_LENGTH = 100;
 
     private static final String START_SYMBOL = "s";
     private static final String FINISH_SYMBOL = "f";
@@ -46,6 +47,7 @@ public final class Problem {
     private final Grid<Feature> initial;
     private final ArrayList<Cell> checkpoints;
     private final HashMap<Cell, Cell> teleports;
+    private final String name;
 
     // == Parser (constructor). ========================================================
 
@@ -109,6 +111,8 @@ public final class Problem {
         this.numCols = strToInt(metadata[0]);
         this.numRows = strToInt(metadata[1]);
         this.playerWallSupply = strToInt(metadata[2]);
+        this.name = cleanName(metadata[3]);
+
         final Function<Integer, Cell> indexToCell = index -> {
             return new Cell(index / numCols, index % numCols);
         };
@@ -242,10 +246,29 @@ public final class Problem {
         }
     }
 
+    private static String cleanName(final String raw) throws BadMapCodeException {
+        final String stripped = raw.strip();
+        require(stripped.chars().noneMatch(chr -> (chr == '\n' || chr == '\r')));
+        return stripped.substring(0, Math.min(stripped.length(), MAX_NAME_LENGTH));
+    }
+
     // == Public API. ==================================================================
 
+    public String getName() {
+        return name;
+    }
+
+    /**
+        Returns the initial grid of the problem.
+
+        The initial grid is read-only; modifying it is a design error. Use {@link
+        #getAnotherInitial()} if modification is desired.
+     */
     public Grid<Feature> getCachedInitial() {
-        return initial; // It is undefined behavior to modify the returned grid.
+        // SpotBugs will correctly tell you this exposes mutable internal state. This
+        // method exists anyway because it is more performant and callers are expected
+        // to be well-behaved.
+        return initial;
     }
 
     public Grid<Feature> getAnotherInitial() {

@@ -20,6 +20,7 @@ import think.stra.Strategy;
 public final class App extends Application {
 
     private static final String NAME = "Tridwoxi's Pathery AI";
+    private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
     private static final AtomicReference<App> INSTANCE = new AtomicReference<>();
@@ -71,7 +72,10 @@ public final class App extends Application {
         if (problem != null) {
             Manager.getInstance().solve(problem);
             if (gui.getWindow() instanceof Stage stage) {
-                stage.setTitle(file.getName());
+                final String problemName = problem.getName().isBlank()
+                    ? UNNAMED_PROBLEM_NAME
+                    : problem.getName();
+                stage.setTitle(problemName);
             }
         }
     }
