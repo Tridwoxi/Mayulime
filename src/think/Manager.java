@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import javafx.application.Platform;
-import think.ana.Snake;
+import think.ana.Pathfind;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
@@ -86,7 +86,7 @@ public final class Manager {
             return;
         }
         final Grid<Feature> copy = new Grid<>(solution);
-        final int score = Snake.evaluate(problem, copy);
+        final int score = Pathfind.evaluate(problem, copy);
         synchronized (this) {
             if (score > topScore) {
                 topScore = score;

@@ -1,15 +1,12 @@
 package think.ana;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.PriorityQueue;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -20,15 +17,19 @@ import think.tools.Iteration.Pair;
 import think.tools.Ordering.BiOrdered;
 
 /**
-    Pathfinding and distance evaluation. Simulates the Pathery snake.
- */
-public final class Snake {
+    Simulate the Pathery snake's pathfinding.
 
-    private Snake() {}
+    This class is the leader of its package, so owns all package-private utilities.
+
+    Although we are sometimes unable to check, and an exception might not be thrown, it
+    is always a design error to pass invalid solutions to any method in this class.
+ */
+public final class Pathfind {
+
+    private Pathfind() {}
 
     /**
-        Evaluate the score of the solution to the problem. This method supports walls,
-        checkpoints, and teleports, but no other features.
+        Calculate the score of the solution to the problem.
      */
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
         assert problem.isValid(solution);
@@ -61,6 +62,10 @@ public final class Snake {
         of teleports the snake stepped on) + 1, and activeTeleports will be modified in
         place. If travel is impossible, the resulting list will be empty, and the state
         of activeTeleports is unspecified.
+
+        It is possible for a route that was originally possible without teleports to
+        become impossible when teleports are added. This happens when the snake steps
+        on a teleport and gets trapped in a box.
      */
     public static ArrayList<Route> travel(
         final Grid<Feature> solution,
@@ -69,10 +74,10 @@ public final class Snake {
         final HashSet<Cell> activeTeleports,
         final HashMap<Cell, Cell> teleportMap
     ) {
-        // It is possible for a route that was originally possible without teleports to
-        // become impossible when teleports are added. This happens when the snake
-        // steps on a teleport and gets trapped in a box.
+        assert !start.equals(end);
+        assert isLegalRun(solution, start) && isLegalRun(solution, end);
         assert activeTeleports.stream().allMatch(teleportMap::containsKey);
+
         final ArrayList<Route> routes = new ArrayList<>();
         Cell currentLocation = start;
         final int maxAttempts = activeTeleports.size() + 1;
@@ -102,12 +107,15 @@ public final class Snake {
     /**
         Get from start to end, ignoring teleports.
      */
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public static Route travel(
         final Grid<Feature> solution,
         final Cell start,
         final Cell end
     ) {
         assert !start.equals(end);
+        assert isLegalRun(solution, start) && isLegalRun(solution, end);
+
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
         // If we are not seeing those grids, then use breadth-first search. The
@@ -170,40 +178,7 @@ public final class Snake {
         return new Route(start, end, new ArrayList<>(0));
     }
 
-    public static Grid<Integer> distances(
-        final Grid<Feature> solution,
-        final Cell source
-    ) {
-        assert isLegalRun(solution, source);
-
-        // Negative numbers are represent "unreachable". Adding two distance grids with
-        // connected sources maintains the invariant that unreachable cells are
-        // negative. If the distance grids are not connected, the invariant does not
-        // hold. Cells that are not open are marked as unreachable.
-        final int numRows = solution.getNumRows();
-        final int numCols = solution.getNumCols();
-        final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
-
-        // We use breadth-first search because we visit every reachable point and it
-        // has slightly less overhead than A-star. "distances" also visited set.
-        final ArrayDeque<Cell> frontier = new ArrayDeque<>();
-        frontier.add(source);
-        distances.set(source, 0);
-
-        while (!frontier.isEmpty()) {
-            final Cell current = frontier.removeFirst();
-            assert distances.get(current) >= 0;
-            for (final Cell neighbor : current.getNeighborsOn(solution)) {
-                if (isOpen(solution, neighbor) && distances.get(neighbor) <= -1) {
-                    distances.set(neighbor, distances.get(current) + 1);
-                    frontier.add(neighbor);
-                }
-            }
-        }
-        assert isConsistent(distances, solution);
-        assert distances.get(source) == 0;
-        return distances;
-    }
+    // == Package-private API. =========================================================
 
     /**
         A cell is open iff it does not contain a system wall or player wall. A cell is
@@ -211,7 +186,7 @@ public final class Snake {
         open cells. Player walls may only be placed on empty cells. The set of open
         cells is an improper superset of the set of empty cells.
      */
-    private static boolean isOpen(final Grid<Feature> solution, final Cell cell) {
+    static boolean isOpen(final Grid<Feature> solution, final Cell cell) {
         return switch (solution.get(cell)) {
             case EMPTY -> true;
             case CHECKPOINT -> true;
@@ -222,23 +197,7 @@ public final class Snake {
         };
     }
 
-    private static boolean isLegalRun(final Grid<Feature> solution, final Cell source) {
+    static boolean isLegalRun(final Grid<Feature> solution, final Cell source) {
         return solution.inBounds(source) && isOpen(solution, source);
-    }
-
-    private static boolean isConsistent(
-        final Grid<Integer> distances,
-        final Grid<Feature> solution
-    ) {
-        final BiFunction<Cell, Cell, Boolean> edgeConsistent = (cell, neighbor) ->
-            distances.get(cell) <= -1 ||
-            distances.get(neighbor) <= -1 ||
-            Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
-        final Predicate<Cell> cellConsistent = cell ->
-            cell
-                .getNeighborsOn(solution)
-                .stream()
-                .allMatch(neighbor -> edgeConsistent.apply(cell, neighbor));
-        return distances.stream().map(Pair::second).allMatch(cellConsistent);
     }
 }
