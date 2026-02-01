@@ -22,4 +22,4 @@ Genetic algorithm should use sets of connected player walls as features, rather 
 
 ## Support
 
-CRITICAL ERROR: Pathfinder fails on "Among shortest paths, the Snake prefers to go up, then right, then down, then left."
+Add tests.

@@ -160,7 +160,10 @@ public final class Pathfind {
             }
             final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
             assert gScoreCurrent != Integer.MAX_VALUE;
-            for (final Cell neighbor : current.getNeighborsOn(solution)) {
+            // After insertion into the PriorityQueue, this algorithm explores nodes in
+            // reverse insertion order, so inserting LDRU causes URDL exploration,
+            // which is the correct snake preference order.
+            for (final Cell neighbor : current.getNeighborsOnLDRU(solution)) {
                 if (!isOpen(solution, neighbor)) {
                     continue;
                 }
