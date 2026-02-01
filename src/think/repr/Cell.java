@@ -9,13 +9,17 @@ import java.util.ArrayList;
 public record Cell(int row, int col) {
     public static final Cell OUT_OF_BOUNDS = new Cell(-1, -1);
 
-    public ArrayList<Cell> getNeighbors(final Problem problem) {
+    /**
+        From the task specification: "Among shortest paths, the Snake prefers to go up,
+        then right, then down, then left.". We return neighbors in that order.
+     */
+    public ArrayList<Cell> getNeighborsOn(final Grid<?> grid) {
         // Potential optimization: get Cell instances from problem to reuse them,
         // reducing GC pressure. Reasonable because this method is important to BFS.
-        assert problem.getCachedInitial().inBounds(this);
+        assert grid.inBounds(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
-        final int numRows = problem.getCachedInitial().getNumRows();
-        final int numCols = problem.getCachedInitial().getNumCols();
+        final int numRows = grid.getNumRows();
+        final int numCols = grid.getNumCols();
         if (row - 1 >= 0) {
             neighbors.add(new Cell(row - 1, col));
         }
@@ -28,7 +32,7 @@ public record Cell(int row, int col) {
         if (col - 1 >= 0) {
             neighbors.add(new Cell(row, col - 1));
         }
-        assert neighbors.stream().allMatch(problem.getCachedInitial()::inBounds);
+        assert neighbors.stream().allMatch(this::isNeighbor);
         return neighbors;
     }
 

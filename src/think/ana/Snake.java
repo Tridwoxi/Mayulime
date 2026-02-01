@@ -27,22 +27,19 @@ public final class Snake {
     private Snake() {}
 
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
+        assert problem.isValid(solution);
         final ArrayList<Route> routes = Iteration.pairwise(problem.getCheckpoints())
-            .map(pair -> travel(problem, solution, pair.first(), pair.second()))
+            .map(pair -> travel(solution, pair.first(), pair.second()))
             .collect(Collectors.toCollection(ArrayList::new));
         return Route.cumulativeLength(routes);
     }
 
     public static Route travel(
-        final Problem problem, // <- Unused for now.
         final Grid<Feature> solution,
         final Cell start,
         final Cell end
     ) {
         assert !start.equals(end);
-        assert isLegalRun(problem, solution, start);
-        assert isLegalRun(problem, solution, end);
-
         // We use A-star search (tree-search version) because for sparse grids with
         // connected start and end, it explores less nodes than breadth-first search.
         // If we are not seeing those grids, then use breadth-first search. The
@@ -87,8 +84,8 @@ public final class Snake {
             }
             final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
             assert gScoreCurrent != Integer.MAX_VALUE;
-            for (final Cell neighbor : current.getNeighbors(problem)) {
-                if (!isOpen(problem, solution, neighbor)) {
+            for (final Cell neighbor : current.getNeighborsOn(solution)) {
+                if (!isOpen(solution, neighbor)) {
                     continue;
                 }
                 final int gScoreNew = gScoreCurrent + 1;
@@ -106,18 +103,17 @@ public final class Snake {
     }
 
     public static Grid<Integer> distances(
-        final Problem problem,
         final Grid<Feature> solution,
         final Cell source
     ) {
-        assert isLegalRun(problem, solution, source);
+        assert isLegalRun(solution, source);
 
         // Negative numbers are represent "unreachable". Adding two distance grids with
         // connected sources maintains the invariant that unreachable cells are
         // negative. If the distance grids are not connected, the invariant does not
         // hold. Cells that are not open are marked as unreachable.
-        final int numRows = problem.getCachedInitial().getNumRows();
-        final int numCols = problem.getCachedInitial().getNumCols();
+        final int numRows = solution.getNumRows();
+        final int numCols = solution.getNumCols();
         final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
 
         // We use breadth-first search because we visit every reachable point and it
@@ -129,16 +125,14 @@ public final class Snake {
         while (!frontier.isEmpty()) {
             final Cell current = frontier.removeFirst();
             assert distances.get(current) >= 0;
-            for (final Cell neighbor : current.getNeighbors(problem)) {
-                if (
-                    isOpen(problem, solution, neighbor) && distances.get(neighbor) <= -1
-                ) {
+            for (final Cell neighbor : current.getNeighborsOn(solution)) {
+                if (isOpen(solution, neighbor) && distances.get(neighbor) <= -1) {
                     distances.set(neighbor, distances.get(current) + 1);
                     frontier.add(neighbor);
                 }
             }
         }
-        assert isConsistent(distances, problem);
+        assert isConsistent(distances, solution);
         assert distances.get(source) == 0;
         return distances;
     }
@@ -149,11 +143,7 @@ public final class Snake {
         open cells. Player walls may only be placed on empty cells. The set of open
         cells is an improper superset of the set of empty cells.
      */
-    private static boolean isOpen(
-        final Problem problem,
-        final Grid<Feature> solution,
-        final Cell cell
-    ) {
+    private static boolean isOpen(final Grid<Feature> solution, final Cell cell) {
         return switch (solution.get(cell)) {
             case EMPTY -> true;
             case CHECKPOINT -> true;
@@ -164,20 +154,13 @@ public final class Snake {
         };
     }
 
-    private static boolean isLegalRun(
-        final Problem problem,
-        final Grid<Feature> solution,
-        final Cell source
-    ) {
-        final boolean valid = problem.isValid(solution);
-        final boolean sourceIn = problem.getCachedInitial().inBounds(source);
-        final boolean openSource = isOpen(problem, solution, source);
-        return valid && sourceIn && openSource;
+    private static boolean isLegalRun(final Grid<Feature> solution, final Cell source) {
+        return solution.inBounds(source) && isOpen(solution, source);
     }
 
     private static boolean isConsistent(
         final Grid<Integer> distances,
-        final Problem problem
+        final Grid<Feature> solution
     ) {
         final BiFunction<Cell, Cell, Boolean> edgeConsistent = (cell, neighbor) ->
             distances.get(cell) <= -1 ||
@@ -185,7 +168,7 @@ public final class Snake {
             Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
         final Predicate<Cell> cellConsistent = cell ->
             cell
-                .getNeighbors(problem)
+                .getNeighborsOn(solution)
                 .stream()
                 .allMatch(neighbor -> edgeConsistent.apply(cell, neighbor));
         return distances.stream().map(Pair::second).allMatch(cellConsistent);

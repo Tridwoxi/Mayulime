@@ -23,3 +23,5 @@ Genetic algorithm should use sets of connected player walls as features, rather 
 ## Support
 
 Problem supports teleports, but rest of the system is not yet there.
+
+Tests. Specifically, does Snake.evaluate do "Among shortest paths, the Snake prefers to go up, then right, then down, then left."?
