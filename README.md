@@ -30,8 +30,8 @@ The system is a JavaFX Application. The launch point and GUI live in `src/app/`.
 the user uploads a problem, it is passed to the manager in `src/think/`.
 
 The manager concurrently runs strategies located in `src/think/stra/`. The problem
-representation and related components live in `src/think/repr/`. Pathfinding, analysis,
-and helpers live in `src/think/ana/`.
+representation and related components live in `src/think/repr/`. Pathfinding and
+analysis is done by `src/think/ana/`. Utilities live in `src/think/tools/`.
 
 Supported examples in the Pathery [MapCode format](https://www.pathery.com/mapeditor)
 can be found in `examples/`. Use the [Gradle](https://gradle.org) build tool,
