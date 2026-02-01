@@ -10,29 +10,24 @@ public record Cell(int row, int col) {
     public static final Cell OUT_OF_BOUNDS = new Cell(-1, -1);
 
     /**
-        From the task specification: "Among shortest paths, the Snake prefers to go up,
-        then right, then down, then left.". We return neighbors in left, down, right,
-        up order, which is the reverse of the preferred order, in the hopes that
-        whoever is calling this method wants it in that order.
+        Get neighbors of this cell on the given grid in up, right, down, left order.
      */
-    public ArrayList<Cell> getNeighborsOnLDRU(final Grid<?> grid) {
+    public ArrayList<Cell> getNeighborsURDL(final Grid<?> grid) {
         // Potential optimization: get Cell instances from problem to reuse them,
         // reducing GC pressure. Reasonable because this method is important to BFS.
         assert grid.inBounds(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
-        final int numRows = grid.getNumRows();
-        final int numCols = grid.getNumCols();
-        if (col - 1 >= 0) {
-            neighbors.add(new Cell(row, col - 1)); // Left.
-        }
-        if (row + 1 < numRows) {
-            neighbors.add(new Cell(row + 1, col)); // Down.
-        }
-        if (col + 1 < numCols) {
-            neighbors.add(new Cell(row, col + 1)); // Right.
-        }
         if (row - 1 >= 0) {
             neighbors.add(new Cell(row - 1, col)); // Up.
+        }
+        if (col + 1 < grid.getNumCols()) {
+            neighbors.add(new Cell(row, col + 1)); // Right.
+        }
+        if (row + 1 < grid.getNumRows()) {
+            neighbors.add(new Cell(row + 1, col)); // Down.
+        }
+        if (col - 1 >= 0) {
+            neighbors.add(new Cell(row, col - 1)); // Left.
         }
         assert neighbors.stream().allMatch(this::isNeighbor);
         return neighbors;
@@ -42,8 +37,8 @@ public record Cell(int row, int col) {
         Get the neighbors of this cell on the given grid. The order of neighbors in the
         returned list is unspecified, regardless of what the implementation indicates.
      */
-    public ArrayList<Cell> getNeighborsOn(final Grid<?> grid) {
-        return getNeighborsOnLDRU(grid);
+    public ArrayList<Cell> getNeighbors(final Grid<?> grid) {
+        return getNeighborsURDL(grid);
     }
 
     /**

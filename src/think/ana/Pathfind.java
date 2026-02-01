@@ -1,11 +1,11 @@
 package think.ana;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.function.Function;
 import think.repr.Cell;
 import think.repr.Grid;
@@ -14,12 +14,9 @@ import think.repr.Problem.Feature;
 import think.repr.Route;
 import think.tools.Iteration;
 import think.tools.Iteration.Pair;
-import think.tools.Ordering.BiOrdered;
 
 /**
     Simulate the Pathery snake's pathfinding.
-
-    This class is the leader of its package, so owns all package-private utilities.
 
     Although we are sometimes unable to check, and an exception might not be thrown, it
     is always a design error to pass invalid solutions to any method in this class.
@@ -107,75 +104,57 @@ public final class Pathfind {
     /**
         Get from start to end, ignoring teleports.
      */
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public static Route travel(
         final Grid<Feature> solution,
         final Cell start,
         final Cell end
     ) {
-        assert !start.equals(end);
         assert isLegalRun(solution, start) && isLegalRun(solution, end);
 
-        // We use A-star search (tree-search version) because for sparse grids with
-        // connected start and end, it explores less nodes than breadth-first search.
-        // If we are not seeing those grids, then use breadth-first search. The
-        // Manhattan distance heuristic is fast, consistent, and admissible.
-        final Function<Cell, Integer> heuristic = state -> state.manhattanTo(end);
+        // We use breadth-first search. From the task specification: "Among shortest
+        // paths, the Snake prefers to go up, then right, then down, then left.".
+        // Faster algorithms like A-star may find a shortest path in less time, but the
+        // returned path may not match the Snake's preference, and patching the result
+        // to match the Snake's preference may not be worth the effort.
 
-        final HashMap<Cell, Cell> parents = new HashMap<>();
-        final HashMap<Cell, Integer> gScore = new HashMap<>();
-        gScore.put(start, 0);
+        // Even if we were able to use A-star, it may not be faster. A-star wins on
+        // large sparse grids with connected start and finish. Our grids are small
+        // (perhaps 1k cells), and freqently dense and disconnected.
 
-        // LIFO tiebreaker causes DFS instead of BFS when multiple paths have equal
-        // length, such as traveling diagonally with no obstacles. On a 10 by 10 grid,
-        // getting from (0, 0) to (9, 9) adds 35 cells to the frontier instead of all
-        // 100 with a FIFO tiebreaker.
-        final PriorityQueue<BiOrdered<Cell>> frontier = new PriorityQueue<>();
-        int tiebreaker = 0;
-        frontier.add(new BiOrdered<>(start, heuristic.apply(start), tiebreaker--));
+        final int numRows = solution.getNumRows();
+        final int numCols = solution.getNumCols();
+        final Grid<Boolean> visited = new Grid<>(false, numRows, numCols);
+        final Grid<Cell> parents = new Grid<>(Cell.OUT_OF_BOUNDS, numRows, numCols);
+        final ArrayDeque<Cell> frontier = new ArrayDeque<>();
 
-        // Keeping an set of visited cells to prevents balloning the frontier and is
-        // simpler and faster than a custom PriorityQueue with a decreaseKey operation.
-        final HashSet<Cell> internal = new HashSet<>();
-
-        final Function<Cell, ArrayList<Cell>> reconstruct = current -> {
-            final ArrayList<Cell> path = new ArrayList<>();
-            while (parents.containsKey(current)) {
-                path.add(current);
-                current = parents.get(current);
+        final Function<Cell, Route> reverse = cell -> {
+            final ArrayList<Cell> steps = new ArrayList<>();
+            Cell walker = end;
+            while (!walker.equals(start)) {
+                steps.add(walker);
+                walker = parents.get(walker);
             }
-            Collections.reverse(path);
-            assert !path.contains(start) && path.contains(end);
-            return path;
+            Collections.reverse(steps);
+            assert !steps.contains(Cell.OUT_OF_BOUNDS);
+            return new Route(start, end, steps);
         };
 
+        visited.set(start, true);
+        frontier.add(start);
         while (!frontier.isEmpty()) {
-            final BiOrdered<Cell> node = frontier.remove();
-            final Cell current = node.item();
-            if (!internal.add(current)) {
-                continue;
-            }
-            if (current.equals(end)) {
-                return new Route(start, end, reconstruct.apply(current));
-            }
-            final int gScoreCurrent = gScore.getOrDefault(current, Integer.MAX_VALUE);
-            assert gScoreCurrent != Integer.MAX_VALUE;
-            // After insertion into the PriorityQueue, this algorithm explores nodes in
-            // reverse insertion order, so inserting LDRU causes URDL exploration,
-            // which is the correct snake preference order.
-            for (final Cell neighbor : current.getNeighborsOnLDRU(solution)) {
-                if (!isOpen(solution, neighbor)) {
+            final Cell current = frontier.removeFirst();
+            // Cells are taken out of the frontier in the same order they are inserted.
+            // Hence URDL is the correct order.
+            for (final Cell neighbor : current.getNeighborsURDL(solution)) {
+                if (visited.get(neighbor) || !isOpen(solution, neighbor)) {
                     continue;
                 }
-                final int gScoreNew = gScoreCurrent + 1;
-                final int gScoreOld = gScore.getOrDefault(neighbor, Integer.MAX_VALUE);
-                if (gScoreNew >= gScoreOld || internal.contains(neighbor)) {
-                    continue;
+                visited.set(neighbor, true);
+                parents.set(neighbor, current);
+                if (neighbor.equals(end)) {
+                    return reverse.apply(neighbor);
                 }
-                parents.put(neighbor, current);
-                gScore.put(neighbor, gScoreNew);
-                final int fScoreNew = gScoreNew + heuristic.apply(neighbor);
-                frontier.add(new BiOrdered<>(neighbor, fScoreNew, tiebreaker--));
+                frontier.add(neighbor);
             }
         }
         return new Route(start, end, new ArrayList<>(0));

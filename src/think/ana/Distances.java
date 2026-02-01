@@ -35,7 +35,7 @@ public final class Distances {
         while (!frontier.isEmpty()) {
             final Cell current = frontier.removeFirst();
             assert distances.get(current) >= 0;
-            for (final Cell neighbor : current.getNeighborsOn(solution)) {
+            for (final Cell neighbor : current.getNeighbors(solution)) {
                 if (
                     Pathfind.isOpen(solution, neighbor) && distances.get(neighbor) <= -1
                 ) {
@@ -59,7 +59,7 @@ public final class Distances {
             Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
         final Predicate<Cell> cellConsistent = cell ->
             cell
-                .getNeighborsOn(solution)
+                .getNeighbors(solution)
                 .stream()
                 .allMatch(neighbor -> edgeConsistent.apply(cell, neighbor));
         return distances.stream().map(Pair::second).allMatch(cellConsistent);
