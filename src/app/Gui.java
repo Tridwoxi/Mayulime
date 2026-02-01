@@ -24,13 +24,13 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import think.ana.Tools;
-import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.stra.Strategy;
+import think.tools.Iteration;
+import think.tools.Iteration.Pair;
 
 /**
     Display the game and its stats. Scene graph:
@@ -146,7 +146,7 @@ final class GameDisplay extends Group {
             problem.getCachedInitial().getNumCols()
         );
         final HashMap<Cell, Integer> checkpoints = new HashMap<>();
-        Tools.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
+        Iteration.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
             checkpoints.put(uniordered.item(), uniordered.order1())
         );
         final HashMap<Cell, Cell> teleports = problem.getTeleports();

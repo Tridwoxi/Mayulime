@@ -2,11 +2,11 @@ package think.stra;
 
 import java.util.ArrayList;
 import think.Manager;
-import think.ana.Tools;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
+import think.tools.Iteration;
 
 /**
     Proof of concept, since it's nice to see some player walls assigned. This strategy
@@ -30,7 +30,7 @@ public final class RandomGuesser extends Strategy {
         final ArrayList<Cell> emptyCells = getProblem()
             .getCachedInitial()
             .where(Feature.EMPTY::equals, new ArrayList<>());
-        Tools.randomly(emptyCells)
+        Iteration.randomly(emptyCells)
             .limit(getProblem().getPlayerWallSupply())
             .forEachOrdered(cell -> guess.set(cell, Feature.PLAYER_WALL));
         return guess;

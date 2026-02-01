@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import think.tools.Ordering.UniOrdered;
 
 /**
     Iteration- and stream-related utilities.
@@ -26,6 +29,15 @@ public final class Iteration {
         }
         assert result.size() == size;
         return result;
+    }
+
+    /**
+        Stream the elements of the given list with their indices.
+     */
+    public static <T> Stream<UniOrdered<T>> enumerate(final ArrayList<T> list) {
+        return IntStream.range(0, list.size()).mapToObj(index ->
+            new UniOrdered<>(list.get(index), index)
+        );
     }
 
     /**
@@ -81,6 +93,37 @@ public final class Iteration {
                 final Pair<T, T> pair = new Pair<>(previous, next);
                 previous = next;
                 return pair;
+            }
+        };
+        return toStream(iterator);
+    }
+
+    /**
+        Stream items in a random order.
+
+        It is undefined behavior to mutate the underlying list while this method runs.
+     */
+    public static <T> Stream<T> randomly(final ArrayList<T> items) {
+        final int size = items.size();
+        final ArrayList<Integer> indices = new ArrayList<>(size);
+        for (int index = 0; index < size; index++) {
+            indices.add(index);
+        }
+        final Iterator<T> iterator = new Iterator<>() {
+            private int remaining = size;
+
+            @Override
+            public boolean hasNext() {
+                return remaining > 0;
+            }
+
+            @Override
+            public T next() {
+                final int choice = ThreadLocalRandom.current().nextInt(remaining);
+                final int index = indices.get(choice);
+                remaining -= 1;
+                indices.set(choice, indices.get(remaining));
+                return items.get(index);
             }
         };
         return toStream(iterator);
