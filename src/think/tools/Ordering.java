@@ -6,6 +6,8 @@ package think.tools;
  */
 public final class Ordering {
 
+    private Ordering() {}
+
     public record UniOrdered<T>(
         T item,
         int order1

@@ -2,7 +2,7 @@ package think.repr;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
-import think.ana.Tools;
+import think.tools.Iteration;
 
 /**
     Result of a Snake's travels from start (exclusive) to end (inclusive). Steps will be empty if the route is blocked. Routes are problem- and assignment-specific.
@@ -23,7 +23,7 @@ public final class Route {
             assert steps.getFirst().isNeighbor(start);
             assert steps.getLast().equals(end);
         }
-        assert Tools.pairwise(steps).allMatch(pair ->
+        assert Iteration.pairwise(steps).allMatch(pair ->
             pair.first().isNeighbor(pair.second())
         );
     }

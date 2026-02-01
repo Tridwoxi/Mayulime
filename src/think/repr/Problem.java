@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import think.ana.Tools;
+import think.tools.Iteration;
 
 /**
     Simplified Pathery problem parser. Structurally, the unification of problem
@@ -115,14 +115,23 @@ public final class Problem {
 
         // == Grid parsing: temporary data holders. ==
         final String[] features = parts[1].split(PERIOD_OR_COMMA_REGEX);
-        final ArrayList<Feature> cells = Tools.fill(Feature.EMPTY, numRows * numCols);
+        final ArrayList<Feature> cells = Iteration.filledArray(
+            Feature.EMPTY,
+            numRows * numCols
+        );
         // checks is 1-indexed, while telIns/Outs is 0-indexed.
-        final ArrayList<Cell> checks = Tools.fill(
+        final ArrayList<Cell> checks = Iteration.filledArray(
             Cell.OUT_OF_BOUNDS,
             NUM_CHECKPOINTS + 2 // get(0): start; get(size() - 1): end.
         );
-        final ArrayList<Cell> telIns = Tools.fill(Cell.OUT_OF_BOUNDS, NUM_TELEPORTS);
-        final ArrayList<Cell> telOuts = Tools.fill(Cell.OUT_OF_BOUNDS, NUM_TELEPORTS);
+        final ArrayList<Cell> telIns = Iteration.filledArray(
+            Cell.OUT_OF_BOUNDS,
+            NUM_TELEPORTS
+        );
+        final ArrayList<Cell> telOuts = Iteration.filledArray(
+            Cell.OUT_OF_BOUNDS,
+            NUM_TELEPORTS
+        );
         int traversingIndex = 0;
 
         // == Grid parsing: feature traversal and syntax validation. ==
@@ -186,7 +195,7 @@ public final class Problem {
         require(traversingIndex <= numRows * numCols);
 
         // == Grid parsing: semantic validation. ==
-        final boolean pairedTels = Tools.zip(telIns, telOuts).allMatch(
+        final boolean pairedTels = Iteration.zip(telIns, telOuts).allMatch(
             pair ->
                 (pair.first().equals(Cell.OUT_OF_BOUNDS)) ==
                 (pair.second().equals(Cell.OUT_OF_BOUNDS))
@@ -205,7 +214,7 @@ public final class Problem {
             .filter(cell -> !cell.equals(Cell.OUT_OF_BOUNDS))
             .forEachOrdered(checkpoints::add);
         this.teleports = new HashMap<>();
-        Tools.zip(telIns, telOuts)
+        Iteration.zip(telIns, telOuts)
             .filter(pair -> !pair.first().equals(Cell.OUT_OF_BOUNDS))
             .forEachOrdered(pair -> {
                 teleports.put(pair.first(), pair.second());

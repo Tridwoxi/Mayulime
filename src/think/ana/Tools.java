@@ -33,21 +33,6 @@ public final class Tools {
         return result;
     }
 
-    public static <T> boolean rectangular(final ArrayList<ArrayList<T>> list2d) {
-        return pairwise(list2d).allMatch(
-            list1d -> list1d.first.size() == list1d.second.size()
-        );
-    }
-
-    public static <T> ArrayList<T> fill(final T item, final int size) {
-        final ArrayList<T> result = new ArrayList<>(size);
-        for (int index = 0; index < size; index++) {
-            result.add(item);
-        }
-        assert result.size() == size;
-        return result;
-    }
-
     public static <T> Stream<UniOrdered<T>> enumerate(final ArrayList<T> list) {
         return IntStream.range(0, list.size()).mapToObj(index ->
             new UniOrdered<>(list.get(index), index)
@@ -99,61 +84,6 @@ public final class Tools {
     // == Pairwise. ====================================================================
 
     public record Pair<F, S>(F first, S second) {}
-
-    /**
-        Same as Python's `itertools.pairwise`.
-     */
-    public static <T> Stream<Pair<T, T>> pairwise(final Iterable<T> items) {
-        final Iterator<T> source = items.iterator();
-        if (!source.hasNext()) {
-            return Stream.empty();
-        }
-        final T first = source.next();
-        final Iterator<Pair<T, T>> iterator = new Iterator<>() {
-            private T previous = first;
-
-            @Override
-            public boolean hasNext() {
-                return source.hasNext();
-            }
-
-            @Override
-            public Pair<T, T> next() {
-                final T next = source.next();
-                final Pair<T, T> pair = new Pair<>(previous, next);
-                previous = next;
-                return pair;
-            }
-        };
-        return toStream(iterator);
-    }
-
-    // == Zip. ====================================================================
-
-    /**
-        Same as Python's `zip` with two arguments and strict=True. Lazily throws
-        NoSuchElementException if iterables are of unequal length.
-     */
-    public static <F, S> Stream<Pair<F, S>> zip(
-        final Iterable<F> firsts,
-        final Iterable<S> seconds
-    ) {
-        final Iterator<F> firstIterator = firsts.iterator();
-        final Iterator<S> secondIterator = seconds.iterator();
-
-        final Iterator<Pair<F, S>> iterator = new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                return firstIterator.hasNext() || secondIterator.hasNext();
-            }
-
-            @Override
-            public Pair<F, S> next() {
-                return new Pair<>(firstIterator.next(), secondIterator.next());
-            }
-        };
-        return toStream(iterator);
-    }
 
     // == Counter. =====================================================================
 

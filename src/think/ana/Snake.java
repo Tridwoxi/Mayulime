@@ -16,6 +16,7 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.repr.Route;
+import think.tools.Iteration;
 import think.tools.Ordering.BiOrdered;
 
 /**
@@ -26,7 +27,7 @@ public final class Snake {
     private Snake() {}
 
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
-        final ArrayList<Route> routes = Tools.pairwise(problem.getCheckpoints())
+        final ArrayList<Route> routes = Iteration.pairwise(problem.getCheckpoints())
             .map(pair -> travel(problem, solution, pair.first(), pair.second()))
             .collect(Collectors.toCollection(ArrayList::new));
         return Route.cumulativeLength(routes);

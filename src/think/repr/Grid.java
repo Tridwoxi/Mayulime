@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import think.ana.Tools;
 import think.ana.Tools.Pair;
+import think.tools.Iteration;
 
 /**
     Rectangular two-dimensional grid. No minimum size. Grids store items of type "T",
@@ -29,7 +29,7 @@ public final class Grid<T> {
     }
 
     public Grid(final T item, final int numRows, final int numCols) {
-        this(Tools.fill(item, numRows * numCols), numRows, numCols);
+        this(Iteration.filledArray(item, numRows * numCols), numRows, numCols);
     }
 
     public Grid(final Grid<T> grid) {
