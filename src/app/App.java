@@ -17,12 +17,12 @@ import think.stra.Strategy;
 /**
     Application launch point. Connects Gui (frontend) to Manager (backend).
  */
-public final class Main extends Application {
+public final class App extends Application {
 
     private static final String NAME = "Tridwoxi's Pathery AI";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
-    private static final AtomicReference<Main> INSTANCE = new AtomicReference<>();
+    private static final AtomicReference<App> INSTANCE = new AtomicReference<>();
 
     private Gui gui;
 
@@ -36,8 +36,8 @@ public final class Main extends Application {
         assert success;
     }
 
-    public static Main getInstance() {
-        final Main stored = INSTANCE.get();
+    public static App getInstance() {
+        final App stored = INSTANCE.get();
         assert stored != null;
         return stored;
     }

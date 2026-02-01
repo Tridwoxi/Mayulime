@@ -32,7 +32,7 @@ tasks.named('run') {
 }
 
 application {
-    mainClass = 'app.Main'
+    mainClass = 'app.App'
 }
 
 javafx {

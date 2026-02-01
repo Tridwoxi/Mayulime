@@ -266,7 +266,7 @@ final class ButtonDisplay extends Button {
         final Window window = scene == null ? null : scene.getWindow();
         final File chosen = chooser.showOpenDialog(window);
         if (chosen != null) {
-            Main.getInstance().send(chosen);
+            App.getInstance().send(chosen);
         }
     }
 }

@@ -1,6 +1,6 @@
 package think;
 
-import app.Main;
+import app.App;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -90,7 +90,7 @@ public final class Manager {
         synchronized (this) {
             if (score > topScore) {
                 topScore = score;
-                Main.getInstance().receive(submitter, problem, copy, score);
+                App.getInstance().receive(submitter, problem, copy, score);
             }
         }
     }
