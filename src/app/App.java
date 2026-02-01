@@ -25,6 +25,7 @@ public final class App extends Application {
     private static final AtomicReference<App> INSTANCE = new AtomicReference<>();
 
     private Gui gui;
+    private Problem previous;
 
     @Override
     public void init() {
@@ -46,6 +47,7 @@ public final class App extends Application {
     public void start(final Stage primaryStage) {
         assert Test.runAllTests();
         this.gui = new Gui();
+        this.previous = null;
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
         primaryStage.setMinWidth(MIN_WIDTH_PX);
@@ -83,8 +85,16 @@ public final class App extends Application {
         Platform.runLater(() -> {
             gui.update(submitter, problem, solution, score);
             if (gui.getWindow() instanceof Stage stage) {
-                stage.sizeToScene();
+                if (isFresh(problem)) {
+                    stage.sizeToScene();
+                }
             }
         });
+    }
+
+    private boolean isFresh(final Problem problem) {
+        final boolean firstUpdate = previous != problem;
+        previous = problem;
+        return firstUpdate;
     }
 }
