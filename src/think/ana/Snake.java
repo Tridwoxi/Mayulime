@@ -10,13 +10,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import think.ana.Tools.BiOrdered;
 import think.ana.Tools.Pair;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.repr.Route;
+import think.tools.Ordering.BiOrdered;
 
 /**
     Pathfinding and distance evaluation. Simulates the Pathery snake.

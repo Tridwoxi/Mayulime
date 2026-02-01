@@ -9,6 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import think.tools.Ordering.UniOrdered;
 
 /**
     General purpose utility functions. Tpai-specific code must go in its own class.
@@ -152,33 +153,6 @@ public final class Tools {
             }
         };
         return toStream(iterator);
-    }
-
-    // == Ordering. ====================================================================
-
-    public record UniOrdered<T>(
-        T item,
-        int order1
-    ) implements Comparable<UniOrdered<T>> {
-        @Override
-        public int compareTo(final UniOrdered<T> other) {
-            return Integer.compare(this.order1, other.order1);
-        }
-    }
-
-    public record BiOrdered<T>(
-        T item,
-        int order1,
-        int order2
-    ) implements Comparable<BiOrdered<T>> {
-        @Override
-        public int compareTo(final BiOrdered<T> other) {
-            final int first = Integer.compare(this.order1, other.order1);
-            if (first != 0) {
-                return first;
-            }
-            return Integer.compare(this.order2, other.order2);
-        }
     }
 
     // == Counter. =====================================================================
