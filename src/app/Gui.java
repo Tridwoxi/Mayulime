@@ -46,7 +46,7 @@ import think.tools.Iteration.Pair;
             ButtonDisplay (Button)
     </pre>
  */
-public final class Gui extends Scene {
+final class Gui extends Scene {
 
     static final String FONT_NAME = "System";
     static final double CELL_SIZE_PX = 50.0;
@@ -56,7 +56,7 @@ public final class Gui extends Scene {
     private final GameDisplay gameDisplay;
     private final StatsDisplay statsDisplay;
 
-    public Gui() {
+    Gui() {
         super(new VBox());
         this.root = (VBox) getRoot();
         this.gameDisplay = new GameDisplay();
