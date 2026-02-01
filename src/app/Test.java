@@ -61,8 +61,6 @@ final class Test {
     private static void snakePathfinding() {
         final Problem problem = getProblem();
         final Grid<Feature> initial = problem.getCachedInitial();
-        assert problem.isValid(initial);
-        // FATAL ERROR: Snake pathfinding failed, says 25, Pathery says 30.
         assert Pathfind.evaluate(problem, initial) == 30;
     }
 

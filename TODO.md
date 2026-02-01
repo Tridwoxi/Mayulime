@@ -22,4 +22,4 @@ Genetic algorithm should use sets of connected player walls as features, rather 
 
 ## Support
 
-Add tests.
+Snake pathfinding in Tests is failing because A-star's heuristic causes it to step on teleports that the Pathery snake would miss. Delete A-star and use BFS.
