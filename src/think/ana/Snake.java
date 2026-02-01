@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -26,14 +26,82 @@ public final class Snake {
 
     private Snake() {}
 
+    /**
+        Evaluate the score of the solution to the problem. This method supports walls,
+        checkpoints, and teleports, but no other features.
+     */
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
         assert problem.isValid(solution);
-        final ArrayList<Route> routes = Iteration.pairwise(problem.getCheckpoints())
-            .map(pair -> travel(solution, pair.first(), pair.second()))
-            .collect(Collectors.toCollection(ArrayList::new));
-        return Route.cumulativeLength(routes);
+        final ArrayList<Cell> checkpoints = problem.getCheckpoints();
+        final HashMap<Cell, Cell> teleportMap = problem.getTeleports();
+        final HashSet<Cell> activeTeleports = new HashSet<>(
+            problem.getTeleports().keySet()
+        );
+        int totalSteps = 0;
+        for (final Pair<Cell, Cell> pair : Iteration.pairwise(checkpoints).toList()) {
+            final ArrayList<Route> routes = travel(
+                solution,
+                pair.first(),
+                pair.second(),
+                activeTeleports,
+                teleportMap
+            );
+            if (routes.isEmpty()) {
+                return 0;
+            }
+            totalSteps += routes.stream().mapToInt(Route::getLength).sum();
+        }
+        return totalSteps;
     }
 
+    /**
+        Get from start to end, including teleports.
+
+        If the travel is possible, the length of the resulting list will be (the number
+        of teleports the snake stepped on) + 1, and activeTeleports will be modified in
+        place. If travel is impossible, the resulting list will be empty, and the state
+        of activeTeleports is unspecified.
+     */
+    public static ArrayList<Route> travel(
+        final Grid<Feature> solution,
+        final Cell start,
+        final Cell end,
+        final HashSet<Cell> activeTeleports,
+        final HashMap<Cell, Cell> teleportMap
+    ) {
+        // It is possible for a route that was originally possible without teleports to
+        // become impossible when teleports are added. This happens when the snake
+        // steps on a teleport and gets trapped in a box.
+        assert activeTeleports.stream().allMatch(teleportMap::containsKey);
+        final ArrayList<Route> routes = new ArrayList<>();
+        Cell currentLocation = start;
+        final int maxAttempts = activeTeleports.size() + 1;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            final Route route = travel(solution, currentLocation, end);
+            if (!route.isPossible()) {
+                return new ArrayList<>(0);
+            }
+            final Optional<Cell> stoppedAtTeleport = route
+                .walk()
+                .filter(activeTeleports::contains)
+                .findFirst();
+            if (stoppedAtTeleport.isEmpty()) {
+                routes.add(route);
+                return routes;
+            }
+            assert activeTeleports.contains(stoppedAtTeleport.get());
+            final Route trimmed = Route.trimTo(route, stoppedAtTeleport.get());
+            routes.add(trimmed);
+            activeTeleports.remove(trimmed.getEnd());
+            // Teleportation is instant and does not add a step.
+            currentLocation = teleportMap.get(trimmed.getEnd());
+        }
+        throw new AssertionError();
+    }
+
+    /**
+        Get from start to end, ignoring teleports.
+     */
     public static Route travel(
         final Grid<Feature> solution,
         final Cell start,

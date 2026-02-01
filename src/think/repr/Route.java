@@ -13,15 +13,20 @@ public final class Route {
     private final Cell end;
     private final ArrayList<Cell> steps;
 
-    public Route(final Cell start, final Cell end, final ArrayList<Cell> steps) {
-        this.start = start;
-        this.end = end;
+    public Route(
+        final Cell startExclusive,
+        final Cell endInclusive,
+        final ArrayList<Cell> steps
+    ) {
+        this.start = startExclusive;
+        this.end = endInclusive;
         this.steps = new ArrayList<>(steps);
         // Both zero-length direct paths and nonzero-length circular chains are illegal
         // because a cell on a problem is always interesting for exactly one reason.
         if (!steps.isEmpty()) {
-            assert steps.getFirst().isNeighbor(start);
-            assert steps.getLast().equals(end);
+            assert steps.getFirst().isNeighbor(startExclusive);
+            assert steps.getLast().equals(endInclusive);
+            assert !steps.contains(startExclusive) && steps.contains(endInclusive);
         }
         assert Iteration.pairwise(steps).allMatch(pair ->
             pair.first().isNeighbor(pair.second())
@@ -47,6 +52,18 @@ public final class Route {
 
     public Stream<Cell> walk() {
         return steps.stream();
+    }
+
+    public static Route trimTo(final Route route, final Cell end) {
+        assert route.steps.contains(end);
+        final ArrayList<Cell> steps = new ArrayList<>(route.steps.size());
+        for (final Cell step : route.steps) {
+            steps.add(step);
+            if (step.equals(end)) {
+                break;
+            }
+        }
+        return new Route(route.start, end, steps);
     }
 
     public static int cumulativeLength(final ArrayList<Route> routes) {
