@@ -2,12 +2,15 @@ package app;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import think.ana.Pathfind;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
+import think.tools.Random;
+import think.tools.Structures.Weighted;
 
 /**
     Testing of the system is done by unit tests (below) and assertions in the code.
@@ -28,13 +31,30 @@ final class Test {
     private Test() {}
 
     /**
-        Death by failed assertion if any test fails. This method always returns true.
+        Death by failed assertion if any test fails.
+
+        This method always returns true. The preferred way to run this method is to
+        assert it upon system launch.
      */
     static boolean runAllTests() {
         problemParsing();
         snakePathfinding();
+        solutionValidation();
+        weightedSelection();
         return true;
     }
+
+    // == think.ana ====================================================================
+
+    private static void snakePathfinding() {
+        final Problem problem = getProblem();
+        assert Pathfind.evaluate(problem, problem.getCachedInitial()) == 30;
+        final Grid<Feature> solution = problem.getAnotherInitial();
+        solution.set(new Cell(0, 3), Feature.PLAYER_WALL);
+        assert Pathfind.evaluate(problem, solution) == 0;
+    }
+
+    // == think.repr ===================================================================
 
     private static void problemParsing() {
         final Problem problem = getProblem();
@@ -43,6 +63,7 @@ final class Test {
         assert initial.getNumRows() == 4;
         assert initial.getNumCols() == 6;
         assert problem.getPlayerWallSupply() == 13;
+        assert problem.getName().equals("Example");
 
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();
         assert checkpoints.size() == 4;
@@ -57,11 +78,42 @@ final class Test {
         assert teleports.get(new Cell(2, 1)).equals(new Cell(1, 3));
     }
 
-    private static void snakePathfinding() {
+    private static void solutionValidation() {
         final Problem problem = getProblem();
-        final Grid<Feature> initial = problem.getCachedInitial();
-        assert Pathfind.evaluate(problem, initial) == 30;
+        final Grid<Feature> solution = problem.getAnotherInitial();
+
+        assert problem.isValid(solution);
+
+        solution.set(new Cell(0, 0), Feature.SYSTEM_WALL);
+        assert !problem.isValid(solution);
+        solution.set(new Cell(0, 0), Feature.EMPTY);
+
+        solution.set(new Cell(3, 3), Feature.TELEPORT_OUT);
+        assert !problem.isValid(solution);
+        solution.set(new Cell(3, 3), Feature.CHECKPOINT);
+
+        solution.set(new Cell(0, 2), Feature.PLAYER_WALL);
+        assert problem.isValid(solution);
+        solution.set(new Cell(3, 3), Feature.EMPTY);
     }
+
+    // == think.tools ==================================================================
+
+    private static void weightedSelection() {
+        final List<Weighted<String>> weighteds = List.of(
+            new Weighted<>("Light", 1e-10),
+            new Weighted<>("Heavy", 1e+10),
+            new Weighted<>("Light", 1e-10)
+        );
+        for (int attempt = 0; attempt < 10; attempt++) {
+            assert Random.weightedStream(new ArrayList<>(weighteds))
+                .findFirst()
+                .orElseThrow()
+                .equals("Heavy");
+        }
+    }
+
+    // == Helpers. =====================================================================
 
     private static Problem getProblem() {
         try {
