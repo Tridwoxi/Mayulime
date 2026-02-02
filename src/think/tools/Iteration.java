@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -97,38 +96,7 @@ public final class Iteration {
         return toStream(iterator);
     }
 
-    /**
-        Stream items in a random order.
-
-        It is undefined behavior to mutate the underlying list while this method runs.
-     */
-    public static <T> Stream<T> randomly(final ArrayList<T> items) {
-        final int size = items.size();
-        final ArrayList<Integer> indices = new ArrayList<>(size);
-        for (int index = 0; index < size; index++) {
-            indices.add(index);
-        }
-        final Iterator<T> iterator = new Iterator<>() {
-            private int remaining = size;
-
-            @Override
-            public boolean hasNext() {
-                return remaining > 0;
-            }
-
-            @Override
-            public T next() {
-                final int choice = ThreadLocalRandom.current().nextInt(remaining);
-                final int index = indices.get(choice);
-                remaining -= 1;
-                indices.set(choice, indices.get(remaining));
-                return items.get(index);
-            }
-        };
-        return toStream(iterator);
-    }
-
-    private static <T> Stream<T> toStream(final Iterator<T> iterator) {
+    static <T> Stream<T> toStream(final Iterator<T> iterator) {
         // The stream is always ordered because all our streams come from lists. It is
         // always non-null because the project prohibits passing nulls.
         return StreamSupport.stream(
