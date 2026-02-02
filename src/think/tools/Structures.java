@@ -16,7 +16,17 @@ public final class Structures {
     public record Pair<F, S>(F first, S second) {}
 
     /**
-        Association between an item a number. Comparable on the number.
+        Association between an item and a double. Comparable on the double.
+     */
+    public record Weighted<T>(T item, double weight) implements Comparable<Weighted<T>> {
+        @Override
+        public int compareTo(final Weighted<T> other) {
+            return Double.compare(this.weight, other.weight);
+        }
+    }
+
+    /**
+        Association between an item an integer. Comparable on the integer.
      */
     public record Ordered<T>(T item, int order) implements Comparable<Ordered<T>> {
         @Override
