@@ -30,7 +30,7 @@ public final class RandomGuesser extends Strategy {
         final ArrayList<Cell> emptyCells = getProblem()
             .getCachedInitial()
             .where(Feature.EMPTY::equals, new ArrayList<>());
-        Random.randomly(emptyCells)
+        Random.uniformStream(emptyCells)
             .limit(getProblem().getPlayerWallSupply())
             .forEachOrdered(cell -> guess.set(cell, Feature.PLAYER_WALL));
         return guess;

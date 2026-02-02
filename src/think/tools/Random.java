@@ -2,8 +2,11 @@ package think.tools;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.stream.Stream;
+import think.tools.Structures.Weighted;
 
 /**
     Access randomization only through this class, think.stra.Random. Although nothing
@@ -17,9 +20,39 @@ public final class Random {
     private Random() {}
 
     /**
+        Stream items in a random order proportional to weight, without replacement.
+     */
+    public static <T> Stream<T> weightedStream(final ArrayList<Weighted<T>> weighteds) {
+        assert weighteds.stream().allMatch(weighted -> weighted.weight() > 0);
+
+        // https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Res
+        // Modified with logarithm for numerical stability and to be lazy.
+
+        final Function<Weighted<T>, Weighted<T>> reweight = item -> {
+            final double random = ThreadLocalRandom.current().nextDouble();
+            return new Weighted<>(item.item(), -Math.log(random) / item.weight());
+        };
+        final PriorityQueue<Weighted<T>> queue = new PriorityQueue<>(weighteds.size());
+        queue.addAll(weighteds.stream().map(reweight).toList());
+
+        final Iterator<T> iterator = new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return !queue.isEmpty();
+            }
+
+            @Override
+            public T next() {
+                return queue.remove().item();
+            }
+        };
+        return Iteration.toStream(iterator);
+    }
+
+    /**
         Stream items in a random order, without replacement.
      */
-    public static <T> Stream<T> randomly(final ArrayList<T> items) {
+    public static <T> Stream<T> uniformStream(final ArrayList<T> items) {
         final int size = items.size();
         final ArrayList<Integer> indices = new ArrayList<>(size);
         for (int index = 0; index < size; index++) {
