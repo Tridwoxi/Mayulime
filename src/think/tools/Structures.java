@@ -2,12 +2,28 @@ package think.tools;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
-import think.tools.Ordering.UniOrdered;
 
 /**
     Custom data structure implementations.
  */
-public class Structures {
+public final class Structures {
+
+    private Structures() {}
+
+    /**
+        Association between two items.
+     */
+    public record Pair<F, S>(F first, S second) {}
+
+    /**
+        Association between an item a number. Comparable on the number.
+     */
+    public record Ordered<T>(T item, int order) implements Comparable<Ordered<T>> {
+        @Override
+        public int compareTo(final Ordered<T> other) {
+            return Integer.compare(this.order, other.order);
+        }
+    }
 
     /**
         Counts number of occurrences of items.
@@ -36,11 +52,11 @@ public class Structures {
         /**
             Iteration order is arbitrary.
          */
-        public Stream<UniOrdered<T>> stream() {
+        public Stream<Ordered<T>> stream() {
             return counts
                 .entrySet()
                 .stream()
-                .map(entry -> new UniOrdered<>(entry.getKey(), entry.getValue()));
+                .map(entry -> new Ordered<>(entry.getKey(), entry.getValue()));
         }
 
         public int total() {

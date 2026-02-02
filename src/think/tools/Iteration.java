@@ -8,14 +8,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import think.tools.Ordering.UniOrdered;
+import think.tools.Structures.Ordered;
+import think.tools.Structures.Pair;
 
 /**
     Iteration- and stream-related utilities.
  */
 public final class Iteration {
-
-    public record Pair<F, S>(F first, S second) {}
 
     private Iteration() {}
 
@@ -34,9 +33,9 @@ public final class Iteration {
     /**
         Stream the elements of the given list with their indices.
      */
-    public static <T> Stream<UniOrdered<T>> enumerate(final ArrayList<T> list) {
+    public static <T> Stream<Ordered<T>> enumerate(final ArrayList<T> list) {
         return IntStream.range(0, list.size()).mapToObj(index ->
-            new UniOrdered<>(list.get(index), index)
+            new Ordered<>(list.get(index), index)
         );
     }
 

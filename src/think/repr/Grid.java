@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import think.tools.Iteration;
-import think.tools.Iteration.Pair;
+import think.tools.Structures.Pair;
 
 /**
     Rectangular two-dimensional grid. No minimum size. Grids store items of type "T",

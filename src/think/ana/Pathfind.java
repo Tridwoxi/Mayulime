@@ -13,7 +13,7 @@ import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.repr.Route;
 import think.tools.Iteration;
-import think.tools.Iteration.Pair;
+import think.tools.Structures.Pair;
 
 /**
     Simulate the Pathery snake's pathfinding.

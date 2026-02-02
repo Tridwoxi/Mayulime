@@ -30,7 +30,7 @@ import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.stra.Strategy;
 import think.tools.Iteration;
-import think.tools.Iteration.Pair;
+import think.tools.Structures.Pair;
 
 /**
     Display the game and its stats. Scene graph:
@@ -147,7 +147,7 @@ final class GameDisplay extends Group {
         );
         final HashMap<Cell, Integer> checkpoints = new HashMap<>();
         Iteration.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
-            checkpoints.put(uniordered.item(), uniordered.order1())
+            checkpoints.put(uniordered.item(), uniordered.order())
         );
         final HashMap<Cell, Cell> teleports = problem.getTeleports();
         final Consumer<Cell> assign = cell -> {

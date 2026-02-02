@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem.Feature;
-import think.tools.Iteration.Pair;
+import think.tools.Structures.Pair;
 
 /**
     Distance evaluation.
