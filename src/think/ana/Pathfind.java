@@ -2,6 +2,7 @@ package think.ana;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,17 +12,29 @@ import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.repr.Route;
 import think.tools.Iteration;
 import think.tools.Structures.Pair;
 
 /**
-    Simulate the Pathery snake's pathfinding.
+    Pathfinding and evaluation.
 
     Although we are sometimes unable to check, and an exception might not be thrown, it
     is always a design error to pass invalid solutions to any method in this class.
  */
 public final class Pathfind {
+
+    /**
+        Result of a Snake's travels. Excludes start. Includes end. Cells may be
+        disconnected due to teleporation.
+     */
+    public static final class Path extends ArrayList<Cell> {
+
+        Path() {}
+
+        Path(final Collection<Cell> cells) {
+            super(cells);
+        }
+    }
 
     private Pathfind() {}
 
@@ -30,41 +43,50 @@ public final class Pathfind {
      */
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
         assert problem.isValid(solution);
+        return travel(problem, solution).orElse(new Path()).size();
+    }
+
+    /**
+        Simulate the Pathery snake between all checkpoints.
+     */
+    public static Optional<Path> travel(
+        final Problem problem,
+        final Grid<Feature> solution
+    ) {
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();
         final HashMap<Cell, Cell> teleportMap = problem.getTeleports();
         final HashSet<Cell> activeTeleports = new HashSet<>(
             problem.getTeleports().keySet()
         );
-        int totalSteps = 0;
+        final ArrayList<Path> paths = new ArrayList<>();
         for (final Pair<Cell, Cell> pair : Iteration.pairwise(checkpoints).toList()) {
-            final ArrayList<Route> routes = travel(
+            final Optional<Path> path = travel(
                 solution,
                 pair.first(),
                 pair.second(),
                 activeTeleports,
                 teleportMap
             );
-            if (routes.isEmpty()) {
-                return 0;
+            if (path.isEmpty()) {
+                return Optional.empty();
             }
-            totalSteps += routes.stream().mapToInt(Route::getLength).sum();
+            paths.add(path.get());
         }
-        return totalSteps;
+        return Optional.of(flatten(paths));
     }
 
     /**
-        Get from start to end, including teleports.
+        Simulate the Pathery snake between two checkpoints.
 
-        If the travel is possible, the length of the resulting list will be (the number
-        of teleports the snake stepped on) + 1, and activeTeleports will be modified in
-        place. If travel is impossible, the resulting list will be empty, and the state
-        of activeTeleports is unspecified.
+        If travel is possible, activeTeleports will be modified in place to indicate
+        which teleports are no longer active. If the travel is the state of
+        activeTeleports is unspecified.
 
         It is possible for a route that was originally possible without teleports to
         become impossible when teleports are added. This happens when the snake steps
         on a teleport and gets trapped in a box.
      */
-    public static ArrayList<Route> travel(
+    public static Optional<Path> travel(
         final Grid<Feature> solution,
         final Cell start,
         final Cell end,
@@ -75,36 +97,40 @@ public final class Pathfind {
         assert isLegalRun(solution, start) && isLegalRun(solution, end);
         assert activeTeleports.stream().allMatch(teleportMap::containsKey);
 
-        final ArrayList<Route> routes = new ArrayList<>();
+        final ArrayList<Path> paths = new ArrayList<>();
         Cell currentLocation = start;
         final int maxAttempts = activeTeleports.size() + 1;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            final Route route = travel(solution, currentLocation, end);
-            if (!route.isPossible()) {
-                return new ArrayList<>(0);
+            final Optional<Path> path = travel(solution, currentLocation, end);
+            if (path.isEmpty()) {
+                return Optional.empty();
             }
-            final Optional<Cell> stoppedAtTeleport = route
-                .walk()
+            final Optional<Cell> stoppedAtTeleport = path
+                .get()
+                .stream()
                 .filter(activeTeleports::contains)
                 .findFirst();
             if (stoppedAtTeleport.isEmpty()) {
-                routes.add(route);
-                return routes;
+                paths.add(path.get());
+                return Optional.of(flatten(paths));
             }
             assert activeTeleports.contains(stoppedAtTeleport.get());
-            final Route trimmed = Route.trimTo(route, stoppedAtTeleport.get());
-            routes.add(trimmed);
-            activeTeleports.remove(trimmed.getEnd());
+            final Path trimmed = trimTo(path.get(), stoppedAtTeleport.get());
+            paths.add(trimmed);
+            activeTeleports.remove(stoppedAtTeleport.get());
             // Teleportation is instant and does not add a step.
-            currentLocation = teleportMap.get(trimmed.getEnd());
+            currentLocation = teleportMap.get(stoppedAtTeleport.get());
         }
+        // This assertion is impossible to trip because the snake must consume a
+        // teleport or die each step, and there are only maxAttempts teleports.
         throw new AssertionError();
     }
 
     /**
-        Get from start to end, ignoring teleports.
+        Simulate an alternative version of the Pathery snake that is not affected by
+        teleports.
      */
-    public static Route travel(
+    public static Optional<Path> travel(
         final Grid<Feature> solution,
         final Cell start,
         final Cell end
@@ -127,8 +153,8 @@ public final class Pathfind {
         final Grid<Cell> parents = new Grid<>(Cell.OUT_OF_BOUNDS, numRows, numCols);
         final ArrayDeque<Cell> frontier = new ArrayDeque<>();
 
-        final Function<Cell, Route> reverse = cell -> {
-            final ArrayList<Cell> steps = new ArrayList<>();
+        final Function<Cell, Path> reverse = cell -> {
+            final Path steps = new Path();
             Cell walker = end;
             while (!walker.equals(start)) {
                 steps.add(walker);
@@ -136,7 +162,7 @@ public final class Pathfind {
             }
             Collections.reverse(steps);
             assert !steps.contains(Cell.OUT_OF_BOUNDS);
-            return new Route(start, end, steps);
+            return steps;
         };
 
         visited.set(start, true);
@@ -152,12 +178,12 @@ public final class Pathfind {
                 visited.set(neighbor, true);
                 parents.set(neighbor, current);
                 if (neighbor.equals(end)) {
-                    return reverse.apply(neighbor);
+                    return Optional.of(reverse.apply(neighbor));
                 }
                 frontier.add(neighbor);
             }
         }
-        return new Route(start, end, new ArrayList<>(0));
+        return Optional.empty();
     }
 
     // == Package-private API. =========================================================
@@ -181,5 +207,23 @@ public final class Pathfind {
 
     static boolean isLegalRun(final Grid<Feature> solution, final Cell source) {
         return solution.inBounds(source) && isOpen(solution, source);
+    }
+
+    // == Private API. =================================================================
+
+    private static Path flatten(final ArrayList<Path> paths) {
+        return new Path(paths.stream().flatMap(Path::stream).toList());
+    }
+
+    private static Path trimTo(final Path path, final Cell end) {
+        assert path.contains(end);
+        final Path trimmed = new Path();
+        for (final Cell step : path) {
+            trimmed.add(step);
+            if (step.equals(end)) {
+                break;
+            }
+        }
+        return trimmed;
     }
 }
