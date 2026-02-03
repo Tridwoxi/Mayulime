@@ -87,18 +87,18 @@ public final class Manager {
         final Grid<Feature> solution
     ) {
         assert currentProblem != null;
-        // This guard is tripped when the user uploads a new problem but worker threads
-        // are still running, so workers propose solutions to the old (stale) problem.
-        if (currentProblem != problem) {
-            Logging.log(getClass(), "Guard tripped.");
-            return;
-        }
         // Grids are mutable data structures, and strategies make no promises to not
         // mutate the grid between the time they send it here and the long time later
         // when the frontend tries to read it.
         final Grid<Feature> copy = new Grid<>(solution);
         final int score = Pathfind.evaluate(problem, copy);
         synchronized (this) {
+            // This guard is tripped when the user uploads a new problem but old worker
+            // threads haven't died and propose solutions to the old (stale) problem.
+            if (currentProblem != problem) {
+                Logging.log(getClass(), "Guard tripped.");
+                return;
+            }
             if (score > topScore) {
                 Logging.log(
                     getClass(),
