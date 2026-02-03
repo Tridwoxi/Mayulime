@@ -14,7 +14,7 @@ public final class BlankSolution extends Strategy {
     }
 
     @Override
-    public void run() {
+    protected void solve() throws KilledException {
         Manager.getInstance().consider(
             this,
             getProblem(),

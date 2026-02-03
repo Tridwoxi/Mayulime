@@ -19,8 +19,9 @@ public final class RandomGuesser extends Strategy {
     }
 
     @Override
-    public void run() {
-        while (keepGoing()) {
+    protected void solve() throws KilledException {
+        while (true) {
+            checkAlive();
             Manager.getInstance().consider(this, getProblem(), guess());
         }
     }

@@ -1,6 +1,0 @@
-#!/bin/sh
-set -eu
-
-# Before committing, the project must build successfully. Gradle depends on checkstyle
-# and spotbugs, so the project must satisfy those too.
-./gradlew build

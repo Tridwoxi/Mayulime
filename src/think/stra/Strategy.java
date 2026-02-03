@@ -2,43 +2,62 @@ package think.stra;
 
 import think.repr.Problem;
 
+/**
+    Base class for working on a problem.
+ */
 public abstract class Strategy implements Runnable {
 
     private final Problem problem;
     private final String name;
-    private volatile boolean keepGoing;
+    private volatile boolean alive;
 
     public Strategy(final Problem problem, final String name) {
         this.problem = problem;
         this.name = name;
-        this.keepGoing = true;
+        this.alive = true;
     }
 
-    /**
-        Generate solutions to the problem, and ask the manager to consider them.
-
-        Concrete subclasses should do all non-trivial work in this method. It would be
-        nice if this method returns shortly (ideally within 500 miliseconds) after its
-        owning instance is killed, but failing to do so is merely an annoyance and not
-        an error since all it does is waste compute. This method comes from {@link
-        Runnable}.
-     */
     @Override
-    public abstract void run();
+    public final void run() {
+        // When the user instructs us to work on a different problem, we should work on
+        // it. But many strategies run forever, and there is no safe way to forcefully
+        // kill a thread or procedure. So, the strategy needs to check when to stop. We
+        // can do so with a lengthy chain of "if not alive, return", but throwing
+        // exceptions is an easier way to do non-local returns.
+        try {
+            solve();
+        } catch (final KilledException exception) {
+            // Do nothing.
+        }
+    }
 
     public final void pleaseDie() {
-        this.keepGoing = false;
+        this.alive = false;
     }
 
     public final String getName() {
         return name;
     }
 
-    protected final boolean keepGoing() {
-        return keepGoing;
-    }
+    /**
+        Generate solutions and ask the {@link think.Manager} to consider them.
+
+        Concrete subclasses should do all non-trivial work in this method, as opposed
+        to the constructor. Implementations of this method are free to hang
+        indefintely, but it would be nice if this method calls {@link #checkAlive} at
+        least once every 500 miliseconds.
+     */
+    protected abstract void solve() throws KilledException;
 
     protected final Problem getProblem() {
         return problem;
     }
+
+    protected final void checkAlive() throws KilledException {
+        if (!alive) {
+            throw new KilledException();
+        }
+    }
+
+    protected static final class KilledException extends Exception {}
 }
