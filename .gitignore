@@ -14,12 +14,7 @@
 # Include Pathery MapCode format.
 !*.mapcode
 
-# Include extensionless hooks. Git expects these exact filenames under core.hooksPath.
-# This list must be manually maintained.
-!hooks/pre-commit
-!hooks/commit-msg
-
-# Ignore hidden files (usually garbage or tests)
+# Ignore hidden files (usually garbage or tests).
 .*
 
 # Ignore build artifacts.
