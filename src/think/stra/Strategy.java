@@ -1,6 +1,7 @@
 package think.stra;
 
 import think.repr.Problem;
+import think.tools.Logging;
 
 /**
     Base class for working on a problem.
@@ -24,10 +25,12 @@ public abstract class Strategy implements Runnable {
         // kill a thread or procedure. So, the strategy needs to check when to stop. We
         // can do so with a lengthy chain of "if not alive, return", but throwing
         // exceptions is an easier way to do non-local returns.
+        Logging.log(getClass(), "Started.");
         try {
             solve();
+            Logging.log(getClass(), "Done (returned).");
         } catch (final KilledException exception) {
-            // Do nothing.
+            Logging.log(getClass(), "Done (killed).");
         }
     }
 

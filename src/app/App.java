@@ -13,6 +13,7 @@ import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
 import think.stra.Strategy;
+import think.tools.Logging;
 
 /**
     Application launch point. Connects Gui (frontend) to Manager (backend).
@@ -65,9 +66,9 @@ public final class App extends Application {
         try {
             problem = new Problem(Files.readString(file.toPath()));
         } catch (BadMapCodeException exception) {
-            System.err.println("Bad MapCode.");
+            Logging.log(getClass(), "Bad MapCode.");
         } catch (IOException exception) {
-            System.err.println("Can't read file.");
+            Logging.log(getClass(), "Can't read file.");
         }
         if (problem != null) {
             Manager.getInstance().solve(problem);

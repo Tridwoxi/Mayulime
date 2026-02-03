@@ -13,6 +13,7 @@ import think.repr.Problem.Feature;
 import think.stra.BlankSolution;
 import think.stra.RandomGuesser;
 import think.stra.Strategy;
+import think.tools.Logging;
 
 /**
     Strategy controller. Must be called from JavaFX Application Thread. Workers run in
@@ -74,6 +75,12 @@ public final class Manager {
         return topScore;
     }
 
+    /**
+        Relay a solution to the frontend if it is the best so far.
+
+        It is best practice to check with "getTopScore(void)" first instead of blindly
+        spamming this method with bad guesses, but spamming is acceptable.
+     */
     public void consider(
         final Strategy submitter,
         final Problem problem,
@@ -83,12 +90,25 @@ public final class Manager {
         // This guard is tripped when the user uploads a new problem but worker threads
         // are still running, so workers propose solutions to the old (stale) problem.
         if (currentProblem != problem) {
+            Logging.log(getClass(), "Guard tripped.");
             return;
         }
+        // Grids are mutable data structures, and strategies make no promises to not
+        // mutate the grid between the time they send it here and the long time later
+        // when the frontend tries to read it.
         final Grid<Feature> copy = new Grid<>(solution);
         final int score = Pathfind.evaluate(problem, copy);
         synchronized (this) {
             if (score > topScore) {
+                Logging.log(
+                    getClass(),
+                    "Score %d -> %d on %s by %s from %s",
+                    topScore,
+                    score,
+                    problem.getName(),
+                    submitter.getName(),
+                    Thread.currentThread().getName()
+                );
                 topScore = score;
                 App.getInstance().receive(submitter, problem, copy, score);
             }
