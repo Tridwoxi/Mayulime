@@ -1,12 +1,10 @@
 package think.stra;
 
-import java.util.ArrayList;
 import think.Manager;
-import think.repr.Cell;
+import think.ana.Manipulate;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.tools.Random;
 
 /**
     Proof of concept, since it's nice to see some player walls assigned. This strategy
@@ -22,18 +20,13 @@ public final class RandomGuesser extends Strategy {
     protected void solve() throws KilledException {
         while (true) {
             checkAlive();
-            Manager.getInstance().consider(this, getProblem(), guess());
+            Manager.getInstance().consider(this, getProblem(), maximalRandomSplatter());
         }
     }
 
-    private Grid<Feature> guess() {
-        final Grid<Feature> guess = getProblem().getAnotherInitial();
-        final ArrayList<Cell> emptyCells = getProblem()
-            .getCachedInitial()
-            .where(Feature.EMPTY::equals, new ArrayList<>());
-        Random.uniformStream(emptyCells)
-            .limit(getProblem().getPlayerWallSupply())
-            .forEachOrdered(cell -> guess.set(cell, Feature.PLAYER_WALL));
-        return guess;
+    private Grid<Feature> maximalRandomSplatter() {
+        final Grid<Feature> solution = getProblem().getAnotherInitial();
+        Manipulate.splatter(solution, getProblem().getPlayerWallSupply());
+        return solution;
     }
 }
