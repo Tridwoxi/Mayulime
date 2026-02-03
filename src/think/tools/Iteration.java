@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -94,6 +95,13 @@ public final class Iteration {
             }
         };
         return toStream(iterator);
+    }
+
+    /**
+        Turn a stream into an ArrayList. It is a runtime error pass an infinite stream.
+     */
+    public static <T> ArrayList<T> materialize(final Stream<T> stream) {
+        return stream.collect(Collectors.toCollection(ArrayList::new));
     }
 
     static <T> Stream<T> toStream(final Iterator<T> iterator) {
