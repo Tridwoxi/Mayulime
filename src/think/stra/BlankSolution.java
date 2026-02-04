@@ -1,6 +1,6 @@
 package think.stra;
 
-import think.Manager;
+import java.util.function.Supplier;
 import think.repr.Problem;
 
 /**
@@ -9,16 +9,16 @@ import think.repr.Problem;
  */
 public final class BlankSolution extends Strategy {
 
-    public BlankSolution(final Problem problem) {
-        super(problem, "doing nothing");
+    public BlankSolution(
+        final Considerer considerer,
+        final Supplier<Integer> scorer,
+        final Problem problem
+    ) {
+        super(considerer, scorer, problem, "doing nothing");
     }
 
     @Override
     protected void solve() throws KilledException {
-        Manager.getInstance().consider(
-            this,
-            getProblem(),
-            getProblem().getCachedInitial()
-        );
+        consider(getProblem().getCachedInitial());
     }
 }

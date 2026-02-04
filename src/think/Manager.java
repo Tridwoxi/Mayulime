@@ -1,10 +1,8 @@
 package think;
 
-import app.App;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import javafx.application.Platform;
 import think.ana.Pathfind;
 import think.repr.Grid;
@@ -21,32 +19,40 @@ import think.tools.Logging;
  */
 public final class Manager {
 
-    private static final Manager INSTANCE = new Manager();
+    /**
+        After a solution is considered and vertified to be an improvement, notify those
+        who care. A listener for improvements.
+     */
+    @FunctionalInterface
+    public interface Alerter {
+        void alert(
+            Strategy submitter,
+            Problem problem,
+            Grid<Feature> solution,
+            int score
+        );
+    }
+
+    private final Alerter alerter;
     private final ExecutorService executor;
     private final ArrayList<Strategy> workers;
     private volatile Problem currentProblem;
     private volatile int topScore;
 
-    private Manager() {
+    public Manager(final Alerter alerter) {
+        this.alerter = alerter;
         // "The shutdown sequence begins when all started non-daemon threads have
         // terminated.". Workers that spin longer than we want shouldn't prevent Java
         // from shutting down, so we'll make them into daemons.
-        final ThreadFactory factory = task -> {
+        this.executor = Executors.newCachedThreadPool(task -> {
             final Thread thread = new Thread(task);
             thread.setDaemon(true);
             return thread;
-        };
-        this.executor = Executors.newCachedThreadPool(factory);
+        });
         this.workers = new ArrayList<>();
         this.currentProblem = null;
         this.topScore = 0;
     }
-
-    public static Manager getInstance() {
-        return INSTANCE;
-    }
-
-    // == Strategy management. =========================================================
 
     public void solve(final Problem problem) {
         assert Platform.isFxApplicationThread();
@@ -58,8 +64,8 @@ public final class Manager {
         workers.forEach(worker -> worker.pleaseDie());
         workers.clear();
         topScore = 0;
-        addWorker(new BlankSolution(problem));
-        addWorker(new RandomGuesser(problem));
+        addWorker(new BlankSolution(this::consider, () -> topScore, problem));
+        addWorker(new RandomGuesser(this::consider, () -> topScore, problem));
     }
 
     private void addWorker(final Strategy worker) {
@@ -69,19 +75,13 @@ public final class Manager {
         executor.execute(worker);
     }
 
-    // == Communication. ===============================================================
-
-    public int getTopScore() {
-        return topScore;
-    }
-
     /**
         Relay a solution to the frontend if it is the best so far.
 
         It is best practice to check with "getTopScore(void)" first instead of blindly
         spamming this method with bad guesses, but spamming is acceptable.
      */
-    public void consider(
+    private void consider(
         final Strategy submitter,
         final Problem problem,
         final Grid<Feature> solution
@@ -110,7 +110,7 @@ public final class Manager {
                     Thread.currentThread().getName()
                 );
                 topScore = score;
-                App.getInstance().receive(submitter, problem, copy, score);
+                alerter.alert(submitter, problem, copy, score);
             }
         }
     }

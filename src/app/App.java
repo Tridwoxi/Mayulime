@@ -1,9 +1,5 @@
 package app;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -24,10 +20,10 @@ public final class App extends Application {
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
-    private static final AtomicReference<App> INSTANCE = new AtomicReference<>();
 
+    private Manager manager;
     private Gui gui;
-    private Problem previous;
+    private Problem current;
 
     @Override
     public void init() {
@@ -35,21 +31,15 @@ public final class App extends Application {
             exception.printStackTrace();
             Platform.exit();
         });
-        final boolean success = INSTANCE.compareAndSet(null, this);
-        assert success;
-    }
-
-    public static App getInstance() {
-        final App stored = INSTANCE.get();
-        assert stored != null;
-        return stored;
     }
 
     @Override
     public void start(final Stage primaryStage) {
         assert Test.runAllTests();
-        this.gui = new Gui();
-        this.previous = null;
+        this.manager = new Manager(this::recieveSolution);
+        this.gui = new Gui(this::recieveMapCode);
+        this.current = null;
+
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
         primaryStage.setMinWidth(MIN_WIDTH_PX);
@@ -61,17 +51,43 @@ public final class App extends Application {
 
     // == Connectors. ==================================================================
 
-    public void send(final File file) {
+    /**
+        Recieve a Solution from somewhere (perhaps the Manager) and pass it to the GUI.
+     */
+    private void recieveSolution(
+        final Strategy submitter,
+        final Problem problem,
+        final Grid<Feature> solution,
+        final int score
+    ) {
+        assert gui != null && manager != null;
+        // PERF: Spamming the GUI with updates when each update invalidates all
+        // previous updates is basically cyberbullying. Keep only the latest one.
+        Platform.runLater(() -> {
+            gui.update(submitter, problem, solution, score);
+            if (problem == current) {
+                return;
+            }
+            current = problem;
+            if (gui.getWindow() instanceof Stage stage) {
+                stage.sizeToScene();
+            }
+        });
+    }
+
+    /**
+        Recieve a MapCode from somewhere (perhaps the GUI) and pass it to the Manager.
+     */
+    private void recieveMapCode(final String mapCode) {
+        assert gui != null && manager != null;
         Problem problem = null;
         try {
-            problem = new Problem(Files.readString(file.toPath()));
+            problem = new Problem(mapCode);
         } catch (BadMapCodeException exception) {
             Logging.log(getClass(), "Bad MapCode.");
-        } catch (IOException exception) {
-            Logging.log(getClass(), "Can't read file.");
         }
         if (problem != null) {
-            Manager.getInstance().solve(problem);
+            manager.solve(problem);
             if (gui.getWindow() instanceof Stage stage) {
                 final String problemName = problem.getName().isBlank()
                     ? UNNAMED_PROBLEM_NAME
@@ -79,27 +95,5 @@ public final class App extends Application {
                 stage.setTitle(problemName);
             }
         }
-    }
-
-    public void receive(
-        final Strategy submitter,
-        final Problem problem,
-        final Grid<Feature> solution,
-        final int score
-    ) {
-        Platform.runLater(() -> {
-            gui.update(submitter, problem, solution, score);
-            if (gui.getWindow() instanceof Stage stage) {
-                if (isFresh(problem)) {
-                    stage.sizeToScene();
-                }
-            }
-        });
-    }
-
-    private boolean isFresh(final Problem problem) {
-        final boolean firstUpdate = previous != problem;
-        previous = problem;
-        return firstUpdate;
     }
 }

@@ -1,6 +1,6 @@
 package think.stra;
 
-import think.Manager;
+import java.util.function.Supplier;
 import think.ana.Manipulate;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -12,19 +12,23 @@ import think.repr.Problem.Feature;
  */
 public final class RandomGuesser extends Strategy {
 
-    public RandomGuesser(final Problem problem) {
-        super(problem, "guess randomly");
+    public RandomGuesser(
+        final Considerer considerer,
+        final Supplier<Integer> scorer,
+        final Problem problem
+    ) {
+        super(considerer, scorer, problem, "guess randomly");
     }
 
     @Override
     protected void solve() throws KilledException {
         while (true) {
             checkAlive();
-            Manager.getInstance().consider(this, getProblem(), maximalRandomSplatter());
+            consider(maximalSplatter());
         }
     }
 
-    private Grid<Feature> maximalRandomSplatter() {
+    private Grid<Feature> maximalSplatter() {
         final Grid<Feature> solution = getProblem().getAnotherInitial();
         Manipulate.splatter(solution, getProblem().getPlayerWallSupply());
         return solution;

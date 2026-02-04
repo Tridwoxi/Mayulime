@@ -1,6 +1,9 @@
 package think.stra;
 
+import java.util.function.Supplier;
+import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.Feature;
 import think.tools.Logging;
 
 /**
@@ -8,15 +11,34 @@ import think.tools.Logging;
  */
 public abstract class Strategy implements Runnable {
 
+    /**
+        Consider that the solution may be an improvement over previous results.
+     */
+    @FunctionalInterface
+    public interface Considerer {
+        void consider(Strategy submitter, Problem problem, Grid<Feature> solution);
+    }
+
+    private final Supplier<Integer> scorer;
+    private final Considerer considerer;
     private final Problem problem;
     private final String name;
     private volatile boolean alive;
 
-    public Strategy(final Problem problem, final String name) {
+    public Strategy(
+        final Considerer considerer,
+        final Supplier<Integer> scorer,
+        final Problem problem,
+        final String name
+    ) {
+        this.considerer = considerer;
+        this.scorer = scorer;
         this.problem = problem;
         this.name = name;
         this.alive = true;
     }
+
+    // == Public API. ==================================================================
 
     @Override
     public final void run() {
@@ -42,8 +64,10 @@ public abstract class Strategy implements Runnable {
         return name;
     }
 
+    // == Subclass contract. ===========================================================
+
     /**
-        Generate solutions and ask the {@link think.Manager} to consider them.
+        Generate solutions and consider them.
 
         Concrete subclasses should do all non-trivial work in this method, as opposed
         to the constructor. Implementations of this method are free to hang
@@ -52,9 +76,9 @@ public abstract class Strategy implements Runnable {
      */
     protected abstract void solve() throws KilledException;
 
-    protected final Problem getProblem() {
-        return problem;
-    }
+    // == Protected API. ===============================================================
+
+    protected static final class KilledException extends Exception {}
 
     protected final void checkAlive() throws KilledException {
         if (!alive) {
@@ -62,5 +86,15 @@ public abstract class Strategy implements Runnable {
         }
     }
 
-    protected static final class KilledException extends Exception {}
+    protected final Problem getProblem() {
+        return problem;
+    }
+
+    protected final int getTopScore() {
+        return scorer.get();
+    }
+
+    protected final void consider(final Grid<Feature> solution) {
+        considerer.consider(this, problem, solution);
+    }
 }

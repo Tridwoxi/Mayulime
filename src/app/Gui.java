@@ -1,6 +1,8 @@
 package app;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.function.Consumer;
 import javafx.event.Event;
@@ -30,6 +32,7 @@ import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.stra.Strategy;
 import think.tools.Iteration;
+import think.tools.Logging;
 import think.tools.Structures.Pair;
 
 /**
@@ -52,15 +55,18 @@ final class Gui extends Scene {
     static final double CELL_SIZE_PX = 50.0;
     static final double SPACING_PX = 50.0;
     static final double PADDING_PX = 50.0;
+
+    private final Consumer<String> mapCodeConsumer;
     private final VBox root;
     private final GameDisplay gameDisplay;
     private final StatsDisplay statsDisplay;
 
-    Gui() {
+    Gui(final Consumer<String> mapCodeConsumer) {
         super(new VBox());
+        this.mapCodeConsumer = mapCodeConsumer;
         this.root = (VBox) getRoot();
-        this.gameDisplay = new GameDisplay();
-        this.statsDisplay = new StatsDisplay();
+        this.gameDisplay = new GameDisplay(this);
+        this.statsDisplay = new StatsDisplay(this);
 
         setFill(PatheryColors.BACKGROUND);
         root.setPadding(new Insets(PADDING_PX));
@@ -93,6 +99,10 @@ final class Gui extends Scene {
         gameDisplay.setVisible(true);
         root.setSpacing(SPACING_PX);
     }
+
+    Consumer<String> getMapCodeConsumer() {
+        return mapCodeConsumer;
+    }
 }
 
 final class GameDisplay extends Group {
@@ -103,8 +113,11 @@ final class GameDisplay extends Group {
     private static final String TELEPORT_IN = "t";
     private static final String TELEPORT_OUT = "u";
     private static final String CHECKPOINT = "c";
+    private final Gui gui;
 
-    GameDisplay() {}
+    GameDisplay(final Gui gui) {
+        this.gui = gui;
+    }
 
     public void setGame(final Problem problem, final Grid<Feature> solution) {
         getChildren().clear();
@@ -115,6 +128,7 @@ final class GameDisplay extends Group {
                 final Feature feature = pair.first();
                 final Cell cell = pair.second();
                 final CellDisplay cellDisplay = new CellDisplay(
+                    gui,
                     toColor(feature),
                     labels.get(cell)
                 );
@@ -178,7 +192,7 @@ final class CellDisplay extends Group {
     private static final double SIZE = Gui.CELL_SIZE_PX;
     private static final double HALF = 0.5;
 
-    CellDisplay(final Color color, final String content) {
+    CellDisplay(final Gui gui, final Color color, final String content) {
         final Rectangle body = new Rectangle(SIZE, SIZE);
         body.setFill(color);
         body.setStroke(PatheryColors.BACKGROUND);
@@ -201,9 +215,9 @@ final class StatsDisplay extends HBox {
     private final ScoreDisplay scoreDisplay;
     private final ButtonDisplay buttonDisplay;
 
-    StatsDisplay() {
-        this.scoreDisplay = new ScoreDisplay();
-        this.buttonDisplay = new ButtonDisplay();
+    StatsDisplay(final Gui gui) {
+        this.scoreDisplay = new ScoreDisplay(gui);
+        this.buttonDisplay = new ButtonDisplay(gui);
         setAlignment(Pos.CENTER);
         hideScore();
         setSpacing(0.0);
@@ -230,7 +244,7 @@ final class StatsDisplay extends HBox {
 
 final class ScoreDisplay extends Text {
 
-    ScoreDisplay() {
+    ScoreDisplay(final Gui gui) {
         setFill(PatheryColors.FOREGROUND);
     }
 
@@ -244,9 +258,11 @@ final class ButtonDisplay extends Button {
     private static final String TEXT = "Upload problem";
     private static final String FORMAT_NAME = "Pathery MapCode";
     private static final String FORMAT_EXT = "*.mapcode";
+    private final Gui gui;
 
-    ButtonDisplay() {
+    ButtonDisplay(final Gui gui) {
         super(TEXT);
+        this.gui = gui;
         setBackground(Background.fill(PatheryColors.BACKGROUND));
         final BorderStroke stroke = new BorderStroke(
             PatheryColors.FOREGROUND,
@@ -265,8 +281,20 @@ final class ButtonDisplay extends Button {
         final Scene scene = getScene();
         final Window window = scene == null ? null : scene.getWindow();
         final File chosen = chooser.showOpenDialog(window);
-        if (chosen != null) {
-            App.getInstance().send(chosen);
+        if (chosen == null) {
+            Logging.log(getClass(), "File picker cancelled.");
+            return;
+        }
+        Logging.log(getClass(), "Picked file %s", chosen.getPath());
+
+        String mapCode = null;
+        try {
+            mapCode = Files.readString(chosen.toPath());
+        } catch (IOException ignored) {
+            Logging.log(getClass(), "Can't read file (!?)");
+        }
+        if (mapCode != null) {
+            gui.getMapCodeConsumer().accept(mapCode);
         }
     }
 }
