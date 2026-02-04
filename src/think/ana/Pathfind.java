@@ -29,9 +29,11 @@ public final class Pathfind {
      */
     public static final class Path extends ArrayList<Cell> {
 
-        Path() {}
+        private Path(final int initialCapacity) {
+            super(initialCapacity);
+        }
 
-        Path(final Collection<Cell> cells) {
+        private Path(final Collection<Cell> cells) {
             super(cells);
         }
     }
@@ -43,7 +45,7 @@ public final class Pathfind {
      */
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
         assert problem.isValid(solution);
-        return travel(problem, solution).orElse(new Path()).size();
+        return travel(problem, solution).orElse(new Path(0)).size();
     }
 
     /**
@@ -139,13 +141,12 @@ public final class Pathfind {
 
         // We use breadth-first search. From the task specification: "Among shortest
         // paths, the Snake prefers to go up, then right, then down, then left.".
-        // Faster algorithms like A-star may find a shortest path in less time, but the
-        // returned path may not match the Snake's preference, and patching the result
-        // to match the Snake's preference may not be worth the effort.
+        // Asymtopically faster algorithms like A-star find the wrong shortest path, have
+        // have higher constant factors, and perform badly on grids dense grids with
+        // disconnected start and finish.
 
-        // Even if we were able to use A-star, it may not be faster. A-star wins on
-        // large sparse grids with connected start and finish. Our grids are small
-        // (perhaps 1k cells), and freqently dense and disconnected.
+        // PERF: Unbox primitives, use raw indexes instead of Cells, unroll and inline
+        // neighbor loop, 1d primitive arrays, preallocate and reuse where possible.
 
         final int numRows = solution.getNumRows();
         final int numCols = solution.getNumCols();
@@ -154,7 +155,7 @@ public final class Pathfind {
         final ArrayDeque<Cell> frontier = new ArrayDeque<>();
 
         final Function<Cell, Path> reverse = cell -> {
-            final Path steps = new Path();
+            final Path steps = new Path(10);
             Cell walker = end;
             while (!walker.equals(start)) {
                 steps.add(walker);
@@ -217,7 +218,7 @@ public final class Pathfind {
 
     private static Path trimTo(final Path path, final Cell end) {
         assert path.contains(end);
-        final Path trimmed = new Path();
+        final Path trimmed = new Path(path.size());
         for (final Cell step : path) {
             trimmed.add(step);
             if (step.equals(end)) {

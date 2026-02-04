@@ -31,6 +31,17 @@ public final class Iteration {
     }
 
     /**
+        Copy the specified range into a new list.
+     */
+    public static <T> ArrayList<T> slice(
+        final ArrayList<T> source,
+        final int startInclusive,
+        final int endExclusive
+    ) {
+        return new ArrayList<>(source.subList(startInclusive, endExclusive));
+    }
+
+    /**
         Stream the elements of the given list with their indices.
      */
     public static <T> Stream<Ordered<T>> enumerate(final ArrayList<T> list) {

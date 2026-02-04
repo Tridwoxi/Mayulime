@@ -70,8 +70,7 @@ public final class Structures {
         }
 
         public int total() {
-            // Potential optimization: If this method is called repeatedly, keep sum as
-            // a field to avoid recomputation.
+            // PERF: Cache to avoid recomputation.
             return counts.values().stream().reduce(0, Integer::sum);
         }
 

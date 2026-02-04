@@ -15,8 +15,8 @@ import think.tools.Structures.Pair;
  */
 public final class Grid<T> {
 
-    // Potential optimization: use a primitive boolean[] or int[] to avoid unboxing
-    // costs. Since grids are used in hot loops, the speedup may be significant.
+    // PERF: Use primitives, like int[]. Compare IntStream versus Stream<Integer>.
+
     private final ArrayList<T> items;
     private final int numRows;
     private final int numCols;

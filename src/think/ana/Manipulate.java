@@ -9,9 +9,11 @@ import think.tools.Iteration;
 import think.tools.Random;
 
 /**
-    Grid<Feature> fiddler.
+    Pathery solution fiddler.
 
-    All methods in this class are static and modify the grid in-place.
+    This class consists only of static helpers that manipulate a Grid<Feature>. All
+    provided methods modify the grid in-place, return void, and do not modify their
+    other arguments.
  */
 public final class Manipulate {
 

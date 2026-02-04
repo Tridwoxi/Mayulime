@@ -13,8 +13,6 @@ public record Cell(int row, int col) {
         Get neighbors of this cell on the given grid in up, right, down, left order.
      */
     public ArrayList<Cell> getNeighborsURDL(final Grid<?> grid) {
-        // Potential optimization: get Cell instances from problem to reuse them,
-        // reducing GC pressure. Reasonable because this method is important to BFS.
         assert grid.inBounds(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
         if (row - 1 >= 0) {
@@ -35,7 +33,7 @@ public record Cell(int row, int col) {
 
     /**
         Get the neighbors of this cell on the given grid. The order of neighbors in the
-        returned list is unspecified, regardless of what the implementation indicates.
+        returned list is unspecified.
      */
     public ArrayList<Cell> getNeighbors(final Grid<?> grid) {
         return getNeighborsURDL(grid);
