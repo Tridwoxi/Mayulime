@@ -12,6 +12,8 @@ import think.tools.Logging;
 public abstract class Strategy implements Runnable {
 
     /**
+        Solution listener.
+
         Consider that the solution may be an improvement over previous results.
      */
     @FunctionalInterface

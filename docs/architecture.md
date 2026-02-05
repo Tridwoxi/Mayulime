@@ -39,7 +39,7 @@ analysis and tools packages, and instantiates more objects from the representati
 package.
 
 The Problem contains metadata, such as the order of checkpoints and the player's wall
-supply, and the pathery map itself. This map is represented as a rectangular Grid of
+supply, and the Pathery map itself. This map is represented as a rectangular Grid of
 Features. Feature is an enum of things that appear on the map, such as a player wall.
 
 Solutions to the Problem are Grids of Features resembling the original map, but with

@@ -20,6 +20,3 @@ Extending or implementing custom classes and interfaces is discouraged but permi
 to one layer deep.
 
 Commits use conventional commits style with required scope.
-
-AI agents are allowed to add comments claiming documentation is wrong, but are not
-allowed to write the documentation itself.

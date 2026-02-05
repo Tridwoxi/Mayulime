@@ -7,7 +7,7 @@ The system in this repository proposes solutions to Pathery problems, so may be 
 as an assistant or checker. This repository is not affiliated with Pathery.
 
 The `docs/` folder contains more information about architecture, task specification,
-and style.
+style, and theory.
 
 ## Usage
 

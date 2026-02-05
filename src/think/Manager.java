@@ -3,7 +3,6 @@ package think;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javafx.application.Platform;
 import think.ana.Pathfind;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -14,14 +13,17 @@ import think.stra.Strategy;
 import think.tools.Logging;
 
 /**
-    Strategy controller. Must be called from JavaFX Application Thread. Workers run in
-    background to not block the GUI.
+    Strategy controller.
+
+    Workers run in background to not block the GUI.
  */
 public final class Manager {
 
     /**
-        After a solution is considered and vertified to be an improvement, notify those
-        who care. A listener for improvements.
+        Improvement listener.
+
+        This interface will be called when a solution is considered and verified to be
+        an improvement.
      */
     @FunctionalInterface
     public interface Alerter {
@@ -55,20 +57,15 @@ public final class Manager {
     }
 
     public void solve(final Problem problem) {
-        assert Platform.isFxApplicationThread();
-        // Once the user uploads a new problem, the old workers are useless. I don't
-        // know how to kill them, so we must kindly ask for them to stop. I believe
-        // that once they stop, the ExecutorService will throw them out, and that will
-        // free up resources.
         currentProblem = problem;
         workers.forEach(worker -> worker.pleaseDie());
         workers.clear();
         topScore = 0;
-        addWorker(new BlankSolution(this::consider, () -> topScore, problem));
-        addWorker(new RandomGuesser(this::consider, () -> topScore, problem));
+        runStrategy(new BlankSolution(this::consider, () -> topScore, problem));
+        runStrategy(new RandomGuesser(this::consider, () -> topScore, problem));
     }
 
-    private void addWorker(final Strategy worker) {
+    private void runStrategy(final Strategy worker) {
         workers.add(worker);
         // Unlike submit, execute will propagate exceptions into the FX Thread. Since
         // we use assertions to catch correctness issues, these exceptions must be seen.
@@ -77,9 +74,6 @@ public final class Manager {
 
     /**
         Relay a solution to the frontend if it is the best so far.
-
-        It is best practice to check with "getTopScore(void)" first instead of blindly
-        spamming this method with bad guesses, but spamming is acceptable.
      */
     private void consider(
         final Strategy submitter,
