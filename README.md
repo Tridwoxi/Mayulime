@@ -1,29 +1,31 @@
 # Tridwoxi's Pathery AI
 
-This repository contains a system that proposes solutions to problems from the game
-[Pathery](https://www.pathery.com). This repository is not affiliated with Pathery. For
-ease of programming, it uses a simplified variant of the complete Pathery rules.
+The game [Pathery](https://www.pathery.com) is an exercise in creating the longest
+shortest path on a maze by placing a set of walls.
 
-Supported examples in the Pathery [MapCode](https://www.pathery.com/mapeditor) format
-can be found in `examples/`. Use the [Gradle](https://gradle.org) build tool,
-configured in `build.gradle`, to run.
+The system in this repository proposes solutions to Pathery problems, so may be helpful
+as an assistant or checker. This repository is not affiliated with Pathery.
 
-## Task specification
+The `docs/` folder contains more information about architecture, task specification,
+and style.
 
-The world is a rectangular grid of empty cells, player walls, system walls,
-teleport-in/out pairs, and uniquely-numbered checkpoints. Initially, the world does not
-contain player walls. The player may convert up to some number of empty cells to player
-walls.
+## Usage
 
-A snake makes its way from each checkpoint to the next in ascending order. It moves one
-step at a time either up, right, down, or left (but not diagonally). The snake takes a
-shortest path. Among shortest paths, the Snake prefers to go up, then right, then down,
-then left.
+Install the [Gradle](https://gradle.org) build tool, version 7 or later. Walk through
+the steps to create the wrapper, and once you have it, run the project. Gradle
+is supposed to install the required dependency (JavaFX) and optional dependencies
+(Checkstyle, Spotbugs). If it doesn't work, message the author of this project.
 
-If the snake visits a teleport-in it has not yet visited, it emerges at the
-corresponding teleport-out. From there, it continues its journey. The snake does not
-account for teleports when calculating a shortest path.
+When run, the project launches a GUI with a button for a file selector. Upload a file
+with extension `.mapcode` that this project supports, and wait for it to display its
+solutions. Supported files in the Pathery [MapCode](https://www.pathery.com/mapeditor)
+format can be found in `examples/`.
 
-The snake cannot visit cells with system walls or player walls on them. The player's
-goal is to maximize the total number of steps the snake takes. If the snake fails to
-reach a checkpoint, the player loses.
+## Related work
+
+You may also be interested in:
+
+- https://github.com/t3chn0l0g1c/pathery
+- https://github.com/WuTheFWasThat/midnighttherapy
+- https://github.com/bwoodbury3/pathery-solver
+- https://github.com/pitrack/m-pathery
