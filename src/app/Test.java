@@ -62,7 +62,7 @@ final class Test {
         final Grid<Feature> initial = problem.getCachedInitial();
         assert initial.getNumRows() == 4;
         assert initial.getNumCols() == 6;
-        assert problem.getPlayerWallSupply() == 13;
+        assert problem.getPlayerWallSupply() == 12;
         assert problem.getName().equals("Example");
 
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();

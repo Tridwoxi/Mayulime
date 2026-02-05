@@ -110,7 +110,7 @@ public final class Problem {
         require(metadata.length == NUM_METADATA_PARTS);
         this.numCols = strToInt(metadata[0]);
         this.numRows = strToInt(metadata[1]);
-        this.playerWallSupply = strToInt(metadata[2]);
+        final int proposedPlayerWallSupply = strToInt(metadata[2]);
         this.name = cleanName(metadata[3]);
 
         final Function<Integer, Cell> indexToCell = index -> {
@@ -223,6 +223,13 @@ public final class Problem {
             .forEachOrdered(pair -> {
                 teleports.put(pair.first(), pair.second());
             });
+
+        // Pathery often supplies more walls than possible to place. I don't want to
+        // prohibit that in MapCodes, but I don't want to let it through either.
+        this.playerWallSupply = Math.min(
+            proposedPlayerWallSupply,
+            (int) initial.where(Feature.EMPTY::equals).count()
+        );
     }
 
     private static void require(final Boolean condition) throws BadMapCodeException {
