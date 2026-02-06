@@ -1,38 +1,45 @@
 package think.stra;
 
-import java.util.function.Supplier;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.tools.Logging;
 
 /**
-    Base class for working on a problem.
+    Think of solutions to Pathery problems.
+
+    This abstract class provides a few useful getters and a framework to integrate its
+    concrete subclasses with the rest of the system.
  */
 public abstract class Strategy implements Runnable {
 
-    /**
-        Solution listener.
-
-        Consider that the solution may be an improvement over previous results.
-     */
     @FunctionalInterface
-    public interface Considerer {
-        void consider(String submitter, Problem problem, Grid<Feature> solution);
+    public interface ProposedSolutionListener {
+        void listen(
+            String submitter,
+            Problem problem,
+            Grid<Feature> solution,
+            int score
+        );
     }
 
-    private final Supplier<Integer> scorer;
-    private final Considerer considerer;
+    @FunctionalInterface
+    public interface TopScoreSupplier {
+        int supply();
+    }
+
+    private final ProposedSolutionListener proposedSolutionListener;
+    private final TopScoreSupplier topScoreSupplier;
     private final Problem problem;
     private volatile boolean alive;
 
     public Strategy(
-        final Considerer considerer,
-        final Supplier<Integer> scorer,
+        final ProposedSolutionListener proposedSolutionListener,
+        final TopScoreSupplier topScoreSupplier,
         final Problem problem
     ) {
-        this.considerer = considerer;
-        this.scorer = scorer;
+        this.proposedSolutionListener = proposedSolutionListener;
+        this.topScoreSupplier = topScoreSupplier;
         this.problem = problem;
         this.alive = true;
     }
@@ -46,7 +53,7 @@ public abstract class Strategy implements Runnable {
         // kill a thread or procedure. So, the strategy needs to check when to stop. We
         // can do so with a lengthy chain of "if not alive, return", but throwing
         // exceptions is an easier way to do non-local returns.
-        Logging.log(getClass(), "Started.");
+        Logging.log(getClass(), "Started");
         try {
             solve();
             Logging.log(getClass(), "Terminated (returned normally)");
@@ -62,8 +69,6 @@ public abstract class Strategy implements Runnable {
     // == Subclass contract. ===========================================================
 
     /**
-        Generate solutions and consider them.
-
         Concrete subclasses should do all non-trivial work in this method, as opposed
         to the constructor. Implementations of this method are free to hang
         indefintely, but it would be nice if this method calls {@link #checkAlive} at
@@ -85,15 +90,16 @@ public abstract class Strategy implements Runnable {
         return problem;
     }
 
-    protected final Grid<Feature> getInitial() {
-        return problem.getCachedInitial();
-    }
-
     protected final int getTopScore() {
-        return scorer.get();
+        return topScoreSupplier.supply();
     }
 
-    protected final void consider(final Grid<Feature> solution) {
-        considerer.consider(getClass().getSimpleName(), problem, solution);
+    protected final void proposeSolution(final Grid<Feature> solution, final int score) {
+        proposedSolutionListener.listen(
+            getClass().getSimpleName(),
+            problem,
+            solution,
+            score
+        );
     }
 }

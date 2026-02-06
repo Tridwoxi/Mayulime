@@ -13,7 +13,7 @@ features.
 
 ## Strategies
 
-### Brute force
+### Guess randomly
 
 The number of ways $W$ to select up to $S$ vertices from $N$ total is:
 
