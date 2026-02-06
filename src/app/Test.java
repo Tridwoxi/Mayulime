@@ -105,7 +105,7 @@ final class Test {
             new Weighted<>("Heavy", 1e+10),
             new Weighted<>("Light", 1e-10)
         );
-        for (int attempt = 0; attempt < 10; attempt++) {
+        for (int attempt = 0; attempt < 10; attempt += 1) {
             assert Random.weightedStream(new ArrayList<>(weighteds))
                 .findFirst()
                 .orElseThrow()

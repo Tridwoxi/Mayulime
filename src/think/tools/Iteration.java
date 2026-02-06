@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,10 +24,23 @@ public final class Iteration {
      */
     public static <T> ArrayList<T> filledArray(final T item, final int size) {
         final ArrayList<T> result = new ArrayList<>(size);
-        for (int index = 0; index < size; index++) {
+        for (int index = 0; index < size; index += 1) {
             result.add(item);
         }
-        assert result.size() == size;
+        return result;
+    }
+
+    /**
+        Create an array of the specified size filled with the results of the supplier.
+     */
+    public static <T> ArrayList<T> filledArray(
+        final Supplier<T> supplier,
+        final int size
+    ) {
+        final ArrayList<T> result = new ArrayList<>(size);
+        for (int index = 0; index < size; index += 1) {
+            result.add(supplier.get());
+        }
         return result;
     }
 

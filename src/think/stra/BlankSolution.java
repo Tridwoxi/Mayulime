@@ -19,6 +19,6 @@ public final class BlankSolution extends Strategy {
 
     @Override
     protected void solve() throws KilledException {
-        consider(getProblem().getCachedInitial());
+        consider(getInitial());
     }
 }

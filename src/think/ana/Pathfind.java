@@ -102,7 +102,7 @@ public final class Pathfind {
         final ArrayList<Path> paths = new ArrayList<>();
         Cell currentLocation = start;
         final int maxAttempts = activeTeleports.size() + 1;
-        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+        for (int attempt = 0; attempt < maxAttempts; attempt += 1) {
             final Optional<Path> path = travel(solution, currentLocation, end);
             if (path.isEmpty()) {
                 return Optional.empty();

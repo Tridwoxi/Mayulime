@@ -55,7 +55,7 @@ public final class Random {
     public static <T> Stream<T> uniformStream(final ArrayList<T> items) {
         final int size = items.size();
         final ArrayList<Integer> indices = new ArrayList<>(size);
-        for (int index = 0; index < size; index++) {
+        for (int index = 0; index < size; index += 1) {
             indices.add(index);
         }
         final Iterator<T> iterator = new Iterator<>() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import think.tools.Iteration;
@@ -16,7 +17,6 @@ import think.tools.Structures.Pair;
 public final class Grid<T> {
 
     // PERF: Use primitives, like int[]. Compare IntStream versus Stream<Integer>.
-
     private final ArrayList<T> items;
     private final int numRows;
     private final int numCols;
@@ -30,6 +30,10 @@ public final class Grid<T> {
 
     public Grid(final T item, final int numRows, final int numCols) {
         this(Iteration.filledArray(item, numRows * numCols), numRows, numCols);
+    }
+
+    public Grid(final Supplier<T> supplier, final int numRows, final int numCols) {
+        this(Iteration.filledArray(supplier, numRows * numCols), numRows, numCols);
     }
 
     public Grid(final Grid<T> grid) {
@@ -92,7 +96,7 @@ public final class Grid<T> {
         assert first.getNumRows() == second.getNumRows();
         assert first.getNumCols() == second.getNumCols();
         final ArrayList<R> results = new ArrayList<>(first.items.size());
-        for (int index = 0; index < first.items.size(); index++) {
+        for (int index = 0; index < first.items.size(); index += 1) {
             results.add(combiner.apply(first.items.get(index), second.items.get(index)));
         }
         return new Grid<>(results, first.getNumRows(), first.getNumCols());

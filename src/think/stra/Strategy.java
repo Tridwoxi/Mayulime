@@ -49,9 +49,9 @@ public abstract class Strategy implements Runnable {
         Logging.log(getClass(), "Started.");
         try {
             solve();
-            Logging.log(getClass(), "Done (returned).");
+            Logging.log(getClass(), "Terminated (returned normally)");
         } catch (final KilledException exception) {
-            Logging.log(getClass(), "Done (killed).");
+            Logging.log(getClass(), "Terminated (killed)");
         }
     }
 
@@ -83,6 +83,10 @@ public abstract class Strategy implements Runnable {
 
     protected final Problem getProblem() {
         return problem;
+    }
+
+    protected final Grid<Feature> getInitial() {
+        return problem.getCachedInitial();
     }
 
     protected final int getTopScore() {
