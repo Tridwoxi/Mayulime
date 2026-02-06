@@ -1,15 +1,13 @@
 # Architecture
 
-The project is a JavaFX Application.
-
 ## Package structure
 
 `docs/`: Project description as markdown.
 
 `examples/`: Pathery problems the project is known to support as MapCodes.
 
-`src/app/`: Contains main class, tests, and GUI. Things here are relevant to entire
-project or user experience.
+`src/app/`: Contains main classes (App or Headless), tests, and GUI. Things here are
+relevant to entire project or user experience.
 
 `src/think/`: Backend. The Manager is responsible for concurrency and worker management.
 

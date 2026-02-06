@@ -101,7 +101,6 @@
         <module name="SuppressWarningsHolder" />
         <module name="ThrowsCount" />
         <module name="TypeName" />
-        <module name="UncommentedMain" />
         <module name="VisibilityModifier" />
         <module name="ExplicitInitialization" />
         <module name="SuppressWarnings" />
@@ -148,5 +147,6 @@
         <module name="OuterTypeNumber" />
         <module name="ReturnCount" />
         <module name="TrailingComment" />
+        <module name="UncommentedMain" />
     -->
 </module>

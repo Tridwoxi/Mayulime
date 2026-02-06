@@ -19,4 +19,5 @@ to slow down the system by an arbritrary amount.
 Extending or implementing custom classes and interfaces is discouraged but permitted up
 to one layer deep.
 
-Commits use conventional commits style with required scope.
+Commits use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+style with required scope.

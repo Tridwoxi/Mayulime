@@ -31,6 +31,14 @@ tasks.named('run') {
     jvmArgs '-ea'
 }
 
+tasks.register('runHeadless', JavaExec) {
+    group = 'application'
+    dependsOn 'checkstyleMain', 'spotbugsMain'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'app.Headless'
+    jvmArgs '-ea'
+}
+
 application {
     mainClass = 'app.App'
 }

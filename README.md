@@ -6,15 +6,17 @@ shortest path on a maze by placing a set of walls.
 The system in this repository proposes solutions to Pathery problems, so may be helpful
 as an assistant or checker. This repository is not affiliated with Pathery.
 
-The `docs/` folder contains more information about architecture, task specification,
-style, and theory.
+The `docs/` folder contains more information about architecture, the problem statement,
+coding style, and theory.
 
 ## Usage
 
 Install the [Gradle](https://gradle.org) build tool, version 7 or later. Walk through
 the steps to create the wrapper, and once you have it, run the project. Gradle
-is supposed to install the required dependency (JavaFX) and optional dependencies
-(Checkstyle, Spotbugs). If it doesn't work, message the author of this project.
+is supposed to install the required dependency ([JavaFX](https://openjfx.io)) and
+optional dependencies ([Checkstyle](https://checkstyle.org),
+[Spotbugs](https://spotbugs.github.io)) automatically. If it doesn't work, message the
+author of this project.
 
 When run, the project launches a GUI with a button for a file selector. Upload a file
 with extension `.mapcode` that this project supports, and wait for it to display its
