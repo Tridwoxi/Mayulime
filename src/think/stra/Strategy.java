@@ -18,25 +18,22 @@ public abstract class Strategy implements Runnable {
      */
     @FunctionalInterface
     public interface Considerer {
-        void consider(Strategy submitter, Problem problem, Grid<Feature> solution);
+        void consider(String submitter, Problem problem, Grid<Feature> solution);
     }
 
     private final Supplier<Integer> scorer;
     private final Considerer considerer;
     private final Problem problem;
-    private final String name;
     private volatile boolean alive;
 
     public Strategy(
         final Considerer considerer,
         final Supplier<Integer> scorer,
-        final Problem problem,
-        final String name
+        final Problem problem
     ) {
         this.considerer = considerer;
         this.scorer = scorer;
         this.problem = problem;
-        this.name = name;
         this.alive = true;
     }
 
@@ -60,10 +57,6 @@ public abstract class Strategy implements Runnable {
 
     public final void pleaseDie() {
         this.alive = false;
-    }
-
-    public final String getName() {
-        return name;
     }
 
     // == Subclass contract. ===========================================================
@@ -97,6 +90,6 @@ public abstract class Strategy implements Runnable {
     }
 
     protected final void consider(final Grid<Feature> solution) {
-        considerer.consider(this, problem, solution);
+        considerer.consider(getClass().getSimpleName(), problem, solution);
     }
 }

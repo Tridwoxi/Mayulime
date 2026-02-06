@@ -17,7 +17,7 @@ public final class RandomGuesser extends Strategy {
         final Supplier<Integer> scorer,
         final Problem problem
     ) {
-        super(considerer, scorer, problem, "guess randomly");
+        super(considerer, scorer, problem);
     }
 
     @Override

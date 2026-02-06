@@ -30,7 +30,6 @@ import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.stra.Strategy;
 import think.tools.Iteration;
 import think.tools.Logging;
 import think.tools.Structures.Pair;
@@ -78,14 +77,14 @@ final class Gui extends Scene {
     }
 
     public void update(
-        final Strategy submitter,
+        final String submitter,
         final Problem problem,
         final Grid<Feature> solution,
         final int score
     ) {
         showGame();
         gameDisplay.setGame(problem, solution);
-        statsDisplay.setScore(score, submitter.getName());
+        statsDisplay.setScore(score, submitter);
     }
 
     private void hideGame() {

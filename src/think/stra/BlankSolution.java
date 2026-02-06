@@ -14,7 +14,7 @@ public final class BlankSolution extends Strategy {
         final Supplier<Integer> scorer,
         final Problem problem
     ) {
-        super(considerer, scorer, problem, "doing nothing");
+        super(considerer, scorer, problem);
     }
 
     @Override

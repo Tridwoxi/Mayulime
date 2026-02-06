@@ -8,7 +8,6 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
-import think.stra.Strategy;
 import think.tools.Logging;
 
 /**
@@ -66,7 +65,7 @@ public final class Headless {
     }
 
     private void recieveSolutionStub(
-        final Strategy submitter,
+        final String submitter,
         final Problem problem,
         final Grid<Feature> solution,
         final int score

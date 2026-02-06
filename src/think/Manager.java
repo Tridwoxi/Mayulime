@@ -27,12 +27,7 @@ public final class Manager {
      */
     @FunctionalInterface
     public interface Alerter {
-        void alert(
-            Strategy submitter,
-            Problem problem,
-            Grid<Feature> solution,
-            int score
-        );
+        void alert(String submitter, Problem problem, Grid<Feature> solution, int score);
     }
 
     private final Alerter alerter;
@@ -76,7 +71,7 @@ public final class Manager {
         Relay a solution to the frontend if it is the best so far.
      */
     private void consider(
-        final Strategy submitter,
+        final String submitter,
         final Problem problem,
         final Grid<Feature> solution
     ) {
@@ -100,7 +95,7 @@ public final class Manager {
                     topScore,
                     score,
                     problem.getName(),
-                    submitter.getName(),
+                    submitter,
                     Thread.currentThread().getName()
                 );
                 topScore = score;
