@@ -84,4 +84,24 @@ public final class Structures {
             );
         }
     }
+
+    public static final class RunningAverage {
+
+        private long count;
+        private double average;
+
+        public RunningAverage() {
+            this.count = 0L;
+            this.average = 0.0;
+        }
+
+        public void insert(final double value) {
+            this.count += 1L;
+            this.average += (value - this.average) / this.count;
+        }
+
+        public double get() {
+            return this.average;
+        }
+    }
 }
