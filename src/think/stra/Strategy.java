@@ -1,5 +1,6 @@
 package think.stra;
 
+import think.ana.Pathfind;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
@@ -23,23 +24,15 @@ public abstract class Strategy implements Runnable {
         );
     }
 
-    @FunctionalInterface
-    public interface TopScoreSupplier {
-        int supply();
-    }
-
     private final ProposedSolutionListener proposedSolutionListener;
-    private final TopScoreSupplier topScoreSupplier;
     private final Problem problem;
     private volatile boolean alive;
 
     public Strategy(
         final ProposedSolutionListener proposedSolutionListener,
-        final TopScoreSupplier topScoreSupplier,
         final Problem problem
     ) {
         this.proposedSolutionListener = proposedSolutionListener;
-        this.topScoreSupplier = topScoreSupplier;
         this.problem = problem;
         this.alive = true;
     }
@@ -90,16 +83,12 @@ public abstract class Strategy implements Runnable {
         return problem;
     }
 
-    protected final int getTopScore() {
-        return topScoreSupplier.supply();
-    }
-
-    protected final void proposeSolution(final Grid<Feature> solution, final int score) {
+    protected final void proposeSolution(final Grid<Feature> solution) {
         proposedSolutionListener.listen(
             getClass().getSimpleName(),
             problem,
             solution,
-            score
+            Pathfind.evaluate(problem, solution)
         );
     }
 }

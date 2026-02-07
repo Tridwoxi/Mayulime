@@ -53,8 +53,8 @@ public final class Manager {
     public void solve(final Problem problem) {
         this.currentProblem = problem;
         cleanupPreviousSolve();
-        runStrategy(new StrategyBaseline(this::consider, () -> topScore, problem));
-        runStrategy(new StrategyGuessRandomly(this::consider, () -> topScore, problem));
+        runStrategy(new StrategyBaseline(this::considerSolution, problem));
+        runStrategy(new StrategyGuessRandomly(this::considerSolution, problem));
     }
 
     private void cleanupPreviousSolve() {
@@ -70,13 +70,19 @@ public final class Manager {
         executor.execute(worker);
     }
 
-    private void consider(
+    private void considerSolution(
         final String submitter,
         final Problem problem,
         final Grid<Feature> solution,
         final int score
     ) {
         assert currentProblem != null;
+        // We also check if the score is better in the synchronized section, but as
+        // strategies might give this method lots of garbage, if we can early exit
+        // without competing for the lock it would be nice to.
+        if (score <= topScore) {
+            return;
+        }
         // Grids are mutable data structures, and strategies make no promises to not
         // mutate the grid between the time they send it here and the long time later
         // when the caller tries to read it.
