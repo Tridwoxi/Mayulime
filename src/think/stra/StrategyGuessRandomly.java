@@ -4,6 +4,7 @@ import think.ana.Manipulate;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
+import think.tools.Random.RestrictedBinomialDistribution;
 
 /**
     Guess randomly.
@@ -12,11 +13,17 @@ import think.repr.Problem.Feature;
  */
 public final class StrategyGuessRandomly extends Strategy {
 
+    private final RestrictedBinomialDistribution numWalls;
+
     public StrategyGuessRandomly(
         final ProposedSolutionListener proposedSolutionListener,
         final Problem problem
     ) {
         super(proposedSolutionListener, problem);
+        this.numWalls = new RestrictedBinomialDistribution(
+            (int) getProblem().getCachedInitial().where(Feature.EMPTY::equals).count(),
+            getProblem().getPlayerWallSupply()
+        );
     }
 
     @Override
@@ -24,7 +31,7 @@ public final class StrategyGuessRandomly extends Strategy {
         while (true) {
             checkAlive();
             final Grid<Feature> solution = getProblem().getAnotherInitial();
-            Manipulate.splatter(solution, getProblem().getPlayerWallSupply());
+            Manipulate.splatter(solution, numWalls.sample());
             proposeSolution(solution);
         }
     }

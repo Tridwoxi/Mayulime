@@ -34,7 +34,7 @@ forever {
 }
 ```
 
-Guessing randomly is effective on small maps with limited walls. My machine can loop
-about 140k times per second per thread on the example Simple, which has $N = 60$ and $S
-= 7$. If all candidate solutions are unique, it can brute force the problem in a
-handful of minutes given 10 threads.
+Guessing randomly is effective on small maps with limited walls. The Simple example has
+$N = 60$ and $S = 7$, so $W = 442255978$. My machine can loop about 140k times per
+second per thread, so if all candidate solutions are unique, it can brute force the
+problem in a handful of minutes.

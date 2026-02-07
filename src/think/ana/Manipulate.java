@@ -38,14 +38,15 @@ public final class Manipulate {
         locations.forEach(cell -> solution.set(cell, Feature.EMPTY));
     }
 
-    public static void splatter(final Grid<Feature> solution, final int howManyAtMost) {
+    public static void splatter(final Grid<Feature> solution, final int howMany) {
         // Lazy solution.where(...).limit(int) will not work because we need to sample
         // the whole distribution. So materialization is mandatory.
         final ArrayList<Cell> locations = Iteration.materialize(
             solution.where(Feature.EMPTY::equals)
         );
+        assert howMany <= locations.size();
         Random.uniformStream(locations)
-            .limit(howManyAtMost)
+            .limit(howMany)
             .forEachOrdered(cell -> solution.set(cell, Feature.PLAYER_WALL));
     }
 }
