@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import think.tools.Structures.Weighted;
@@ -111,13 +110,11 @@ public final class Random {
         }
 
         private static ArrayList<Double> build(final int population, final int limit) {
-            final BinaryOperator<Double> max = (first, second) ->
-                first > second ? first : second;
             final ArrayList<Double> rawLogProbs = new ArrayList<>(limit + 1);
             for (int element = 0; element <= limit; element += 1) {
                 rawLogProbs.add(logBinom(population, element));
             }
-            final double largest = rawLogProbs.stream().reduce(0.0, max);
+            final double largest = rawLogProbs.stream().reduce(0.0, Math::max);
             final ArrayList<Double> normLogProbs = new ArrayList<>(limit + 1);
             for (int element = 0; element <= limit; element += 1) {
                 normLogProbs.add(rawLogProbs.get(element) - largest);
