@@ -7,9 +7,14 @@ import think.repr.Problem;
 import think.repr.Problem.Feature;
 
 /**
-    Strategy "Guess Randomly": see `docs/theory.md`
-
     Proof of concept. Not intended for use, except perhaps as a benchmark.
+
+    <pre>
+    forever {
+        guess randomly;
+        evaluate;
+    }
+    </pre>
  */
 public final class StrategyGuessRandomly extends Strategy {
 
