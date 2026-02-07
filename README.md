@@ -1,4 +1,4 @@
-# Tridwoxi's Pathery AI
+# Mayulime
 
 The game [Pathery](https://www.pathery.com) is an exercise in creating the longest
 shortest path on a maze by placing a set of walls.

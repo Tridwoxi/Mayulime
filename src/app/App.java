@@ -15,7 +15,7 @@ import think.tools.Logging;
  */
 public final class App extends Application {
 
-    private static final String NAME = "Tridwoxi's Pathery AI";
+    private static final String NAME = "Mayulime";
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
@@ -83,7 +83,7 @@ public final class App extends Application {
         try {
             problem = new Problem(mapCode);
         } catch (BadMapCodeException exception) {
-            Logging.log(getClass(), "Bad MapCode.");
+            Logging.log(getClass(), "Bad MapCode; problem rejected");
         }
         if (problem != null) {
             manager.solve(problem);
@@ -91,7 +91,7 @@ public final class App extends Application {
                 final String problemName = problem.getName().isBlank()
                     ? UNNAMED_PROBLEM_NAME
                     : problem.getName();
-                stage.setTitle(problemName);
+                stage.setTitle("\"" + problemName + "\"");
             }
         }
     }
