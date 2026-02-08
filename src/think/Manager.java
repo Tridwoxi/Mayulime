@@ -10,6 +10,7 @@ import think.repr.Problem.Feature;
 import think.stra.Strategy;
 import think.stra.StrategyBaseline;
 import think.stra.StrategyGuessRandomly;
+import think.stra.StrategyHillClimb;
 import think.tools.Logging;
 
 /**
@@ -55,6 +56,7 @@ public final class Manager {
         cleanupPreviousSolve();
         runStrategy(new StrategyBaseline(this::considerSolution, problem));
         runStrategy(new StrategyGuessRandomly(this::considerSolution, problem));
+        runStrategy(new StrategyHillClimb(this::considerSolution, problem));
     }
 
     private void cleanupPreviousSolve() {
