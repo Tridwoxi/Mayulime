@@ -35,6 +35,8 @@ public final class App extends Application {
     @Override
     public void start(final Stage primaryStage) {
         assert Test.runAllTests();
+        Logging.log(getClass(), "Launch point: Application");
+
         this.manager = new Manager(this::recieveSolution);
         this.gui = new Gui(this::recieveMapCode);
         this.current = null;

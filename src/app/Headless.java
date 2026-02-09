@@ -29,15 +29,17 @@ public final class Headless {
     private static final int FAILURE = 1;
 
     public static void main(final String[] args) {
-        assert Test.runAllTests();
-        System.exit(new Headless().run(args));
-    }
-
-    private int run(final String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
             exception.printStackTrace();
             System.exit(FAILURE);
         });
+        System.exit(new Headless().run(args));
+    }
+
+    private int run(final String[] args) {
+        assert Test.runAllTests();
+        Logging.log(Headless.class, "Launch point: Headless");
+
         final Config config;
         final Problem problem;
         try {
@@ -53,8 +55,6 @@ public final class Headless {
             Logging.log(getClass(), "Failure: can't read file.");
             return FAILURE;
         }
-
-        Logging.log(getClass(), "Launching manager...");
         new Manager(this::recieveSolutionStub).solve(problem);
         try {
             Thread.sleep(1000 * config.timeoutSeconds());

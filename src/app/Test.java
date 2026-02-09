@@ -41,7 +41,7 @@ final class Test {
         assert it upon system launch.
      */
     static boolean runAllTests() {
-        Logging.log(Test.class, "Running all tests...");
+        Logging.log(Test.class, "Running unit tests");
         problemParsing();
         snakePathfinding();
         snakeTiebreaking();

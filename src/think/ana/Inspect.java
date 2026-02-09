@@ -1,7 +1,6 @@
 package think.ana;
 
 import think.repr.Grid;
-import think.repr.Problem;
 import think.repr.Problem.Feature;
 
 /**
@@ -13,23 +12,6 @@ public final class Inspect {
 
     public static int getNumPlacedPlayerWalls(final Grid<Feature> solution) {
         return (int) solution.where(Feature.PLAYER_WALL::equals).count();
-    }
-
-    /**
-        Get a number at least as large as the maximum score that can be achieved on the
-        given problem.
-     */
-    public static int getLoosePathLengthUpperBound(final Problem problem) {
-        final int numCheckpoints = problem.getCheckpoints().size();
-        final int numTeleports = problem.getTeleports().size();
-        final int numOpenCells = (int) problem
-            .getCachedInitial()
-            .where(Inspect::isOpen)
-            .count();
-        // To get to a checkpoint, a snake needs to step on no more than every open
-        // cell. A teleport can place the snake away by a distance no more than every
-        // open cell. Hence, a loose upper bound for maximum possible length:
-        return (numCheckpoints + numTeleports) * numOpenCells;
     }
 
     /**

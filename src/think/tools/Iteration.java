@@ -20,7 +20,7 @@ public final class Iteration {
     private Iteration() {}
 
     /**
-        Create an array of the specified size filled with the given item.
+        Create a list of the specified size filled with the given item.
      */
     public static <T> ArrayList<T> filledArray(final T item, final int size) {
         final ArrayList<T> result = new ArrayList<>(size);
@@ -31,7 +31,7 @@ public final class Iteration {
     }
 
     /**
-        Create an array of the specified size filled with the results of the supplier.
+        Create a list of the specified size filled with the results of the supplier.
      */
     public static <T> ArrayList<T> filledArray(
         final Supplier<T> supplier,
@@ -42,17 +42,6 @@ public final class Iteration {
             result.add(supplier.get());
         }
         return result;
-    }
-
-    /**
-        Copy the specified range into a new list.
-     */
-    public static <T> ArrayList<T> slice(
-        final ArrayList<T> source,
-        final int startInclusive,
-        final int endExclusive
-    ) {
-        return new ArrayList<>(source.subList(startInclusive, endExclusive));
     }
 
     /**

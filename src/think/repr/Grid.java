@@ -84,15 +84,6 @@ public final class Grid<T> {
             .map(Pair::second);
     }
 
-    public <C extends Collection<Cell>> C where(
-        final Predicate<T> predicate,
-        final C emptyCollection
-    ) {
-        assert emptyCollection.isEmpty();
-        where(predicate).forEachOrdered(emptyCollection::add);
-        return emptyCollection;
-    }
-
     public static <F, S, R> Grid<R> combine(
         final Grid<F> first,
         final Grid<S> second,
