@@ -1,6 +1,6 @@
 package think.stra;
 
-import think.ana.Pathfind;
+import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
@@ -88,7 +88,7 @@ public abstract class Strategy implements Runnable {
             getClass().getSimpleName(),
             problem,
             solution,
-            Pathfind.evaluate(problem, solution)
+            Snake.evaluate(problem, solution)
         );
     }
 }

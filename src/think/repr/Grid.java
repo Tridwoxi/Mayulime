@@ -50,6 +50,11 @@ public final class Grid<T> {
         items.set(cell.row() * numCols + cell.col(), item);
     }
 
+    public void setAll(final Collection<Cell> cells, final T item) {
+        assert cells.stream().allMatch(this::inBounds);
+        cells.forEach(cell -> set(cell, item));
+    }
+
     public int getNumRows() {
         return numRows;
     }

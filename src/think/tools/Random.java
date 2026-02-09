@@ -20,6 +20,10 @@ public final class Random {
 
     private Random() {}
 
+    public static <T> T uniformChoice(final ArrayList<T> items) {
+        return items.get(getRandom().nextInt(items.size()));
+    }
+
     /**
         Stream items in a random order proportional to weight, without replacement.
      */
@@ -30,7 +34,7 @@ public final class Random {
         // Modified with logarithm for numerical stability and to be lazy.
 
         final Function<Weighted<T>, Weighted<T>> reweight = item -> {
-            final double random = ThreadLocalRandom.current().nextDouble();
+            final double random = getRandom().nextDouble();
             return new Weighted<>(item.item(), -Math.log(random) / item.weight());
         };
         final PriorityQueue<Weighted<T>> queue = new PriorityQueue<>(weighteds.size());
@@ -69,7 +73,7 @@ public final class Random {
 
             @Override
             public T next() {
-                final int choice = ThreadLocalRandom.current().nextInt(remaining);
+                final int choice = getRandom().nextInt(remaining);
                 final int index = indices.get(choice);
                 remaining -= 1;
                 indices.set(choice, indices.get(remaining));
@@ -104,7 +108,7 @@ public final class Random {
             // found. Since a double has many bits, it will never be found.
             final int index = -Collections.binarySearch(
                 cumulativeDistribution,
-                ThreadLocalRandom.current().nextDouble() * total
+                getRandom().nextDouble() * total
             );
             return index - 1;
         }
@@ -143,5 +147,9 @@ public final class Random {
                 (population - element) * Math.log(population - element)
             );
         }
+    }
+
+    private static ThreadLocalRandom getRandom() {
+        return ThreadLocalRandom.current();
     }
 }

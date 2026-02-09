@@ -123,7 +123,7 @@ public final class Iteration {
     }
 
     /**
-        Turn a stream into an ArrayList. It is a runtime error pass an infinite stream.
+        Collect a stream into an ArrayList.
      */
     public static <T> ArrayList<T> materialize(final Stream<T> stream) {
         return stream.collect(Collectors.toCollection(ArrayList::new));

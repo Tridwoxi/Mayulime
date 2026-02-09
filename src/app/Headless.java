@@ -20,6 +20,7 @@ import think.tools.Logging;
         <li>It does not start the JavaFX runtime, so produces no GUI</li>
         <li>It requires an argument for the map file to load</li>
         <li>It logs solutions instead of updating the GUI</li>
+        <li>It exits after a set amount of time</li>
     </ul>
  */
 public final class Headless {

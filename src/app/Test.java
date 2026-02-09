@@ -3,7 +3,7 @@ package app;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import think.ana.Pathfind;
+import think.ana.Snake;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -48,10 +48,10 @@ final class Test {
 
     private static void snakePathfinding() {
         final Problem problem = getProblem();
-        assert Pathfind.evaluate(problem, problem.getCachedInitial()) == 30;
+        assert Snake.evaluate(problem, problem.getCachedInitial()) == 30;
         final Grid<Feature> solution = problem.getAnotherInitial();
         solution.set(new Cell(0, 3), Feature.PLAYER_WALL);
-        assert Pathfind.evaluate(problem, solution) == 0;
+        assert Snake.evaluate(problem, solution) == 0;
     }
 
     // == think.repr ===================================================================

@@ -3,7 +3,7 @@ package think;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import think.ana.Pathfind;
+import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
@@ -89,7 +89,7 @@ public final class Manager {
         // mutate the grid between the time they send it here and the long time later
         // when the caller tries to read it.
         final Grid<Feature> copy = new Grid<>(solution);
-        assert score == Pathfind.evaluate(problem, copy);
+        assert score == Snake.evaluate(problem, copy);
         synchronized (this) {
             // This guard is tripped when the user uploads a new problem but old worker
             // threads haven't died and propose solutions to the old (stale) problem.
