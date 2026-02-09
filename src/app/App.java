@@ -52,9 +52,6 @@ public final class App extends Application {
 
     // == Connectors. ==================================================================
 
-    /**
-        Recieve a Solution from somewhere (perhaps the Manager) and pass it to the GUI.
-     */
     private void recieveSolution(
         final String submitter,
         final Problem problem,
@@ -76,9 +73,6 @@ public final class App extends Application {
         });
     }
 
-    /**
-        Recieve a MapCode from somewhere (perhaps the GUI) and pass it to the Manager.
-     */
     private void recieveMapCode(final String mapCode) {
         assert gui != null && manager != null;
         Problem problem = null;

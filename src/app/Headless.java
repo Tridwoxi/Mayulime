@@ -20,7 +20,7 @@ import think.tools.Logging;
         <li>It does not start the JavaFX runtime, so produces no GUI</li>
         <li>It requires an argument for the map file to load</li>
         <li>It logs solutions instead of updating the GUI</li>
-        <li>It exits after a set amount of time</li>
+        <li>It exits after a given amount of time (also given as argument)</li>
     </ul>
  */
 public final class Headless {
@@ -71,7 +71,9 @@ public final class Headless {
         final Grid<Feature> solution,
         final int score
     ) {
-        // Do nothing. The manager will handle everything.
+        // Normally, we would display solutions, but we have no GUI. We also don't know
+        // how to turn a problem or solution back into a MapCode. As for logging, the
+        // rest of the system handles it. Hence, there's nothing to do here.
     }
 
     private Config parseConfig(final String[] args) throws IllegalArgumentException {

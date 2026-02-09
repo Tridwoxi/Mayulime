@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import think.tools.Structures.Weighted;
 
 /**
-    Access randomization only through this class, think.stra.Random. Although nothing
+    Access randomization only through this class, think.tools.Random. Although nothing
     bad will happen, it is a design error to use other randoms like java.util.Random.
 
     It is undefined behavior to mutate the backing structure while any method from this
