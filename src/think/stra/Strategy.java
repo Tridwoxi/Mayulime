@@ -24,15 +24,12 @@ public abstract class Strategy implements Runnable {
         );
     }
 
-    private final ProposedSolutionListener proposedSolutionListener;
+    private final ProposedSolutionListener listener;
     private final Problem problem;
     private volatile boolean alive;
 
-    public Strategy(
-        final ProposedSolutionListener proposedSolutionListener,
-        final Problem problem
-    ) {
-        this.proposedSolutionListener = proposedSolutionListener;
+    public Strategy(final ProposedSolutionListener listener, final Problem problem) {
+        this.listener = listener;
         this.problem = problem;
         this.alive = true;
     }
@@ -84,7 +81,7 @@ public abstract class Strategy implements Runnable {
     }
 
     protected final void proposeSolution(final Grid<Feature> solution) {
-        proposedSolutionListener.listen(
+        listener.listen(
             getClass().getSimpleName(),
             problem,
             solution,

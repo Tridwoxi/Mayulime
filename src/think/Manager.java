@@ -10,7 +10,6 @@ import think.repr.Problem.Feature;
 import think.stra.Strategy;
 import think.stra.StrategyBaseline;
 import think.stra.StrategyGuessRandomly;
-import think.stra.StrategyHillClimb;
 import think.tools.Logging;
 
 /**
@@ -30,14 +29,14 @@ public final class Manager {
         );
     }
 
-    private final ImprovedSolutionListener improvedSolutionListener;
+    private final ImprovedSolutionListener listener;
     private final ExecutorService executor;
     private final ArrayList<Strategy> workers;
     private volatile Problem currentProblem;
     private volatile int topScore;
 
-    public Manager(final ImprovedSolutionListener improvedSolutionListener) {
-        this.improvedSolutionListener = improvedSolutionListener;
+    public Manager(final ImprovedSolutionListener listener) {
+        this.listener = listener;
         // "The shutdown sequence begins when all started non-daemon threads have
         // terminated.". Workers that spin longer than we want shouldn't prevent Java
         // from shutting down, so we'll make them into daemons.
@@ -56,7 +55,6 @@ public final class Manager {
         cleanupPreviousSolve();
         runStrategy(new StrategyBaseline(this::considerSolution, problem));
         runStrategy(new StrategyGuessRandomly(this::considerSolution, problem));
-        runStrategy(new StrategyHillClimb(this::considerSolution, problem));
     }
 
     private void cleanupPreviousSolve() {
@@ -110,7 +108,7 @@ public final class Manager {
                     Thread.currentThread().getName()
                 );
                 topScore = score;
-                improvedSolutionListener.listen(submitter, problem, copy, score);
+                listener.listen(submitter, problem, copy, score);
             }
         }
     }

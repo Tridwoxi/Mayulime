@@ -16,10 +16,10 @@ public final class StrategyGuessRandomly extends Strategy {
     private final RestrictedBinomialDistribution numWalls;
 
     public StrategyGuessRandomly(
-        final ProposedSolutionListener proposedSolutionListener,
+        final ProposedSolutionListener listener,
         final Problem problem
     ) {
-        super(proposedSolutionListener, problem);
+        super(listener, problem);
         this.numWalls = new RestrictedBinomialDistribution(
             (int) getProblem().getCachedInitial().where(Feature.EMPTY::equals).count(),
             getProblem().getPlayerWallSupply()

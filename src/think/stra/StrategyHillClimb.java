@@ -10,10 +10,10 @@ import think.repr.Problem.Feature;
 public final class StrategyHillClimb extends Strategy {
 
     public StrategyHillClimb(
-        final ProposedSolutionListener proposedSolutionListener,
+        final ProposedSolutionListener listener,
         final Problem problem
     ) {
-        super(proposedSolutionListener, problem);
+        super(listener, problem);
     }
 
     @Override

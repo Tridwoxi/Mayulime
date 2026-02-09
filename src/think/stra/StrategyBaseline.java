@@ -8,10 +8,10 @@ import think.repr.Problem;
 public final class StrategyBaseline extends Strategy {
 
     public StrategyBaseline(
-        final ProposedSolutionListener proposedSolutionListener,
+        final ProposedSolutionListener listener,
         final Problem problem
     ) {
-        super(proposedSolutionListener, problem);
+        super(listener, problem);
     }
 
     @Override
