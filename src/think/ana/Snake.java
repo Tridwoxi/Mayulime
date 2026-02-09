@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
-import think.ana.Distances.PathDirection;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
@@ -101,8 +100,7 @@ public final class Snake {
             final ArrayList<Cell> path = Distances.reconstructPath(
                 distanceFromEnd,
                 end,
-                currentLocation,
-                PathDirection.REACHABLE_TO_SOURCE
+                currentLocation
             );
             final Optional<Cell> stoppedAtTeleport = path
                 .stream()
