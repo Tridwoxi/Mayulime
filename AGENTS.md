@@ -1,4 +1,4 @@
-# Repository guidelines
+# Agent instructions
 
 If you need information about system architecture, the problem statement, coding
 style, or theory, consult `docs/`.
@@ -16,5 +16,4 @@ If you edit code, test the project by running the following command:
 If Checkstyle or Spotbugs complains during the build, fix violations. If the violations
 are difficult to fix, it's probably not your fault; inform the human instead.
 
-If the gradle wrapper or jar is not available, ask the human to create it. If you are
-Codex, the system gradle is unlikely to work.
+If the gradle wrapper or jar is not available, ask the human to create it.
