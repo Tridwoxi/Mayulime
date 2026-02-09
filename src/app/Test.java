@@ -2,7 +2,10 @@ package app;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import think.ana.Snake;
 import think.repr.Cell;
 import think.repr.Grid;
@@ -39,6 +42,7 @@ final class Test {
     static boolean runAllTests() {
         problemParsing();
         snakePathfinding();
+        snakeTiebreaking();
         solutionValidation();
         weightedSelection();
         return true;
@@ -52,6 +56,27 @@ final class Test {
         final Grid<Feature> solution = problem.getAnotherInitial();
         solution.set(new Cell(0, 3), Feature.PLAYER_WALL);
         assert Snake.evaluate(problem, solution) == 0;
+    }
+
+    private static void snakeTiebreaking() {
+        final BiFunction<Cell, Cell, Cell> first2x2 = (start, end) -> {
+            final Optional<ArrayList<Cell>> steps = Snake.travel(
+                new Grid<>(Feature.EMPTY, 2, 2),
+                start,
+                end,
+                new HashSet<>(),
+                new HashMap<>()
+            );
+            return steps.orElseThrow().getFirst();
+        };
+        final Cell topLeft = new Cell(0, 0);
+        final Cell bottomRight = new Cell(1, 1);
+        final Cell topRight = new Cell(0, 1);
+        final Cell bottomLeft = new Cell(1, 0);
+        assert first2x2.apply(topLeft, bottomRight).equals(topRight);
+        assert first2x2.apply(bottomLeft, topRight).equals(topLeft);
+        assert first2x2.apply(bottomRight, topLeft).equals(topRight);
+        assert first2x2.apply(topRight, bottomLeft).equals(bottomRight);
     }
 
     // == think.repr ===================================================================
