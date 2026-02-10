@@ -11,9 +11,9 @@ graph. The remaining vertices are either blocked (has a player wall) or open (do
 have a player wall). A vertex is empty iff it is open and does not contain other
 features.
 
-## Guessing
-
-The number of ways $W$ to select up to $S$ vertices from $N$ total is:
+Every way to assign walls to at most $S$ vertices of $N$ total is a candidate solution.
+Since we are looking for the best candidate solution, the problem is a state-space
+search over candidate solutions. The number of states is:
 
 $$
 W = \sum_{i=0}^{S} {N \choose i}
@@ -34,7 +34,11 @@ forever {
 }
 ```
 
-Guessing randomly is effective on small maps with limited walls. The Simple example has
+Brute force is effective on small maps with limited walls. The Simple example has
 $N = 60$ and $S = 7$, so $W = 442255978$. My machine can loop about 140k times per
-second per thread, so if all candidate solutions are unique, it can brute force the
-problem in a handful of minutes.
+second per thread, so if all candidate solutions are unique, it can exhaust the problem
+in a handful of minutes.
+
+Brute force is inefficient because there are many states and the majority are
+low-scoring: there are many ways to wholly block the snake or let it get to its
+destination with a few poorly-placed walls, and the rest can be set in a myriad of ways.
