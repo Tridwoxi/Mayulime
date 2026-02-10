@@ -1,7 +1,9 @@
 # Agent instructions
 
-If you need information about system architecture, the problem statement, coding
-style, or theory, consult `docs/`.
+The game "Pathery" is an exercise in creating the longest shortest path on a maze by placing a set of walls. This repository contains an automated Pathery solver.
+
+If you need information about architecture (including coding conventions), the problem
+statement, or the theory of this project, consult `docs/`.
 
 Do not write documentation unless asked. Write comments as needed. If you stumble upon
 lies (either in the docs or in Javadoc), please inform the human.

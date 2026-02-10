@@ -2,19 +2,25 @@
 
 ## Package structure
 
-`docs/`: Project description as markdown.
+`docs/`: Supplementary documents as markdown.
 
 `examples/`: Pathery problems the project is known to support as MapCodes.
 
-`src/app/`: Contains main classes (App or Headless), tests, and GUI. Things here are
-relevant to entire project or user experience.
+`src/app/`: Main classes (App and Headless), tests, and GUI. Things here are relevant
+to entire project or user experience. The Pathery MapCode is loaded into the system
+from here, parsed into a Problem, then sent to the Manager.
 
-`src/think/`: Backend. The Manager is responsible for concurrency and worker management.
+`src/think/`: Backend. The Manager is responsible for concurrency and worker
+management. It creates the workers and recieves information with non-blocking callbacks.
 
 `src/think/ana`: Static analysis tools. Subroutines belong here when they are
-project-specific, such as pathfinding and distance evaluation.
+project-specific, such as pathfinding and distance evaluation, but not quite
+strategy-specific.
 
-`src/think/repr`: Data model. Classes defined here are instantiable.
+`src/think/repr`: Data model. The Problem contains metadata, such as the order of
+checkpoints and the player's wall supply, and the Pathery map itself. This map is
+represented as a rectangular Grid of Features. Feature is an enum of things that appear
+on the map, such as a player wall. Classes defined here are instantiable.
 
 `src/think/stra`: A Strategy is a runnable worker that uses the other think packages to
 come up with better solutions to notify the Manager about.
@@ -22,23 +28,26 @@ come up with better solutions to notify the Manager about.
 `src/think/tools`: More static subroutines, such as Iteration and Structures, that are
 not project-specific and do not import other project packages.
 
-## Data model and flow
+## Conventions
 
-A Pathery MapCode is uploaded by the user in the GUI and sent to the app. The App
-creates a Problem from the MapCode and sends it to the Manager, which sends it to
-Strategies.
+Variable names are descriptive. Abbreviation is acceptable but discouraged. One letter
+names are prohibited.
 
-Data is sent from the App down the chain using method calls on instances. Data is sent
-up the chain to the App using a dependecy-injected method reference, which is why Gui,
-Manager, and Strategy acccept functional interfaces in their constructors.
+Currently, constant-factor performance improvements are not a priority. The comment
+"PERF:" indicates areas for work if performance gains are necessary.
 
-When a Strategy attempts to solve a Problem, it makes calls to static methods in the
-analysis and tools packages, and instantiates more objects from the representation
-package.
+Null pointers may be produced and checked for, but `null` is never accepted or passed
+by any subroutine defined in this project.
 
-The Problem contains metadata, such as the order of checkpoints and the player's wall
-supply, and the Pathery map itself. This map is represented as a rectangular Grid of
-Features. Feature is an enum of things that appear on the map, such as a player wall.
+Streaming and functional programming are encouraged but not required. Use ArrayLists
+instead of raw arrays.
 
-Solutions to the Problem are Grids of Features resembling the original map, but with
-assignments of player wall features where there was previous empty cells.
+Assertions are for both conditions and invariants because they are close to source.
+Tests are written only when assertions are difficult to write. Assertions are permitted
+to slow down the system by an arbritrary amount.
+
+Extending or implementing custom classes and interfaces is discouraged but permitted up
+to one layer deep.
+
+Commits use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+style with required scope.
