@@ -1,5 +1,6 @@
 package infra.main;
 
+import infra.io.Logging;
 import infra.tests.Tests;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +10,6 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
-import think.tools.Logging;
 
 /**
     Development-only headless alternative program launch point.

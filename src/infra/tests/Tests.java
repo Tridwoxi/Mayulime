@@ -1,5 +1,6 @@
 package infra.tests;
 
+import infra.io.Logging;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +13,6 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
-import think.tools.Logging;
 import think.tools.Random;
 import think.tools.Structures.Weighted;
 

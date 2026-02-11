@@ -1,4 +1,4 @@
-package think.tools;
+package infra.io;
 
 import java.util.Locale;
 

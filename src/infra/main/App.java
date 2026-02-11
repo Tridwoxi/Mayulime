@@ -1,6 +1,7 @@
 package infra.main;
 
 import infra.io.Gui;
+import infra.io.Logging;
 import infra.tests.Tests;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,7 +11,6 @@ import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
-import think.tools.Logging;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).

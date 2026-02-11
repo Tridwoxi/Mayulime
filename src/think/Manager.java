@@ -1,5 +1,6 @@
 package think;
 
+import infra.io.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +11,6 @@ import think.repr.Problem.Feature;
 import think.stra.Strategy;
 import think.stra.StrategyBaseline;
 import think.stra.StrategyGuessRandomly;
-import think.tools.Logging;
 
 /**
     Strategy controller.

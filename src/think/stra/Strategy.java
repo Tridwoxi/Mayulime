@@ -1,10 +1,10 @@
 package think.stra;
 
+import infra.io.Logging;
 import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.tools.Logging;
 
 /**
     Think of solutions to Pathery problems.
