@@ -22,10 +22,11 @@ public final class App extends Application {
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
+    private static final double DEFAULT_WIDTH_PX = 1280;
+    private static final double DEFAULT_HEIGHT_PX = 720.0;
 
     private Manager manager;
     private Gui gui;
-    private Problem current;
 
     @Override
     public void init() {
@@ -42,14 +43,13 @@ public final class App extends Application {
 
         this.manager = new Manager(this::recieveSolution);
         this.gui = new Gui(this::recieveMapCode);
-        this.current = null;
 
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
         primaryStage.setMinWidth(MIN_WIDTH_PX);
         primaryStage.setMinHeight(MIN_HEIGHT_PX);
-        primaryStage.setWidth(MIN_WIDTH_PX);
-        primaryStage.setHeight(MIN_HEIGHT_PX);
+        primaryStage.setWidth(DEFAULT_WIDTH_PX);
+        primaryStage.setHeight(DEFAULT_HEIGHT_PX);
         primaryStage.show();
     }
 
@@ -64,16 +64,7 @@ public final class App extends Application {
         assert gui != null && manager != null;
         // PERF: Spamming the GUI with updates when each update invalidates all
         // previous updates is basically cyberbullying. Keep only the latest one.
-        Platform.runLater(() -> {
-            gui.update(submitter, problem, solution, score);
-            if (problem == current) {
-                return;
-            }
-            current = problem;
-            if (gui.getWindow() instanceof Stage stage) {
-                stage.sizeToScene();
-            }
-        });
+        Platform.runLater(() -> gui.update(submitter, problem, solution, score));
     }
 
     private void recieveMapCode(final String mapCode) {
