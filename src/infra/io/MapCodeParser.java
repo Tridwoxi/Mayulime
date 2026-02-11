@@ -81,45 +81,63 @@ public final class MapCodeParser {
         this.mapCode = mapCode;
     }
 
+    public Problem parse() throws BadMapCodeException {
+        final String[] parts = mapCode.split(COLON_REGEX, -1);
+        require(parts.length == 2);
+        final MetaData metaData = parseMetaData(parts[0]);
+        final RawGridData rawGridData = parseRawGridData(metaData, parts[1]);
+        final AssembledGridData assembledGridData = assembleGridData(
+            metaData,
+            rawGridData
+        );
+        return new Problem(
+            metaData.name,
+            assembledGridData.clampedPlayerWallSupply,
+            assembledGridData.grid,
+            assembledGridData.checkpoints,
+            assembledGridData.teleports
+        );
+    }
+
+    // == Sections. ====================================================================
+
+    private static MetaData parseMetaData(final String metaData)
+        throws BadMapCodeException {
+        final String[] parts = metaData.split(PERIOD_REGEX, -1);
+        require(parts.length == NUM_METADATA_PARTS);
+        final int numCols = toPositive(parts[0]);
+        final int numRows = toPositive(parts[1]);
+        final int proposedWalls = toNonNegative(parts[2]);
+        final String name = cleanName(parts[3]);
+        return new MetaData(name, numCols, numRows, proposedWalls);
+    }
+
     @SuppressWarnings(
         { "checkstyle:CyclomaticComplexity", "checkstyle:ExecutableStatementCount" }
     )
-    public Problem parse() throws BadMapCodeException {
-        // == Section parsing. ==
-        final String[] parts = mapCode.split(COLON_REGEX, -1);
-        require(parts.length == 2);
-
-        // == Metadata parsing. ==
-        final String[] metadata = parts[0].split(PERIOD_REGEX, -1);
-        require(metadata.length == NUM_METADATA_PARTS);
-        final int numCols = toPositive(metadata[0]);
-        final int numRows = toPositive(metadata[1]);
-        final int proposedPlayerWallSupply = toNonNegative(metadata[2]);
-        final String name = cleanName(metadata[3]);
-
-        final Function<Integer, Cell> indexToCell = index -> {
-            return new Cell(index / numCols, index % numCols);
-        };
-
-        // == Grid parsing: temporary data holders. ==
-        final String[] features = parts[1].split(PERIOD_OR_COMMA_REGEX);
-        final ArrayList<Feature> cells = Iteration.filledArray(
+    private static RawGridData parseRawGridData(
+        final MetaData metaData,
+        final String rawGridData
+    ) throws BadMapCodeException {
+        final ArrayList<Feature> grid = Iteration.filledArray(
             Feature.EMPTY,
-            numRows * numCols
+            metaData.numRows * metaData.numCols
         );
         final TreeMap<Integer, Cell> checksById = new TreeMap<>();
         final TreeMap<Integer, Cell> telInsById = new TreeMap<>();
         final TreeMap<Integer, Cell> telOutsById = new TreeMap<>();
         Cell start = Cell.OUT_OF_BOUNDS;
         Cell finish = Cell.OUT_OF_BOUNDS;
-        int traversingIndex = 0;
 
-        // == Grid parsing: feature traversal and syntax validation. ==
-        for (final String feature : features) {
+        final Function<Integer, Cell> indexToCell = index -> {
+            return new Cell(index / metaData.numCols, index % metaData.numCols);
+        };
+        int traversingIndex = 0;
+        for (String feature : rawGridData.split(PERIOD_OR_COMMA_REGEX)) {
             if (feature.isBlank()) {
                 continue;
             }
-            require(traversingIndex < numRows * numCols);
+            require(traversingIndex < metaData.numRows * metaData.numCols);
             if (feature.matches(DIGITS_REGEX)) {
                 traversingIndex += toPositive(feature);
                 continue;
@@ -127,42 +145,38 @@ public final class MapCodeParser {
             require(feature.length() >= 2);
             final String category = feature.substring(0, 1);
             require(category.matches(LOWERCASE_LETTER_REGEX));
-            final String annotationRaw = feature.substring(1);
-            require(annotationRaw.matches(DIGITS_REGEX));
-            final int annotation = toPositive(annotationRaw);
+            final int annotation = toPositive(feature.substring(1));
             switch (category) {
                 case START_SYMBOL -> {
                     require(annotation == 1);
                     require(start.equals(Cell.OUT_OF_BOUNDS));
                     start = indexToCell.apply(traversingIndex);
-                    cells.set(traversingIndex, Feature.CHECKPOINT);
+                    grid.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case FINISH_SYMBOL -> {
                     require(annotation == 1);
                     require(finish.equals(Cell.OUT_OF_BOUNDS));
                     finish = indexToCell.apply(traversingIndex);
-                    cells.set(traversingIndex, Feature.CHECKPOINT);
+                    grid.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case WALL_SYMBOL -> {
-                    final int wallType1 = 1;
-                    final int wallType3 = 3;
-                    require(annotation == wallType1 || annotation == wallType3);
-                    cells.set(traversingIndex, Feature.SYSTEM_WALL);
+                    require(annotation == 1 || annotation == 3);
+                    grid.set(traversingIndex, Feature.SYSTEM_WALL);
                 }
                 case CHECKPOINT_SYMBOL -> {
                     require(!checksById.containsKey(annotation));
                     checksById.put(annotation, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, Feature.CHECKPOINT);
+                    grid.set(traversingIndex, Feature.CHECKPOINT);
                 }
                 case TELEPORT_IN_SYMBOL -> {
                     require(!telInsById.containsKey(annotation));
                     telInsById.put(annotation, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, Feature.TELEPORT_IN);
+                    grid.set(traversingIndex, Feature.TELEPORT_IN);
                 }
                 case TELEPORT_OUT_SYMBOL -> {
                     require(!telOutsById.containsKey(annotation));
                     telOutsById.put(annotation, indexToCell.apply(traversingIndex));
-                    cells.set(traversingIndex, Feature.TELEPORT_OUT);
+                    grid.set(traversingIndex, Feature.TELEPORT_OUT);
                 }
                 default -> {
                     require(false);
@@ -170,39 +184,58 @@ public final class MapCodeParser {
             }
             traversingIndex += 1;
         }
-        require(traversingIndex <= numRows * numCols);
+        require(traversingIndex <= metaData.numRows * metaData.numCols);
+        return new RawGridData(grid, start, finish, checksById, telInsById, telOutsById);
+    }
 
-        // == Grid parsing: semantic validation and building. ==
-        require(!start.equals(Cell.OUT_OF_BOUNDS));
-        require(!finish.equals(Cell.OUT_OF_BOUNDS));
+    private static AssembledGridData assembleGridData(
+        final MetaData metaData,
+        final RawGridData rawGridData
+    ) throws BadMapCodeException {
+        final TreeMap<Integer, Cell> telInsById = rawGridData.telInsById;
+        final TreeMap<Integer, Cell> telOutsById = rawGridData.telOutsById;
+        require(!rawGridData.start.equals(Cell.OUT_OF_BOUNDS));
+        require(!rawGridData.finish.equals(Cell.OUT_OF_BOUNDS));
         require(telInsById.keySet().equals(telOutsById.keySet()));
 
-        final Grid<Feature> initial = new Grid<>(cells, numRows, numCols);
         final ArrayList<Cell> checkpoints = new ArrayList<>();
-        checkpoints.add(start);
-        checkpoints.addAll(checksById.values());
-        checkpoints.add(finish);
-
+        checkpoints.add(rawGridData.start);
+        // This operation inserts checkpoints in order as long as checksById is a
+        // SortedMap (it happens to be a TreeMap).
+        checkpoints.addAll(rawGridData.checksById.values());
+        checkpoints.add(rawGridData.finish);
         final HashMap<Cell, Cell> teleports = new HashMap<>();
         telInsById
             .keySet()
             .forEach(key -> {
                 teleports.put(telInsById.get(key), telOutsById.get(key));
             });
-
         // Pathery often supplies more walls than possible to place. We don't want to
         // prohibit that in input, but we don't want to let it through either.
-        final int playerWallSupply = Math.min(
-            proposedPlayerWallSupply,
-            (int) initial.where(Feature.EMPTY::equals).count()
+        final int clampedPlayerWallSupply = Math.min(
+            metaData.proposedPlayerWallSupply,
+            (int) rawGridData.grid.stream().filter(Feature.EMPTY::equals).count()
         );
-        return new Problem(name, playerWallSupply, initial, checkpoints, teleports);
+        final Grid<Feature> grid = new Grid<>(
+            rawGridData.grid,
+            metaData.numRows,
+            metaData.numCols
+        );
+        return new AssembledGridData(
+            grid,
+            checkpoints,
+            teleports,
+            clampedPlayerWallSupply
+        );
     }
+
+    // == Helpers. =====================================================================
 
     private static void require(final boolean condition) throws BadMapCodeException {
         // The parser should throw our custom exception instead of unexpectedly
-        // failing. But we don't want wrap everything in a massive try-except because
-        // that sort of lazy programming silently surpresses bugs.
+        // failing. But we don't want catch miscellaneous exceptions since that sort of
+        // lazy programming silently surpresses bugs; only exceptions that we expect to
+        // see should be caught.
         if (!condition) {
             throw new BadMapCodeException();
         }
@@ -235,4 +268,29 @@ public final class MapCodeParser {
         require(stripped.chars().noneMatch(chr -> (chr == '\n' || chr == '\r')));
         return stripped.substring(0, Math.min(stripped.length(), MAX_NAME_LENGTH));
     }
+
+    // == Records. =====================================================================
+
+    private record MetaData(
+        String name,
+        int numCols,
+        int numRows,
+        int proposedPlayerWallSupply
+    ) {}
+
+    private record RawGridData(
+        ArrayList<Feature> grid,
+        Cell start,
+        Cell finish,
+        TreeMap<Integer, Cell> checksById,
+        TreeMap<Integer, Cell> telInsById,
+        TreeMap<Integer, Cell> telOutsById
+    ) {}
+
+    private record AssembledGridData(
+        Grid<Feature> grid,
+        ArrayList<Cell> checkpoints,
+        HashMap<Cell, Cell> teleports,
+        int clampedPlayerWallSupply
+    ) {}
 }
