@@ -51,9 +51,9 @@ import think.tools.Iteration;
       - z5: Ice
       - r2: Player wall (since these are from solutions, rather than problems).
 
-      The above list is complete as of January 2026. All supported features except for
-      system walls must be unique or absent. Teleport ins must be paired with teleport
-      outs. All supported features must live in the grid.
+    The above list is complete as of January 2026. All supported features except for
+    system walls must be unique or absent. Teleport ins must be paired with teleport
+    outs. All supported features must live in the grid.
  */
 public final class MapCodeParser {
 
@@ -67,6 +67,7 @@ public final class MapCodeParser {
 
     private static final int NUM_METADATA_PARTS = 7;
     private static final int MAX_NAME_LENGTH = 100;
+    private static final int BIG_NUMBER = 1_000_000; // Resource exhaustion.
 
     private static final String START_SYMBOL = "s";
     private static final String FINISH_SYMBOL = "f";
@@ -119,10 +120,8 @@ public final class MapCodeParser {
         final MetaData metaData,
         final String rawGridData
     ) throws BadMapCodeException {
-        final ArrayList<Feature> grid = Iteration.filledArray(
-            Feature.EMPTY,
-            metaData.numRows * metaData.numCols
-        );
+        final int numCells = multiply(metaData.numRows, metaData.numCols);
+        final ArrayList<Feature> grid = Iteration.filledArray(Feature.EMPTY, numCells);
         final TreeMap<Integer, Cell> checksById = new TreeMap<>();
         final TreeMap<Integer, Cell> telInsById = new TreeMap<>();
         final TreeMap<Integer, Cell> telOutsById = new TreeMap<>();
@@ -137,9 +136,9 @@ public final class MapCodeParser {
             if (feature.isBlank()) {
                 continue;
             }
-            require(traversingIndex < metaData.numRows * metaData.numCols);
+            require(traversingIndex < numCells);
             if (feature.matches(DIGITS_REGEX)) {
-                traversingIndex += toPositive(feature);
+                traversingIndex = add(traversingIndex, toPositive(feature));
                 continue;
             }
             require(feature.length() >= 2);
@@ -182,9 +181,9 @@ public final class MapCodeParser {
                     require(false);
                 }
             }
-            traversingIndex += 1;
+            traversingIndex = add(traversingIndex, 1);
         }
-        require(traversingIndex <= metaData.numRows * metaData.numCols);
+        require(traversingIndex <= numCells);
         return new RawGridData(grid, start, finish, checksById, telInsById, telOutsById);
     }
 
@@ -245,7 +244,7 @@ public final class MapCodeParser {
         try {
             require(number.matches(DIGITS_REGEX));
             final int result = Integer.parseInt(number);
-            require(result >= 1);
+            require(result >= 1 && result <= BIG_NUMBER);
             return result;
         } catch (NumberFormatException exception) {
             throw new BadMapCodeException();
@@ -256,7 +255,7 @@ public final class MapCodeParser {
         try {
             require(number.matches(DIGITS_REGEX));
             final int result = Integer.parseInt(number);
-            require(result >= 0);
+            require(result >= 0 && result <= BIG_NUMBER);
             return result;
         } catch (NumberFormatException exception) {
             throw new BadMapCodeException();
@@ -267,6 +266,26 @@ public final class MapCodeParser {
         final String stripped = raw.strip();
         require(stripped.chars().noneMatch(chr -> (chr == '\n' || chr == '\r')));
         return stripped.substring(0, Math.min(stripped.length(), MAX_NAME_LENGTH));
+    }
+
+    private static int multiply(final int first, final int second)
+        throws BadMapCodeException {
+        try {
+            require(Math.multiplyExact(first, second) <= BIG_NUMBER);
+            return Math.multiplyExact(first, second);
+        } catch (ArithmeticException exception) {
+            throw new BadMapCodeException();
+        }
+    }
+
+    private static int add(final int first, final int second)
+        throws BadMapCodeException {
+        try {
+            require(Math.addExact(first, second) <= BIG_NUMBER);
+            return Math.addExact(first, second);
+        } catch (ArithmeticException exception) {
+            throw new BadMapCodeException();
+        }
     }
 
     // == Records. =====================================================================
