@@ -1,5 +1,6 @@
-package app;
+package infra.main;
 
+import infra.tests.Tests;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,15 +12,14 @@ import think.repr.Problem.Feature;
 import think.tools.Logging;
 
 /**
-    Development-only headless program entry point.
+    Development-only headless alternative program launch point.
 
-    Subclasses of javafx.application.Application, such as app.App, have bad ideas about
-    program lifecycle. This class does the same thing as app.App, except:
+    Subclasses of javafx.application.Application, such as infra.main.App, have bad ideas
+    about program lifecycle. This class does the same thing as infra.main.App, except:
 
     <ul>
         <li>It does not start the JavaFX runtime, so produces no GUI</li>
-        <li>It requires an argument for the map file to load</li>
-        <li>It logs solutions instead of updating the GUI</li>
+        <li>It takes an argument for the map file to load</li>
         <li>It exits after a given amount of time (also given as argument)</li>
     </ul>
  */
@@ -37,7 +37,7 @@ public final class Headless {
     }
 
     private int run(final String[] args) {
-        assert Test.runAllTests();
+        assert Tests.runAllTests();
         Logging.log(Headless.class, "Launch point: Headless");
 
         final Config config;

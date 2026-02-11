@@ -1,4 +1,4 @@
-package app;
+package infra.tests;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,13 +26,13 @@ import think.tools.Structures.Weighted;
     and because I can't get my language server and JUnit to be friends. Regrettably,
     this couples the test running to the system running.
  */
-final class Test {
+public final class Tests {
 
     private static final String EXAMPLE = """
         6.4.13.Example...:7,c2.,r1.,u2.,t1.,r1.,u1.,t2.,r1.3,s1.1,r1.,c1.1,f1.
         """;
 
-    private Test() {}
+    private Tests() {}
 
     /**
         Death by failed assertion if any test fails.
@@ -40,8 +40,8 @@ final class Test {
         This method always returns true. The preferred way to run this method is to
         assert it upon system launch.
      */
-    static boolean runAllTests() {
-        Logging.log(Test.class, "Running unit tests");
+    public static boolean runAllTests() {
+        Logging.log(Tests.class, "Running unit tests");
         problemParsing();
         snakePathfinding();
         snakeTiebreaking();

@@ -1,5 +1,7 @@
-package app;
+package infra.main;
 
+import infra.io.Gui;
+import infra.tests.Tests;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -11,7 +13,7 @@ import think.repr.Problem.Feature;
 import think.tools.Logging;
 
 /**
-    Application launch point. Connects Gui (frontend) to Manager (backend).
+    Normal application launch point. Connects Gui (frontend) to Manager (backend).
  */
 public final class App extends Application {
 
@@ -34,7 +36,7 @@ public final class App extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        assert Test.runAllTests();
+        assert Tests.runAllTests();
         Logging.log(getClass(), "Launch point: Application");
 
         this.manager = new Manager(this::recieveSolution);

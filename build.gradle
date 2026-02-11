@@ -35,12 +35,12 @@ tasks.register('runHeadless', JavaExec) {
     group = 'application'
     dependsOn 'checkstyleMain', 'spotbugsMain'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'app.Headless'
+    mainClass = 'infra.main.Headless'
     jvmArgs '-ea'
 }
 
 application {
-    mainClass = 'app.App'
+    mainClass = 'infra.main.App'
 }
 
 javafx {

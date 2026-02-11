@@ -1,4 +1,4 @@
-package app;
+package infra.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +48,7 @@ import think.tools.Structures.Pair;
             ButtonDisplay (Button)
     </pre>
  */
-final class Gui extends Scene {
+public final class Gui extends Scene {
 
     static final String FONT_NAME = "System";
     static final double CELL_SIZE_PX = 50.0;
@@ -60,7 +60,7 @@ final class Gui extends Scene {
     private final GameDisplay gameDisplay;
     private final StatsDisplay statsDisplay;
 
-    Gui(final Consumer<String> mapCodeConsumer) {
+    public Gui(final Consumer<String> mapCodeConsumer) {
         super(new VBox());
         this.mapCodeConsumer = mapCodeConsumer;
         this.root = (VBox) getRoot();

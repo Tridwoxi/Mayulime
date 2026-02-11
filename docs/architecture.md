@@ -6,26 +6,27 @@
 
 `examples/`: Pathery problems the project is known to support as MapCodes.
 
-`src/app/`: Main classes (App and Headless), tests, and GUI. Things here are relevant
-to entire project or user experience. The Pathery MapCode is loaded into the system
-from here, parsed into a Problem, then sent to the Manager.
+`src/infra/io`: GUI, MapCode parsing, and logging.
+
+`src/infra/main`: Program entry point. App is the normal entry point; Headless is a development-only alternative. Starts up the Manager. Connects backend to frontend.
+
+`src/infra/tests`: Unit tests.
 
 `src/think/`: Backend. The Manager is responsible for concurrency and worker
 management. It creates the workers and recieves information with non-blocking callbacks.
 
-`src/think/ana`: Static analysis tools. Subroutines belong here when they are
-project-specific, such as pathfinding and distance evaluation, but not quite
-strategy-specific.
+`src/think/ana`: Static tools. Objects belong here when they are project-specific, such
+as pathfinding and distance evaluation, but not quite strategy-specific.
 
 `src/think/repr`: Data model. The Problem contains metadata, such as the order of
-checkpoints and the player's wall supply, and the Pathery map itself. This map is
+checkpoints and the player's wall supply, and the Pathery maze itself. This maze is
 represented as a rectangular Grid of Features. Feature is an enum of things that appear
-on the map, such as a player wall. Classes defined here are instantiable.
+in the maze, such as a player wall. Classes defined here are instantiable.
 
 `src/think/stra`: A Strategy is a runnable worker that uses the other think packages to
 come up with better solutions to notify the Manager about.
 
-`src/think/tools`: More static subroutines, such as Iteration and Structures, that are
+`src/think/tools`: More static tools, such as Iteration and Structures, that are
 not project-specific and do not import other project packages.
 
 ## Conventions
