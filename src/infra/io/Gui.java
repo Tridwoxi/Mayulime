@@ -50,7 +50,8 @@ import think.tools.Structures.Pair;
 public final class Gui extends Scene {
 
     static final String FONT_NAME = "System";
-    static final double CELL_SIZE_PX = 50.0;
+    static final double MIN_CELL_SIZE_PX = 8.0;
+    static final double MAX_CELL_SIZE_PX = 50.0;
     static final double SPACING_PX = 50.0;
     static final double PADDING_PX = 50.0;
 
@@ -58,6 +59,7 @@ public final class Gui extends Scene {
     private final VBox root;
     private final GameDisplay gameDisplay;
     private final StatsDisplay statsDisplay;
+    private double currentCellSizePx;
 
     public Gui(final Consumer<String> mapCodeConsumer) {
         super(new VBox());
@@ -65,6 +67,7 @@ public final class Gui extends Scene {
         this.root = (VBox) getRoot();
         this.gameDisplay = new GameDisplay(this);
         this.statsDisplay = new StatsDisplay(this);
+        this.currentCellSizePx = MAX_CELL_SIZE_PX;
 
         setFill(PatheryColors.BACKGROUND);
         root.setPadding(new Insets(PADDING_PX));
@@ -72,6 +75,8 @@ public final class Gui extends Scene {
         root.setSpacing(0.0);
         root.setBackground(Background.fill(PatheryColors.BACKGROUND));
         root.getChildren().addAll(gameDisplay, statsDisplay);
+        widthProperty().addListener((ignored, oldValue, newValue) -> handleResize());
+        heightProperty().addListener((ignored, oldValue, newValue) -> handleResize());
         hideGame();
     }
 
@@ -82,8 +87,9 @@ public final class Gui extends Scene {
         final int score
     ) {
         showGame();
-        gameDisplay.setGame(problem, solution);
         statsDisplay.setScore(score, submitter);
+        recalculateCellSize(problem);
+        gameDisplay.setGame(problem, solution);
     }
 
     private void hideGame() {
@@ -101,6 +107,56 @@ public final class Gui extends Scene {
     Consumer<String> getMapCodeConsumer() {
         return mapCodeConsumer;
     }
+
+    double getCurrentCellSizePx() {
+        return currentCellSizePx;
+    }
+
+    private void handleResize() {
+        // PERF: Noticable lag on large (100 by 100) maps on a modern computer.
+        recalculateCellSize(gameDisplay.getCurrentProblem());
+        gameDisplay.rerenderIfPresent();
+    }
+
+    private void recalculateCellSize(final Problem problem) {
+        if (problem == null) {
+            currentCellSizePx = MAX_CELL_SIZE_PX;
+            return;
+        }
+        final int numRows = problem.getCachedInitial().getNumRows();
+        final int numCols = problem.getCachedInitial().getNumCols();
+        if (numRows <= 0 || numCols <= 0) {
+            currentCellSizePx = MAX_CELL_SIZE_PX;
+            return;
+        }
+
+        final Insets insets = root.getPadding();
+        final double availableWidth = Math.max(
+            1.0,
+            getWidth() - insets.getLeft() - insets.getRight()
+        );
+        double availableHeight = Math.max(
+            1.0,
+            getHeight() - insets.getTop() - insets.getBottom()
+        );
+        if (gameDisplay.isVisible()) {
+            final double statsHeight = Math.max(
+                statsDisplay.getLayoutBounds().getHeight(),
+                statsDisplay.prefHeight(-1.0)
+            );
+            availableHeight -= statsHeight;
+            availableHeight -= root.getSpacing();
+        }
+        availableHeight = Math.max(1.0, availableHeight);
+
+        final double sizeByWidth = availableWidth / numCols;
+        final double sizeByHeight = availableHeight / numRows;
+        final double rawSize = Math.min(sizeByWidth, sizeByHeight);
+        currentCellSizePx = Math.max(
+            MIN_CELL_SIZE_PX,
+            Math.min(MAX_CELL_SIZE_PX, rawSize)
+        );
+    }
 }
 
 final class GameDisplay extends Group {
@@ -112,26 +168,46 @@ final class GameDisplay extends Group {
     private static final String TELEPORT_OUT = "u";
     private static final String CHECKPOINT = "c";
     private final Gui gui;
+    private Problem currentProblem;
+    private Grid<Feature> currentSolution;
 
     GameDisplay(final Gui gui) {
         this.gui = gui;
     }
 
     public void setGame(final Problem problem, final Grid<Feature> solution) {
+        currentProblem = problem;
+        currentSolution = solution;
+        render();
+    }
+
+    public void rerenderIfPresent() {
+        if (currentProblem != null && currentSolution != null) {
+            render();
+        }
+    }
+
+    public Problem getCurrentProblem() {
+        return currentProblem;
+    }
+
+    private void render() {
+        assert currentProblem != null && currentSolution != null;
         getChildren().clear();
-        final Grid<String> labels = makeLabels(problem);
-        solution
+        final Grid<String> labels = makeLabels(currentProblem);
+        final double cellSizePx = gui.getCurrentCellSizePx();
+        currentSolution
             .stream()
             .forEachOrdered(pair -> {
                 final Feature feature = pair.first();
                 final Cell cell = pair.second();
                 final CellDisplay cellDisplay = new CellDisplay(
-                    gui,
                     toColor(feature),
-                    labels.get(cell)
+                    labels.get(cell),
+                    cellSizePx
                 );
-                cellDisplay.setLayoutY(cell.row() * Gui.CELL_SIZE_PX);
-                cellDisplay.setLayoutX(cell.col() * Gui.CELL_SIZE_PX);
+                cellDisplay.setLayoutY(cell.row() * cellSizePx);
+                cellDisplay.setLayoutX(cell.col() * cellSizePx);
                 getChildren().add(cellDisplay);
             });
     }
@@ -187,22 +263,21 @@ final class GameDisplay extends Group {
 final class CellDisplay extends Group {
 
     private static final double LABLE_SCALE = 0.3;
-    private static final double SIZE = Gui.CELL_SIZE_PX;
     private static final double HALF = 0.5;
 
-    CellDisplay(final Gui gui, final Color color, final String content) {
-        final Rectangle body = new Rectangle(SIZE, SIZE);
+    CellDisplay(final Color color, final String content, final double sizePx) {
+        final Rectangle body = new Rectangle(sizePx, sizePx);
         body.setFill(color);
         body.setStroke(PatheryColors.BACKGROUND);
 
         final Text label = new Text(content);
         label.setFill(PatheryColors.FOREGROUND);
 
-        label.setFont(Font.font(Gui.FONT_NAME, Gui.CELL_SIZE_PX * LABLE_SCALE));
+        label.setFont(Font.font(Gui.FONT_NAME, sizePx * LABLE_SCALE));
 
         final Bounds bounds = label.getLayoutBounds();
-        label.setX((SIZE - bounds.getWidth()) * HALF - bounds.getMinX());
-        label.setY((SIZE - bounds.getHeight()) * HALF - bounds.getMinY());
+        label.setX((sizePx - bounds.getWidth()) * HALF - bounds.getMinX());
+        label.setY((sizePx - bounds.getHeight()) * HALF - bounds.getMinY());
 
         getChildren().addAll(body, label);
     }
