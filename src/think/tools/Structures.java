@@ -1,6 +1,9 @@
 package think.tools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -93,6 +96,69 @@ public final class Structures {
 
         public double get() {
             return this.average;
+        }
+    }
+
+    /**
+        Specialized vector database to estimate the overlap of a vector.
+     */
+    public static final class DensityDB<T> {
+
+        private static final int NUM_HASHES = 10;
+        private final ArrayList<ArrayList<Integer>> permutations;
+        private final int vectorSize;
+        private final Function<T, ArrayList<Boolean>> converter;
+        private final ArrayList<ArrayList<Integer>> buckets;
+        private int numElements;
+
+        // PERF: Use true bit vectors.
+        public DensityDB(
+            final int vectorSize,
+            final Function<T, ArrayList<Boolean>> converter
+        ) {
+            this.vectorSize = vectorSize;
+            this.permutations = Iteration.filledArray(
+                ignored -> Random.permutation(vectorSize),
+                NUM_HASHES
+            );
+            this.converter = converter;
+            this.buckets = Iteration.filledArray(
+                ignored -> Iteration.filledArray(0, vectorSize),
+                NUM_HASHES
+            );
+            this.numElements = 0;
+        }
+
+        public void insert(final T item) {
+            final ArrayList<Integer> hash = minHash(item);
+            IntStream.range(0, NUM_HASHES).forEachOrdered(index -> {
+                final int current = buckets.get(index).get(hash.get(index));
+                buckets.get(index).set(hash.get(index), current + 1);
+            });
+            numElements += 1;
+        }
+
+        public double estimate(final T item) {
+            final ArrayList<Integer> hash = minHash(item);
+            final double unnormalized = IntStream.range(0, NUM_HASHES)
+                .mapToDouble(index -> buckets.get(index).get(hash.get(index)))
+                .average()
+                .orElse(0);
+            return numElements == 0 ? 0 : unnormalized / (double) numElements;
+        }
+
+        private ArrayList<Integer> minHash(final T item) {
+            // https://en.wikipedia.org/wiki/MinHash
+            final ArrayList<Boolean> bitVector = converter.apply(item);
+            assert bitVector.size() == vectorSize;
+            final Function<Integer, Integer> firstTrue = whichPermutation ->
+                permutations
+                    .get(whichPermutation)
+                    .stream()
+                    .filter(bitVector::get)
+                    .findFirst()
+                    .orElse(bitVector.size() - 1);
+            return Iteration.filledArray(firstTrue, NUM_HASHES);
         }
     }
 }
