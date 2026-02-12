@@ -33,7 +33,11 @@ public final class Grid<T> {
     }
 
     public Grid(final Supplier<T> supplier, final int numRows, final int numCols) {
-        this(Iteration.filledArray(supplier, numRows * numCols), numRows, numCols);
+        this(
+            Iteration.filledArray(ignored -> supplier.get(), numRows * numCols),
+            numRows,
+            numCols
+        );
     }
 
     public Grid(final Grid<T> grid) {

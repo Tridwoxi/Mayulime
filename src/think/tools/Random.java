@@ -21,6 +21,15 @@ public final class Random {
 
     private Random() {}
 
+    public static ArrayList<Integer> permutation(final int size) {
+        final ArrayList<Integer> shuffled = new ArrayList<>(size);
+        for (int index = 0; index < size; index += 1) {
+            shuffled.add(index);
+        }
+        Collections.shuffle(shuffled);
+        return shuffled;
+    }
+
     public static <T> T uniformChoice(final ArrayList<T> items) {
         return items.get(getRandom().nextInt(items.size()));
     }

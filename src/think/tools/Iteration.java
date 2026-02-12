@@ -2,9 +2,10 @@ package think.tools;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -31,15 +32,16 @@ public final class Iteration {
     }
 
     /**
-        Create a list of the specified size filled with the results of the supplier.
+        Create a list of the specified size filled with the results of the converter
+        applied to each index in range [0, size).
      */
     public static <T> ArrayList<T> filledArray(
-        final Supplier<T> supplier,
+        final Function<Integer, T> converter,
         final int size
     ) {
         final ArrayList<T> result = new ArrayList<>(size);
         for (int index = 0; index < size; index += 1) {
-            result.add(supplier.get());
+            result.add(converter.apply(index));
         }
         return result;
     }
