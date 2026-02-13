@@ -6,7 +6,7 @@
 
 `examples/`: Pathery problems the project is known to support as MapCodes.
 
-`src/infra/io`: GUI, MapCode parsing, and logging.
+`src/infra/io`: GUI, output, and logging.
 
 `src/infra/main`: Program entry point. App is the normal entry point; Headless is a development-only alternative. Starts up the Manager. Connects backend to frontend.
 

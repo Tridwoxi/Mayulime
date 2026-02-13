@@ -1,8 +1,6 @@
 package infra.main;
 
 import infra.io.Logging;
-import infra.io.MapCodeParser;
-import infra.io.MapCodeParser.BadMapCodeException;
 import infra.tests.Tests;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +8,7 @@ import java.nio.file.Path;
 import think.Manager;
 import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
 
 /**
@@ -45,9 +44,7 @@ public final class Headless {
         final Problem problem;
         try {
             config = parseConfig(args);
-            problem = new MapCodeParser(
-                Files.readString(config.mapCodePath())
-            ).parse();
+            problem = new Problem(Files.readString(config.mapCodePath()));
         } catch (IllegalArgumentException ignored) {
             Logging.log(getClass(), "Failure: bad arguments.");
             return FAILURE;

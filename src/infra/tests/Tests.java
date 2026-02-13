@@ -1,8 +1,6 @@
 package infra.tests;
 
 import infra.io.Logging;
-import infra.io.MapCodeParser;
-import infra.io.MapCodeParser.BadMapCodeException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +11,7 @@ import think.ana.Snake;
 import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
 import think.tools.Random;
 import think.tools.Structures.Weighted;
@@ -145,7 +144,7 @@ public final class Tests {
 
     private static Problem getProblem() {
         try {
-            return new MapCodeParser(EXAMPLE).parse();
+            return new Problem(EXAMPLE);
         } catch (BadMapCodeException exception) {
             throw new AssertionError();
         }

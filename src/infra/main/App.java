@@ -2,8 +2,6 @@ package infra.main;
 
 import infra.io.Gui;
 import infra.io.Logging;
-import infra.io.MapCodeParser;
-import infra.io.MapCodeParser.BadMapCodeException;
 import infra.tests.Tests;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -11,6 +9,7 @@ import javafx.stage.Stage;
 import think.Manager;
 import think.repr.Grid;
 import think.repr.Problem;
+import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
 
 /**
@@ -71,7 +70,7 @@ public final class App extends Application {
         assert gui != null && manager != null;
         Problem problem = null;
         try {
-            problem = new MapCodeParser(mapCode).parse();
+            problem = new Problem(mapCode);
         } catch (BadMapCodeException exception) {
             Logging.log(getClass(), "Bad MapCode; problem rejected");
         }
