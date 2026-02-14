@@ -30,7 +30,6 @@ worth trying.
 ```pseudocode
 forever {
 	guess randomly;
-	evaluate;
 }
 ```
 
@@ -42,3 +41,20 @@ in a handful of minutes.
 Brute force is inefficient because there are many states and the majority are
 low-scoring: there are many ways to wholly block the snake or let it get to its
 destination with a few poorly-placed walls, and the rest can be set in a myriad of ways.
+
+To score highly, we need to exploit the state space's structure. In many cases, adding,
+removing, or moving a wall produces a small change in score; similar states produce
+similar scores. Call these similar states neighbors.
+
+From an initial state, exploring neighbors randomly is no better than guessing randomly
+because we incorporate no information about our surroundings. If we can get from an
+initial state to a high scoring state by exploring a minimum of $T$ steps, and each
+state has $I$ successors, we explore $I^T$ states. But if exploring only the best state
+with best-first search leads to a high scoring state, we explore only $I*T$ states.
+
+```pseudocode
+forever {
+    seed an initial configuration;
+    make it better until you can't anymore;
+}
+```
