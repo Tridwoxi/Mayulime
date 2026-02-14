@@ -16,14 +16,14 @@
 management. It creates the workers and recieves information with non-blocking callbacks.
 
 `src/think/ana`: Static tools. Objects belong here when they are project-specific, such
-as pathfinding and distance evaluation, but not quite strategy-specific.
+as pathfinding and distance evaluation, but not quite solver-specific.
 
 `src/think/repr`: Data model. The Problem contains metadata, such as the order of
 checkpoints and the player's wall supply, and the Pathery maze itself. This maze is
 represented as a rectangular Grid of Features. Feature is an enum of things that appear
 in the maze, such as a player wall. Classes defined here are instantiable.
 
-`src/think/stra`: A Strategy is a runnable worker that uses the other think packages to
+`src/think/solve`: A Solver is a runnable worker that uses the other think packages to
 come up with better solutions to notify the Manager about.
 
 `src/think/tools`: More static tools, such as Iteration and Structures, that are

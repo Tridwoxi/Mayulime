@@ -1,4 +1,4 @@
-package think.stra;
+package think.solve;
 
 import think.ana.Manipulate;
 import think.repr.Grid;
@@ -11,14 +11,11 @@ import think.tools.Random.RestrictedBinomialDistribution;
 
     Proof of concept. Not intended for use, except perhaps as a benchmark.
  */
-public final class StrategyGuessRandomly extends Strategy {
+public final class RandomSolver extends Solver {
 
     private final RestrictedBinomialDistribution numWalls;
 
-    public StrategyGuessRandomly(
-        final ProposedSolutionListener listener,
-        final Problem problem
-    ) {
+    public RandomSolver(final ProposedSolutionListener listener, final Problem problem) {
         super(listener, problem);
         this.numWalls = new RestrictedBinomialDistribution(
             (int) getProblem().getCachedInitial().where(Feature.EMPTY::equals).count(),

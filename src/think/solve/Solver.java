@@ -1,4 +1,4 @@
-package think.stra;
+package think.solve;
 
 import infra.io.Logging;
 import think.ana.Snake;
@@ -12,9 +12,9 @@ import think.repr.Problem.Feature;
     This abstract class provides a few useful getters and a framework to integrate its
     concrete subclasses with the rest of the system.
  */
-public abstract sealed class Strategy
+public abstract sealed class Solver
     implements Runnable
-    permits StrategyBaseline, StrategyGuessRandomly, StrategyHillClimb
+    permits BaselineSolver, RandomSolver, ClimbingSolver
 {
 
     @FunctionalInterface
@@ -31,7 +31,7 @@ public abstract sealed class Strategy
     private final Problem problem;
     private volatile boolean alive;
 
-    public Strategy(final ProposedSolutionListener listener, final Problem problem) {
+    public Solver(final ProposedSolutionListener listener, final Problem problem) {
         this.listener = listener;
         this.problem = problem;
         this.alive = true;
@@ -43,7 +43,7 @@ public abstract sealed class Strategy
     public final void run() {
         // When the user instructs us to work on a different problem, we should work on
         // it. But many strategies run forever, and there is no safe way to forcefully
-        // kill a thread or procedure. So, the strategy needs to check when to stop. We
+        // kill a thread or procedure. So, the solver needs to check when to stop. We
         // can do so with a lengthy chain of "if not alive, return", but throwing
         // exceptions is an easier way to do non-local returns.
         Logging.log(getClass(), "Started");

@@ -8,12 +8,12 @@ import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
-import think.stra.Strategy;
-import think.stra.StrategyBaseline;
-import think.stra.StrategyGuessRandomly;
+import think.solve.BaselineSolver;
+import think.solve.RandomSolver;
+import think.solve.Solver;
 
 /**
-    Strategy controller.
+    Solver controller.
 
     Spawns workers in background to not block callers.
  */
@@ -31,7 +31,7 @@ public final class Manager {
 
     private final ImprovedSolutionListener listener;
     private final ExecutorService executor;
-    private final ArrayList<Strategy> workers;
+    private final ArrayList<Solver> workers;
     private volatile Problem currentProblem;
     private volatile int topScore;
 
@@ -53,8 +53,8 @@ public final class Manager {
     public void solve(final Problem problem) {
         this.currentProblem = problem;
         cleanupPreviousSolve();
-        runStrategy(new StrategyBaseline(this::considerSolution, problem));
-        runStrategy(new StrategyGuessRandomly(this::considerSolution, problem));
+        runSolver(new BaselineSolver(this::considerSolution, problem));
+        runSolver(new RandomSolver(this::considerSolution, problem));
     }
 
     private void cleanupPreviousSolve() {
@@ -63,7 +63,7 @@ public final class Manager {
         topScore = 0;
     }
 
-    private void runStrategy(final Strategy worker) {
+    private void runSolver(final Solver worker) {
         workers.add(worker);
         // Unlike submit, execute will propagate exceptions into the FX Thread. Since
         // we use assertions to catch correctness issues, these exceptions must be seen.
@@ -91,7 +91,7 @@ public final class Manager {
         synchronized (this) {
             // This guard is tripped when the user uploads a new problem but old worker
             // threads haven't died and propose solutions to the old (stale) problem.
-            // If this guard is tripped excessively, it indicates a strategy we asked
+            // If this guard is tripped excessively, it indicates a solver we asked
             // to die refuses to do so.
             if (currentProblem != problem) {
                 Logging.log(getClass(), "Guard tripped.");

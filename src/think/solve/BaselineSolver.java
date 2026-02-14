@@ -1,13 +1,13 @@
-package think.stra;
+package think.solve;
 
 import think.repr.Problem;
 
 /**
     Hack used by {@link think.Manager} to send baseline results.
  */
-public final class StrategyBaseline extends Strategy {
+public final class BaselineSolver extends Solver {
 
-    public StrategyBaseline(
+    public BaselineSolver(
         final ProposedSolutionListener listener,
         final Problem problem
     ) {

@@ -1,4 +1,4 @@
-package think.stra;
+package think.solve;
 
 import think.repr.Grid;
 import think.repr.Problem;
@@ -7,9 +7,9 @@ import think.repr.Problem.Feature;
 /**
     Random restart hill climbing.
  */
-public final class StrategyHillClimb extends Strategy {
+public final class ClimbingSolver extends Solver {
 
-    public StrategyHillClimb(
+    public ClimbingSolver(
         final ProposedSolutionListener listener,
         final Problem problem
     ) {
