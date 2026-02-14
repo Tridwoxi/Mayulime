@@ -1,9 +1,12 @@
 package think.solve;
 
-import think.ana.Manipulate;
+import java.util.ArrayList;
+import think.repr.Cell;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
+import think.tools.Iteration;
+import think.tools.Random;
 import think.tools.Random.RestrictedBinomialDistribution;
 
 /**
@@ -13,12 +16,16 @@ import think.tools.Random.RestrictedBinomialDistribution;
  */
 public final class RandomSolver extends Solver {
 
+    private final ArrayList<Cell> emptyCells;
     private final RestrictedBinomialDistribution numWalls;
 
     public RandomSolver(final ProposedSolutionListener listener, final Problem problem) {
         super(listener, problem);
+        this.emptyCells = Iteration.materialize(
+            getProblem().getCachedInitial().where(Feature.EMPTY::equals)
+        );
         this.numWalls = new RestrictedBinomialDistribution(
-            (int) getProblem().getCachedInitial().where(Feature.EMPTY::equals).count(),
+            emptyCells.size(),
             getProblem().getPlayerWallSupply()
         );
     }
@@ -27,9 +34,15 @@ public final class RandomSolver extends Solver {
     protected void solve() throws KilledException {
         while (true) {
             checkAlive();
-            final Grid<Feature> solution = getProblem().getAnotherInitial();
-            Manipulate.splatter(solution, numWalls.sample());
-            proposeSolution(solution);
+            proposeSolution(createRandomSolution());
         }
+    }
+
+    private Grid<Feature> createRandomSolution() {
+        final Grid<Feature> candidateSolution = getProblem().getAnotherInitial();
+        Random.uniformStream(emptyCells)
+            .limit(numWalls.sample())
+            .forEachOrdered(cell -> candidateSolution.set(cell, Feature.PLAYER_WALL));
+        return candidateSolution;
     }
 }
