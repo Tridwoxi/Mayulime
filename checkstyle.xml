@@ -62,7 +62,6 @@
         <module name="IllegalTokenText" />
         <module name="ImportOrder" />
         <module name="LambdaParameterName" />
-        <module name="LeftCurly" />
         <module name="LocalFinalVariableName" />
         <module name="LocalVariableName" />
         <module name="MatchXpath" />
@@ -126,6 +125,7 @@
 
         == Formatting ==
         <module name="AnnotationOnSameLine" />
+        <module name="LeftCurly" />
         <module name="LineLength" />
         <module name="UnnecessaryParentheses" />
         <module name="EmptyLineSeparator" />

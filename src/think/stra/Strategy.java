@@ -12,7 +12,10 @@ import think.repr.Problem.Feature;
     This abstract class provides a few useful getters and a framework to integrate its
     concrete subclasses with the rest of the system.
  */
-public abstract class Strategy implements Runnable {
+public abstract sealed class Strategy
+    implements Runnable
+    permits StrategyBaseline, StrategyGuessRandomly, StrategyHillClimb
+{
 
     @FunctionalInterface
     public interface ProposedSolutionListener {
