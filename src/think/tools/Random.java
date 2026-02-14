@@ -21,6 +21,10 @@ public final class Random {
 
     private Random() {}
 
+    public static int integer(final int lowerInclusive, final int upperExclusive) {
+        return getRandom().nextInt(lowerInclusive, upperExclusive);
+    }
+
     public static ArrayList<Integer> permutation(final int size) {
         final ArrayList<Integer> shuffled = new ArrayList<>(size);
         for (int index = 0; index < size; index += 1) {

@@ -39,7 +39,6 @@
         <module name="DefaultComesLast" />
         <module name="DescendantToken" />
         <module name="DesignForExtension" />
-        <module name="EmptyBlock" />
         <module name="EmptyCatchBlock" />
         <module name="EmptyForInitializerPad" />
         <module name="EmptyForIteratorPad" />
@@ -136,6 +135,7 @@
         <module name="AbstractClassName" />
         <module name="AvoidInlineConditionals" />
         <module name="ClassMemberImpliedModifier" />
+        <module name="EmptyBlock" />
         <module name="HiddenField" />
         <module name="IllegalToken" />
         <module name="IllegalType" />
