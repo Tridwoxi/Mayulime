@@ -13,6 +13,8 @@ public record Cell(int row, int col) {
         Get neighbors of this cell on the given grid in up, right, down, left order.
      */
     public ArrayList<Cell> getNeighborsURDL(final Grid<?> grid) {
+        // PERF: VisualVM says this method is using 10% of total compute with
+        // assertions disabled. Cache (make neighbors a property of a grid) or inline.
         assert grid.inBounds(this);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
         if (row - 1 >= 0) {

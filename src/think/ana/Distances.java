@@ -30,10 +30,10 @@ public final class Distances {
         // because it is invariant under addition of distance grids with connected
         // sources. If the sources are not connected, it may not hold.
 
-        // PERF: Unbox primitives, use raw indexes instead of Cells, avoid modulo and
-        // division, inline and unroll neighbor loop, reuse structures where possible.
+        // PERF: Unbox primitives, use raw indexes instead of Cells, inline and unroll
+        // neighbor loop, reuse structures where possible.
 
-        assert Inspect.isOpen(solution.get(source)) && solution.inBounds(source);
+        assert Snake.isOpen(solution.get(source)) && solution.inBounds(source);
         final int numRows = solution.getNumRows();
         final int numCols = solution.getNumCols();
         final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
@@ -45,8 +45,7 @@ public final class Distances {
             final Cell current = frontier.removeFirst();
             for (final Cell neighbor : current.getNeighbors(solution)) {
                 if (
-                    Inspect.isOpen(solution.get(neighbor)) &&
-                    distances.get(neighbor) <= -1
+                    Snake.isOpen(solution.get(neighbor)) && distances.get(neighbor) <= -1
                 ) {
                     distances.set(neighbor, distances.get(current) + 1);
                     frontier.add(neighbor);

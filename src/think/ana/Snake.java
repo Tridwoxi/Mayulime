@@ -84,8 +84,8 @@ public final class Snake {
         final HashMap<Cell, Cell> teleportMap
     ) {
         assert !start.equals(end);
-        assert Inspect.isOpen(solution.get(start)) && solution.inBounds(start);
-        assert Inspect.isOpen(solution.get(end)) && solution.inBounds(end);
+        assert isOpen(solution.get(start)) && solution.inBounds(start);
+        assert isOpen(solution.get(end)) && solution.inBounds(end);
         assert activeTeleports.stream().allMatch(teleportMap::containsKey);
 
         final Grid<Integer> distanceFromEnd = Distances.distanceFrom(solution, end);
@@ -121,6 +121,23 @@ public final class Snake {
         // This assertion is impossible to trip because the snake must consume a
         // teleport or die each step, and there are only maxAttempts teleports.
         throw new AssertionError();
+    }
+
+    /**
+        A cell is open iff it does not contain a system wall or player wall. A cell is
+        empty iff it is open and not a checkpoint or teleport. Snakes may only step on
+        open cells. Player walls may only be placed on empty cells. The set of open
+        cells is an improper superset of the set of empty cells.
+     */
+    static boolean isOpen(final Feature feature) {
+        return switch (feature) {
+            case EMPTY -> true;
+            case CHECKPOINT -> true;
+            case SYSTEM_WALL -> false;
+            case PLAYER_WALL -> false;
+            case TELEPORT_IN -> true;
+            case TELEPORT_OUT -> true;
+        };
     }
 
     private static ArrayList<Cell> trimTo(final ArrayList<Cell> path, final Cell end) {
