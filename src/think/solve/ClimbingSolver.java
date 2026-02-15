@@ -25,18 +25,21 @@ public final class ClimbingSolver extends Solver {
         }
     }
 
-    private Grid<Feature> hillClimb() {
+    private Grid<Feature> hillClimb() throws KilledException {
         final Grid<Feature> candidateSolution = getProblem().getAnotherInitial();
         final AtomicInteger remainingSupply = new AtomicInteger(
             getProblem().getPlayerWallSupply()
         );
+        // The methods in this loop operate by side effects and return if they were
+        // successful. This loop must terminate because both placeAdditionalWalls and
+        // relocateExistingWalls improve the score and there is an upper bound on
+        // score. reclaimUselessWalls does not improve the score, but is idempotent.
         while (
             placeAdditionalWalls(candidateSolution, remainingSupply) ||
             relocateExistingWalls(candidateSolution, remainingSupply) ||
             reclaimUselessWalls(candidateSolution, remainingSupply)
         ) {
-            // Do nothing: the above methods operate by side effects. This loop must
-            // terminate because... TODO
+            checkAlive();
         }
         return candidateSolution;
     }
