@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import think.repr.Grid.Cell;
 import think.repr.MapCodeParser.ProblemDTO;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;

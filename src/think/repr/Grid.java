@@ -11,10 +11,30 @@ import think.tools.Iteration;
 import think.tools.Structures.Pair;
 
 /**
-    Rectangular two-dimensional grid. No minimum size. Grids store items of type "T",
-    which have a "Cell" as their location.
+    Rectangular two-dimensional grid. Grids store items of type "T", which are indexed
+    by "Cell"s.
  */
 public final class Grid<T> {
+
+    /**
+        Conceptually, a cell is used to index like "item = grid[cell.row][cell.col]".
+        Cells are not defined outside of a grid.
+     */
+    public record Cell(int row, int col) {
+        public static final Cell OUT_OF_BOUNDS = new Cell(-1, -1);
+
+        public int manhattanDistanceTo(final Cell other) {
+            return Math.abs(row - other.row) + Math.abs(col - other.col);
+        }
+
+        /**
+            Two cells are neighbors iff they are adjacent horizontally or vertically
+            (diagonal does not count). Cells are not neighbors of themselves.
+         */
+        public boolean isNeighbor(final Cell other) {
+            return manhattanDistanceTo(other) == 1;
+        }
+    }
 
     // PERF: Use primitives, like int[]. Compare IntStream versus Stream<Integer>.
     private final ArrayList<T> items;
@@ -100,5 +120,36 @@ public final class Grid<T> {
             results.add(combiner.apply(first.items.get(index), second.items.get(index)));
         }
         return new Grid<>(results, first.getNumRows(), first.getNumCols());
+    }
+
+    /**
+        Get the neighbors of the given cell on this grid in unspecified order.
+     */
+    public ArrayList<Cell> getNeighbors(final Cell cell) {
+        return getNeighborsURDL(cell);
+    }
+
+    /**
+        Get neighbors of the given cell on this grid in up, right, down, left order.
+     */
+    public ArrayList<Cell> getNeighborsURDL(final Cell cell) {
+        // PERF: VisualVM says this method is using 10% of total compute with
+        // assertions disabled on Complex under RandomSolver.
+        assert inBounds(cell);
+        final ArrayList<Cell> neighbors = new ArrayList<>(4);
+        if (cell.row - 1 >= 0) {
+            neighbors.add(new Cell(cell.row - 1, cell.col)); // Up.
+        }
+        if (cell.col + 1 < getNumCols()) {
+            neighbors.add(new Cell(cell.row, cell.col + 1)); // Right.
+        }
+        if (cell.row + 1 < getNumRows()) {
+            neighbors.add(new Cell(cell.row + 1, cell.col)); // Down.
+        }
+        if (cell.col - 1 >= 0) {
+            neighbors.add(new Cell(cell.row, cell.col - 1)); // Left.
+        }
+        assert neighbors.stream().allMatch(cell::isNeighbor);
+        return neighbors;
     }
 }

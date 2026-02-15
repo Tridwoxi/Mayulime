@@ -1,8 +1,8 @@
 package think.solve;
 
 import java.util.ArrayList;
-import think.repr.Cell;
 import think.repr.Grid;
+import think.repr.Grid.Cell;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
 import think.tools.Iteration;

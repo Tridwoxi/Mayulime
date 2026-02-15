@@ -4,8 +4,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-import think.repr.Cell;
 import think.repr.Grid;
+import think.repr.Grid.Cell;
 import think.repr.Problem.Feature;
 import think.tools.Structures.Pair;
 
@@ -43,7 +43,7 @@ public final class Distances {
         distances.set(source, 0);
         while (!frontier.isEmpty()) {
             final Cell current = frontier.removeFirst();
-            for (final Cell neighbor : current.getNeighbors(solution)) {
+            for (final Cell neighbor : solution.getNeighbors(current)) {
                 if (
                     Snake.isOpen(solution.get(neighbor)) && distances.get(neighbor) <= -1
                 ) {
@@ -89,7 +89,7 @@ public final class Distances {
         final ArrayList<Cell> path = new ArrayList<>(length);
         Cell current = reachableStart;
         for (int step = length; step > 0; step -= 1) {
-            for (final Cell neighbor : current.getNeighborsURDL(distanceFromEnd)) {
+            for (final Cell neighbor : distanceFromEnd.getNeighborsURDL(current)) {
                 final int expected = step - 1;
                 if (distanceFromEnd.get(neighbor) == expected) {
                     path.add(neighbor);
@@ -108,8 +108,8 @@ public final class Distances {
             distances.get(neighbor) <= -1 ||
             Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
         final Predicate<Cell> acrossCells = cell ->
-            cell
-                .getNeighbors(distances)
+            distances
+                .getNeighbors(cell)
                 .stream()
                 .allMatch(neighbor -> alongEdges.apply(cell, neighbor));
         return distances.stream().map(Pair::second).allMatch(acrossCells);
