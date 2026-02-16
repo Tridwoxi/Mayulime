@@ -3,6 +3,7 @@ package think.repr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -108,6 +109,14 @@ public final class Grid<T> {
             .map(Pair::second);
     }
 
+    public static <F, R> Grid<R> map(final Grid<F> grid, final Function<F, R> mapper) {
+        final ArrayList<R> results = new ArrayList<>(grid.items.size());
+        for (int index = 0; index < grid.items.size(); index += 1) {
+            results.add(mapper.apply(grid.items.get(index)));
+        }
+        return new Grid<>(results, grid.getNumRows(), grid.getNumCols());
+    }
+
     public static <F, S, R> Grid<R> combine(
         final Grid<F> first,
         final Grid<S> second,
@@ -120,6 +129,16 @@ public final class Grid<T> {
             results.add(combiner.apply(first.items.get(index), second.items.get(index)));
         }
         return new Grid<>(results, first.getNumRows(), first.getNumCols());
+    }
+
+    public static Grid<Cell> ofCells(final int numRows, final int numCols) {
+        final ArrayList<Cell> cells = new ArrayList<>(numRows * numCols);
+        for (int row = 0; row < numRows; row += 1) {
+            for (int col = 0; col < numCols; col += 1) {
+                cells.add(new Cell(row, col));
+            }
+        }
+        return new Grid<>(cells, numRows, numCols);
     }
 
     /**
