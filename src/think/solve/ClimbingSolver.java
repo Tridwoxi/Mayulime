@@ -7,6 +7,23 @@ import think.repr.Problem.Feature;
 
 /**
     Random restart hill climbing.
+
+    Naive hill climbing is likely to be much faster than random guessing when the state
+    space looks like a hill (there are more low-scoring states than high-scoring ones)
+    and is climbable (the neighbors of a state are sometimes similarly-scoring). I think
+    that's what our state space looks like because there are many ways to ruin
+    the snake's path, but only a few that carefully assign walls to craft its path.
+
+    Hill climbing suffers from inefficiency. The state space is vast, and cannot be
+    explored entirely except on Simples (even that takes a few minutes). We can apply
+    some clever graph algorithms and handcrafted heuristics to find improved neighbors
+    faster, but this is mere cope. Further, we suffer from local optima (it's called
+    "hill climbing", not "hill magically teleport", after all). At this point, the
+    classic trick is to randomly restart. That's what we do here.
+
+    A better approach might use simulated annealing, multi-arm bandit / MCTS, genetic
+    algorithms, or K-best first search on so getting stuck at a dead end does not lose
+    partial progress.
  */
 public final class ClimbingSolver extends Solver {
 
@@ -48,6 +65,9 @@ public final class ClimbingSolver extends Solver {
         final Grid<Feature> candidateSolution,
         final AtomicInteger remainingSupply
     ) {
+        if (remainingSupply.get() == 0) {
+            return false;
+        }
         return false;
     }
 
