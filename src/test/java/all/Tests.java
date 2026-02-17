@@ -6,8 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import think.ana.Distances;
 import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Grid.Cell;
@@ -15,34 +17,81 @@ import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
 import think.tools.Random;
+import think.tools.Structures.Pair;
 import think.tools.Structures.Weighted;
 
 /**
     Testing of the system is done with the unit tests below.
 
-    Currently, the system uses a mix of tests and assertions. I plan to migrate
-    assertions into unit tests.
+    We put all the tests in one file because the project is small (projected to be no
+    more than 5k loc at completion) and at such scale it is cuter to track and control
+    everything in one place.
  */
 public final class Tests {
 
-    private static final String EXAMPLE = """
-        6.4.13.Example...:7,c2.,r1.,u2.,t1.,r1.,u1.,t2.,r1.3,s1.1,r1.,c1.1,f1.
+    private static final String PROBLEM_A = """
+        6.4.13.ProblemA...:7,c2.,r1.,u2.,t1.,r1.,u1.,t2.,r1.3,s1.1,r1.,c1.1,f1.
+        """;
+    private static final String PROBLEM_B = """
+        7.5.3.ProblemB...:,u5.6,s1.4,t1.,f1.7,r1.2,t5.3,u1.,r1.3,c2.,c1.
         """;
 
     // == think.ana ====================================================================
 
+    // == Distances ==
+
     @Test
-    public void snakeEvaluation() {
-        final Problem problem = getProblem();
-        Assertions.assertEquals(30, Snake.evaluate(problem, problem.getCachedInitial()));
-        final Grid<Feature> solution = problem.getAnotherInitial();
-        solution.set(new Cell(0, 3), Feature.PLAYER_WALL);
-        Assertions.assertEquals(0, Snake.evaluate(problem, solution));
+    public void evaluateDistances() {
+        final Predicate<Grid<Integer>> isConsistent = distances -> {
+            final BiFunction<Cell, Cell, Boolean> alongEdges = (cell, neighbor) ->
+                distances.get(cell) <= -1 ||
+                distances.get(neighbor) <= -1 ||
+                Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
+            final Predicate<Cell> acrossCells = cell ->
+                distances
+                    .getNeighbors(cell)
+                    .stream()
+                    .allMatch(neighbor -> alongEdges.apply(cell, neighbor));
+            return distances.stream().map(Pair::second).allMatch(acrossCells);
+        };
+
+        final Problem problemB = getProblem(PROBLEM_B);
+        final Grid<Integer> distances = Distances.distanceFrom(
+            problemB.getCachedInitial(),
+            new Cell(2, 3)
+        );
+        Assertions.assertEquals(3, distances.get(new Cell(1, 1)));
+        Assertions.assertTrue(distances.get(new Cell(3, 0)) < 0);
+        Assertions.assertTrue(distances.get(new Cell(4, 0)) < 0);
+        Assertions.assertTrue(isConsistent.test(distances));
+    }
+
+    // == Snake ==
+
+    @Test
+    public void evaluateScore() {
+        final Problem problemA = getProblem(PROBLEM_A);
+        final int evalInitialA = Snake.evaluate(problemA, problemA.getCachedInitial());
+        Assertions.assertEquals(evalInitialA, 30);
+        final Grid<Feature> solutionA = problemA.getAnotherInitial();
+        solutionA.set(new Cell(0, 3), Feature.PLAYER_WALL);
+        final int evalModifiedA = Snake.evaluate(problemA, solutionA);
+        Assertions.assertEquals(0, evalModifiedA);
+
+        final Problem problemB = getProblem(PROBLEM_B);
+        final int evalInitialB = Snake.evaluate(problemB, problemB.getCachedInitial());
+        Assertions.assertEquals(0, evalInitialB);
+        final Grid<Feature> solutionB = problemB.getAnotherInitial();
+        solutionB.set(new Cell(1, 4), Feature.PLAYER_WALL);
+        solutionB.set(new Cell(2, 5), Feature.PLAYER_WALL);
+        solutionB.set(new Cell(3, 6), Feature.PLAYER_WALL);
+        final int evalModifiedB = Snake.evaluate(problemB, solutionB);
+        Assertions.assertEquals(20, evalModifiedB);
     }
 
     @Test
-    public void snakeTiebreaking() {
-        final BiFunction<Cell, Cell, Cell> first2x2 = (start, end) -> {
+    public void preferenceOrder() {
+        final BiFunction<Cell, Cell, Cell> getFirstStep = (start, end) -> {
             final Optional<ArrayList<Cell>> steps = Snake.travel(
                 new Grid<>(Feature.EMPTY, 2, 2),
                 start,
@@ -56,23 +105,25 @@ public final class Tests {
         final Cell bottomRight = new Cell(1, 1);
         final Cell topRight = new Cell(0, 1);
         final Cell bottomLeft = new Cell(1, 0);
-        Assertions.assertEquals(topRight, first2x2.apply(topLeft, bottomRight));
-        Assertions.assertEquals(topLeft, first2x2.apply(bottomLeft, topRight));
-        Assertions.assertEquals(topRight, first2x2.apply(bottomRight, topLeft));
-        Assertions.assertEquals(bottomRight, first2x2.apply(topRight, bottomLeft));
+        Assertions.assertEquals(topRight, getFirstStep.apply(topLeft, bottomRight));
+        Assertions.assertEquals(topLeft, getFirstStep.apply(bottomLeft, topRight));
+        Assertions.assertEquals(topRight, getFirstStep.apply(bottomRight, topLeft));
+        Assertions.assertEquals(bottomRight, getFirstStep.apply(topRight, bottomLeft));
     }
 
     // == think.repr ===================================================================
 
+    // == Problem ==
+
     @Test
-    public void parseProblem() {
-        final Problem problem = getProblem();
+    public void problemParsing() {
+        final Problem problem = getProblem(PROBLEM_A);
 
         final Grid<Feature> initial = problem.getCachedInitial();
         Assertions.assertEquals(4, initial.getNumRows());
         Assertions.assertEquals(6, initial.getNumCols());
         Assertions.assertEquals(12, problem.getPlayerWallSupply());
-        Assertions.assertEquals("Example", problem.getName());
+        Assertions.assertEquals("ProblemA", problem.getName());
 
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();
         Assertions.assertEquals(4, checkpoints.size());
@@ -89,9 +140,8 @@ public final class Tests {
 
     @Test
     public void solutionValidation() {
-        final Problem problem = getProblem();
+        final Problem problem = getProblem(PROBLEM_A);
         final Grid<Feature> solution = problem.getAnotherInitial();
-
         Assertions.assertTrue(problem.isValid(solution));
 
         solution.set(new Cell(0, 0), Feature.SYSTEM_WALL);
@@ -104,10 +154,12 @@ public final class Tests {
 
         solution.set(new Cell(0, 2), Feature.PLAYER_WALL);
         Assertions.assertTrue(problem.isValid(solution));
-        solution.set(new Cell(3, 3), Feature.EMPTY);
+        solution.set(new Cell(0, 2), Feature.EMPTY);
     }
 
     // == think.tools ==================================================================
+
+    // == Random ==
 
     @Test
     public void weightedSelection() {
@@ -128,9 +180,9 @@ public final class Tests {
 
     // == Helpers. =====================================================================
 
-    private static Problem getProblem() {
+    private static Problem getProblem(final String mapCode) {
         try {
-            return new Problem(EXAMPLE);
+            return new Problem(mapCode);
         } catch (BadMapCodeException exception) {
             Assertions.fail(exception);
             throw new AssertionError();
