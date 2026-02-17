@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import org.junit.jupiter.api.Test;
 import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Grid.Cell;
@@ -21,8 +22,6 @@ import think.tools.Structures.Weighted;
     Assertions are used for both conditions and invariants. Tests are used for
     end-to-end behavior and running the assertions. Do not write tests that are already
     covered by assertions.
-
-    We keep all tests in this single file because there aren't many things to test.
  */
 public final class Tests {
 
@@ -30,22 +29,17 @@ public final class Tests {
         6.4.13.Example...:7,c2.,r1.,u2.,t1.,r1.,u1.,t2.,r1.3,s1.1,r1.,c1.1,f1.
         """;
 
-    private Tests() {}
-
     /**
         Death by failed assertion if any test fails.
-
-        This method always returns true. The preferred way to run this method is to
-        assert it upon system launch.
      */
-    public static boolean runAllTests() {
+    @Test
+    public void runAllTests() {
         Logging.log(Tests.class, "Running unit tests");
         problemParsing();
         snakePathfinding();
         snakeTiebreaking();
         solutionValidation();
         weightedSelection();
-        return true;
     }
 
     // == think.ana ====================================================================

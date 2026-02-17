@@ -7,40 +7,14 @@ plugins {
     id 'com.github.spotbugs' version '6.4.8'
 }
 
-java {
-    toolchain { languageVersion = JavaLanguageVersion.of(21) }
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-
-spotbugs {
-    excludeFilter = file("spotbugs-exclude.xml")
-}
-
-checkstyle {
-    toolVersion = "13.0.0"
-    configFile = file("checkstyle.xml")
-}
-
 repositories {
     mavenCentral()
 }
 
-tasks.named('run') {
-    dependsOn 'checkstyleMain', 'spotbugsMain'
-    jvmArgs '-ea'
-}
-
-tasks.named('test') {
-    failOnNoDiscoveredTests = false
-}
-
-tasks.register('runHeadless', JavaExec) {
-    group = 'application'
-    dependsOn 'checkstyleMain', 'spotbugsMain'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'infra.main.Headless'
-    jvmArgs '-ea'
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 application {
@@ -50,4 +24,36 @@ application {
 javafx {
     version = '23'
     modules = [ 'javafx.controls', 'javafx.media' ]
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+    toolVersion = "13.0.0"
+    configFile = file("checkstyle.xml")
+}
+
+spotbugs {
+    excludeFilter = file("spotbugs-exclude.xml")
+}
+
+tasks.named('run') {
+    dependsOn 'checkstyleMain', 'spotbugsMain'
+    jvmArgs '-ea'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    jvmArgs '-ea'
+}
+
+tasks.register('runHeadless', JavaExec) {
+    group = 'application'
+    dependsOn 'checkstyleMain', 'spotbugsMain'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'infra.main.Headless'
+    jvmArgs '-ea'
 }
