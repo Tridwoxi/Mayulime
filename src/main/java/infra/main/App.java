@@ -2,7 +2,6 @@ package infra.main;
 
 import infra.io.Gui;
 import infra.io.Logging;
-import infra.tests.Tests;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -37,7 +36,6 @@ public final class App extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        assert Tests.runAllTests();
         Logging.log(getClass(), "Launch point: Application");
 
         this.manager = new Manager(this::recieveSolution);

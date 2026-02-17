@@ -1,7 +1,6 @@
 package infra.main;
 
 import infra.io.Logging;
-import infra.tests.Tests;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +36,6 @@ public final class Headless {
     }
 
     private int run(final String[] args) {
-        assert Tests.runAllTests();
         Logging.log(Headless.class, "Launch point: Headless");
 
         final Config config;

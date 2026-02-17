@@ -1,4 +1,4 @@
-package infra.tests;
+package all;
 
 import infra.io.Logging;
 import java.util.ArrayList;
@@ -22,9 +22,7 @@ import think.tools.Structures.Weighted;
     end-to-end behavior and running the assertions. Do not write tests that are already
     covered by assertions.
 
-    We use a test file in the src/ directory because there aren't many things to test,
-    and because I can't get my language server and JUnit to be friends. Regrettably,
-    this couples the test running to the system running.
+    We keep all tests in this single file because there aren't many things to test.
  */
 public final class Tests {
 
