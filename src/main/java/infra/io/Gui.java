@@ -135,10 +135,7 @@ public final class Gui extends Scene {
             1.0,
             getWidth() - insets.getLeft() - insets.getRight()
         );
-        double availableHeight = Math.max(
-            1.0,
-            getHeight() - insets.getTop() - insets.getBottom()
-        );
+        double availableHeight = Math.max(1.0, getHeight() - insets.getTop() - insets.getBottom());
         if (gameDisplay.isVisible()) {
             final double statsHeight = Math.max(
                 statsDisplay.getLayoutBounds().getHeight(),
@@ -152,18 +149,15 @@ public final class Gui extends Scene {
         final double sizeByWidth = availableWidth / numCols;
         final double sizeByHeight = availableHeight / numRows;
         final double rawSize = Math.min(sizeByWidth, sizeByHeight);
-        currentCellSizePx = Math.max(
-            MIN_CELL_SIZE_PX,
-            Math.min(MAX_CELL_SIZE_PX, rawSize)
-        );
+        currentCellSizePx = Math.max(MIN_CELL_SIZE_PX, Math.min(MAX_CELL_SIZE_PX, rawSize));
     }
 }
 
 final class GameDisplay extends Group {
 
-    // These labels can be anything, but using whatever code the Pathery MapCode uses
-    // is probably most understandable. To avoid clutter, only these cell types are
-    // labeled. Like, labeling system walls would just be noise.
+    // These labels can be anything, but using whatever code the Pathery MapCode uses is probably
+    // most understandable. To avoid clutter, only these cell types are labeled. Like, labeling
+    // system walls would just be noise.
     private static final String TELEPORT_IN = "t";
     private static final String TELEPORT_OUT = "u";
     private static final String CHECKPOINT = "c";
@@ -224,9 +218,9 @@ final class GameDisplay extends Group {
     }
 
     private static Grid<String> makeLabels(final Problem problem) {
-        // The backend was foolish enough to forget the order of teleports, so we
-        // cannot assign teleports their orignal labels. Fortunately, teleports are
-        // unordered, so we'll just assign arbritrary associations.
+        // The backend was foolish enough to forget the order of teleports, so we cannot assign
+        // teleports their orignal labels. Fortunately, teleports are unordered, so we'll just
+        // assign arbritrary associations.
         final int[] association = { 0 }; // Effectively final hack.
         final Grid<String> labels = new Grid<String>(
             "",

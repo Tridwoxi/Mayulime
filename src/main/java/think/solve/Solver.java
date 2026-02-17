@@ -9,8 +9,8 @@ import think.repr.Problem.Feature;
 /**
     Think of solutions to Pathery problems.
 
-    This abstract class provides a few useful getters and a framework to integrate its
-    concrete subclasses with the rest of the system.
+    This abstract class provides a few useful getters and a framework to integrate its concrete
+    subclasses with the rest of the system.
  */
 public abstract sealed class Solver
     implements Runnable
@@ -19,12 +19,7 @@ public abstract sealed class Solver
 
     @FunctionalInterface
     public interface ProposedSolutionListener {
-        void listen(
-            String submitter,
-            Problem problem,
-            Grid<Feature> solution,
-            int score
-        );
+        void listen(String submitter, Problem problem, Grid<Feature> solution, int score);
     }
 
     private final ProposedSolutionListener listener;
@@ -37,15 +32,15 @@ public abstract sealed class Solver
         this.alive = true;
     }
 
-    // == Public API. ==================================================================
+    // == Public API. =============================================================================
 
     @Override
     public final void run() {
-        // When the user instructs us to work on a different problem, we should work on
-        // it. But many strategies run forever, and there is no safe way to forcefully
-        // kill a thread or procedure. So, the solver needs to check when to stop. We
-        // can do so with a lengthy chain of "if not alive, return", but throwing
-        // exceptions is an easier way to do non-local returns.
+        // When the user instructs us to work on a different problem, we should work on it. But
+        // many strategies run forever, and there is no safe way to forcefully kill a thread or
+        // procedure. So, the solver needs to check when to stop. We can do so with a lengthy
+        // chain of "if not alive, return", but throwing exceptions is an easier way to do
+        // non-local returns.
         Logging.log(getClass(), "Started");
         try {
             solve();
@@ -59,17 +54,16 @@ public abstract sealed class Solver
         this.alive = false;
     }
 
-    // == Subclass contract. ===========================================================
+    // == Subclass contract. ======================================================================
 
     /**
-        Concrete subclasses should do all non-trivial work in this method, as opposed
-        to the constructor. Implementations of this method are free to hang
-        indefintely, but it would be nice if this method calls {@link #checkAlive} at
-        least once every 500 miliseconds.
+        Concrete subclasses should do all non-trivial work in this method, as opposed to the
+        constructor. Implementations of this method are free to hang indefintely, but it would be
+        nice if this method calls {@link #checkAlive} at least once every 500 miliseconds.
      */
     protected abstract void solve() throws KilledException;
 
-    // == Protected API. ===============================================================
+    // == Protected API. ==========================================================================
 
     protected static final class KilledException extends Exception {}
 

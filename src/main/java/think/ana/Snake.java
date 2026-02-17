@@ -31,11 +31,10 @@ public final class Snake {
     /**
         Simulate the Pathery snake between all checkpoints with all teleports active.
 
-        If present, the resulting list contains every cell the snake gets to by taking
-        a step, in order of time. The start and teleport-outs are not automatically
-        included because the snake appearing at those location does not count as having
-        taken a step to get there. If a snake steps on a cell multiple times, the cell
-        is included multiple times.
+        If present, the resulting list contains every cell the snake gets to by taking a step, in
+        order of time. The start and teleport-outs are not automatically included because the
+        snake appearing at those location does not count as having taken a step to get there. If a
+        snake steps on a cell multiple times, the cell is included multiple times.
      */
     public static Optional<ArrayList<Cell>> travel(
         final Problem problem,
@@ -43,9 +42,7 @@ public final class Snake {
     ) {
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();
         final HashMap<Cell, Cell> teleportMap = problem.getTeleports();
-        final HashSet<Cell> activeTeleports = new HashSet<>(
-            problem.getTeleports().keySet()
-        );
+        final HashSet<Cell> activeTeleports = new HashSet<>(problem.getTeleports().keySet());
         final ArrayList<ArrayList<Cell>> paths = new ArrayList<>();
         for (final Pair<Cell, Cell> pair : Iteration.pairwise(checkpoints).toList()) {
             final Optional<ArrayList<Cell>> path = travel(
@@ -64,17 +61,15 @@ public final class Snake {
     }
 
     /**
-        Simulate the Pathery snake between two checkpoints with the given teleports
-        active.
+        Simulate the Pathery snake between two checkpoints with the given teleports active.
 
-        If travel is possible, activeTeleports will be modified in place to indicate
-        which teleports are no longer active. If travel is impossible, the state of
-        activeTeleports is unspecified. Teleportation is instant and does not add a
-        step.
+        If travel is possible, activeTeleports will be modified in place to indicate which
+        teleports are no longer active. If travel is impossible, the state of activeTeleports is
+        unspecified. Teleportation is instant and does not add a step.
 
-        It is possible for a route that was originally possible without teleports to
-        become impossible when teleports are added; such happens when the snake steps
-        on a teleport and gets trapped in a box.
+        It is possible for a route that was originally possible without teleports to become
+        impossible when teleports are added; such happens when the snake steps on a teleport and
+        gets trapped in a box.
      */
     public static Optional<ArrayList<Cell>> travel(
         final Grid<Feature> solution,
@@ -110,24 +105,21 @@ public final class Snake {
                 paths.add(path);
                 return Optional.of(flatten(paths));
             }
-            final ArrayList<Cell> trimmed = trimTo(
-                path,
-                stoppedAtTeleport.orElseThrow()
-            );
+            final ArrayList<Cell> trimmed = trimTo(path, stoppedAtTeleport.orElseThrow());
             paths.add(trimmed);
             activeTeleports.remove(stoppedAtTeleport.get());
             currentLocation = teleportMap.get(stoppedAtTeleport.get());
         }
-        // This assertion is impossible to trip because the snake must consume a
-        // teleport or die each step, and there are only maxAttempts teleports.
+        // This assertion is impossible to trip because the snake must consume a teleport or die
+        // each step, and there are only maxAttempts teleports.
         throw new AssertionError();
     }
 
     /**
-        A cell is open iff it does not contain a system wall or player wall. A cell is
-        empty iff it is open and not a checkpoint or teleport. Snakes may only step on
-        open cells. Player walls may only be placed on empty cells. The set of open
-        cells is an improper superset of the set of empty cells.
+        A cell is open iff it does not contain a system wall or player wall. A cell is empty iff
+        it is open and not a checkpoint or teleport. Snakes may only step on open cells. Player
+        walls may only be placed on empty cells. The set of open cells is an improper superset of
+        the set of empty cells.
      */
     static boolean isOpen(final Feature feature) {
         return switch (feature) {

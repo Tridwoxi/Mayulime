@@ -23,9 +23,8 @@ import think.tools.Structures.Weighted;
 /**
     Testing of the system is done with the unit tests below.
 
-    We put all the tests in one file because the project is small (projected to be no
-    more than 5k loc at completion) and at such scale it is cuter to track and control
-    everything in one place.
+    We put all the tests in one file because the project is small (projected to be no more than 5k
+    loc at completion) and at such scale it is cuter to track and control everything in one place.
  */
 public final class Tests {
 
@@ -36,7 +35,7 @@ public final class Tests {
         7.5.3.ProblemB...:,u5.6,s1.4,t1.,f1.7,r1.2,t5.3,u1.,r1.3,c2.,c1.
         """;
 
-    // == think.ana ====================================================================
+    // == think.ana ===============================================================================
 
     // == Distances ==
 
@@ -111,7 +110,7 @@ public final class Tests {
         Assertions.assertEquals(bottomRight, getFirstStep.apply(topRight, bottomLeft));
     }
 
-    // == think.repr ===================================================================
+    // == think.repr ==============================================================================
 
     // == Problem ==
 
@@ -157,7 +156,7 @@ public final class Tests {
         solution.set(new Cell(0, 2), Feature.EMPTY);
     }
 
-    // == think.tools ==================================================================
+    // == think.tools =============================================================================
 
     // == Random ==
 
@@ -171,14 +170,12 @@ public final class Tests {
         for (int attempt = 0; attempt < 10; attempt += 1) {
             Assertions.assertEquals(
                 "Heavy",
-                Random.weightedStream(new ArrayList<>(weighteds))
-                    .findFirst()
-                    .orElseThrow()
+                Random.weightedStream(new ArrayList<>(weighteds)).findFirst().orElseThrow()
             );
         }
     }
 
-    // == Helpers. =====================================================================
+    // == Helpers. ================================================================================
 
     private static Problem getProblem(final String mapCode) {
         try {

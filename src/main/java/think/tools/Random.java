@@ -11,11 +11,11 @@ import java.util.stream.Stream;
 import think.tools.Structures.Weighted;
 
 /**
-    Access randomization only through this class, think.tools.Random. Although nothing
-    bad will happen, it is a design error to use other randoms like java.util.Random.
+    Access randomization only through this class, think.tools.Random. It is a design error to use
+    other randoms like java.util.Random.
 
-    It is undefined behavior to mutate the backing structure while any method from this
-    class runs. Methods from this class will never mutate the backing structure.
+    It is undefined behavior to mutate the backing structure while any method from this class
+    runs. Methods from this class will never mutate the backing structure.
  */
 public final class Random {
 
@@ -118,8 +118,8 @@ public final class Random {
                 return 0;
             }
             final double total = cumulativeDistribution.getLast();
-            // Binary search returns "(-(insertion point) - 1)" if the value is not
-            // found. Since a double has many bits, it will never be found.
+            // Binary search returns "(-(insertion point) - 1)" if the value is not found. Since a
+            // double has many bits, it will never be found.
             final int index = -Collections.binarySearch(
                 cumulativeDistribution,
                 getRandom().nextDouble() * total
@@ -151,9 +151,8 @@ public final class Random {
             if (element == 0 || element == population) {
                 return Math.log(1.0);
             }
-            // A binomial coefficient n choose k is calculated n! / k! (n - k)!. Since
-            // Stirling's approximation works on factorials, it also works on binomial
-            // coefficients.
+            // A binomial coefficient n choose k is calculated n! / k! (n - k)!. Since Stirling's
+            // approximation works on factorials, it also works on binomial coefficients.
             // https://math.stackexchange.com/questions/64716/approximating-the-logarithm-of-the-binomial-coefficient
             return (
                 population * Math.log(population) -

@@ -21,12 +21,7 @@ public final class Manager {
 
     @FunctionalInterface
     public interface ImprovedSolutionListener {
-        void listen(
-            String submitter,
-            Problem problem,
-            Grid<Feature> solution,
-            int score
-        );
+        void listen(String submitter, Problem problem, Grid<Feature> solution, int score);
     }
 
     private final ImprovedSolutionListener listener;
@@ -37,9 +32,9 @@ public final class Manager {
 
     public Manager(final ImprovedSolutionListener listener) {
         this.listener = listener;
-        // "The shutdown sequence begins when all started non-daemon threads have
-        // terminated.". Workers that spin longer than we want shouldn't prevent Java
-        // from shutting down, so we'll make them into daemons.
+        // "The shutdown sequence begins when all started non-daemon threads have terminated.".
+        // Workers that spin longer than we want shouldn't prevent Java from shutting down, so
+        // we'll make them into daemons.
         this.executor = Executors.newCachedThreadPool(task -> {
             final Thread thread = new Thread(task);
             thread.setDaemon(true);
@@ -65,8 +60,8 @@ public final class Manager {
 
     private void runSolver(final Solver worker) {
         workers.add(worker);
-        // Unlike submit, execute will propagate exceptions into the FX Thread. Since
-        // we use assertions to catch correctness issues, these exceptions must be seen.
+        // Unlike submit, execute will propagate exceptions into the FX Thread. Since we use
+        // assertions to catch correctness issues, these exceptions must be seen.
         executor.execute(worker);
     }
 
@@ -77,22 +72,21 @@ public final class Manager {
         final int score
     ) {
         assert currentProblem != null;
-        // We also check if the score is better in the synchronized section, but as
-        // strategies might give this method lots of garbage, if we can early exit
-        // without competing for the lock it would be nice to.
+        // We also check if the score is better in the synchronized section, but as strategies
+        // might give this method lots of garbage, if we can early exit without competing for the
+        // lock it would be nice to.
         if (score <= topScore) {
             return;
         }
-        // Grids are mutable data structures, and strategies make no promises to not
-        // mutate the grid between the time they send it here and the long time later
-        // when the caller tries to read it.
+        // Grids are mutable data structures, and strategies make no promises to not mutate the
+        // grid between the time they send it here and the long time later when the caller tries
+        // to read it.
         final Grid<Feature> copy = new Grid<>(solution);
         assert score == Snake.evaluate(problem, copy);
         synchronized (this) {
-            // This guard is tripped when the user uploads a new problem but old worker
-            // threads haven't died and propose solutions to the old (stale) problem.
-            // If this guard is tripped excessively, it indicates a solver we asked
-            // to die refuses to do so.
+            // This guard is tripped when the user uploads a new problem but old worker threads
+            // haven't died and propose solutions to the old (stale) problem. If this guard is
+            // tripped excessively, it indicates a solver we asked to die refuses to do so.
             if (currentProblem != problem) {
                 Logging.log(getClass(), "Guard tripped.");
                 return;

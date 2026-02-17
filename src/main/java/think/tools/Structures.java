@@ -73,9 +73,7 @@ public final class Structures {
          */
         public void addAll(final MultiSet<T> other) {
             assert this != other;
-            other.counts.forEach((item, count) ->
-                this.counts.merge(item, count, Integer::sum)
-            );
+            other.counts.forEach((item, count) -> this.counts.merge(item, count, Integer::sum));
         }
     }
 
@@ -112,10 +110,7 @@ public final class Structures {
         private int numElements;
 
         // PERF: Use true bit vectors.
-        public DensityDB(
-            final int vectorSize,
-            final Function<T, ArrayList<Boolean>> converter
-        ) {
+        public DensityDB(final int vectorSize, final Function<T, ArrayList<Boolean>> converter) {
             this.vectorSize = vectorSize;
             this.permutations = Iteration.filledArray(
                 ignored -> Random.permutation(vectorSize),

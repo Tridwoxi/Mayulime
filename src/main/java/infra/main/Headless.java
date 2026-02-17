@@ -13,8 +13,8 @@ import think.repr.Problem.Feature;
 /**
     Development-only headless alternative program launch point.
 
-    Subclasses of javafx.application.Application, such as infra.main.App, have bad ideas
-    about program lifecycle. This class does the same thing as infra.main.App, except:
+    Subclasses of javafx.application.Application, such as infra.main.App, have bad ideas about
+    program lifecycle. This class does the same thing as infra.main.App, except:
 
     <ul>
         <li>It does not start the JavaFX runtime, so produces no GUI</li>
@@ -69,9 +69,9 @@ public final class Headless {
         final Grid<Feature> solution,
         final int score
     ) {
-        // Normally, we would display solutions, but we have no GUI. We also don't know
-        // how to turn a problem or solution back into a MapCode. As for logging, the
-        // rest of the system handles it. Hence, there's nothing to do here.
+        // Normally, we would display solutions, but we have no GUI. We also don't know how to
+        // turn a problem or solution back into a MapCode. As for logging, the rest of the system
+        // handles it. Hence, there's nothing to do here.
     }
 
     private Config parseConfig(final String[] args) throws IllegalArgumentException {

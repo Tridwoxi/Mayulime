@@ -50,7 +50,7 @@ public final class App extends Application {
         primaryStage.show();
     }
 
-    // == Connectors. ==================================================================
+    // == Connectors. =============================================================================
 
     private void recieveSolution(
         final String submitter,

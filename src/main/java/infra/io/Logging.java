@@ -16,18 +16,14 @@ public final class Logging {
         Print the message to stderr. It is a design error to print in any other manner.
 
         @param
-            getClass whatever the method "getClass(void)" returns at the call site, or
-            whatever the equivalent is in static contexts
+            getClass whatever the method "getClass(void)" returns at the call site, or whatever
+            the equivalent is in static contexts
         @param
             message the message to print
         @param
             args arguments to format the message
      */
-    public static void log(
-        final Class<?> getClass,
-        final String message,
-        final Object... args
-    ) {
+    public static void log(final Class<?> getClass, final String message, final Object... args) {
         if (ENABLED) {
             final String formatted = String.format(message, args);
             System.err.printf(LOCALE, "[%s]: %s%n", getClass.getName(), formatted);

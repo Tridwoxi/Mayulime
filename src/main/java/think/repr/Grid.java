@@ -12,14 +12,13 @@ import think.tools.Iteration;
 import think.tools.Structures.Pair;
 
 /**
-    Rectangular two-dimensional grid. Grids store items of type "T", which are indexed
-    by "Cell"s.
+    Rectangular two-dimensional grid. Grids store items of type "T", which are indexed by "Cell"s.
  */
 public final class Grid<T> {
 
     /**
-        Conceptually, a cell is used to index like "item = grid[cell.row][cell.col]".
-        Cells are not defined outside of a grid.
+        Conceptually, a cell is used to index like "item = grid[cell.row][cell.col]". Cells are
+        not defined outside of a grid.
      */
     public record Cell(int row, int col) {
         public static final Cell OUT_OF_BOUNDS = new Cell(-1, -1);
@@ -29,8 +28,8 @@ public final class Grid<T> {
         }
 
         /**
-            Two cells are neighbors iff they are adjacent horizontally or vertically
-            (diagonal does not count). Cells are not neighbors of themselves.
+            Two cells are neighbors iff they are adjacent horizontally or vertically (diagonal
+            does not count). Cells are not neighbors of themselves.
          */
         public boolean isNeighbor(final Cell other) {
             return manhattanDistanceTo(other) == 1;
@@ -54,11 +53,7 @@ public final class Grid<T> {
     }
 
     public Grid(final Supplier<T> supplier, final int numRows, final int numCols) {
-        this(
-            Iteration.filledArray(ignored -> supplier.get(), numRows * numCols),
-            numRows,
-            numCols
-        );
+        this(Iteration.filledArray(ignored -> supplier.get(), numRows * numCols), numRows, numCols);
     }
 
     public Grid(final Grid<T> grid) {
@@ -89,12 +84,7 @@ public final class Grid<T> {
     }
 
     public boolean inBounds(final Cell cell) {
-        return (
-            cell.row() >= 0 &&
-            cell.row() < numRows &&
-            cell.col() >= 0 &&
-            cell.col() < numCols
-        );
+        return (cell.row() >= 0 && cell.row() < numRows && cell.col() >= 0 && cell.col() < numCols);
     }
 
     public Stream<Pair<T, Cell>> stream() {
@@ -152,8 +142,8 @@ public final class Grid<T> {
         Get neighbors of the given cell on this grid in up, right, down, left order.
      */
     public ArrayList<Cell> getNeighborsURDL(final Cell cell) {
-        // PERF: VisualVM says this method is using 10% of total compute with
-        // assertions disabled on Complex under RandomSolver.
+        // PERF: VisualVM says this method is using 10% of total compute with assertions disabled
+        // on Complex under RandomSolver.
         assert inBounds(cell);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
         if (cell.row - 1 >= 0) {

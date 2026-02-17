@@ -7,10 +7,7 @@ import think.repr.Problem;
  */
 public final class BaselineSolver extends Solver {
 
-    public BaselineSolver(
-        final ProposedSolutionListener listener,
-        final Problem problem
-    ) {
+    public BaselineSolver(final ProposedSolutionListener listener, final Problem problem) {
         super(listener, problem);
     }
 
