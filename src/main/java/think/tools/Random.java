@@ -42,8 +42,9 @@ public final class Random {
         Stream items in a random order proportional to weight, without replacement.
      */
     public static <T> Stream<T> weightedStream(final ArrayList<Weighted<T>> weighteds) {
-        assert weighteds.stream().allMatch(weighted -> weighted.weight() > 0);
-
+        if (!weighteds.stream().allMatch(weighted -> weighted.weight() > 0)) {
+            throw new IllegalArgumentException();
+        }
         // https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Res
         // Modified with logarithm for numerical stability and to be lazy.
 
@@ -106,7 +107,9 @@ public final class Random {
         private final ArrayList<Double> cumulativeDistribution;
 
         public RestrictedBinomialDistribution(final int population, final int limit) {
-            assert population >= limit;
+            if (population < limit) {
+                throw new IllegalArgumentException();
+            }
             if (population > 100000) {
                 Logging.log(getClass(), "I did not have this in mind.");
             }

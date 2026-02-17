@@ -4,7 +4,6 @@ import infra.io.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import think.ana.Snake;
 import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
@@ -60,8 +59,8 @@ public final class Manager {
 
     private void runSolver(final Solver worker) {
         workers.add(worker);
-        // Unlike submit, execute will propagate exceptions into the FX Thread. Since we use
-        // assertions to catch correctness issues, these exceptions must be seen.
+        // Unlike submit, execute will propagate exceptions into the FX Thread. If the program
+        // explodes, we need to know so it can be fixed.
         executor.execute(worker);
     }
 
@@ -71,7 +70,9 @@ public final class Manager {
         final Grid<Feature> solution,
         final int score
     ) {
-        assert currentProblem != null;
+        if (currentProblem == null) {
+            throw new IllegalStateException();
+        }
         // We also check if the score is better in the synchronized section, but as strategies
         // might give this method lots of garbage, if we can early exit without competing for the
         // lock it would be nice to.
@@ -82,7 +83,6 @@ public final class Manager {
         // grid between the time they send it here and the long time later when the caller tries
         // to read it.
         final Grid<Feature> copy = new Grid<>(solution);
-        assert score == Snake.evaluate(problem, copy);
         synchronized (this) {
             // This guard is tripped when the user uploads a new problem but old worker threads
             // haven't died and propose solutions to the old (stale) problem. If this guard is
@@ -90,6 +90,9 @@ public final class Manager {
             if (currentProblem != problem) {
                 Logging.log(getClass(), "Guard tripped.");
                 return;
+            }
+            if (!currentProblem.isValid(copy)) {
+                throw new IllegalArgumentException();
             }
             if (score > topScore) {
                 Logging.log(

@@ -60,8 +60,5 @@ by any subroutine defined in this project.
 Streaming and functional programming are encouraged but not required. Use ArrayLists
 instead of raw arrays.
 
-Assertions are for both conditions and invariants because they are close to source.
-Tests are written only when assertions are difficult to write.
-
 Extending or implementing custom classes and interfaces is permitted up to one layer
 deep.

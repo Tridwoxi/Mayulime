@@ -72,7 +72,9 @@ public final class Structures {
             Add all elements from another MultiSet to this one, modifying this one.
          */
         public void addAll(final MultiSet<T> other) {
-            assert this != other;
+            if (this == other) {
+                throw new IllegalArgumentException();
+            }
             other.counts.forEach((item, count) -> this.counts.merge(item, count, Integer::sum));
         }
     }
@@ -145,7 +147,9 @@ public final class Structures {
         private ArrayList<Integer> minHash(final T item) {
             // https://en.wikipedia.org/wiki/MinHash
             final ArrayList<Boolean> bitVector = converter.apply(item);
-            assert bitVector.size() == vectorSize;
+            if (bitVector.size() != vectorSize) {
+                throw new IllegalArgumentException();
+            }
             final Function<Integer, Integer> firstTrue = whichPermutation ->
                 permutations
                     .get(whichPermutation)

@@ -186,7 +186,9 @@ final class GameDisplay extends Group {
     }
 
     private void render() {
-        assert currentProblem != null && currentSolution != null;
+        if (currentProblem == null || currentSolution == null) {
+            throw new IllegalStateException();
+        }
         getChildren().clear();
         final Grid<String> labels = makeLabels(currentProblem);
         final double cellSizePx = gui.getCurrentCellSizePx();
@@ -235,13 +237,17 @@ final class GameDisplay extends Group {
         final Consumer<Cell> assign = cell -> {
             switch (problem.getCachedInitial().get(cell)) {
                 case TELEPORT_IN -> {
-                    assert teleports.containsKey(cell);
+                    if (!teleports.containsKey(cell)) {
+                        throw new IllegalStateException();
+                    }
                     association[0] += 1;
                     labels.set(cell, TELEPORT_IN + association[0]);
                     labels.set(teleports.get(cell), TELEPORT_OUT + association[0]);
                 }
                 case CHECKPOINT -> {
-                    assert checkpoints.containsKey(cell);
+                    if (!checkpoints.containsKey(cell)) {
+                        throw new IllegalStateException();
+                    }
                     labels.set(cell, CHECKPOINT + checkpoints.get(cell));
                 }
                 default -> {

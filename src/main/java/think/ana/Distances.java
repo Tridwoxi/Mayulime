@@ -2,12 +2,9 @@ package think.ana;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import think.repr.Grid;
 import think.repr.Grid.Cell;
 import think.repr.Problem.Feature;
-import think.tools.Structures.Pair;
 
 /**
     Distance evaluation.
@@ -23,14 +20,15 @@ public final class Distances {
         open are always unreachable.
      */
     public static Grid<Integer> distanceFrom(final Grid<Feature> solution, final Cell source) {
+        if (!Snake.isOpen(solution.get(source))) {
+            throw new IllegalArgumentException();
+        }
         // The "cells with a negative distance are unreachable" convention was chosen because it
         // is invariant under addition of distance grids with connected sources. If the sources
         // are not connected, it may not hold.
-
         // PERF: Unbox primitives, use raw indexes instead of Cells, inline and unroll neighbor
         // loop, reuse structures where possible.
 
-        assert Snake.isOpen(solution.get(source)) && solution.inBounds(source);
         final int numRows = solution.getNumRows();
         final int numCols = solution.getNumCols();
         final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
@@ -47,7 +45,6 @@ public final class Distances {
                 }
             }
         }
-        assert isConsistent(distances);
         return distances;
     }
 
@@ -72,9 +69,9 @@ public final class Distances {
         final Cell sourceEnd,
         final Cell reachableStart
     ) {
-        assert distanceFromEnd.get(sourceEnd) == 0;
-        assert distanceFromEnd.get(reachableStart) >= 0;
-        assert isConsistent(distanceFromEnd);
+        if (distanceFromEnd.get(sourceEnd) != 0 || distanceFromEnd.get(reachableStart) < 0) {
+            throw new IllegalArgumentException();
+        }
         if (sourceEnd.equals(reachableStart)) {
             return new ArrayList<>(0);
         }
@@ -91,20 +88,6 @@ public final class Distances {
                 }
             }
         }
-        assert current.equals(sourceEnd) && !path.contains(reachableStart);
         return path;
-    }
-
-    private static boolean isConsistent(final Grid<Integer> distances) {
-        final BiFunction<Cell, Cell, Boolean> alongEdges = (cell, neighbor) ->
-            distances.get(cell) <= -1 ||
-            distances.get(neighbor) <= -1 ||
-            Math.abs(distances.get(cell) - distances.get(neighbor)) <= 1;
-        final Predicate<Cell> acrossCells = cell ->
-            distances
-                .getNeighbors(cell)
-                .stream()
-                .allMatch(neighbor -> alongEdges.apply(cell, neighbor));
-        return distances.stream().map(Pair::second).allMatch(acrossCells);
     }
 }

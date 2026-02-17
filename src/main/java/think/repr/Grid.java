@@ -42,7 +42,9 @@ public final class Grid<T> {
     private final int numCols;
 
     public Grid(final ArrayList<T> items, final int numRows, final int numCols) {
-        assert items.size() == numRows * numCols && numRows >= 0;
+        if (items.size() != numRows * numCols || numRows < 0) {
+            throw new IllegalArgumentException();
+        }
         this.items = new ArrayList<>(items);
         this.numRows = numRows;
         this.numCols = numCols;
@@ -61,17 +63,14 @@ public final class Grid<T> {
     }
 
     public T get(final Cell cell) {
-        assert inBounds(cell);
         return items.get(cell.row() * numCols + cell.col());
     }
 
     public void set(final Cell cell, final T item) {
-        assert inBounds(cell);
         items.set(cell.row() * numCols + cell.col(), item);
     }
 
     public void setAll(final Collection<Cell> cells, final T item) {
-        assert cells.stream().allMatch(this::inBounds);
         cells.forEach(cell -> set(cell, item));
     }
 
@@ -112,8 +111,11 @@ public final class Grid<T> {
         final Grid<S> second,
         final BiFunction<F, S, R> combiner
     ) {
-        assert first.getNumRows() == second.getNumRows();
-        assert first.getNumCols() == second.getNumCols();
+        if (
+            first.getNumRows() != second.getNumRows() || first.getNumCols() != second.getNumCols()
+        ) {
+            throw new IllegalArgumentException();
+        }
         final ArrayList<R> results = new ArrayList<>(first.items.size());
         for (int index = 0; index < first.items.size(); index += 1) {
             results.add(combiner.apply(first.items.get(index), second.items.get(index)));
@@ -142,9 +144,11 @@ public final class Grid<T> {
         Get neighbors of the given cell on this grid in up, right, down, left order.
      */
     public ArrayList<Cell> getNeighborsURDL(final Cell cell) {
+        if (!inBounds(cell)) {
+            throw new IllegalArgumentException();
+        }
         // PERF: VisualVM says this method is using 10% of total compute with assertions disabled
         // on Complex under RandomSolver.
-        assert inBounds(cell);
         final ArrayList<Cell> neighbors = new ArrayList<>(4);
         if (cell.row - 1 >= 0) {
             neighbors.add(new Cell(cell.row - 1, cell.col)); // Up.
@@ -158,7 +162,6 @@ public final class Grid<T> {
         if (cell.col - 1 >= 0) {
             neighbors.add(new Cell(cell.row, cell.col - 1)); // Left.
         }
-        assert neighbors.stream().allMatch(cell::isNeighbor);
         return neighbors;
     }
 }

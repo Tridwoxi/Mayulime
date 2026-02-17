@@ -24,7 +24,6 @@ public final class Snake {
         It is a design error to pass an invalid solution to this method.
      */
     public static int evaluate(final Problem problem, final Grid<Feature> solution) {
-        assert problem.isValid(solution);
         return travel(problem, solution).orElse(new ArrayList<>(0)).size();
     }
 
@@ -78,10 +77,13 @@ public final class Snake {
         final HashSet<Cell> activeTeleports,
         final HashMap<Cell, Cell> teleportMap
     ) {
-        assert !start.equals(end);
-        assert isOpen(solution.get(start)) && solution.inBounds(start);
-        assert isOpen(solution.get(end)) && solution.inBounds(end);
-        assert activeTeleports.stream().allMatch(teleportMap::containsKey);
+        if (
+            !isOpen(solution.get(start)) ||
+            !isOpen(solution.get(end)) ||
+            !activeTeleports.stream().allMatch(teleportMap::containsKey)
+        ) {
+            throw new IllegalArgumentException();
+        }
 
         final Grid<Integer> distanceFromEnd = Distances.distanceFrom(solution, end);
         final ArrayList<ArrayList<Cell>> paths = new ArrayList<>();
@@ -133,15 +135,14 @@ public final class Snake {
     }
 
     private static ArrayList<Cell> trimTo(final ArrayList<Cell> path, final Cell end) {
-        assert path.contains(end);
         final ArrayList<Cell> trimmed = new ArrayList<>(path.size());
         for (final Cell step : path) {
             trimmed.add(step);
             if (step.equals(end)) {
-                break;
+                return trimmed;
             }
         }
-        return trimmed;
+        throw new IllegalArgumentException();
     }
 
     private static ArrayList<Cell> flatten(final ArrayList<ArrayList<Cell>> paths) {

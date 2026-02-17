@@ -58,14 +58,18 @@ public final class App extends Application {
         final Grid<Feature> solution,
         final int score
     ) {
-        assert gui != null && manager != null;
+        if (gui == null || manager == null) {
+            throw new IllegalStateException();
+        }
         // PERF: Spamming the GUI with updates when each update invalidates all
         // previous updates is basically cyberbullying. Keep only the latest one.
         Platform.runLater(() -> gui.update(submitter, problem, solution, score));
     }
 
     private void recieveMapCode(final String mapCode) {
-        assert gui != null && manager != null;
+        if (gui == null || manager == null) {
+            throw new IllegalStateException();
+        }
         Problem problem = null;
         try {
             problem = new Problem(mapCode);
