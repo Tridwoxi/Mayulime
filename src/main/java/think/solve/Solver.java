@@ -41,12 +41,12 @@ public abstract sealed class Solver
         // procedure. So, the solver needs to check when to stop. We can do so with a lengthy
         // chain of "if not alive, return", but throwing exceptions is an easier way to do
         // non-local returns.
-        Logging.log(getClass(), "Started");
+        Logging.info("Started %s", getClass().getSimpleName());
         try {
             solve();
-            Logging.log(getClass(), "Terminated (returned normally)");
+            Logging.info("Terminated %s (returned normally)", getClass().getSimpleName());
         } catch (final KilledException exception) {
-            Logging.log(getClass(), "Terminated (killed)");
+            Logging.info("Terminated %s (killed)", getClass().getSimpleName());
         }
     }
 

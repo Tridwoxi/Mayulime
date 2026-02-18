@@ -36,7 +36,7 @@ public final class Headless {
     }
 
     private int run(final String[] args) {
-        Logging.log(Headless.class, "Launch point: Headless");
+        Logging.announcement("Launch point: Headless");
 
         final Config config;
         final Problem problem;
@@ -44,13 +44,13 @@ public final class Headless {
             config = parseConfig(args);
             problem = new Problem(Files.readString(config.mapCodePath()));
         } catch (IllegalArgumentException ignored) {
-            Logging.log(getClass(), "Failure: bad arguments.");
+            Logging.warning("Failure: bad arguments.");
             return FAILURE;
         } catch (BadMapCodeException ignored) {
-            Logging.log(getClass(), "Failure: bad map code.");
+            Logging.warning("Failure: bad map code.");
             return FAILURE;
         } catch (IOException ignored) {
-            Logging.log(getClass(), "Failure: can't read file.");
+            Logging.warning("Failure: can't read file.");
             return FAILURE;
         }
         new Manager(this::recieveSolutionStub).solve(problem);
@@ -59,7 +59,7 @@ public final class Headless {
         } catch (InterruptedException exception) {
             throw new AssertionError();
         }
-        Logging.log(getClass(), "Success: timed out without dying");
+        Logging.announcement("Success: timed out without dying");
         return SUCCESS;
     }
 

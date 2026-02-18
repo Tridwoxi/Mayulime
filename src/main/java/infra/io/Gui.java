@@ -355,16 +355,16 @@ final class ButtonDisplay extends Button {
         final Window window = scene == null ? null : scene.getWindow();
         final File chosen = chooser.showOpenDialog(window);
         if (chosen == null) {
-            Logging.log(getClass(), "File picker cancelled.");
+            Logging.info("File picker cancelled.");
             return;
         }
-        Logging.log(getClass(), "Picked file %s", chosen.getPath());
+        Logging.info("Picked file %s", chosen.getPath());
 
         String mapCode = null;
         try {
             mapCode = Files.readString(chosen.toPath());
         } catch (IOException ignored) {
-            Logging.log(getClass(), "Can't read file (!?)");
+            Logging.warning("Can't read file (!?)");
         }
         if (mapCode != null) {
             gui.getMapCodeConsumer().accept(mapCode);

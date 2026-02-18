@@ -36,7 +36,7 @@ public final class App extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        Logging.log(getClass(), "Launch point: Application");
+        Logging.announcement("Launch point: Application");
 
         this.manager = new Manager(this::recieveSolution);
         this.gui = new Gui(this::recieveMapCode);
@@ -74,7 +74,7 @@ public final class App extends Application {
         try {
             problem = new Problem(mapCode);
         } catch (BadMapCodeException exception) {
-            Logging.log(getClass(), "Bad MapCode; problem rejected");
+            Logging.warning("Bad MapCode; problem rejected");
         }
         if (problem != null) {
             manager.solve(problem);

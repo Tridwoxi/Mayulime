@@ -111,7 +111,7 @@ public final class Random {
                 throw new IllegalArgumentException();
             }
             if (population > 100000) {
-                Logging.log(getClass(), "I did not have this in mind.");
+                Logging.warning("I did not have this in mind.");
             }
             this.cumulativeDistribution = build(population, limit);
         }

@@ -88,15 +88,14 @@ public final class Manager {
             // haven't died and propose solutions to the old (stale) problem. If this guard is
             // tripped excessively, it indicates a solver we asked to die refuses to do so.
             if (currentProblem != problem) {
-                Logging.log(getClass(), "Guard tripped.");
+                Logging.warning("Guard tripped.");
                 return;
             }
             if (!currentProblem.isValid(copy)) {
                 throw new IllegalArgumentException();
             }
             if (score > topScore) {
-                Logging.log(
-                    getClass(),
+                Logging.info(
                     "Score %d -> %d on %s by %s from %s",
                     topScore,
                     score,
