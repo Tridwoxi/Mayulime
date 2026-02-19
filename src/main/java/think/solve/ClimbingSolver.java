@@ -17,11 +17,11 @@ import think.repr.Problem.Feature;
     Hill climbing suffers from inefficiency. The state space is vast, and cannot be explored
     entirely except on Simples (even that takes a few minutes). We can apply some clever graph
     algorithms and handcrafted heuristics to find improved neighbors faster, but this is mere cope.
-    Further, we suffer from local optima (it's called "hill climbing", not "hill magically teleport
-    ", after all). At this point, the classic trick is to randomly restart. That's what we do here.
-
-    A better approach might use simulated annealing, multi-arm bandit / MCTS, genetic algorithms,
-    or K-best first search on so getting stuck at a dead end does not lose partial progress.
+    Further, we suffer from local optima (it's called "hill climbing", not "hill magical teleport",
+    after all). At this point, the classic trick is to randomly restart. That's what we do here. It
+    might be better to wander around the optimum for a bit in the hope it's a plateau, continue
+    from modestly good solutions, or consider paths instead of just assignments of walls, but
+    let's save that for another state space search.
  */
 public final class ClimbingSolver extends Solver {
 
@@ -54,6 +54,8 @@ public final class ClimbingSolver extends Solver {
         return candidateSolution;
     }
 
+    // == Place additional walls. =================================================================
+
     private static boolean placeAdditionalWalls(
         final Grid<Feature> candidateSolution,
         final AtomicInteger remainingSupply
@@ -64,12 +66,16 @@ public final class ClimbingSolver extends Solver {
         return false;
     }
 
+    // == Relocate existing walls. ================================================================
+
     private static boolean relocateExistingWalls(
         final Grid<Feature> candidateSolution,
         final AtomicInteger remainingSupply
     ) {
         return false;
     }
+
+    // == Reclaim useless walls. ==================================================================
 
     private static boolean reclaimUselessWalls(
         final Grid<Feature> candidateSolution,
