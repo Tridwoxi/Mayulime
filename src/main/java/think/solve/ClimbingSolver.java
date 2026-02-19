@@ -24,19 +24,33 @@ import think.repr.Solution;
  */
 public final class ClimbingSolver extends Solver {
 
+    private static final class Parameters {
+
+        /**
+            Adding more walls allows for delaying the snake more. However, adding too many deprives
+            it of space to travel. I estimated that if wall supply was unlimited, the optimal
+            solution would have some wall density (ideally, you'd scrape the best human solutions
+            to UCU and average their wall densities instead). Then, I assumed that it is a good
+            idea to have our solver target exactly that wall density. I did so under the
+            impression that the map would be mostly empty.
+         */
+        static final double OPTIMAL_DENSITY = 0.4;
+    }
+
     public ClimbingSolver(final ProposedSolutionListener listener, final Problem problem) {
         super(listener, problem);
     }
 
     @Override
     protected void solve() throws KilledException {
+        final Precomputation precomputation = precompute();
         while (true) {
             checkAlive();
-            proposeSolution(hillClimb());
+            proposeSolution(hillClimb(precomputation));
         }
     }
 
-    private Solution hillClimb() throws KilledException {
+    private Solution hillClimb(final Precomputation precomputation) throws KilledException {
         final Solution solution = getProblem().getBlankSolution();
         final AtomicInteger remainingSupply = new AtomicInteger(getProblem().getPlayerWallSupply());
         // The methods in this loop operate by side effects and return if they were successful.
@@ -44,9 +58,9 @@ public final class ClimbingSolver extends Solver {
         // improve the score and there is an upper bound on score. reclaimUselessWalls does not
         // improve the score, but is idempotent.
         while (
-            placeAdditionalWalls(solution, remainingSupply) ||
-            relocateExistingWalls(solution, remainingSupply) ||
-            reclaimUselessWalls(solution, remainingSupply)
+            placeAdditionalWalls(precomputation, solution, remainingSupply) ||
+            relocateExistingWalls(precomputation, solution, remainingSupply) ||
+            reclaimUselessWalls(precomputation, solution, remainingSupply)
         ) {
             checkAlive();
         }
@@ -56,18 +70,21 @@ public final class ClimbingSolver extends Solver {
     // == Place additional walls. =================================================================
 
     private static boolean placeAdditionalWalls(
+        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         if (remainingSupply.get() == 0) {
             return false;
         }
+
         return false;
     }
 
     // == Relocate existing walls. ================================================================
 
     private static boolean relocateExistingWalls(
+        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
@@ -77,9 +94,18 @@ public final class ClimbingSolver extends Solver {
     // == Reclaim useless walls. ==================================================================
 
     private static boolean reclaimUselessWalls(
+        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         return false;
+    }
+
+    // == Precomputation. =========================================================================
+
+    private record Precomputation() {}
+
+    private Precomputation precompute() {
+        return new Precomputation();
     }
 }
