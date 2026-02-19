@@ -4,9 +4,8 @@ import infra.io.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import think.repr.Grid;
 import think.repr.Problem;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 import think.solve.BaselineSolver;
 import think.solve.RandomSolver;
 import think.solve.Solver;
@@ -20,7 +19,7 @@ public final class Manager {
 
     @FunctionalInterface
     public interface ImprovedSolutionListener {
-        void listen(String submitter, Problem problem, Grid<Feature> solution, int score);
+        void listen(String submitter, Problem problem, Solution solution, int score);
     }
 
     private final ImprovedSolutionListener listener;
@@ -67,7 +66,7 @@ public final class Manager {
     private void considerSolution(
         final String submitter,
         final Problem problem,
-        final Grid<Feature> solution,
+        final Solution solution,
         final int score
     ) {
         if (currentProblem == null) {
@@ -82,7 +81,7 @@ public final class Manager {
         // Grids are mutable data structures, and strategies make no promises to not mutate the
         // grid between the time they send it here and the long time later when the caller tries
         // to read it.
-        final Grid<Feature> copy = new Grid<>(solution);
+        final Solution copy = new Solution(solution);
         synchronized (this) {
             // This guard is tripped when the user uploads a new problem but old worker threads
             // haven't died and propose solutions to the old (stale) problem. If this guard is

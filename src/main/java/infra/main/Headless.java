@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import think.Manager;
-import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 
 /**
     Development-only headless alternative program launch point.
@@ -66,7 +65,7 @@ public final class Headless {
     private void recieveSolutionStub(
         final String submitter,
         final Problem problem,
-        final Grid<Feature> solution,
+        final Solution solution,
         final int score
     ) {
         // Normally, we would display solutions, but we have no GUI. We also don't know how to

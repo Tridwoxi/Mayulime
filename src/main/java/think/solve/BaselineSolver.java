@@ -14,6 +14,6 @@ public final class BaselineSolver extends Solver {
     @Override
     protected void solve() throws KilledException {
         checkAlive();
-        proposeSolution(getProblem().getCachedInitial());
+        proposeSolution(getProblem().getBlankSolution());
     }
 }

@@ -30,7 +30,7 @@ public final class Problem {
 
     private final String name;
     private final int playerWallSupply;
-    private final Grid<Feature> initial;
+    private final Solution blank;
     private final ArrayList<Cell> checkpoints;
     private final HashMap<Cell, Cell> teleports;
 
@@ -44,7 +44,7 @@ public final class Problem {
         final ProblemDTO dto = new MapCodeParser(mapCode).parse();
         this.name = dto.name();
         this.playerWallSupply = dto.playerWallSupply();
-        this.initial = new Grid<>(dto.initial());
+        this.blank = new Solution(dto.initial());
         this.checkpoints = new ArrayList<>(dto.checkpoints());
         this.teleports = new HashMap<>(dto.teleports());
     }
@@ -54,19 +54,11 @@ public final class Problem {
     }
 
     /**
-        Returns the initial grid of the problem.
-
-        The initial grid is read-only; modifying it is a design error. Use {@link
-        #getAnotherInitial()} if modification is desired.
-     */
-    public Grid<Feature> getCachedInitial() {
-        // SpotBugs will correctly tell you this exposes mutable internal state. This method
-        // exists anyway because it is more performant and callers are expected to be well-behaved.
-        return initial;
-    }
-
-    public Grid<Feature> getAnotherInitial() {
-        return new Grid<>(initial);
+        Get a solution representing the initial grid. This method provides a copy, so it should be
+        cached if you want the grid for reasons other than modification.
+    */
+    public Solution getBlankSolution() {
+        return new Solution(blank);
     }
 
     public int getPlayerWallSupply() {
@@ -81,19 +73,22 @@ public final class Problem {
         return new HashMap<>(teleports);
     }
 
-    public boolean isValid(final Grid<Feature> solution) {
+    public boolean isValid(final Solution solution) {
         final Predicate<Cell> legalMove = cell -> {
-            final boolean unchanged = initial.get(cell) == solution.get(cell);
+            final boolean unchanged = blank.get(cell) == solution.get(cell);
             final boolean assigned =
-                initial.get(cell) == Feature.EMPTY && solution.get(cell) == Feature.PLAYER_WALL;
+                blank.get(cell) == Feature.EMPTY && solution.get(cell) == Feature.PLAYER_WALL;
             return unchanged || assigned;
         };
-        final boolean enoughSupply =
-            solution.where(Feature.PLAYER_WALL::equals).count() <= playerWallSupply;
+        final boolean enoughSupply = solution.findWhereWall().size() <= playerWallSupply;
         final boolean sameSize =
-            initial.getNumRows() == solution.getNumRows() &&
-            initial.getNumCols() == solution.getNumCols();
-        return (sameSize && enoughSupply && initial.stream().map(Pair::second).allMatch(legalMove));
+            blank.getNumRows() == solution.getNumRows() &&
+            blank.getNumCols() == solution.getNumCols();
+        return (
+            sameSize &&
+            enoughSupply &&
+            blank.getCopyOfBacking().stream().map(Pair::second).allMatch(legalMove)
+        );
     }
 }
 

@@ -8,6 +8,7 @@ import think.repr.Grid;
 import think.repr.Grid.Cell;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
+import think.repr.Solution;
 import think.tools.Iteration;
 import think.tools.Structures.Pair;
 
@@ -23,7 +24,7 @@ public final class Snake {
 
         It is a design error to pass an invalid solution to this method.
      */
-    public static int evaluate(final Problem problem, final Grid<Feature> solution) {
+    public static int evaluate(final Problem problem, final Solution solution) {
         return travel(problem, solution).orElse(new ArrayList<>(0)).size();
     }
 
@@ -37,7 +38,7 @@ public final class Snake {
      */
     public static Optional<ArrayList<Cell>> travel(
         final Problem problem,
-        final Grid<Feature> solution
+        final Solution solution
     ) {
         final ArrayList<Cell> checkpoints = problem.getCheckpoints();
         final HashMap<Cell, Cell> teleportMap = problem.getTeleports();
@@ -71,7 +72,7 @@ public final class Snake {
         gets trapped in a box.
      */
     public static Optional<ArrayList<Cell>> travel(
-        final Grid<Feature> solution,
+        final Solution solution,
         final Cell start,
         final Cell end,
         final HashSet<Cell> activeTeleports,

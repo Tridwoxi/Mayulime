@@ -30,6 +30,7 @@ import think.repr.Grid;
 import think.repr.Grid.Cell;
 import think.repr.Problem;
 import think.repr.Problem.Feature;
+import think.repr.Solution;
 import think.tools.Iteration;
 import think.tools.Structures.Pair;
 
@@ -83,7 +84,7 @@ public final class Gui extends Scene {
     public void update(
         final String submitter,
         final Problem problem,
-        final Grid<Feature> solution,
+        final Solution solution,
         final int score
     ) {
         showGame();
@@ -123,8 +124,8 @@ public final class Gui extends Scene {
             currentCellSizePx = MAX_CELL_SIZE_PX;
             return;
         }
-        final int numRows = problem.getCachedInitial().getNumRows();
-        final int numCols = problem.getCachedInitial().getNumCols();
+        final int numRows = problem.getBlankSolution().getNumRows();
+        final int numCols = problem.getBlankSolution().getNumCols();
         if (numRows <= 0 || numCols <= 0) {
             currentCellSizePx = MAX_CELL_SIZE_PX;
             return;
@@ -163,13 +164,13 @@ final class GameDisplay extends Group {
     private static final String CHECKPOINT = "c";
     private final Gui gui;
     private Problem currentProblem;
-    private Grid<Feature> currentSolution;
+    private Solution currentSolution;
 
     GameDisplay(final Gui gui) {
         this.gui = gui;
     }
 
-    public void setGame(final Problem problem, final Grid<Feature> solution) {
+    public void setGame(final Problem problem, final Solution solution) {
         currentProblem = problem;
         currentSolution = solution;
         render();
@@ -193,6 +194,7 @@ final class GameDisplay extends Group {
         final Grid<String> labels = makeLabels(currentProblem);
         final double cellSizePx = gui.getCurrentCellSizePx();
         currentSolution
+            .getCopyOfBacking()
             .stream()
             .forEachOrdered(pair -> {
                 final Feature feature = pair.first();
@@ -224,10 +226,11 @@ final class GameDisplay extends Group {
         // teleports their orignal labels. Fortunately, teleports are unordered, so we'll just
         // assign arbritrary associations.
         final int[] association = { 0 }; // Effectively final hack.
+        final Solution solution = problem.getBlankSolution();
         final Grid<String> labels = new Grid<String>(
-            "",
-            problem.getCachedInitial().getNumRows(),
-            problem.getCachedInitial().getNumCols()
+            () -> "",
+            solution.getNumRows(),
+            solution.getNumCols()
         );
         final HashMap<Cell, Integer> checkpoints = new HashMap<>();
         Iteration.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
@@ -235,7 +238,7 @@ final class GameDisplay extends Group {
         );
         final HashMap<Cell, Cell> teleports = problem.getTeleports();
         final Consumer<Cell> assign = cell -> {
-            switch (problem.getCachedInitial().get(cell)) {
+            switch (solution.get(cell)) {
                 case TELEPORT_IN -> {
                     if (!teleports.containsKey(cell)) {
                         throw new IllegalStateException();
@@ -255,7 +258,7 @@ final class GameDisplay extends Group {
                 }
             }
         };
-        problem.getCachedInitial().stream().map(Pair::second).forEachOrdered(assign);
+        solution.getCopyOfBacking().stream().map(Pair::second).forEachOrdered(assign);
         return labels;
     }
 }

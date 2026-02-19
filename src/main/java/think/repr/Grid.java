@@ -1,7 +1,6 @@
 package think.repr;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -50,10 +49,6 @@ public final class Grid<T> {
         this.numCols = numCols;
     }
 
-    public Grid(final T item, final int numRows, final int numCols) {
-        this(Iteration.filledArray(item, numRows * numCols), numRows, numCols);
-    }
-
     public Grid(final Supplier<T> supplier, final int numRows, final int numCols) {
         this(Iteration.filledArray(ignored -> supplier.get(), numRows * numCols), numRows, numCols);
     }
@@ -70,10 +65,6 @@ public final class Grid<T> {
         items.set(cell.row() * numCols + cell.col(), item);
     }
 
-    public void setAll(final Collection<Cell> cells, final T item) {
-        cells.forEach(cell -> set(cell, item));
-    }
-
     public int getNumRows() {
         return numRows;
     }
@@ -82,7 +73,7 @@ public final class Grid<T> {
         return numCols;
     }
 
-    public boolean inBounds(final Cell cell) {
+    public boolean isInBounds(final Cell cell) {
         return (cell.row() >= 0 && cell.row() < numRows && cell.col() >= 0 && cell.col() < numCols);
     }
 
@@ -134,17 +125,10 @@ public final class Grid<T> {
     }
 
     /**
-        Get the neighbors of the given cell on this grid in unspecified order.
-     */
-    public ArrayList<Cell> getNeighbors(final Cell cell) {
-        return getNeighborsURDL(cell);
-    }
-
-    /**
         Get neighbors of the given cell on this grid in up, right, down, left order.
      */
-    public ArrayList<Cell> getNeighborsURDL(final Cell cell) {
-        if (!inBounds(cell)) {
+    public ArrayList<Cell> getNeighbors(final Cell cell) {
+        if (!isInBounds(cell)) {
             throw new IllegalArgumentException();
         }
         // PERF: VisualVM says this method is using 10% of total compute with assertions disabled

@@ -1,9 +1,8 @@
 package think.solve;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import think.repr.Grid;
 import think.repr.Problem;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 
 /**
     Random restart hill climbing.
@@ -37,27 +36,27 @@ public final class ClimbingSolver extends Solver {
         }
     }
 
-    private Grid<Feature> hillClimb() throws KilledException {
-        final Grid<Feature> candidateSolution = getProblem().getAnotherInitial();
+    private Solution hillClimb() throws KilledException {
+        final Solution solution = getProblem().getBlankSolution();
         final AtomicInteger remainingSupply = new AtomicInteger(getProblem().getPlayerWallSupply());
         // The methods in this loop operate by side effects and return if they were successful.
         // This loop must terminate because both placeAdditionalWalls and relocateExistingWalls
         // improve the score and there is an upper bound on score. reclaimUselessWalls does not
         // improve the score, but is idempotent.
         while (
-            placeAdditionalWalls(candidateSolution, remainingSupply) ||
-            relocateExistingWalls(candidateSolution, remainingSupply) ||
-            reclaimUselessWalls(candidateSolution, remainingSupply)
+            placeAdditionalWalls(solution, remainingSupply) ||
+            relocateExistingWalls(solution, remainingSupply) ||
+            reclaimUselessWalls(solution, remainingSupply)
         ) {
             checkAlive();
         }
-        return candidateSolution;
+        return solution;
     }
 
     // == Place additional walls. =================================================================
 
     private static boolean placeAdditionalWalls(
-        final Grid<Feature> candidateSolution,
+        final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         if (remainingSupply.get() == 0) {
@@ -69,7 +68,7 @@ public final class ClimbingSolver extends Solver {
     // == Relocate existing walls. ================================================================
 
     private static boolean relocateExistingWalls(
-        final Grid<Feature> candidateSolution,
+        final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         return false;
@@ -78,7 +77,7 @@ public final class ClimbingSolver extends Solver {
     // == Reclaim useless walls. ==================================================================
 
     private static boolean reclaimUselessWalls(
-        final Grid<Feature> candidateSolution,
+        final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         return false;

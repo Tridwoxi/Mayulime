@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import think.repr.Grid;
 import think.repr.Grid.Cell;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 
 /**
     Distance evaluation.
@@ -19,7 +19,7 @@ public final class Distances {
         In the resulting grid, negative numbers mean a cell is unreachable. Cells that are not
         open are always unreachable.
      */
-    public static Grid<Integer> distanceFrom(final Grid<Feature> solution, final Cell source) {
+    public static Grid<Integer> distanceFrom(final Solution solution, final Cell source) {
         if (!Snake.isOpen(solution.get(source))) {
             throw new IllegalArgumentException();
         }
@@ -31,7 +31,7 @@ public final class Distances {
 
         final int numRows = solution.getNumRows();
         final int numCols = solution.getNumCols();
-        final Grid<Integer> distances = new Grid<>(-1, numRows, numCols);
+        final Grid<Integer> distances = new Grid<>(() -> -1, numRows, numCols);
         final ArrayDeque<Cell> frontier = new ArrayDeque<>();
 
         frontier.add(source);
@@ -79,7 +79,7 @@ public final class Distances {
         final ArrayList<Cell> path = new ArrayList<>(length);
         Cell current = reachableStart;
         for (int step = length; step > 0; step -= 1) {
-            for (final Cell neighbor : distanceFromEnd.getNeighborsURDL(current)) {
+            for (final Cell neighbor : distanceFromEnd.getNeighbors(current)) {
                 final int expected = step - 1;
                 if (distanceFromEnd.get(neighbor) == expected) {
                     path.add(neighbor);

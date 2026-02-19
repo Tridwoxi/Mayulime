@@ -2,9 +2,8 @@ package think.solve;
 
 import infra.io.Logging;
 import think.ana.Snake;
-import think.repr.Grid;
 import think.repr.Problem;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 
 /**
     Think of solutions to Pathery problems.
@@ -19,7 +18,7 @@ public abstract sealed class Solver
 
     @FunctionalInterface
     public interface ProposedSolutionListener {
-        void listen(String submitter, Problem problem, Grid<Feature> solution, int score);
+        void listen(String submitter, Problem problem, Solution solution, int score);
     }
 
     private final ProposedSolutionListener listener;
@@ -77,7 +76,7 @@ public abstract sealed class Solver
         return problem;
     }
 
-    protected final void proposeSolution(final Grid<Feature> solution) {
+    protected final void proposeSolution(final Solution solution) {
         listener.listen(
             getClass().getSimpleName(),
             problem,

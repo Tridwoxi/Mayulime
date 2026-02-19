@@ -16,6 +16,7 @@ import think.repr.Grid.Cell;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
 import think.repr.Problem.Feature;
+import think.repr.Solution;
 import think.tools.Random;
 import think.tools.Structures.Pair;
 import think.tools.Structures.Weighted;
@@ -56,7 +57,7 @@ public final class Tests {
 
         final Problem problemB = getProblem(PROBLEM_B);
         final Grid<Integer> distances = Distances.distanceFrom(
-            problemB.getCachedInitial(),
+            problemB.getBlankSolution(),
             new Cell(2, 3)
         );
         Assertions.assertEquals(3, distances.get(new Cell(1, 1)));
@@ -70,20 +71,20 @@ public final class Tests {
     @Test
     public void evaluateScore() {
         final Problem problemA = getProblem(PROBLEM_A);
-        final int evalInitialA = Snake.evaluate(problemA, problemA.getCachedInitial());
+        final int evalInitialA = Snake.evaluate(problemA, problemA.getBlankSolution());
         Assertions.assertEquals(evalInitialA, 30);
-        final Grid<Feature> solutionA = problemA.getAnotherInitial();
-        solutionA.set(new Cell(0, 3), Feature.PLAYER_WALL);
+        final Solution solutionA = problemA.getBlankSolution();
+        solutionA.placeWalls(new Cell(0, 3));
         final int evalModifiedA = Snake.evaluate(problemA, solutionA);
         Assertions.assertEquals(0, evalModifiedA);
 
         final Problem problemB = getProblem(PROBLEM_B);
-        final int evalInitialB = Snake.evaluate(problemB, problemB.getCachedInitial());
+        final int evalInitialB = Snake.evaluate(problemB, problemB.getBlankSolution());
         Assertions.assertEquals(0, evalInitialB);
-        final Grid<Feature> solutionB = problemB.getAnotherInitial();
-        solutionB.set(new Cell(1, 4), Feature.PLAYER_WALL);
-        solutionB.set(new Cell(2, 5), Feature.PLAYER_WALL);
-        solutionB.set(new Cell(3, 6), Feature.PLAYER_WALL);
+        final Solution solutionB = problemB.getBlankSolution();
+        solutionB.placeWalls(new Cell(1, 4));
+        solutionB.placeWalls(new Cell(2, 5));
+        solutionB.placeWalls(new Cell(3, 6));
         final int evalModifiedB = Snake.evaluate(problemB, solutionB);
         Assertions.assertEquals(20, evalModifiedB);
     }
@@ -92,7 +93,7 @@ public final class Tests {
     public void preferenceOrder() {
         final BiFunction<Cell, Cell, Cell> getFirstStep = (start, end) -> {
             final Optional<ArrayList<Cell>> steps = Snake.travel(
-                new Grid<>(Feature.EMPTY, 2, 2),
+                new Solution(new Grid<>(() -> Feature.EMPTY, 2, 2)),
                 start,
                 end,
                 new HashSet<>(),
@@ -118,7 +119,7 @@ public final class Tests {
     public void problemParsing() {
         final Problem problem = getProblem(PROBLEM_A);
 
-        final Grid<Feature> initial = problem.getCachedInitial();
+        final Solution initial = problem.getBlankSolution();
         Assertions.assertEquals(4, initial.getNumRows());
         Assertions.assertEquals(6, initial.getNumCols());
         Assertions.assertEquals(12, problem.getPlayerWallSupply());
@@ -140,20 +141,19 @@ public final class Tests {
     @Test
     public void solutionValidation() {
         final Problem problem = getProblem(PROBLEM_A);
-        final Grid<Feature> solution = problem.getAnotherInitial();
+        final Solution solution = problem.getBlankSolution();
         Assertions.assertTrue(problem.isValid(solution));
 
-        solution.set(new Cell(0, 0), Feature.SYSTEM_WALL);
-        Assertions.assertFalse(problem.isValid(solution));
-        solution.set(new Cell(0, 0), Feature.EMPTY);
+        final Grid<Feature> invalidSystemWall = solution.getCopyOfBacking();
+        invalidSystemWall.set(new Cell(0, 0), Feature.SYSTEM_WALL);
+        Assertions.assertFalse(problem.isValid(new Solution(invalidSystemWall)));
 
-        solution.set(new Cell(3, 3), Feature.TELEPORT_OUT);
-        Assertions.assertFalse(problem.isValid(solution));
-        solution.set(new Cell(3, 3), Feature.CHECKPOINT);
+        final Grid<Feature> invalidTeleport = solution.getCopyOfBacking();
+        invalidTeleport.set(new Cell(3, 3), Feature.TELEPORT_OUT);
+        Assertions.assertFalse(problem.isValid(new Solution(invalidTeleport)));
 
-        solution.set(new Cell(0, 2), Feature.PLAYER_WALL);
+        solution.placeWalls(new Cell(0, 2));
         Assertions.assertTrue(problem.isValid(solution));
-        solution.set(new Cell(0, 2), Feature.EMPTY);
     }
 
     // == think.tools =============================================================================

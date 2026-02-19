@@ -6,10 +6,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import think.Manager;
-import think.repr.Grid;
 import think.repr.Problem;
 import think.repr.Problem.BadMapCodeException;
-import think.repr.Problem.Feature;
+import think.repr.Solution;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
@@ -55,7 +54,7 @@ public final class App extends Application {
     private void recieveSolution(
         final String submitter,
         final Problem problem,
-        final Grid<Feature> solution,
+        final Solution solution,
         final int score
     ) {
         if (gui == null || manager == null) {

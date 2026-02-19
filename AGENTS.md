@@ -40,8 +40,8 @@ is a development-only alternative.
 `src/main/java/think/ana`: Project-specific static tools: Distance evaluation and Snake
 simulation.
 
-`src/main/java/think/repr`: Data model. A Problem contains metadata and Features; a Grid
-contains items indexed by Cells.
+`src/main/java/think/repr`: Data model. A Problem contains metadata and hands out blank
+Solutions for solvers to work on. A Grid contains items indexed by Cells.
 
 `src/main/java/think/solve`: Solvers are runnable workers that come up with better
 solutions.

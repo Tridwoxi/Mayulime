@@ -1,11 +1,9 @@
 package think.solve;
 
 import java.util.ArrayList;
-import think.repr.Grid;
 import think.repr.Grid.Cell;
 import think.repr.Problem;
-import think.repr.Problem.Feature;
-import think.tools.Iteration;
+import think.repr.Solution;
 import think.tools.Random;
 import think.tools.Random.RestrictedBinomialDistribution;
 
@@ -21,9 +19,7 @@ public final class RandomSolver extends Solver {
 
     public RandomSolver(final ProposedSolutionListener listener, final Problem problem) {
         super(listener, problem);
-        this.emptyCells = Iteration.materialize(
-            getProblem().getCachedInitial().where(Feature.EMPTY::equals)
-        );
+        this.emptyCells = getProblem().getBlankSolution().findWhereEmpty();
         this.numWalls = new RestrictedBinomialDistribution(
             emptyCells.size(),
             getProblem().getPlayerWallSupply()
@@ -38,11 +34,11 @@ public final class RandomSolver extends Solver {
         }
     }
 
-    private Grid<Feature> createRandomSolution() {
-        final Grid<Feature> candidateSolution = getProblem().getAnotherInitial();
+    private Solution createRandomSolution() {
+        final Solution solution = getProblem().getBlankSolution();
         Random.uniformStream(emptyCells)
             .limit(numWalls.sample())
-            .forEachOrdered(cell -> candidateSolution.set(cell, Feature.PLAYER_WALL));
-        return candidateSolution;
+            .forEachOrdered(solution::placeWalls);
+        return solution;
     }
 }
