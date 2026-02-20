@@ -14,13 +14,11 @@ import think.repr.Solution;
     carefully assign walls to craft its path.
 
     Hill climbing suffers from inefficiency. The state space is vast, and cannot be explored
-    entirely except on Simples (even that takes a few minutes). We can apply some clever graph
-    algorithms and handcrafted heuristics to find improved neighbors faster, but this is mere cope.
-    Further, we suffer from local optima (it's called "hill climbing", not "hill magical teleport",
-    after all). At this point, the classic trick is to randomly restart. That's what we do here. It
-    might be better to wander around the optimum for a bit in the hope it's a plateau, continue
-    from modestly good solutions, or consider paths instead of just assignments of walls, but
-    let's save that for another state space search.
+    entirely except on Simples, where it takes minutes. We can apply some clever graph algorithms
+    and handcrafted heuristics to allocate resources more efficiently, but this is mere cope. We
+    still suffer from an inefficient problem representation (compare humans, who do not think in
+    terms of wall subsets, but rather paths). More critically, hill climbing struggles to progress
+    past local optima and is forced to, perhaps after briefly wandering on a plateau, restart.
  */
 public final class ClimbingSolver extends Solver {
 
@@ -43,14 +41,13 @@ public final class ClimbingSolver extends Solver {
 
     @Override
     protected void solve() throws KilledException {
-        final Precomputation precomputation = precompute();
         while (true) {
             checkAlive();
-            proposeSolution(hillClimb(precomputation));
+            proposeSolution(hillClimb());
         }
     }
 
-    private Solution hillClimb(final Precomputation precomputation) throws KilledException {
+    private Solution hillClimb() throws KilledException {
         final Solution solution = getProblem().getBlankSolution();
         final AtomicInteger remainingSupply = new AtomicInteger(getProblem().getPlayerWallSupply());
         // The methods in this loop operate by side effects and return if they were successful.
@@ -58,9 +55,9 @@ public final class ClimbingSolver extends Solver {
         // improve the score and there is an upper bound on score. reclaimUselessWalls does not
         // improve the score, but is idempotent.
         while (
-            placeAdditionalWalls(precomputation, solution, remainingSupply) ||
-            relocateExistingWalls(precomputation, solution, remainingSupply) ||
-            reclaimUselessWalls(precomputation, solution, remainingSupply)
+            placeAdditionalWalls(solution, remainingSupply) ||
+            relocateExistingWalls(solution, remainingSupply) ||
+            reclaimUselessWalls(solution, remainingSupply)
         ) {
             checkAlive();
         }
@@ -70,21 +67,18 @@ public final class ClimbingSolver extends Solver {
     // == Place additional walls. =================================================================
 
     private static boolean placeAdditionalWalls(
-        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         if (remainingSupply.get() == 0) {
             return false;
         }
-
         return false;
     }
 
     // == Relocate existing walls. ================================================================
 
     private static boolean relocateExistingWalls(
-        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
@@ -94,18 +88,9 @@ public final class ClimbingSolver extends Solver {
     // == Reclaim useless walls. ==================================================================
 
     private static boolean reclaimUselessWalls(
-        final Precomputation precomputation,
         final Solution solution,
         final AtomicInteger remainingSupply
     ) {
         return false;
-    }
-
-    // == Precomputation. =========================================================================
-
-    private record Precomputation() {}
-
-    private Precomputation precompute() {
-        return new Precomputation();
     }
 }
