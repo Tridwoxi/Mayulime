@@ -47,11 +47,15 @@ public final class Solution {
     }
 
     public ArrayList<Cell> findWhereEmpty() {
-        return Iteration.materialize(backing.where(Feature.EMPTY::equals));
+        return findWhere(Feature.EMPTY);
     }
 
     public ArrayList<Cell> findWhereWall() {
-        return Iteration.materialize(backing.where(Feature.PLAYER_WALL::equals));
+        return findWhere(Feature.PLAYER_WALL);
+    }
+
+    public ArrayList<Cell> findWhere(final Feature feature) {
+        return Iteration.materialize(backing.where(feature::equals));
     }
 
     public ArrayList<Cell> getNeighbors(final Cell cell) {
