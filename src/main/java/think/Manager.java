@@ -72,13 +72,13 @@ public final class Manager {
         if (currentProblem == null) {
             throw new IllegalStateException();
         }
-        // We also check if the score is better in the synchronized section, but as strategies
-        // might give this method lots of garbage, if we can early exit without competing for the
-        // lock it would be nice to.
+        // We also check if the score is better in the synchronized section, but as solvers might
+        // give this method lots of garbage, if we can early exit without competing for the lock
+        // it would be nice to.
         if (score <= topScore) {
             return;
         }
-        // Grids are mutable data structures, and strategies make no promises to not mutate the
+        // Grids are mutable data structures, and solvers make no promises to not mutate the
         // grid between the time they send it here and the long time later when the caller tries
         // to read it.
         final Solution copy = new Solution(solution);

@@ -100,7 +100,7 @@ public final class Problem {
     map name. I don't know what the other sections do.
 
     The grid section consists of a series of features or skips. These are separated by inanely
-    distributed commas or periods. A skip is an arbritrary strictly positive integer representing
+    distributed commas or periods. A skip is an arbitrary strictly positive integer representing
     a run of empty cells in the one-dimensional representation of a grid.
 
     A feature is a string that maps to a special type of cell. Pathery believes features are a
@@ -285,8 +285,8 @@ final class MapCodeParser {
 
     private static void require(final boolean condition) throws BadMapCodeException {
         // The parser should throw our custom exception instead of unexpectedly failing. But we
-        // don't want catch miscellaneous exceptions since that sort of lazy programming silently
-        // surpresses bugs; only exceptions that we expect to see should be caught.
+        // don't want to catch miscellaneous exceptions since that sort of lazy programming
+        // silently suppresses bugs; only exceptions that we expect to see should be caught.
         if (!condition) {
             throw new BadMapCodeException();
         }

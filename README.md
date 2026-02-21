@@ -2,14 +2,14 @@
 
 The game [Pathery](https://www.pathery.com) is an exercise in creating the longest
 shortest path on a maze by placing a set of walls. The system in this repository
-proposes solutions to a proper subset of Pathery problems, so may be helpful
+proposes solutions to a proper subset of Pathery problems, so it may be helpful
 as an assistant or checker. This repository is not affiliated with Pathery.
 
 ## Usage / Development
 
 Install version 7 or later of the [Gradle](https://gradle.org) build tool. In the
 repository root, execute `gradle run`. Gradle will install the dependencies
-[JavaFX](https://openjfx.io)), [Checkstyle](https://checkstyle.org), and
+[JavaFX](https://openjfx.io), [Checkstyle](https://checkstyle.org), and
 [Spotbugs](https://spotbugs.github.io), then run the project. If it doesn't work,
 message the author of this project.
 

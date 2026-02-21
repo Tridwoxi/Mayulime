@@ -36,10 +36,10 @@ public abstract sealed class Solver
     @Override
     public final void run() {
         // When the user instructs us to work on a different problem, we should work on it. But
-        // many strategies run forever, and there is no safe way to forcefully kill a thread or
-        // procedure. So, the solver needs to check when to stop. We can do so with a lengthy
-        // chain of "if not alive, return", but throwing exceptions is an easier way to do
-        // non-local returns.
+        // many solvers run forever, and there is no safe way to forcefully kill a thread or
+        // procedure. So, the solver needs to check when to stop. We can do so with a lengthy chain
+        // of "if not alive, return", but throwing exceptions is an easier way to do non-local
+        // returns.
         Logging.info("Started %s", getClass().getSimpleName());
         try {
             solve();

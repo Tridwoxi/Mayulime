@@ -114,7 +114,7 @@ public final class Gui extends Scene {
     }
 
     private void handleResize() {
-        // PERF: Noticable lag on large (100 by 100) maps on a modern computer.
+        // PERF: Noticeable lag on large (100 by 100) maps on a modern computer.
         recalculateCellSize(gameDisplay.getCurrentProblem());
         gameDisplay.rerenderIfPresent();
     }
@@ -223,8 +223,8 @@ final class GameDisplay extends Group {
 
     private static Grid<String> makeLabels(final Problem problem) {
         // The backend was foolish enough to forget the order of teleports, so we cannot assign
-        // teleports their orignal labels. Fortunately, teleports are unordered, so we'll just
-        // assign arbritrary associations.
+        // teleports their original labels. Fortunately, teleports are unordered, so we'll just
+        // assign arbitrary associations.
         final int[] association = { 0 }; // Effectively final hack.
         final Solution solution = problem.getBlankSolution();
         final Grid<String> labels = new Grid<String>(
