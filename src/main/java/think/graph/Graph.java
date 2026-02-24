@@ -46,15 +46,18 @@ public interface Graph<V, E> {
      */
     ArrayList<V> getAllVertices();
     /**
-        Get all vertices in this graph that have an edge to the given vertex.
+        Get all vertices in this graph that have an edge from the given vertex; all verticies that
+        the given one can reach.
      */
-    ArrayList<V> getIncomingNeighbors(V vertex);
+    ArrayList<V> getChildren(V vertex);
     /**
-        Get all vertices in this graph that have an edge from the given vertex.
+        Get all vertices in this graph that have an edge to the given vertex; all verticies that
+        can reach the given one.
      */
-    ArrayList<V> getOutgoingNeighbors(V vertex);
+    ArrayList<V> getParents(V vertex);
     /**
-        Create a shallow copy of this graph.
+        Create a shallow copy of this graph. Implementations should declare the exact type of
+        returned graph.
      */
-    Graph<V, E> copy();
+    Graph<V, E> shallowCopy();
 }

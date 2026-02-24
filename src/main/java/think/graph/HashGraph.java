@@ -11,99 +11,97 @@ import java.util.function.Function;
  */
 public final class HashGraph<V, E> implements Graph<V, E> {
 
-    /*
-       Let the first `V` in the following signatures be `V1` and the second `V` be `V2`. Outgoing
-       stores `V1 -> V2`, so answers "where can I get from V1?". Incoming stores `V1 <- V2`, so
-       answers "what vertices come into V1?"
-    */
-    private final HashMap<V, HashMap<V, E>> outgoing;
-    private final HashMap<V, HashMap<V, E>> incoming;
+    private final HashMap<V, HashMap<V, E>> children;
+    private final HashMap<V, HashMap<V, E>> parents;
+    private final HashMap<V, HashMap<V, E>> either; // Read-only view.
 
     public HashGraph(final int expectedSize) {
-        this.outgoing = HashMap.newHashMap(expectedSize);
-        this.incoming = HashMap.newHashMap(expectedSize);
+        this.children = HashMap.newHashMap(expectedSize);
+        this.parents = HashMap.newHashMap(expectedSize);
+        this.either = children;
     }
 
     private HashGraph(
-        final HashMap<V, HashMap<V, E>> outgoing,
-        final HashMap<V, HashMap<V, E>> incoming
+        final HashMap<V, HashMap<V, E>> children,
+        final HashMap<V, HashMap<V, E>> parents
     ) {
-        this.outgoing = outgoing;
-        this.incoming = incoming;
+        this.children = children;
+        this.parents = parents;
+        this.either = children;
     }
 
     @Override
     public boolean addVertex(final V vertex) {
-        if (outgoing.containsKey(vertex)) {
+        if (either.containsKey(vertex)) {
             return false;
         }
-        outgoing.put(vertex, new HashMap<>());
-        incoming.put(vertex, new HashMap<>());
+        children.put(vertex, new HashMap<>());
+        parents.put(vertex, new HashMap<>());
         return true;
     }
 
     @Override
     public boolean removeVertex(final V vertex) {
-        final ArrayList<V> outgoingCopy = new ArrayList<>(outgoing.get(vertex).keySet());
-        final ArrayList<V> incomingCopy = new ArrayList<>(incoming.get(vertex).keySet());
-        outgoingCopy.forEach(other -> incoming.get(other).remove(vertex));
-        incomingCopy.forEach(other -> outgoing.get(other).remove(vertex));
-        outgoing.remove(vertex);
-        incoming.remove(vertex);
+        final ArrayList<V> childrenCopy = new ArrayList<>(children.get(vertex).keySet());
+        final ArrayList<V> parentsCopy = new ArrayList<>(parents.get(vertex).keySet());
+        childrenCopy.forEach(other -> parents.get(other).remove(vertex));
+        parentsCopy.forEach(other -> children.get(other).remove(vertex));
+        children.remove(vertex);
+        parents.remove(vertex);
         return false;
     }
 
     @Override
     public boolean containsVertex(final V vertex) {
-        return outgoing.containsKey(vertex);
+        return either.containsKey(vertex);
     }
 
     @Override
     public boolean setEdge(final V source, final V destination, final E edge) {
-        final E previous = outgoing.get(source).get(destination);
+        final E previous = children.get(source).get(destination);
         if (previous != null && previous.equals(edge)) {
             return false;
         }
-        outgoing.get(source).put(destination, edge);
-        incoming.get(destination).put(source, edge);
+        children.get(source).put(destination, edge);
+        parents.get(destination).put(source, edge);
         return true;
     }
 
     @Override
     public Optional<E> getEdge(final V source, final V destination) {
-        if (!outgoing.get(source).containsKey(destination)) {
+        if (!children.get(source).containsKey(destination)) {
             return Optional.empty();
         }
-        return Optional.of(outgoing.get(source).get(destination));
+        return Optional.of(children.get(source).get(destination));
     }
 
     @Override
     public boolean removeEdge(final V source, final V destination) {
-        if (!outgoing.get(source).containsKey(destination)) {
+        if (!children.get(source).containsKey(destination)) {
             return false;
         }
-        outgoing.get(source).remove(destination);
-        incoming.get(destination).remove(source);
+        children.get(source).remove(destination);
+        parents.get(destination).remove(source);
         return true;
     }
 
     @Override
     public ArrayList<V> getAllVertices() {
-        return new ArrayList<>(outgoing.keySet());
+        return new ArrayList<>(either.keySet());
     }
 
     @Override
-    public ArrayList<V> getOutgoingNeighbors(final V vertex) {
-        return new ArrayList<>(outgoing.get(vertex).keySet());
+    public ArrayList<V> getChildren(final V vertex) {
+        return new ArrayList<>(children.get(vertex).keySet());
     }
 
     @Override
-    public ArrayList<V> getIncomingNeighbors(final V vertex) {
-        return new ArrayList<>(incoming.get(vertex).keySet());
+    public ArrayList<V> getParents(final V vertex) {
+        return new ArrayList<>(parents.get(vertex).keySet());
     }
 
     @Override
-    public Graph<V, E> copy() {
+    public Graph<V, E> shallowCopy() {
         final Function<HashMap<V, HashMap<V, E>>, HashMap<V, HashMap<V, E>>> copier = outer -> {
             final HashMap<V, HashMap<V, E>> outerCopy = HashMap.newHashMap(outer.size());
             outer.forEach((key, inner) -> {
@@ -112,8 +110,8 @@ public final class HashGraph<V, E> implements Graph<V, E> {
             });
             return outerCopy;
         };
-        final HashMap<V, HashMap<V, E>> outgoingCopy = copier.apply(outgoing);
-        final HashMap<V, HashMap<V, E>> incomingCopy = copier.apply(incoming);
+        final HashMap<V, HashMap<V, E>> outgoingCopy = copier.apply(children);
+        final HashMap<V, HashMap<V, E>> incomingCopy = copier.apply(parents);
         return new HashGraph<>(outgoingCopy, incomingCopy);
     }
 }
