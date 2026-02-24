@@ -1,10 +1,11 @@
-package think.graph;
+package think.graph.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
+import think.graph.Graph;
 
 /**
     HashMap-backed implementation of a graph. All operations have theoretically optimal time
