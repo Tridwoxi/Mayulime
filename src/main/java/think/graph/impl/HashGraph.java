@@ -121,7 +121,7 @@ public final class HashGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public Graph<V, E> shallowCopy() {
+    public HashGraph<V, E> shallowCopy() {
         final Function<HashMap<V, HashMap<V, E>>, HashMap<V, HashMap<V, E>>> copier = outer -> {
             final HashMap<V, HashMap<V, E>> outerCopy = HashMap.newHashMap(outer.size());
             outer.forEach((key, inner) -> {
@@ -130,8 +130,8 @@ public final class HashGraph<V, E> implements Graph<V, E> {
             });
             return outerCopy;
         };
-        final HashMap<V, HashMap<V, E>> outgoingCopy = copier.apply(children);
-        final HashMap<V, HashMap<V, E>> incomingCopy = copier.apply(parents);
-        return new HashGraph<>(outgoingCopy, incomingCopy);
+        final HashMap<V, HashMap<V, E>> childrenCopy = copier.apply(children);
+        final HashMap<V, HashMap<V, E>> parentsCopy = copier.apply(parents);
+        return new HashGraph<>(childrenCopy, parentsCopy);
     }
 }
