@@ -60,4 +60,18 @@ public interface Graph<V, E> {
         returned graph.
      */
     Graph<V, E> shallowCopy();
+
+    /**
+        Calculate the out-degree of the given vertex.
+     */
+    default int getNumChildren(final V vertex) {
+        return getChildren(vertex).size();
+    }
+
+    /**
+        Calculate the in-degree of the given vertex.
+     */
+    default int getNumParents(final V vertex) {
+        return getParents(vertex).size();
+    }
 }
