@@ -2,6 +2,7 @@ package think.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -32,7 +33,7 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public boolean addVertex(final V vertex) {
-        if (either.containsKey(vertex)) {
+        if (containsVertex(vertex)) {
             return false;
         }
         children.put(vertex, new HashMap<>());
@@ -42,13 +43,16 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public boolean removeVertex(final V vertex) {
+        if (!containsVertex(vertex)) {
+            return false;
+        }
         final ArrayList<V> childrenCopy = new ArrayList<>(children.get(vertex).keySet());
         final ArrayList<V> parentsCopy = new ArrayList<>(parents.get(vertex).keySet());
         childrenCopy.forEach(other -> parents.get(other).remove(vertex));
         parentsCopy.forEach(other -> children.get(other).remove(vertex));
         children.remove(vertex);
         parents.remove(vertex);
-        return false;
+        return true;
     }
 
     @Override
@@ -58,8 +62,11 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public boolean setEdge(final V source, final V destination, final E edge) {
+        if (!containsVertex(source) || !containsVertex(destination)) {
+            throw new NoSuchElementException();
+        }
         final E previous = children.get(source).get(destination);
-        if (previous != null && previous.equals(edge)) {
+        if (children.get(source).containsKey(destination) && edge.equals(previous)) {
             return false;
         }
         children.get(source).put(destination, edge);
@@ -69,6 +76,9 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public Optional<E> getEdge(final V source, final V destination) {
+        if (!containsVertex(source) || !containsVertex(destination)) {
+            throw new NoSuchElementException();
+        }
         if (!children.get(source).containsKey(destination)) {
             return Optional.empty();
         }
@@ -77,6 +87,9 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public boolean removeEdge(final V source, final V destination) {
+        if (!containsVertex(source) || !containsVertex(destination)) {
+            throw new NoSuchElementException();
+        }
         if (!children.get(source).containsKey(destination)) {
             return false;
         }
@@ -92,11 +105,17 @@ public final class HashGraph<V, E> implements Graph<V, E> {
 
     @Override
     public ArrayList<V> getChildren(final V vertex) {
+        if (!containsVertex(vertex)) {
+            throw new NoSuchElementException();
+        }
         return new ArrayList<>(children.get(vertex).keySet());
     }
 
     @Override
     public ArrayList<V> getParents(final V vertex) {
+        if (!containsVertex(vertex)) {
+            throw new NoSuchElementException();
+        }
         return new ArrayList<>(parents.get(vertex).keySet());
     }
 
