@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
-import think.graph.Graph;
+import think.graph.Graph.MutableGraph;
 
 /**
     HashMap-backed implementation of a graph. All operations have theoretically optimal time
     complexity in exchange for poor constant factor performance.
  */
-public final class HashGraph<V, E> implements Graph<V, E> {
+public final class HashGraph<V, E> implements MutableGraph<V, E> {
 
     private final HashMap<V, HashMap<V, E>> children;
     private final HashMap<V, HashMap<V, E>> parents;
