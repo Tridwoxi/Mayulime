@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
-import java.util.function.Function;
 import think.graph.Graph;
 import think.graph.Graph.MutableGraph;
 
@@ -15,7 +14,7 @@ import think.graph.Graph.MutableGraph;
     HashMap-backed implementation of a graph. All operations have theoretically optimal time
     complexity in exchange for poor constant factor performance. This implementation is general and
     supports all graphs supported by {@link MutableGraph}. The iteration order of all collections
-    returned by this implementation is order of insertion.
+    returned by this implementation is order of first insertion.
  */
 public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
 
@@ -32,8 +31,13 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
     }
 
     public HashGraph(final Graph<K, V, E> other) {
-        this(16);
-        throw new UnsupportedOperationException();
+        this(other.getNumVertices());
+        for (final K vertexKey : other.getAllVertexKeys()) {
+            putVertex(vertexKey, other.getVertexValue(vertexKey));
+            for (final K destinationKey : other.getChildren(vertexKey)) {
+                putEdge(vertexKey, destinationKey, other.getEdge(vertexKey, destinationKey));
+            }
+        }
     }
 
     private HashGraph(
@@ -41,9 +45,9 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         final SequencedMap<K, SequencedMap<K, E>> parents,
         final SequencedMap<K, V> values
     ) {
-        this.children = children;
-        this.parents = parents;
-        this.values = values;
+        this.children = shallowCopyNSM(children);
+        this.parents = shallowCopyNSM(parents);
+        this.values = new LinkedHashMap<>(values);
         this.either = children;
     }
 
@@ -99,23 +103,7 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
 
     @Override
     public HashGraph<K, V, E> shallowCopy() {
-        final Function<
-            SequencedMap<K, SequencedMap<K, E>>,
-            SequencedMap<K, SequencedMap<K, E>>
-        > copier = outer -> {
-            final SequencedMap<K, SequencedMap<K, E>> outerCopy = LinkedHashMap.newLinkedHashMap(
-                outer.size()
-            );
-            outer.forEach((key, inner) -> {
-                final SequencedMap<K, E> innerCopy = new LinkedHashMap<>(inner);
-                outerCopy.put(key, innerCopy);
-            });
-            return outerCopy;
-        };
-        final SequencedMap<K, SequencedMap<K, E>> childrenCopy = copier.apply(children);
-        final SequencedMap<K, SequencedMap<K, E>> parentsCopy = copier.apply(parents);
-        final SequencedMap<K, V> valuesCopy = new LinkedHashMap<>(values);
-        return new HashGraph<>(childrenCopy, parentsCopy, valuesCopy);
+        return new HashGraph<>(children, parents, values);
     }
 
     @Override
@@ -182,5 +170,19 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         if (!containsVertexKey(vertexKey)) {
             throw new NoSuchElementException();
         }
+    }
+
+    private <O, I, D> SequencedMap<O, SequencedMap<I, D>> shallowCopyNSM(
+        final SequencedMap<O, SequencedMap<I, D>> nestedSequencedMap
+    ) {
+        // Abbreviations: outer key "O"; inner key "I"; data "D"; nested SequencedMap "NSM".
+        final SequencedMap<O, SequencedMap<I, D>> outerCopy = LinkedHashMap.newLinkedHashMap(
+            nestedSequencedMap.size()
+        );
+        outerCopy.forEach((key, inner) -> {
+            final SequencedMap<I, D> innerCopy = new LinkedHashMap<>(inner);
+            outerCopy.put(key, innerCopy);
+        });
+        return outerCopy;
     }
 }
