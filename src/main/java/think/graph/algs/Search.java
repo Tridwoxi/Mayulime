@@ -1,11 +1,22 @@
 package think.graph.algs;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
+import think.graph.Graph;
 
 public final class Search {
 
-    public record Path<V, E>(ArrayList<V> vertices, ArrayList<E> edges) {
+    /**
+        A Path is an ordered sequence of vertices on a graph. Vertices need not be unique. A Path
+        contains N vertices and N-1 edges between them, with N >= 1.
+     */
+    public record Path<V, E>(List<V> vertices, List<E> edges) {
         public Path {
             vertices = new ArrayList<>(vertices);
             edges = new ArrayList<>(edges);
@@ -18,7 +29,7 @@ public final class Search {
             return vertices.getFirst();
         }
 
-        public ArrayList<V> getTrailingVertices() {
+        public List<V> getTrailingVertices() {
             return new ArrayList<>(vertices.subList(0, vertices.size() - 2));
         }
 
@@ -26,7 +37,7 @@ public final class Search {
             return vertices.getLast();
         }
 
-        public ArrayList<V> getLeadingVertices() {
+        public List<V> getLeadingVertices() {
             return new ArrayList<>(vertices.subList(1, vertices.size() - 1));
         }
 
@@ -41,5 +52,72 @@ public final class Search {
         }
     }
 
+    /**
+        A Fill is a result of a search operation from a source. `toParent.get(V)` returns the
+        parent of a vertex; `fromParent.get(V)` represents the edge taken from parent to the
+        vertex. Together, these form a tree.
+     */
+    public record Fill<V, E>(Map<V, V> toParent, Map<V, E> fromParent, V source) {
+        public Fill {
+            toParent = new HashMap<>(toParent);
+            fromParent = new HashMap<>(fromParent);
+            if (toParent.size() != fromParent().size() + 1) {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        public boolean isReachable(final V vertex) {
+            return toParent.containsKey(vertex);
+        }
+
+        public Path<V, E> getPathTo(final V vertex) {
+            if (!isReachable(vertex)) {
+                throw new IllegalArgumentException();
+            }
+            final List<V> vertices = new ArrayList<>();
+            V walker = vertex;
+            while (walker != null) {
+                vertices.add(walker);
+                walker = toParent.get(walker);
+            }
+            Collections.reverse(vertices);
+
+            final List<E> edges = new ArrayList<>();
+            for (int index = 1; index < vertices.size(); index++) {
+                edges.add(fromParent.get(vertices.get(index)));
+            }
+            return new Path<>(vertices, edges);
+        }
+    }
+
     private Search() {}
+
+    public static <V, E> Fill<V, E> breadthFirst(final Graph<V, E> graph, final V source) {
+        final Map<V, V> parents = new HashMap<>();
+        final Deque<V> frontier = new ArrayDeque<>();
+        parents.put(source, null);
+        frontier.addLast(source);
+        while (!frontier.isEmpty()) {
+            final V parent = frontier.removeFirst();
+            for (final V child : graph.getChildren(parent)) {
+                if (!parents.containsKey(child)) {
+                    parents.put(child, parent);
+                    frontier.addLast(child);
+                }
+            }
+        }
+        return makeFill(graph, parents, source);
+    }
+
+    private static <V, E> Fill<V, E> makeFill(
+        final Graph<V, E> graph,
+        final Map<V, V> toParent,
+        final V source
+    ) {
+        final Map<V, E> fromParent = HashMap.newHashMap(toParent.size());
+        toParent.forEach((child, parent) -> {
+            fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
+        });
+        return new Fill<V, E>(toParent, fromParent, source);
+    }
 }
