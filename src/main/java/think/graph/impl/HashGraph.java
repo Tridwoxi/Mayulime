@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
 import java.util.function.Function;
+import think.graph.Graph;
 import think.graph.Graph.MutableGraph;
 
 /**
@@ -28,6 +29,11 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         this.parents = LinkedHashMap.newLinkedHashMap(expectedSize);
         this.values = LinkedHashMap.newLinkedHashMap(expectedSize);
         this.either = children;
+    }
+
+    public HashGraph(final Graph<K, V, E> other) {
+        this(16);
+        throw new UnsupportedOperationException();
     }
 
     private HashGraph(
@@ -110,6 +116,11 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         final SequencedMap<K, SequencedMap<K, E>> parentsCopy = copier.apply(parents);
         final SequencedMap<K, V> valuesCopy = new LinkedHashMap<>(values);
         return new HashGraph<>(childrenCopy, parentsCopy, valuesCopy);
+    }
+
+    @Override
+    public int getNumVertices() {
+        return either.size();
     }
 
     @Override

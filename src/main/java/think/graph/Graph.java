@@ -36,6 +36,7 @@ public interface Graph<K, V, E> {
         should return "A", not "Graph", but returning "Graph" is acceptable.
      */
     Graph<K, V, E> shallowCopy();
+    int getNumVertices();
 
     default int getNumChildren(final K parentKey) {
         return getChildren(parentKey).size();
