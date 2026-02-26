@@ -16,12 +16,15 @@ public final class Search {
         A Path is an ordered sequence of vertices on a graph. Vertices need not be unique. A Path
         contains N vertices and N-1 edges between them, with N >= 1.
      */
-    public record Path<V, E>(List<V> vertices, List<E> edges) {
-        public Path {
-            // This defensive copy is effective.
-            vertices = new ArrayList<>(vertices);
-            edges = new ArrayList<>(edges);
-            if (vertices.size() != edges.size() + 1) {
+    public static final class Path<V, E> {
+
+        private final List<V> vertices;
+        private final List<E> edges;
+
+        public Path(final List<V> vertices, final List<E> edges) {
+            this.vertices = new ArrayList<>(vertices);
+            this.edges = new ArrayList<>(edges);
+            if (this.vertices.size() != this.edges.size() + 1) {
                 throw new IllegalArgumentException();
             }
         }
@@ -30,12 +33,12 @@ public final class Search {
             return vertices.getFirst();
         }
 
-        public List<V> getTrailingVertices() {
-            return new ArrayList<>(vertices.subList(0, vertices.size() - 1));
-        }
-
         public V getFinish() {
             return vertices.getLast();
+        }
+
+        public List<V> getTrailingVertices() {
+            return new ArrayList<>(vertices.subList(0, vertices.size() - 1));
         }
 
         public List<V> getLeadingVertices() {
@@ -44,7 +47,8 @@ public final class Search {
 
         public <R> R reduceEdges(final R initial, final BiFunction<R, E, R> reducer) {
             // This implementation has the reduction run sequentially in exchange for callers not
-            // needing to pass a combiner or identity as an initial, unlike Stream::reduce.
+            // needing to pass a combiner or identity as an initial, unlike Stream::reduce(U,
+            // BiFunction, BinaryOperator)
             R accumulator = initial;
             for (final E edge : edges) {
                 accumulator = reducer.apply(accumulator, edge);
@@ -54,17 +58,25 @@ public final class Search {
     }
 
     /**
-        A Fill is a result of a search operation from a source. `toParent.get(V)` returns the
-        parent of a vertex; `fromParent.get(V)` represents the edge taken from parent to the
-        vertex. Together, these form a tree.
+        A Fill is a result of a search operation from a source. It resembles a tree.
      */
-    public record Fill<V, E>(Map<V, V> toParent, Map<V, E> fromParent, V source) {
-        public Fill {
-            toParent = new HashMap<>(toParent);
-            fromParent = new HashMap<>(fromParent);
-            if (toParent.size() != fromParent().size() + 1) {
+    public static final class Fill<V, E> {
+
+        private final Map<V, V> toParent; // get(V) -> parent of V.
+        private final Map<V, E> fromParent; // get(V) -> edge from parent of V to V.
+        private final V source;
+
+        public Fill(final Map<V, V> toParent, final Map<V, E> fromParent, final V source) {
+            this.toParent = new HashMap<>(toParent);
+            this.fromParent = new HashMap<>(fromParent);
+            this.source = source;
+            if (this.toParent.size() != this.fromParent.size() + 1) {
                 throw new IllegalArgumentException();
             }
+        }
+
+        public V getSource() {
+            return source;
         }
 
         public boolean isReachable(final V vertex) {
@@ -89,6 +101,20 @@ public final class Search {
             }
             return new Path<>(vertices, edges);
         }
+
+        private static <V, E> Fill<V, E> fromParentsAndGraph(
+            final Map<V, V> toParent,
+            final Graph<V, E> graph,
+            final V source
+        ) {
+            final Map<V, E> fromParent = HashMap.newHashMap(toParent.size());
+            toParent.forEach((child, parent) -> {
+                if (!child.equals(source)) {
+                    fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
+                }
+            });
+            return new Fill<V, E>(toParent, fromParent, source);
+        }
     }
 
     private Search() {}
@@ -97,8 +123,8 @@ public final class Search {
         final Map<V, V> parents = new HashMap<>();
         final Deque<V> frontier = new ArrayDeque<>();
         // I'm pretty sure this null does no harm. HashMap permits nulls, and the parents map
-        // escapes only to makeFill, which checks child against source instead of treating null
-        // like a sentinel.
+        // escapes only to Fill::fromParentsAndGraph, which checks child against source instead of
+        // treating null like a sentinel.
         parents.put(source, null);
         frontier.addLast(source);
         while (!frontier.isEmpty()) {
@@ -110,20 +136,6 @@ public final class Search {
                 }
             }
         }
-        return makeFill(graph, parents, source);
-    }
-
-    private static <V, E> Fill<V, E> makeFill(
-        final Graph<V, E> graph,
-        final Map<V, V> toParent,
-        final V source
-    ) {
-        final Map<V, E> fromParent = HashMap.newHashMap(toParent.size());
-        toParent.forEach((child, parent) -> {
-            if (!child.equals(source)) {
-                fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
-            }
-        });
-        return new Fill<V, E>(toParent, fromParent, source);
+        return Fill.fromParentsAndGraph(parents, graph, source);
     }
 }
