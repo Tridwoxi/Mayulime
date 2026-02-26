@@ -18,6 +18,7 @@ public final class Search {
      */
     public record Path<V, E>(List<V> vertices, List<E> edges) {
         public Path {
+            // This defensive copy is effective.
             vertices = new ArrayList<>(vertices);
             edges = new ArrayList<>(edges);
             if (vertices.size() != edges.size() + 1) {
@@ -30,7 +31,7 @@ public final class Search {
         }
 
         public List<V> getTrailingVertices() {
-            return new ArrayList<>(vertices.subList(0, vertices.size() - 2));
+            return new ArrayList<>(vertices.subList(0, vertices.size() - 1));
         }
 
         public V getFinish() {
@@ -38,7 +39,7 @@ public final class Search {
         }
 
         public List<V> getLeadingVertices() {
-            return new ArrayList<>(vertices.subList(1, vertices.size() - 1));
+            return new ArrayList<>(vertices.subList(1, vertices.size()));
         }
 
         public <R> R reduceEdges(final R initial, final BiFunction<R, E, R> reducer) {
@@ -95,6 +96,9 @@ public final class Search {
     public static <V, E> Fill<V, E> breadthFirst(final Graph<V, E> graph, final V source) {
         final Map<V, V> parents = new HashMap<>();
         final Deque<V> frontier = new ArrayDeque<>();
+        // I'm pretty sure this null does no harm. HashMap permits nulls, and the parents map
+        // escapes only to makeFill, which checks child against source instead of treating null
+        // like a sentinel.
         parents.put(source, null);
         frontier.addLast(source);
         while (!frontier.isEmpty()) {
@@ -116,7 +120,9 @@ public final class Search {
     ) {
         final Map<V, E> fromParent = HashMap.newHashMap(toParent.size());
         toParent.forEach((child, parent) -> {
-            fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
+            if (!child.equals(source)) {
+                fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
+            }
         });
         return new Fill<V, E>(toParent, fromParent, source);
     }
