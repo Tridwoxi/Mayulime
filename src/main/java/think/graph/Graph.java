@@ -29,7 +29,6 @@ public interface Graph<K, V, E> {
     SequencedSet<K> getChildren(K parentKey);
     SequencedSet<K> getParents(K childKey);
     SequencedSet<K> getAllVertexKeys();
-    SequencedSet<V> getAllVertexValues();
     /**
         It would be nice (but it is not required) for implementations to declare the most specific
         return type they are able. For example, if "A implements Graph", then A::shallowCopy(void)

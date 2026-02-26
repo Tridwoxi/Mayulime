@@ -97,11 +97,6 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
     }
 
     @Override
-    public SequencedSet<V> getAllVertexValues() {
-        return new LinkedHashSet<>(values.values());
-    }
-
-    @Override
     public HashGraph<K, V, E> shallowCopy() {
         return new HashGraph<>(children, parents, values);
     }
