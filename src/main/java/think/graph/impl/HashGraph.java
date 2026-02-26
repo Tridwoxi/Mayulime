@@ -1,12 +1,12 @@
 package think.graph.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.SequencedMap;
+import java.util.SequencedSet;
 import java.util.function.Function;
 import think.graph.Graph.MutableGraph;
 
@@ -17,22 +17,22 @@ import think.graph.Graph.MutableGraph;
  */
 public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
 
-    private final Map<K, Map<K, E>> children;
-    private final Map<K, Map<K, E>> parents;
-    private final Map<K, V> values;
-    private final Map<K, Map<K, E>> either; // Read-only view.
+    private final SequencedMap<K, SequencedMap<K, E>> children;
+    private final SequencedMap<K, SequencedMap<K, E>> parents;
+    private final SequencedMap<K, V> values;
+    private final SequencedMap<K, SequencedMap<K, E>> either; // Read-only view.
 
     public HashGraph(final int expectedSize) {
-        this.children = HashMap.newHashMap(expectedSize);
-        this.parents = HashMap.newHashMap(expectedSize);
-        this.values = HashMap.newHashMap(expectedSize);
+        this.children = LinkedHashMap.newLinkedHashMap(expectedSize);
+        this.parents = LinkedHashMap.newLinkedHashMap(expectedSize);
+        this.values = LinkedHashMap.newLinkedHashMap(expectedSize);
         this.either = children;
     }
 
     private HashGraph(
-        final Map<K, Map<K, E>> children,
-        final Map<K, Map<K, E>> parents,
-        final Map<K, V> values
+        final SequencedMap<K, SequencedMap<K, E>> children,
+        final SequencedMap<K, SequencedMap<K, E>> parents,
+        final SequencedMap<K, V> values
     ) {
         this.children = children;
         this.parents = parents;
@@ -69,48 +69,53 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
     }
 
     @Override
-    public Set<K> getChildren(final K parentKey) {
+    public SequencedSet<K> getChildren(final K parentKey) {
         throwIfNotContains(parentKey);
-        return new HashSet<>(children.get(parentKey).keySet());
+        return new LinkedHashSet<>(children.get(parentKey).keySet());
     }
 
     @Override
-    public Set<K> getParents(final K childKey) {
+    public SequencedSet<K> getParents(final K childKey) {
         throwIfNotContains(childKey);
-        return new HashSet<>(parents.get(childKey).keySet());
+        return new LinkedHashSet<>(parents.get(childKey).keySet());
     }
 
     @Override
-    public Set<K> getAllVertexKeys() {
-        return new HashSet<>(either.keySet());
+    public SequencedSet<K> getAllVertexKeys() {
+        return new LinkedHashSet<>(either.keySet());
     }
 
     @Override
-    public Set<V> getAllVertexValues() {
-        return new HashSet<>(values.values());
+    public SequencedSet<V> getAllVertexValues() {
+        return new LinkedHashSet<>(values.values());
     }
 
     @Override
     public HashGraph<K, V, E> shallowCopy() {
-        final Function<Map<K, Map<K, E>>, Map<K, Map<K, E>>> copier = outer -> {
-            final Map<K, Map<K, E>> outerCopy = HashMap.newHashMap(outer.size());
+        final Function<
+            SequencedMap<K, SequencedMap<K, E>>,
+            SequencedMap<K, SequencedMap<K, E>>
+        > copier = outer -> {
+            final SequencedMap<K, SequencedMap<K, E>> outerCopy = LinkedHashMap.newLinkedHashMap(
+                outer.size()
+            );
             outer.forEach((key, inner) -> {
-                final Map<K, E> innerCopy = new HashMap<>(inner);
+                final SequencedMap<K, E> innerCopy = new LinkedHashMap<>(inner);
                 outerCopy.put(key, innerCopy);
             });
             return outerCopy;
         };
-        final Map<K, Map<K, E>> childrenCopy = copier.apply(children);
-        final Map<K, Map<K, E>> parentsCopy = copier.apply(parents);
-        final Map<K, V> valuesCopy = new HashMap<>(values);
+        final SequencedMap<K, SequencedMap<K, E>> childrenCopy = copier.apply(children);
+        final SequencedMap<K, SequencedMap<K, E>> parentsCopy = copier.apply(parents);
+        final SequencedMap<K, V> valuesCopy = new LinkedHashMap<>(values);
         return new HashGraph<>(childrenCopy, parentsCopy, valuesCopy);
     }
 
     @Override
     public boolean putVertex(final K vertexKey, final V vertexValue) {
         if (!containsVertexKey(vertexKey)) {
-            children.put(vertexKey, new HashMap<>());
-            parents.put(vertexKey, new HashMap<>());
+            children.put(vertexKey, new LinkedHashMap<>());
+            parents.put(vertexKey, new LinkedHashMap<>());
         }
         if (values.get(vertexKey) == null || !values.get(vertexKey).equals(vertexValue)) {
             values.put(vertexKey, vertexValue);

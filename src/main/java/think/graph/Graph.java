@@ -1,7 +1,7 @@
 package think.graph;
 
 import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.SequencedSet;
 
 /**
     A graph is a collection of vertex keys (K) which hold the vertex values (V) of the vertices
@@ -17,19 +17,23 @@ import java.util.Set;
     an {@link IllegalArgumentException}.
 
     All methods are required; no method will ever throw {@link UnsupportedOperationException}.
+
+    The iteration order of returned collections is implementation-defined. It must not be left
+    unspecified: implementations are to treat iteration order as part of the interface contract.
  */
 public interface Graph<K, V, E> {
     boolean containsVertexKey(K vertexKey);
     V getVertexValue(K vertexKey);
     boolean containsEdge(K sourceKey, K destinationKey);
     E getEdge(K sourceKey, K destinationKey);
-    Set<K> getChildren(K parentKey);
-    Set<K> getParents(K childKey);
-    Set<K> getAllVertexKeys();
-    Set<V> getAllVertexValues();
+    SequencedSet<K> getChildren(K parentKey);
+    SequencedSet<K> getParents(K childKey);
+    SequencedSet<K> getAllVertexKeys();
+    SequencedSet<V> getAllVertexValues();
     /**
-        Implementations should declare the most specific return type they are able. For example,
-        if "A implements Graph", then A::shallowCopy(void) should return "A", not "Graph".
+        It would be nice (but it is not required) for implementations to declare the most specific
+        return type they are able. For example, if "A implements Graph", then A::shallowCopy(void)
+        should return "A", not "Graph", but returning "Graph" is acceptable.
      */
     Graph<K, V, E> shallowCopy();
 
