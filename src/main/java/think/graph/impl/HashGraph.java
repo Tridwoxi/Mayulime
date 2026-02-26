@@ -13,7 +13,8 @@ import think.graph.Graph.MutableGraph;
 /**
     HashMap-backed implementation of a graph. All operations have theoretically optimal time
     complexity in exchange for poor constant factor performance. This implementation is general and
-    supports all graphs supported by {@link MutableGraph}.
+    supports all graphs supported by {@link MutableGraph}. The iteration order of all collections
+    returned by this implementation is order of insertion.
  */
 public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
 
