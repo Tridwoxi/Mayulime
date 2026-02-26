@@ -45,7 +45,7 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
         }
     }
 
-    // == Graph interface ==
+    // == Graph interface. =========================================================================
 
     @Override
     public boolean containsVertexKey(final Cell vertexKey) {
@@ -82,12 +82,12 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
         // (A VisualVM profile indicated a previous implementation of this method accounted for
         // ~20% of runtime on Simples under random guessing; this implementation is much slower.)
         final List<Cell> candidates = List.of(
-            new Cell(parentKey.row(), parentKey.col() - 1), // Up.
-            new Cell(parentKey.row() + 1, parentKey.col()), // Right.
-            new Cell(parentKey.row(), parentKey.col() + 1), // Down.
-            new Cell(parentKey.row() - 1, parentKey.col()) // Left.
+            new Cell(parentKey.row() - 1, parentKey.col()), // Up.
+            new Cell(parentKey.row(), parentKey.col() + 1), // Right.
+            new Cell(parentKey.row() + 1, parentKey.col()), // Down.
+            new Cell(parentKey.row(), parentKey.col() - 1) // Left.
         );
-        return toSequencedSetIfPresent(candidates);
+        return toSequencedSetIfContained(candidates);
     }
 
     @Override
@@ -97,7 +97,7 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
 
     @Override
     public SequencedSet<Cell> getAllVertexKeys() {
-        return toSequencedSetIfPresent(allCells);
+        return toSequencedSetIfContained(allCells);
     }
 
     @Override
@@ -113,7 +113,7 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
             throw new IllegalArgumentException();
         }
         final Optional<V> previous = backing.get(toIndex(vertexKey));
-        if (!previous.equals(vertexValue)) {
+        if (!previous.equals(Optional.of(vertexValue))) {
             backing.set(toIndex(vertexKey), Optional.of(vertexValue));
             return true;
         }
@@ -129,19 +129,19 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
         return true;
     }
 
-    private SequencedSet<Cell> toSequencedSetIfPresent(final List<Cell> candidates) {
+    private SequencedSet<Cell> toSequencedSetIfContained(final List<Cell> candidates) {
         final SequencedSet<Cell> result = new LinkedHashSet<>(candidates.size(), 1.0f);
-        candidates.stream().filter(this::isPresent).forEachOrdered(result::add);
+        candidates.stream().filter(this::containsVertexKey).forEachOrdered(result::add);
         return result;
     }
 
     private void throwIfNotContains(final Cell vertexKey) {
         if (!containsVertexKey(vertexKey)) {
-            throw new IllegalArgumentException();
+            throw new NoSuchElementException();
         }
     }
 
-    // == Grid interface ==
+    // == Grid interface. ==========================================================================
 
     public int getNumRows() {
         return numRows;

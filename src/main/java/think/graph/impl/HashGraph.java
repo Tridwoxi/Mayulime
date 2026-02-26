@@ -27,7 +27,7 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         this.children = LinkedHashMap.newLinkedHashMap(expectedSize);
         this.parents = LinkedHashMap.newLinkedHashMap(expectedSize);
         this.values = LinkedHashMap.newLinkedHashMap(expectedSize);
-        this.either = children;
+        this.either = this.children;
     }
 
     public HashGraph(final Graph<K, V, E> other) {
@@ -48,7 +48,7 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         this.children = shallowCopyNSM(children);
         this.parents = shallowCopyNSM(parents);
         this.values = new LinkedHashMap<>(values);
-        this.either = children;
+        this.either = this.children;
     }
 
     @Override
@@ -174,7 +174,7 @@ public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
         final SequencedMap<O, SequencedMap<I, D>> outerCopy = LinkedHashMap.newLinkedHashMap(
             nestedSequencedMap.size()
         );
-        outerCopy.forEach((key, inner) -> {
+        nestedSequencedMap.forEach((key, inner) -> {
             final SequencedMap<I, D> innerCopy = new LinkedHashMap<>(inner);
             outerCopy.put(key, innerCopy);
         });
