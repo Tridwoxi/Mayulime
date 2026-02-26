@@ -103,6 +103,28 @@ public final class HashGraph<V, E> implements MutableGraph<V, E> {
     }
 
     @Override
+    public boolean replaceVertex(final V previous, final V replacement) {
+        throwIfNotContains(previous);
+        if (previous.equals(replacement)) {
+            return false;
+        }
+        if (containsVertex(replacement)) {
+            throw new IllegalArgumentException();
+        }
+        final HashMap<V, E> outgoing = new HashMap<>(children.get(previous));
+        final HashMap<V, E> incoming = new HashMap<>(parents.get(previous));
+        removeVertex(previous);
+        addVertex(replacement);
+        outgoing.forEach((destination, edge) ->
+            setEdge(replacement, destination.equals(previous) ? replacement : destination, edge)
+        );
+        incoming.forEach((source, edge) ->
+            setEdge(source.equals(previous) ? replacement : source, replacement, edge)
+        );
+        return true;
+    }
+
+    @Override
     public boolean setEdge(final V source, final V destination, final E edge) {
         throwIfNotContains(source);
         throwIfNotContains(destination);

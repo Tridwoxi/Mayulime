@@ -49,9 +49,16 @@ public interface Graph<V, E> {
             In addition to ensuring this graph does not contain the given vertex, this method will
             ensure there are no incoming or outgoing edges of the given vertex. Hence adding an
             edge using {@link MutableEdgeGraph#setEdge(V, V, E)} and not removing it with {@link
-            MutableEdgeGraph#removeEdge(V, V)} is not sufficient to ensure it exists.
+            MutableEdgeGraph#removeEdge(V, V)} is not sufficient to ensure it exists. This method
+            must be supported even if the graph is not an {@link MutableEdgeGraph}.
          */
         boolean removeVertex(V vertex);
+
+        /**
+            Replace the given vertex. If the graph already contains the replacement and the
+            replacement is not equal to the placement, it is an IllegalArgumentException.
+         */
+        boolean replaceVertex(V previous, V replacement);
     }
 
     interface MutableEdgeGraph<V, E> extends Graph<V, E> {
