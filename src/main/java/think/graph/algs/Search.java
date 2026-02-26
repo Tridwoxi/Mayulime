@@ -7,135 +7,138 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import think.graph.Graph;
 
+/**
+    Search algorithms upon a graph. The returned {@link Fill} parent maps of the search algorithms
+    always reflects the order of children exploration. For example, on a graph with equal weights,
+    "Start -> A, B; A -> Finish; B -> Finish;" then the path from Start to Finish will always be
+    "Start -> A -> Finish" and never "Start -> B -> Finish".
+ */
 public final class Search {
 
     /**
         A Path is an ordered sequence of vertices on a graph. Vertices need not be unique. A Path
-        contains N vertices and N-1 edges between them, with N >= 1.
+        contains N vertices and N-1 edges between them, with N >= 1. The path components are
+        mutable, so please take care to mutate only in a prudent fashion.
      */
-    public static final class Path<V, E> {
-
-        private final List<V> vertices;
-        private final List<E> edges;
-
-        public Path(final List<V> vertices, final List<E> edges) {
-            this.vertices = new ArrayList<>(vertices);
-            this.edges = new ArrayList<>(edges);
-            if (this.vertices.size() != this.edges.size() + 1) {
+    public record Path<K, V, E>(List<K> vertexKeys, List<V> vertexValues, List<E> edges) {
+        public Path {
+            // Although it doesn't look like it does anything, this defensive copying works.
+            vertexKeys = new ArrayList<>(vertexKeys);
+            vertexValues = new ArrayList<>(vertexValues);
+            edges = new ArrayList<>(edges);
+            if (vertexKeys.size() != vertexValues.size() || vertexKeys.size() != edges.size() + 1) {
                 throw new IllegalArgumentException();
             }
         }
 
-        public V getStart() {
-            return vertices.getFirst();
-        }
-
-        public V getFinish() {
-            return vertices.getLast();
-        }
-
-        public List<V> getTrailingVertices() {
-            return new ArrayList<>(vertices.subList(0, vertices.size() - 1));
-        }
-
-        public List<V> getLeadingVertices() {
-            return new ArrayList<>(vertices.subList(1, vertices.size()));
-        }
-
-        public <R> R reduceEdges(final R initial, final BiFunction<R, E, R> reducer) {
-            // This implementation has the reduction run sequentially in exchange for callers not
-            // needing to pass a combiner or identity as an initial, unlike Stream::reduce(U,
-            // BiFunction, BinaryOperator)
-            R accumulator = initial;
-            for (final E edge : edges) {
-                accumulator = reducer.apply(accumulator, edge);
-            }
-            return accumulator;
+        public Path<K, V, E> shallowCopy() {
+            return new Path<>(vertexKeys, vertexValues, edges);
         }
     }
 
     /**
-        A Fill is a result of a search operation from a source. It resembles a tree.
+        A Fill is a result of a search operation from a source. It resembles a directed tree with
+        `source` as its root.
      */
-    public static final class Fill<V, E> {
+    public static final class Fill<K, V, E> {
 
-        private final Map<V, V> toParent; // get(V) -> parent of V.
-        private final Map<V, E> fromParent; // get(V) -> edge from parent of V to V.
-        private final V source;
+        private final Map<K, K> toParent; // get(K) -> parent of K.
+        private final Map<K, E> fromParent; // get(K) -> edge from parent of K to K.
+        private final Map<K, V> toValue; // get(K) -> value of K.
+        private final K source;
 
-        public Fill(final Map<V, V> toParent, final Map<V, E> fromParent, final V source) {
+        public Fill(
+            final Map<K, K> toParent,
+            final Map<K, E> fromParent,
+            final Map<K, V> toValue,
+            final K source
+        ) {
             this.toParent = new HashMap<>(toParent);
             this.fromParent = new HashMap<>(fromParent);
+            this.toValue = new HashMap<>(toValue);
             this.source = source;
-            if (this.toParent.size() != this.fromParent.size() + 1) {
+            validate(() -> {
                 throw new IllegalArgumentException();
-            }
+            });
         }
 
-        public V getSource() {
+        public K getSource() {
             return source;
         }
 
-        public boolean isReachable(final V vertex) {
-            return toParent.containsKey(vertex);
+        public boolean isReachable(final K key) {
+            return toParent.containsKey(key);
         }
 
-        public Path<V, E> getPathTo(final V vertex) {
-            if (!isReachable(vertex)) {
+        public Path<K, V, E> getPathTo(final K reachableVertexKey) {
+            if (!isReachable(reachableVertexKey)) {
                 throw new IllegalArgumentException();
             }
-            final List<V> vertices = new ArrayList<>();
-            V walker = vertex;
-            while (walker != null) {
-                vertices.add(walker);
+            final List<K> keys = new ArrayList<>();
+            K walker = reachableVertexKey;
+            while (!walker.equals(source)) {
+                keys.add(walker);
                 walker = toParent.get(walker);
             }
-            Collections.reverse(vertices);
+            keys.add(source);
+            Collections.reverse(keys);
 
-            final List<E> edges = new ArrayList<>();
-            for (int index = 1; index < vertices.size(); index++) {
-                edges.add(fromParent.get(vertices.get(index)));
-            }
-            return new Path<>(vertices, edges);
+            final List<V> values = keys.stream().map(toValue::get).toList();
+            final List<E> edges = keys.stream().skip(1L).map(fromParent::get).toList();
+            return new Path<>(keys, values, edges);
         }
 
-        private static <V, E> Fill<V, E> fromParentsAndGraph(
-            final Map<V, V> toParent,
-            final Graph<V, E> graph,
-            final V source
+        private static <K, V, E> Fill<K, V, E> fromToParentsAndGraph(
+            final Map<K, K> toParent,
+            final Graph<K, V, E> graph,
+            final K source
         ) {
-            final Map<V, E> fromParent = HashMap.newHashMap(toParent.size());
+            final Map<K, E> fromParent = HashMap.newHashMap(toParent.size());
+            final Map<K, V> toValue = HashMap.newHashMap(toParent.size());
             toParent.forEach((child, parent) -> {
+                toValue.put(child, graph.getVertexValue(child));
                 if (!child.equals(source)) {
-                    fromParent.put(child, graph.getEdge(parent, child).orElseThrow());
+                    fromParent.put(child, graph.getEdge(parent, child));
                 }
             });
-            return new Fill<V, E>(toParent, fromParent, source);
+            return new Fill<K, V, E>(toParent, fromParent, toValue, source);
+        }
+
+        private void validate(final Runnable uponFailure) {
+            if (toParent.size() != toValue.size() || toParent.size() != fromParent.size() + 1) {
+                uponFailure.run();
+            }
+            final Predicate<K> okay = vertexKey ->
+                !vertexKey.equals(source) &&
+                (!toParent.containsKey(vertexKey) || !toValue.containsKey(vertexKey));
+            if (!toParent.keySet().stream().allMatch(okay)) {
+                uponFailure.run();
+            }
         }
     }
 
     private Search() {}
 
-    public static <V, E> Fill<V, E> breadthFirst(final Graph<V, E> graph, final V source) {
-        final Map<V, V> parents = new HashMap<>();
-        final Deque<V> frontier = new ArrayDeque<>();
+    public static <K, V, E> Fill<K, V, E> breadthFirst(final Graph<K, V, E> graph, final K source) {
+        final Map<K, K> parents = new HashMap<>();
+        final Deque<K> frontier = new ArrayDeque<>();
         // I'm pretty sure this null does no harm. HashMap permits nulls, and the parents map
-        // escapes only to Fill::fromParentsAndGraph, which checks child against source instead of
+        // escapes only to Fill::fromToParentsAndGraph, which checks child against source instead of
         // treating null like a sentinel.
         parents.put(source, null);
         frontier.addLast(source);
         while (!frontier.isEmpty()) {
-            final V parent = frontier.removeFirst();
-            for (final V child : graph.getChildren(parent)) {
+            final K parent = frontier.removeFirst();
+            for (final K child : graph.getChildren(parent)) {
                 if (!parents.containsKey(child)) {
                     parents.put(child, parent);
                     frontier.addLast(child);
                 }
             }
         }
-        return Fill.fromParentsAndGraph(parents, graph, source);
+        return Fill.fromToParentsAndGraph(parents, graph, source);
     }
 }

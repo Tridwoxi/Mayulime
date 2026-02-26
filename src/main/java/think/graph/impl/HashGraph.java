@@ -2,155 +2,167 @@ package think.graph.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import think.graph.Graph.MutableGraph;
 
 /**
     HashMap-backed implementation of a graph. All operations have theoretically optimal time
-    complexity in exchange for poor constant factor performance.
+    complexity in exchange for poor constant factor performance. This implementation is general and
+    supports all graphs supported by {@link MutableGraph}.
  */
-public final class HashGraph<V, E> implements MutableGraph<V, E> {
+public final class HashGraph<K, V, E> implements MutableGraph<K, V, E> {
 
-    private final HashMap<V, HashMap<V, E>> children;
-    private final HashMap<V, HashMap<V, E>> parents;
-    private final HashMap<V, HashMap<V, E>> either; // Read-only view.
+    private final Map<K, Map<K, E>> children;
+    private final Map<K, Map<K, E>> parents;
+    private final Map<K, V> values;
+    private final Map<K, Map<K, E>> either; // Read-only view.
 
     public HashGraph(final int expectedSize) {
         this.children = HashMap.newHashMap(expectedSize);
         this.parents = HashMap.newHashMap(expectedSize);
+        this.values = HashMap.newHashMap(expectedSize);
         this.either = children;
     }
 
     private HashGraph(
-        final HashMap<V, HashMap<V, E>> children,
-        final HashMap<V, HashMap<V, E>> parents
+        final Map<K, Map<K, E>> children,
+        final Map<K, Map<K, E>> parents,
+        final Map<K, V> values
     ) {
         this.children = children;
         this.parents = parents;
+        this.values = values;
         this.either = children;
     }
 
     @Override
-    public boolean containsVertex(final V vertex) {
-        return either.containsKey(vertex);
+    public boolean containsVertexKey(final K vertexKey) {
+        return either.containsKey(vertexKey);
     }
 
     @Override
-    public Optional<E> getEdge(final V source, final V destination) {
-        throwIfNotContains(source);
-        throwIfNotContains(destination);
-        return children.get(source).containsKey(destination)
-            ? Optional.of(children.get(source).get(destination))
-            : Optional.empty();
+    public V getVertexValue(final K vertexKey) {
+        throwIfNotContains(vertexKey);
+        return values.get(vertexKey);
     }
 
     @Override
-    public ArrayList<V> getChildren(final V vertex) {
-        throwIfNotContains(vertex);
-        return new ArrayList<>(children.get(vertex).keySet());
+    public boolean containsEdge(final K sourceKey, final K destinationKey) {
+        throwIfNotContains(sourceKey);
+        throwIfNotContains(destinationKey);
+        return children.get(sourceKey).containsKey(destinationKey);
     }
 
     @Override
-    public ArrayList<V> getParents(final V vertex) {
-        throwIfNotContains(vertex);
-        return new ArrayList<>(parents.get(vertex).keySet());
+    public E getEdge(final K sourceKey, final K destinationKey) {
+        throwIfNotContains(sourceKey);
+        throwIfNotContains(destinationKey);
+        if (!children.get(sourceKey).containsKey(destinationKey)) {
+            throw new NoSuchElementException();
+        }
+        return children.get(sourceKey).get(destinationKey);
     }
 
     @Override
-    public ArrayList<V> getAllVertices() {
-        return new ArrayList<>(either.keySet());
+    public Set<K> getChildren(final K parentKey) {
+        throwIfNotContains(parentKey);
+        return new HashSet<>(children.get(parentKey).keySet());
     }
 
     @Override
-    public HashGraph<V, E> shallowCopy() {
-        final Function<HashMap<V, HashMap<V, E>>, HashMap<V, HashMap<V, E>>> copier = outer -> {
-            final HashMap<V, HashMap<V, E>> outerCopy = HashMap.newHashMap(outer.size());
+    public Set<K> getParents(final K childKey) {
+        throwIfNotContains(childKey);
+        return new HashSet<>(parents.get(childKey).keySet());
+    }
+
+    @Override
+    public Set<K> getAllVertexKeys() {
+        return new HashSet<>(either.keySet());
+    }
+
+    @Override
+    public Set<V> getAllVertexValues() {
+        return new HashSet<>(values.values());
+    }
+
+    @Override
+    public HashGraph<K, V, E> shallowCopy() {
+        final Function<Map<K, Map<K, E>>, Map<K, Map<K, E>>> copier = outer -> {
+            final Map<K, Map<K, E>> outerCopy = HashMap.newHashMap(outer.size());
             outer.forEach((key, inner) -> {
-                final HashMap<V, E> innerCopy = new HashMap<>(inner);
+                final Map<K, E> innerCopy = new HashMap<>(inner);
                 outerCopy.put(key, innerCopy);
             });
             return outerCopy;
         };
-        final HashMap<V, HashMap<V, E>> childrenCopy = copier.apply(children);
-        final HashMap<V, HashMap<V, E>> parentsCopy = copier.apply(parents);
-        return new HashGraph<>(childrenCopy, parentsCopy);
+        final Map<K, Map<K, E>> childrenCopy = copier.apply(children);
+        final Map<K, Map<K, E>> parentsCopy = copier.apply(parents);
+        final Map<K, V> valuesCopy = new HashMap<>(values);
+        return new HashGraph<>(childrenCopy, parentsCopy, valuesCopy);
     }
 
     @Override
-    public boolean addVertex(final V vertex) {
-        if (containsVertex(vertex)) {
+    public boolean putVertex(final K vertexKey, final V vertexValue) {
+        if (!containsVertexKey(vertexKey)) {
+            children.put(vertexKey, new HashMap<>());
+            parents.put(vertexKey, new HashMap<>());
+        }
+        if (values.get(vertexKey) == null || !values.get(vertexKey).equals(vertexValue)) {
+            values.put(vertexKey, vertexValue);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeVertex(final K vertexKey) {
+        if (!containsVertexKey(vertexKey)) {
             return false;
         }
-        children.put(vertex, new HashMap<>());
-        parents.put(vertex, new HashMap<>());
+        final List<K> childrenCopy = new ArrayList<>(children.get(vertexKey).keySet());
+        final List<K> parentsCopy = new ArrayList<>(parents.get(vertexKey).keySet());
+        childrenCopy.forEach(other -> parents.get(other).remove(vertexKey));
+        parentsCopy.forEach(other -> children.get(other).remove(vertexKey));
+        children.remove(vertexKey);
+        parents.remove(vertexKey);
+        values.remove(vertexKey);
         return true;
     }
 
     @Override
-    public boolean removeVertex(final V vertex) {
-        if (!containsVertex(vertex)) {
+    public boolean putEdge(final K sourceKey, final K destinationKey, final E edge) {
+        throwIfNotContains(sourceKey);
+        throwIfNotContains(destinationKey);
+        if (
+            children.get(sourceKey).containsKey(destinationKey) &&
+            edge.equals(children.get(sourceKey).get(destinationKey))
+        ) {
             return false;
         }
-        final ArrayList<V> childrenCopy = new ArrayList<>(children.get(vertex).keySet());
-        final ArrayList<V> parentsCopy = new ArrayList<>(parents.get(vertex).keySet());
-        childrenCopy.forEach(other -> parents.get(other).remove(vertex));
-        parentsCopy.forEach(other -> children.get(other).remove(vertex));
-        children.remove(vertex);
-        parents.remove(vertex);
+        children.get(sourceKey).put(destinationKey, edge);
+        parents.get(destinationKey).put(sourceKey, edge);
         return true;
     }
 
     @Override
-    public boolean replaceVertex(final V previous, final V replacement) {
-        throwIfNotContains(previous);
-        if (previous.equals(replacement)) {
+    public boolean removeEdge(final K sourceKey, final K destinationKey) {
+        throwIfNotContains(sourceKey);
+        throwIfNotContains(destinationKey);
+        if (!children.get(sourceKey).containsKey(destinationKey)) {
             return false;
         }
-        if (containsVertex(replacement)) {
-            throw new IllegalArgumentException();
-        }
-        final HashMap<V, E> outgoing = new HashMap<>(children.get(previous));
-        final HashMap<V, E> incoming = new HashMap<>(parents.get(previous));
-        removeVertex(previous);
-        addVertex(replacement);
-        outgoing.forEach((destination, edge) ->
-            setEdge(replacement, destination.equals(previous) ? replacement : destination, edge)
-        );
-        incoming.forEach((source, edge) ->
-            setEdge(source.equals(previous) ? replacement : source, replacement, edge)
-        );
+        children.get(sourceKey).remove(destinationKey);
+        parents.get(destinationKey).remove(sourceKey);
         return true;
     }
 
-    @Override
-    public boolean setEdge(final V source, final V destination, final E edge) {
-        throwIfNotContains(source);
-        throwIfNotContains(destination);
-        final E previous = children.get(source).get(destination);
-        if (children.get(source).containsKey(destination) && edge.equals(previous)) {
-            return false;
-        }
-        children.get(source).put(destination, edge);
-        parents.get(destination).put(source, edge);
-        return true;
-    }
-
-    @Override
-    public boolean removeEdge(final V source, final V destination) {
-        throwIfNotContains(source);
-        throwIfNotContains(destination);
-        if (!children.get(source).containsKey(destination)) {
-            return false;
-        }
-        children.get(source).remove(destination);
-        parents.get(destination).remove(source);
-        return true;
-    }
-
-    private void throwIfNotContains(final V vertex) {
-        if (!containsVertex(vertex)) {
+    private void throwIfNotContains(final K vertexKey) {
+        if (!containsVertexKey(vertexKey)) {
             throw new NoSuchElementException();
         }
     }

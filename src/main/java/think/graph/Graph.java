@@ -1,16 +1,15 @@
 package think.graph;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Set;
 
 /**
-    A graph is a collection of vertices (V) connected by edges (E). Graphs are always directed.
+    A graph is a collection of vertex keys (K) which hold the vertex values (V) of the vertices
+    they represent and are connected by edges (E). Graphs must not have duplicate keys or edges.
 
-    All methods that accept a vertex except for {@link #containsVertex(V)}, {@link
-    MutableVertexGraph#addVertex(V)}, and {@link MutableVertexGraph#removeVertex(V)} throw {@link
-    NoSuchElementException} if the given vertex is not contained in the graph.
+    All methods that accept a vertex key except for {@link Graph#containsVertexKey(K)}, {@link
+    MutableVertexGraph#putVertex(K, V)}, and {@link MutableVertexGraph#removeVertex(K)} throw {@link
+    NoSuchElementException} if the given vertex key is not contained in the graph.
 
     All methods that mutate the graph return if the graph changed as a result of the operation
     (this is consistent with the Java Collections Framework). If the graph is unable to change in
@@ -19,55 +18,48 @@ import java.util.Optional;
 
     All methods are required; no method will ever throw {@link UnsupportedOperationException}.
  */
-public interface Graph<V, E> {
-    boolean containsVertex(V vertex);
-    Optional<E> getEdge(V source, V destination);
-    List<V> getChildren(V vertex);
-    ArrayList<V> getParents(V vertex);
-    /**
-        The return order of this method is implementation-defined. The implementation may leave
-        the return order unspecified.
-     */
-    List<V> getAllVertices();
+public interface Graph<K, V, E> {
+    boolean containsVertexKey(K vertexKey);
+    V getVertexValue(K vertexKey);
+    boolean containsEdge(K sourceKey, K destinationKey);
+    E getEdge(K sourceKey, K destinationKey);
+    Set<K> getChildren(K parentKey);
+    Set<K> getParents(K childKey);
+    Set<K> getAllVertexKeys();
+    Set<V> getAllVertexValues();
     /**
         Implementations should declare the most specific return type they are able. For example,
         if "A implements Graph", then A::shallowCopy(void) should return "A", not "Graph".
      */
-    Graph<V, E> shallowCopy();
+    Graph<K, V, E> shallowCopy();
 
-    default int getNumChildren(final V vertex) {
-        return getChildren(vertex).size();
+    default int getNumChildren(final K parentKey) {
+        return getChildren(parentKey).size();
     }
 
-    default int getNumParents(final V vertex) {
-        return getParents(vertex).size();
+    default int getNumParents(final K childKey) {
+        return getParents(childKey).size();
     }
 
-    interface MutableVertexGraph<V, E> extends Graph<V, E> {
-        boolean addVertex(V vertex);
+    interface MutableVertexGraph<K, V, E> extends Graph<K, V, E> {
+        boolean putVertex(K vertexKey, V vertexValue);
         /**
             In addition to ensuring this graph does not contain the given vertex, this method will
             ensure there are no incoming or outgoing edges of the given vertex. Hence adding an
-            edge using {@link MutableEdgeGraph#setEdge(V, V, E)} and not removing it with {@link
-            MutableEdgeGraph#removeEdge(V, V)} is not sufficient to ensure it exists. This method
-            must be supported even if the graph is not an {@link MutableEdgeGraph}.
+            edge using {@link MutableEdgeGraph#putEdge(K, K, E)} and not removing it with {@link
+            MutableEdgeGraph#removeEdge(K, K)} is not sufficient to ensure it is contained. This
+            method must be supported even if the graph is not an {@link MutableEdgeGraph}.
          */
-        boolean removeVertex(V vertex);
-
-        /**
-            Replace the given vertex. If the graph already contains the replacement and the
-            replacement is not equal to the placement, it is an IllegalArgumentException.
-         */
-        boolean replaceVertex(V previous, V replacement);
+        boolean removeVertex(K vertexKey);
     }
 
-    interface MutableEdgeGraph<V, E> extends Graph<V, E> {
-        /**
-            Ensure the referenced edge has the given value. If no edge exists, it will be added.
-         */
-        boolean setEdge(V source, V destination, E edge);
-        boolean removeEdge(V source, V destination);
+    interface MutableEdgeGraph<K, V, E> extends Graph<K, V, E> {
+        boolean putEdge(K sourceKey, K destinationKey, E edge);
+        boolean removeEdge(K sourceKey, K destinationKey);
     }
 
-    interface MutableGraph<V, E> extends MutableVertexGraph<V, E>, MutableEdgeGraph<V, E> {}
+    // @formatter:off
+    interface MutableGraph<K, V, E> extends
+        MutableVertexGraph<K, V, E>,
+        MutableEdgeGraph<K, V, E> {}
 }
