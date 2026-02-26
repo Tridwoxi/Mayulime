@@ -8,7 +8,8 @@ import java.util.Optional;
 /**
     A graph is a collection of vertices (V) connected by edges (E). Graphs are always directed.
 
-    All methods that accept a vertex except for {@link #containsVertex(V)} throw {@link
+    All methods that accept a vertex except for {@link #containsVertex(V)}, {@link
+    MutableVertexGraph#addVertex(V)}, and {@link MutableVertexGraph#removeVertex(V)} throw {@link
     NoSuchElementException} if the given vertex is not contained in the graph.
 
     All methods that mutate the graph return if the graph changed as a result of the operation

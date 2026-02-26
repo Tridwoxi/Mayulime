@@ -33,6 +33,52 @@ public final class HashGraph<V, E> implements MutableGraph<V, E> {
     }
 
     @Override
+    public boolean containsVertex(final V vertex) {
+        return either.containsKey(vertex);
+    }
+
+    @Override
+    public Optional<E> getEdge(final V source, final V destination) {
+        throwIfNotContains(source);
+        throwIfNotContains(destination);
+        return children.get(source).containsKey(destination)
+            ? Optional.of(children.get(source).get(destination))
+            : Optional.empty();
+    }
+
+    @Override
+    public ArrayList<V> getChildren(final V vertex) {
+        throwIfNotContains(vertex);
+        return new ArrayList<>(children.get(vertex).keySet());
+    }
+
+    @Override
+    public ArrayList<V> getParents(final V vertex) {
+        throwIfNotContains(vertex);
+        return new ArrayList<>(parents.get(vertex).keySet());
+    }
+
+    @Override
+    public ArrayList<V> getAllVertices() {
+        return new ArrayList<>(either.keySet());
+    }
+
+    @Override
+    public HashGraph<V, E> shallowCopy() {
+        final Function<HashMap<V, HashMap<V, E>>, HashMap<V, HashMap<V, E>>> copier = outer -> {
+            final HashMap<V, HashMap<V, E>> outerCopy = HashMap.newHashMap(outer.size());
+            outer.forEach((key, inner) -> {
+                final HashMap<V, E> innerCopy = new HashMap<>(inner);
+                outerCopy.put(key, innerCopy);
+            });
+            return outerCopy;
+        };
+        final HashMap<V, HashMap<V, E>> childrenCopy = copier.apply(children);
+        final HashMap<V, HashMap<V, E>> parentsCopy = copier.apply(parents);
+        return new HashGraph<>(childrenCopy, parentsCopy);
+    }
+
+    @Override
     public boolean addVertex(final V vertex) {
         if (containsVertex(vertex)) {
             return false;
@@ -57,15 +103,9 @@ public final class HashGraph<V, E> implements MutableGraph<V, E> {
     }
 
     @Override
-    public boolean containsVertex(final V vertex) {
-        return either.containsKey(vertex);
-    }
-
-    @Override
     public boolean setEdge(final V source, final V destination, final E edge) {
-        if (!containsVertex(source) || !containsVertex(destination)) {
-            throw new NoSuchElementException();
-        }
+        throwIfNotContains(source);
+        throwIfNotContains(destination);
         final E previous = children.get(source).get(destination);
         if (children.get(source).containsKey(destination) && edge.equals(previous)) {
             return false;
@@ -76,21 +116,9 @@ public final class HashGraph<V, E> implements MutableGraph<V, E> {
     }
 
     @Override
-    public Optional<E> getEdge(final V source, final V destination) {
-        if (!containsVertex(source) || !containsVertex(destination)) {
-            throw new NoSuchElementException();
-        }
-        if (!children.get(source).containsKey(destination)) {
-            return Optional.empty();
-        }
-        return Optional.of(children.get(source).get(destination));
-    }
-
-    @Override
     public boolean removeEdge(final V source, final V destination) {
-        if (!containsVertex(source) || !containsVertex(destination)) {
-            throw new NoSuchElementException();
-        }
+        throwIfNotContains(source);
+        throwIfNotContains(destination);
         if (!children.get(source).containsKey(destination)) {
             return false;
         }
@@ -99,39 +127,9 @@ public final class HashGraph<V, E> implements MutableGraph<V, E> {
         return true;
     }
 
-    @Override
-    public ArrayList<V> getAllVertices() {
-        return new ArrayList<>(either.keySet());
-    }
-
-    @Override
-    public ArrayList<V> getChildren(final V vertex) {
+    private void throwIfNotContains(final V vertex) {
         if (!containsVertex(vertex)) {
             throw new NoSuchElementException();
         }
-        return new ArrayList<>(children.get(vertex).keySet());
-    }
-
-    @Override
-    public ArrayList<V> getParents(final V vertex) {
-        if (!containsVertex(vertex)) {
-            throw new NoSuchElementException();
-        }
-        return new ArrayList<>(parents.get(vertex).keySet());
-    }
-
-    @Override
-    public HashGraph<V, E> shallowCopy() {
-        final Function<HashMap<V, HashMap<V, E>>, HashMap<V, HashMap<V, E>>> copier = outer -> {
-            final HashMap<V, HashMap<V, E>> outerCopy = HashMap.newHashMap(outer.size());
-            outer.forEach((key, inner) -> {
-                final HashMap<V, E> innerCopy = new HashMap<>(inner);
-                outerCopy.put(key, innerCopy);
-            });
-            return outerCopy;
-        };
-        final HashMap<V, HashMap<V, E>> childrenCopy = copier.apply(children);
-        final HashMap<V, HashMap<V, E>> parentsCopy = copier.apply(parents);
-        return new HashGraph<>(childrenCopy, parentsCopy);
     }
 }
