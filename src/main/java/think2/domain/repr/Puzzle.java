@@ -43,4 +43,8 @@ public final class Puzzle {
     public int getWallBudget() {
         return wallBudget;
     }
+
+    public boolean isValid(final Board board) {
+        return true; // Fix this.
+    }
 }

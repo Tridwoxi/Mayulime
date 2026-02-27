@@ -11,15 +11,15 @@ import think2.domain.repr.Puzzle;
 public abstract class Solver implements Runnable {
 
     @FunctionalInterface
-    public interface SolutionListener {
+    public interface ProposedSolution {
         void listen(String submitter, Puzzle puzzle, Board solution);
     }
 
-    private final SolutionListener listener;
+    private final ProposedSolution listener;
     private final Puzzle puzzle;
     private volatile boolean alive;
 
-    public Solver(final SolutionListener listener, final Puzzle puzzle) {
+    public Solver(final ProposedSolution listener, final Puzzle puzzle) {
         this.listener = listener;
         this.puzzle = puzzle;
         this.alive = true;
@@ -70,7 +70,7 @@ public abstract class Solver implements Runnable {
         return puzzle;
     }
 
-    protected final SolutionListener getListener() {
+    protected final ProposedSolution getListener() {
         return listener;
     }
 }
