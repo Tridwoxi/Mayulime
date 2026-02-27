@@ -10,6 +10,7 @@ import think2.domain.repr.Puzzle;
 import think2.graph.algs.Evaluate;
 import think2.solve.Solver;
 import think2.solve.impl.BaselineSolver;
+import think2.solve.impl.RandomSolver;
 
 public final class Manager {
 
@@ -52,6 +53,7 @@ public final class Manager {
         };
         cleanup.run();
         run.accept(new BaselineSolver(this::consider, puzzle));
+        run.accept(new RandomSolver(this::consider, puzzle));
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Board board) {
