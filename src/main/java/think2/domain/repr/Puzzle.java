@@ -2,7 +2,9 @@ package think2.domain.repr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import think2.domain.repr.Board.Feature;
+import think2.graph.Graph;
 import think2.graph.impl.GridGraph;
 import think2.graph.impl.GridGraph.Cell;
 
@@ -45,6 +47,21 @@ public final class Puzzle {
     }
 
     public boolean isValid(final Board board) {
-        return true; // Fix this.
+        // You could probably maliciously defeat this check, but I think doing so requires a bit of
+        // inventiveness. So far, it's just been an accident detector, and I think it'll suffice.
+        final Graph<Cell, Feature, Integer> originalBacking = original.getBacking();
+        final Graph<Cell, Feature, Integer> candidateBacking = board.getBacking();
+        final Predicate<Cell> okay = cell -> {
+            final Feature originalFeature = originalBacking.getVertexValue(cell);
+            return switch (originalFeature) {
+                case EMPTY -> !candidateBacking.containsVertexKey(cell) ||
+                candidateBacking.getVertexValue(cell) == Feature.EMPTY;
+                case CHECKPOINT -> candidateBacking.containsVertexKey(cell) &&
+                candidateBacking.getVertexValue(cell) == Feature.CHECKPOINT;
+            };
+        };
+        final boolean matching = originalBacking.getAllVertexKeys().stream().allMatch(okay);
+        final boolean permissible = board.getNumSpentWalls() <= wallBudget;
+        return matching && permissible;
     }
 }
