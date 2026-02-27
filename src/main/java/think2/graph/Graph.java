@@ -21,6 +21,11 @@ import java.util.SequencedSet;
     The iteration order of returned collections is implementation-defined. It must not be left
     unspecified: implementations are to treat iteration order as part of the interface contract.
  */
+/*
+    SequencedSet was chosen as the interface because in some scenarios the order of the returned
+    collection matters, and all keys are unique. But Iterable would probably do just fine too:
+    membership testing can be done with containsEdge, and callers can simply promise to return sets.
+ */
 public interface Graph<K, V, E> {
     boolean containsVertexKey(K vertexKey);
     V getVertexValue(K vertexKey);
