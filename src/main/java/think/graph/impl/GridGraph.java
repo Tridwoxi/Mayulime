@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.SequencedSet;
 import java.util.function.Function;
 import think.graph.Graph.MutableVertexGraph;
-import think.tools.Structures.Cell;
+import think.graph.impl.GridGraph.Cell; // This import works somehow.
 
 /**
     ArrayList-backed implementation of a two-dimensional grid graph with holes. This is a highly
@@ -21,6 +21,12 @@ import think.tools.Structures.Cell;
     traverse an array of arrays).
  */
 public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> {
+
+    public record Cell(int row, int col) {
+        private boolean isNeighbor(final Cell other) {
+            return Math.abs(row - other.row) + Math.abs(col - other.col) == 1;
+        }
+    }
 
     private static final Integer EDGE_LENGTH = 1;
     private final List<Cell> allCells;
@@ -62,7 +68,7 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
     public boolean containsEdge(final Cell sourceKey, final Cell destinationKey) {
         throwIfNotContains(sourceKey);
         throwIfNotContains(destinationKey);
-        return sourceKey.manhattanDistance(destinationKey) == 1;
+        return sourceKey.isNeighbor(destinationKey);
     }
 
     @Override

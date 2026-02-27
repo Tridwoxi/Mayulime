@@ -13,12 +13,6 @@ public final class Structures {
 
     private Structures() {}
 
-    public record Cell(int row, int col) {
-        public int manhattanDistance(final Cell other) {
-            return Math.abs(row - other.row) + Math.abs(col - other.col);
-        }
-    }
-
     public record Pair<F, S>(F first, S second) {}
 
     public record Weighted<T>(T item, double weight) implements Comparable<Weighted<T>> {
