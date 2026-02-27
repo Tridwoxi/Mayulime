@@ -19,16 +19,16 @@ public final class Board {
 
     private final GridGraph<Feature> backing;
     private final Set<Cell> originallyEmpty;
-    private final Set<Cell> currentWalls;
+    private final Set<Cell> spentWalls;
 
     Board(
         final GridGraph<Feature> backing,
         final Set<Cell> originallyEmpty,
-        final Set<Cell> currentWalls
+        final Set<Cell> spentWalls
     ) {
         this.backing = backing.shallowCopy();
         this.originallyEmpty = originallyEmpty;
-        this.currentWalls = new HashSet<>(currentWalls);
+        this.spentWalls = new HashSet<>(spentWalls);
     }
 
     public Graph<Cell, Feature, Integer> getBacking() {
@@ -40,33 +40,33 @@ public final class Board {
         return new HashSet<>(originallyEmpty);
     }
 
-    public Set<Cell> getCurrentWalls() {
-        return new HashSet<>(currentWalls);
+    public Set<Cell> getSpentWalls() {
+        return new HashSet<>(spentWalls);
     }
 
-    public int getNumPlacedWalls() {
-        return currentWalls.size();
+    public int getNumSpentWalls() {
+        return spentWalls.size();
     }
 
     public boolean placeWall(final Cell cell) {
-        if (!originallyEmpty.contains(cell) || currentWalls.contains(cell)) {
+        if (!originallyEmpty.contains(cell) || spentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
         backing.removeVertex(cell);
-        currentWalls.add(cell);
+        spentWalls.add(cell);
         return true;
     }
 
     public boolean removeWall(final Cell cell) {
-        if (!originallyEmpty.contains(cell) || !currentWalls.contains(cell)) {
+        if (!originallyEmpty.contains(cell) || !spentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
         backing.putVertex(cell, Feature.EMPTY);
-        currentWalls.remove(cell);
+        spentWalls.remove(cell);
         return true;
     }
 
     public Board shallowCopy() {
-        return new Board(backing.shallowCopy(), originallyEmpty, new HashSet<>(currentWalls));
+        return new Board(backing.shallowCopy(), originallyEmpty, new HashSet<>(spentWalls));
     }
 }
