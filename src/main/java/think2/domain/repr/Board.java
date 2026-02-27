@@ -2,6 +2,7 @@ package think2.domain.repr;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import think2.graph.Graph;
 import think2.graph.impl.GridGraph;
 import think2.graph.impl.GridGraph.Cell;
@@ -21,7 +22,17 @@ public final class Board {
     private final Set<Cell> originallyEmpty;
     private final Set<Cell> spentWalls;
 
-    Board(
+    Board(final GridGraph<Feature> original) {
+        this.backing = original.shallowCopy();
+        this.originallyEmpty = original
+            .getAllVertexKeys()
+            .stream()
+            .filter(cell -> original.getVertexValue(cell).equals(Feature.EMPTY))
+            .collect(Collectors.toCollection(HashSet::new));
+        this.spentWalls = new HashSet<>();
+    }
+
+    private Board(
         final GridGraph<Feature> backing,
         final Set<Cell> originallyEmpty,
         final Set<Cell> spentWalls
