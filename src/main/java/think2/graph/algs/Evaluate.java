@@ -14,7 +14,7 @@ public final class Evaluate {
 
     private Evaluate() {}
 
-    public int evaluate(final Puzzle puzzle, final Board board) {
+    public static int evaluate(final Puzzle puzzle, final Board board) {
         // TODO: This ought to return a record exposing segments so the caller learns more.
         int score = 0;
         Cell start = null;

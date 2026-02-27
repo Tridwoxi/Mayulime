@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import think2.domain.repr.Board;
 import think2.domain.repr.Puzzle;
+import think2.graph.algs.Evaluate;
 import think2.solve.Solver;
 import think2.solve.impl.BaselineSolver;
 
@@ -58,7 +59,7 @@ public final class Manager {
             throw new IllegalStateException();
         }
         final Board copy = board.shallowCopy();
-        final int score = 0; // This needs to be set to a real value.
+        final int score = Evaluate.evaluate(puzzle, copy);
         // We also check if the score is better in the synchronized section, but as solvers might
         // give this method lots of garbage, if we can early exit without competing for the lock,
         // it would be nice to.
@@ -76,7 +77,7 @@ public final class Manager {
                 Logging.warning("Guard tripped.");
                 return;
             }
-            if (!puzzle.isValid(board)) {
+            if (!puzzle.isValid(copy)) {
                 throw new IllegalArgumentException();
             }
             if (score > topScore) {
