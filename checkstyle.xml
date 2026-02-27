@@ -102,7 +102,6 @@
         <module name="VisibilityModifier" />
         <module name="ExplicitInitialization" />
         <module name="SuppressWarnings" />
-        <module name="TodoComment" />
     </module>
     <!--
         == Javadoc ==
@@ -146,6 +145,7 @@
         <module name="MissingNullCaseInSwitch" />
         <module name="OuterTypeNumber" />
         <module name="ReturnCount" />
+        <module name="TodoComment" />
         <module name="TrailingComment" />
         <module name="UncommentedMain" />
     -->
