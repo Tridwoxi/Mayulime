@@ -2,7 +2,6 @@ package think2.domain.repr;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 import think2.graph.Graph;
 import think2.graph.impl.GridGraph;
 import think2.graph.impl.GridGraph.Cell;
@@ -22,19 +21,7 @@ public final class Board {
     private final Set<Cell> originallyEmpty;
     private final Set<Cell> currentWalls;
 
-    // Package-private constructor to be used by Problem only with trusted initial values.
-    Board(final GridGraph<Feature> backing) {
-        this.backing = backing.shallowCopy();
-        this.originallyEmpty = backing
-            .getAllVertexKeys()
-            .stream()
-            .filter(cell -> backing.getVertexValue(cell).equals(Feature.EMPTY))
-            .collect(Collectors.toCollection(HashSet::new));
-        this.currentWalls = new HashSet<>();
-    }
-
-    // Private copy constructor to be used by this::shallowCopy only.
-    private Board(
+    Board(
         final GridGraph<Feature> backing,
         final Set<Cell> originallyEmpty,
         final Set<Cell> currentWalls
@@ -44,25 +31,39 @@ public final class Board {
         this.currentWalls = new HashSet<>(currentWalls);
     }
 
-    public void placeWall(final Cell cell) {
+    public Graph<Cell, Feature, Integer> getBacking() {
+        // You can mutate the returned graph by casting to a MutableVertexGraph, but don't you dare.
+        return backing;
+    }
+
+    public Set<Cell> getOriginallyEmpty() {
+        return new HashSet<>(originallyEmpty);
+    }
+
+    public Set<Cell> getCurrentWalls() {
+        return new HashSet<>(currentWalls);
+    }
+
+    public int getNumPlacedWalls() {
+        return currentWalls.size();
+    }
+
+    public boolean placeWall(final Cell cell) {
         if (!originallyEmpty.contains(cell) || currentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
         backing.removeVertex(cell);
         currentWalls.add(cell);
+        return true;
     }
 
-    public void removeWall(final Cell cell) {
+    public boolean removeWall(final Cell cell) {
         if (!originallyEmpty.contains(cell) || !currentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
         backing.putVertex(cell, Feature.EMPTY);
         currentWalls.remove(cell);
-    }
-
-    public Graph<Cell, Feature, Integer> getBacking() {
-        // You can mutate the returned graph by casting to a MutableVertexGraph, but don't you dare.
-        return backing;
+        return true;
     }
 
     public Board shallowCopy() {
