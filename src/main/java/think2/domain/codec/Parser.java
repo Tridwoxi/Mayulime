@@ -51,6 +51,7 @@ public final class Parser {
 
     private static final String REGION_DELIM_RE = ":";
     private static final String TOKEN_DELIM_RE = "\\.";
+    private static final String FEATURE_DELIM_RE = ",";
     private static final String LINEBREAK_RE = "\\R";
     private static final String DIGITS_RE = "\\d+";
     private static final String FEATURE_RE = "[a-z]\\d+";
@@ -92,9 +93,10 @@ public final class Parser {
             numCols
         );
 
+        int traversingIndex = 0;
         // The token delimiter is not quite a delimiter, but rather an ender. Hence length-1.
         for (int index = 0; index < boarddata.length - 1; index++) {
-            final String[] tokens = boarddata[index].split(TOKEN_DELIM_RE);
+            final String[] tokens = boarddata[index].split(FEATURE_DELIM_RE);
             require(tokens.length == EXPECTED_TOKEN_SIZE);
             final int numSkips = stringToInt(tokens[0].isBlank() ? DEFAULT_SKIP : tokens[0]);
             final String feature = tokens[1];
@@ -102,18 +104,19 @@ public final class Parser {
             final String featureType = feature.substring(0, FEATURE_TYPE_SIZE);
             final int featureOrder = stringToInt(feature.substring(FEATURE_TYPE_SIZE));
 
-            if ((WALL.equals(featureType) && featureOrder == 1) || featureOrder == 3) {
+            if (WALL.equals(featureType) && (featureOrder == 1 || featureOrder == 3)) {
                 // Do nothing.
             } else if (START.equals(featureType) && featureOrder == 1) {
-                checkpointTracker.setStart(index);
+                checkpointTracker.setStart(traversingIndex);
             } else if (FINISH.equals(featureType) && featureOrder == 1) {
-                checkpointTracker.setFinish(index);
+                checkpointTracker.setFinish(traversingIndex);
             } else if (CHECKPOINT.equals(featureType)) {
-                checkpointTracker.addCheckpoint(index, featureOrder);
+                checkpointTracker.addCheckpoint(traversingIndex, featureOrder);
             } else {
                 require(false);
             }
             gridTracker.add(featureType, numSkips);
+            traversingIndex += numSkips + 1;
         }
 
         final List<Optional<String>> graphBase = gridTracker.get();
@@ -131,7 +134,7 @@ public final class Parser {
 
         final List<Integer> checkpointBase = checkpointTracker.get();
         final Function<Integer, Cell> indexToCell = index ->
-            new Cell(index % numCols, index / numCols);
+            new Cell(index / numCols, index % numCols);
 
         return new Puzzle(
             puzzleName,
@@ -150,8 +153,12 @@ public final class Parser {
     }
 
     private static int stringToInt(final String string) throws BadMapCodeException {
-        require(string.matches(DIGITS_RE));
-        return Integer.parseInt(string);
+        try {
+            require(string.matches(DIGITS_RE));
+            return Integer.parseInt(string);
+        } catch (NumberFormatException exception) {
+            throw new BadMapCodeException();
+        }
     }
 
     private static void require(final boolean condition) throws BadMapCodeException {
@@ -192,12 +199,12 @@ final class CheckpointTracker<E extends Exception> {
     }
 
     void setStart(final Integer start) throws E {
-        requirer.throwIfNot(start == SENTINEL);
+        requirer.throwIfNot(this.start == SENTINEL);
         this.start = start;
     }
 
     void setFinish(final int finish) throws E {
-        requirer.throwIfNot(finish == SENTINEL);
+        requirer.throwIfNot(this.finish == SENTINEL);
         this.finish = finish;
     }
 
@@ -228,7 +235,7 @@ final class GridTracker<T, E extends Exception> {
     }
 
     void add(final T item, final int numSkips) throws E {
-        requirer.throwIfNot(currentIndex + numSkips < backing.size());
+        requirer.throwIfNot(currentIndex + numSkips < expectedSize);
         backing.add(Optional.of(item));
         IntStream.range(0, numSkips).forEach(ignored -> backing.add(Optional.empty()));
         currentIndex += numSkips + 1;
