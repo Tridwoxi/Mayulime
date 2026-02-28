@@ -1,8 +1,8 @@
-package think2.solve;
+package think.solve;
 
 import infra.io.Logging;
-import think2.domain.repr.Board;
-import think2.domain.repr.Puzzle;
+import think.domain.repr.Board;
+import think.domain.repr.Puzzle;
 
 /**
     Find board configurations to solve Pathery puzzles. This abstract class provides useful getters

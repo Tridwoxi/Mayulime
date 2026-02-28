@@ -1,12 +1,12 @@
-package think2.domain.repr;
+package think.domain.repr;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import think2.domain.repr.Board.Feature;
-import think2.graph.Graph;
-import think2.graph.impl.GridGraph;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.repr.Board.Feature;
+import think.graph.Graph;
+import think.graph.impl.GridGraph;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Pathery problem specification. Contains metadata and empty board supplier.

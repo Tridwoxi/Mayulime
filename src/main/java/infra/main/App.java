@@ -5,11 +5,11 @@ import infra.io.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import think2.Manager;
-import think2.domain.codec.Parser;
-import think2.domain.codec.Parser.BadMapCodeException;
-import think2.domain.repr.Display;
-import think2.domain.repr.Puzzle;
+import think.Manager;
+import think.domain.codec.Parser;
+import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.repr.Display;
+import think.domain.repr.Puzzle;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).

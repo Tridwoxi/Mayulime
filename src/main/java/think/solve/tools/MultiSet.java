@@ -1,4 +1,4 @@
-package think2.solve.tools;
+package think.solve.tools;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package think2.graph.algs;
+package think.graph.algs;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import think2.graph.Graph;
+import think.graph.Graph;
 
 /**
     Search algorithms upon a graph. The returned {@link Fill} parent maps of the search algorithms
@@ -60,8 +60,7 @@ public final class Search {
                 edges.get(source) == null &&
                 values.get(source) != null;
             final boolean keySetMatch =
-                parents.keySet().equals(values.keySet()) &&
-                parents.keySet().equals(edges.keySet());
+                parents.keySet().equals(values.keySet()) && parents.keySet().equals(edges.keySet());
             if (!properSourcePrescence || !keySetMatch) {
                 throw new IllegalArgumentException();
             }

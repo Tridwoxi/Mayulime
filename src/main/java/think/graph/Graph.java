@@ -1,4 +1,4 @@
-package think2.graph;
+package think.graph;
 
 import java.util.NoSuchElementException;
 import java.util.SequencedSet;

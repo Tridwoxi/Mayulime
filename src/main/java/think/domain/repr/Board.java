@@ -1,13 +1,13 @@
-package think2.domain.repr;
+package think.domain.repr;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import think2.graph.Graph;
-import think2.graph.impl.GridGraph;
-import think2.graph.impl.GridGraph.Cell;
+import think.graph.Graph;
+import think.graph.impl.GridGraph;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Represents a Pathery board. Exposes limited mutation and read-only accessor methods of a backing

@@ -1,12 +1,12 @@
-package think2.domain.repr;
+package think.domain.repr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import think2.domain.repr.Board.Feature;
-import think2.graph.Graph;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.repr.Board.Feature;
+import think.graph.Graph;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Immutable display adapter to allow for simpler querying of backend results.

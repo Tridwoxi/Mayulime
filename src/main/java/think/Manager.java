@@ -1,17 +1,17 @@
-package think2;
+package think;
 
 import infra.io.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import think2.domain.repr.Board;
-import think2.domain.repr.Display;
-import think2.domain.repr.Puzzle;
-import think2.graph.algs.Evaluate;
-import think2.solve.Solver;
-import think2.solve.impl.BaselineSolver;
-import think2.solve.impl.RandomSolver;
+import think.domain.repr.Board;
+import think.domain.repr.Display;
+import think.domain.repr.Puzzle;
+import think.graph.algs.Evaluate;
+import think.solve.Solver;
+import think.solve.stra.BaselineSolver;
+import think.solve.stra.RandomSolver;
 
 public final class Manager {
 

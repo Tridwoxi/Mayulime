@@ -1,12 +1,12 @@
-package think2.solve.impl;
+package think.solve.stra;
 
 import java.util.ArrayList;
-import think2.domain.repr.Board;
-import think2.domain.repr.Puzzle;
-import think2.graph.impl.GridGraph.Cell;
-import think2.solve.Solver;
-import think2.solve.tools.Iteration;
-import think2.solve.tools.RestrictedBinomial;
+import think.domain.repr.Board;
+import think.domain.repr.Puzzle;
+import think.graph.impl.GridGraph.Cell;
+import think.solve.Solver;
+import think.solve.tools.Iteration;
+import think.solve.tools.RestrictedBinomial;
 
 /**
     Guess randomly.

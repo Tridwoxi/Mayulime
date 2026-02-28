@@ -1,9 +1,9 @@
-package think2.solve.impl;
+package think.solve.stra;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import think2.domain.repr.Board;
-import think2.domain.repr.Puzzle;
-import think2.solve.Solver;
+import think.domain.repr.Board;
+import think.domain.repr.Puzzle;
+import think.solve.Solver;
 
 /**
     Random restart hill climbing.

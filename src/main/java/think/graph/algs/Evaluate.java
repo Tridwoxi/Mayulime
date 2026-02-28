@@ -1,11 +1,11 @@
-package think2.graph.algs;
+package think.graph.algs;
 
-import think2.domain.repr.Board;
-import think2.domain.repr.Board.Feature;
-import think2.domain.repr.Puzzle;
-import think2.graph.Graph;
-import think2.graph.algs.Search.Fill;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.repr.Board;
+import think.domain.repr.Board.Feature;
+import think.domain.repr.Puzzle;
+import think.graph.Graph;
+import think.graph.algs.Search.Fill;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Pathery Snake simulator. Produces a score for a given board configuration.

@@ -1,10 +1,10 @@
-package think2.solve.impl;
+package think.solve.stra;
 
-import think2.domain.repr.Puzzle;
-import think2.solve.Solver;
+import think.domain.repr.Puzzle;
+import think.solve.Solver;
 
 /**
-    Hack used by {@link think2.Manager} to send baseline results.
+    Hack used by {@link think.Manager} to send baseline results.
  */
 public final class BaselineSolver extends Solver {
 

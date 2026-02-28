@@ -4,11 +4,11 @@ import infra.io.Logging;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import think2.Manager;
-import think2.domain.codec.Parser;
-import think2.domain.codec.Parser.BadMapCodeException;
-import think2.domain.repr.Display;
-import think2.domain.repr.Puzzle;
+import think.Manager;
+import think.domain.codec.Parser;
+import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.repr.Display;
+import think.domain.repr.Puzzle;
 
 /**
     Development-only headless alternative program launch point.

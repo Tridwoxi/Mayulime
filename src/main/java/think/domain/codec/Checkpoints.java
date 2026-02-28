@@ -1,4 +1,4 @@
-package think2.domain.codec;
+package think.domain.codec;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import think2.domain.codec.Parser.BadMapCodeException;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.codec.Parser.BadMapCodeException;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Keep track of checkpoint cells in traversal order.

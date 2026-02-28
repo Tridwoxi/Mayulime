@@ -1,12 +1,12 @@
-package think2.domain.codec;
+package think.domain.codec;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import think2.domain.repr.Board.Feature;
-import think2.domain.repr.Puzzle;
-import think2.graph.impl.GridGraph;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.repr.Board.Feature;
+import think.domain.repr.Puzzle;
+import think.graph.impl.GridGraph;
+import think.graph.impl.GridGraph.Cell;
 
 /**
     Convert a Pathery MapCode to a puzzle.

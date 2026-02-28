@@ -25,8 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import think2.domain.repr.Display;
-import think2.graph.impl.GridGraph.Cell;
+import think.domain.repr.Display;
 
 /**
     Display the game and its stats. Scene graph:
