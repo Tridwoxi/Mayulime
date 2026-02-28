@@ -4,12 +4,14 @@ The game "Pathery" is an exercise in creating the longest shortest path on a maz
 of walls. The full problem statement is in the README. This repository contains an automated Pathery
 solver.
 
-Do not write documentation unless asked. Write comments as needed. If you stumble upon lies in the
-documentation, please inform the human.
+Do not write documentation unless explicitly asked. Write comments as needed. If you stumble upon
+lies in the documentation, please inform the human.
 
 ## Testing
 
-If you edit code, execute `./gradlew test` to run all the unit tests. If you cannot do so because the Gradle wrapper or jar is missing, ask the human to create it.
+If you edit code, execute `./gradlew test` to run all the tests. If you cannot do so because the
+Gradle wrapper or jar is missing, ask the human to create it. Do not attempt to launch the
+application itself unless explicitly asked.
 
 If Checkstyle or Spotbugs complains during the build, evaluate if fixing the violations would
 improve or harm the design. Then either fix it or keep whatever you originally wrote and inform the
@@ -17,28 +19,15 @@ human instead.
 
 ## Repository layout
 
-<!-- THE FOLLOWING IS OUTDATED AND THE HUMAN WILL REWRITE IT EVENTUALLY -->
+Application code lives in `src/main/java/`. `infra/` contains infrastructure (gui, logging, launch
+point). `think/` contains the backend. The backend is linked to the frontend by the Manager.
 
-`examples/`: Pathery problems the project is known to support as MapCodes.
+The backend is split across `domain/`, `graph/`, and `solve/`. Domain does MapCode parsing in
+`codec/` and problem representation in `repr/`. Graphs have implementations in `impl/` and
+algorithms in `algs/`. Solvers have strategies in `stra/` and non-graph tools in `tools/`.
 
-`src/main/java/infra/io`: GUI and logging.
-
-`src/main/java/infra/main`: Program entry point. App is the normal entry point; Headless is a
-development-only alternative.
-
-`src/main/java/think/`: Backend. The Manager handles concurrency and worker lifecycle.
-
-`src/main/java/think/ana`: Project-specific static tools: Distance evaluation and Snake simulation.
-
-`src/main/java/think/repr`: Data model. A Problem contains metadata and hands out blank
-Solutions for solvers to work on. A Grid contains items indexed by Cells.
-
-`src/main/java/think/solve`: Solvers are runnable workers that come up with better solutions.
-
-`src/main/java/think/tools`: Static tools that aren't project-specific: Iteration support, Random,
-and custom data Structures.
-
-`src/test/java/all`: Unit tests.
+Tests live in `src/test/java/`. Within tests, `e2e/` contains end-to-end and integration tests, and
+`unit/` contains unit tests grouped by package.
 
 ## Style
 
