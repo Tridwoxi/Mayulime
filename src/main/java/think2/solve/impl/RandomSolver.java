@@ -1,7 +1,6 @@
 package think2.solve.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import think2.domain.repr.Board;
 import think2.domain.repr.Puzzle;
 import think2.graph.impl.GridGraph.Cell;
