@@ -157,6 +157,10 @@ public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> 
         return numCols;
     }
 
+    public SequencedSet<Cell> getAllPossibleCells() {
+        return new LinkedHashSet<>(allCells);
+    }
+
     public boolean isInBounds(final Cell cell) {
         return cell.row() >= 0 && cell.row() < numRows && cell.col() >= 0 && cell.col() < numCols;
     }
