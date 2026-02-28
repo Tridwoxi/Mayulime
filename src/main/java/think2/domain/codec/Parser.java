@@ -50,10 +50,10 @@ public final class Parser {
 
     @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:ExecutableStatementCount" })
     public static Puzzle parse(final String mapCode) throws BadMapCodeException {
-        final String[] regions = REGION_DELIM_RE.split(mapCode);
+        final String[] regions = REGION_DELIM_RE.split(mapCode.strip());
         Safety.require(regions.length == EXPECTED_REGIONS_SIZE);
 
-        final String[] metadata = TOKEN_DELIM_RE.split(regions[0]);
+        final String[] metadata = TOKEN_DELIM_RE.split(regions[0], -1);
         Safety.require(metadata.length == EXPECTED_METADATA_SIZE);
         final int numCols = Safety.stringToInt(metadata[0]);
         final int numRows = Safety.stringToInt(metadata[1]);
@@ -61,7 +61,7 @@ public final class Parser {
         final String puzzleName = Safety.cleanName(metadata[3]);
         final int numCells = Safety.multiply(numRows, numCols);
 
-        final String[] boarddata = TOKEN_DELIM_RE.split(regions[1]);
+        final String[] boarddata = TOKEN_DELIM_RE.split(regions[1], -1);
         final Checkpoints checkpoints = new Checkpoints();
         final GridGraph<Feature> graph = new GridGraph<>(numRows, numCols, ignoredCell ->
             Optional.of(Feature.EMPTY)
