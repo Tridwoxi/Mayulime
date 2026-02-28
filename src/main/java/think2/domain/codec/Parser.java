@@ -135,12 +135,16 @@ public final class Parser {
         final List<Integer> checkpointBase = checkpointTracker.get();
         final Function<Integer, Cell> indexToCell = index ->
             new Cell(index / numCols, index % numCols);
+        final int clampedBlockingBudget = Math.min(
+            blockingBudget,
+            (int) graphBase.stream().filter(Optional::isEmpty).count()
+        );
 
         return new Puzzle(
             puzzleName,
             new GridGraph<>(numRows, numCols, graphDataSupplier),
             checkpointBase.stream().map(indexToCell).toList(),
-            blockingBudget
+            clampedBlockingBudget
         );
     }
 
@@ -231,13 +235,13 @@ final class GridTracker<T, E extends Exception> {
         this.expectedSize = numRows * numCols;
         requirer.throwIfNot(expectedSize > 0 && expectedSize < MAX_SIZE);
         this.backing = new ArrayList<>(numRows * numCols);
+        IntStream.range(0, expectedSize).forEach(ignored -> backing.add(Optional.empty()));
         this.currentIndex = 0;
     }
 
     void add(final T item, final int numSkips) throws E {
         requirer.throwIfNot(currentIndex + numSkips < expectedSize);
-        backing.add(Optional.of(item));
-        IntStream.range(0, numSkips).forEach(ignored -> backing.add(Optional.empty()));
+        backing.set(currentIndex, Optional.of(item));
         currentIndex += numSkips + 1;
     }
 
