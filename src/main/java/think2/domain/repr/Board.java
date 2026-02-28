@@ -1,6 +1,8 @@
 package think2.domain.repr;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import think2.graph.Graph;
@@ -53,6 +55,10 @@ public final class Board {
 
     public Set<Cell> getSpentWalls() {
         return new HashSet<>(spentWalls);
+    }
+
+    public List<Cell> getAllPossibleCells() {
+        return new ArrayList<>(backing.getAllPossibleCells());
     }
 
     public int getNumSpentWalls() {

@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import think2.domain.repr.Board;
+import think2.domain.repr.Display;
 import think2.domain.repr.Puzzle;
 import think2.graph.algs.Evaluate;
 import think2.solve.Solver;
@@ -16,7 +17,7 @@ public final class Manager {
 
     @FunctionalInterface
     public interface ImprovedSolution {
-        void listen(String submitter, Puzzle puzzle, Board board, int score);
+        void listen(Display display);
     }
 
     private final ImprovedSolution listener;
@@ -92,7 +93,7 @@ public final class Manager {
                     Thread.currentThread().getName()
                 );
                 topScore = score;
-                listener.listen(submitter, puzzle, copy, score);
+                listener.listen(new Display(submitter, puzzle, copy, score));
             }
         }
     }
