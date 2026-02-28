@@ -61,7 +61,7 @@ public final class Search {
                 values.get(source) != null;
             final boolean keySetMatch =
                 parents.keySet().equals(values.keySet()) &&
-                !parents.keySet().equals(edges.keySet());
+                parents.keySet().equals(edges.keySet());
             if (!properSourcePrescence || !keySetMatch) {
                 throw new IllegalArgumentException();
             }
