@@ -49,11 +49,3 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
     jvmArgs '-ea'
 }
-
-tasks.register('runHeadless', JavaExec) {
-    group = 'application'
-    dependsOn 'checkstyleMain', 'spotbugsMain'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'infra.main.Headless'
-    jvmArgs '-ea'
-}

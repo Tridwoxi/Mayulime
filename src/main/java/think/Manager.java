@@ -42,19 +42,21 @@ public final class Manager {
     }
 
     public void solve(final Puzzle puzzle) {
-        final Runnable cleanup = () -> {
-            current = puzzle;
-            solvers.forEach(Solver::pleaseDie);
-            solvers.clear();
-            topScore = 0;
-        };
         final Consumer<Solver> run = solver -> {
             solvers.add(solver);
             executor.execute(solver);
         };
-        cleanup.run();
+        stop();
+        current = puzzle;
         run.accept(new BaselineSolver(this::consider, puzzle));
         run.accept(new RandomSolver(this::consider, puzzle));
+    }
+
+    public void stop() {
+        current = null;
+        solvers.forEach(Solver::pleaseDie);
+        solvers.clear();
+        topScore = 0;
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Board board) {
