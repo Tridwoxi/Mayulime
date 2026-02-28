@@ -3,7 +3,6 @@ package infra.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.function.Consumer;
 import javafx.event.Event;
 import javafx.geometry.Bounds;
@@ -26,13 +25,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import think.repr.Grid;
-import think.repr.Grid.Cell;
-import think.repr.Problem;
-import think.repr.Problem.Feature;
-import think.repr.Solution;
-import think.tools.Iteration;
-import think.tools.Structures.Pair;
+import think2.domain.repr.Display;
+import think2.graph.impl.GridGraph.Cell;
 
 /**
     Display the game and its stats. Scene graph:
@@ -81,16 +75,11 @@ public final class Gui extends Scene {
         hideGame();
     }
 
-    public void update(
-        final String submitter,
-        final Problem problem,
-        final Solution solution,
-        final int score
-    ) {
+    public void update(final Display display) {
         showGame();
-        statsDisplay.setScore(score, submitter);
-        recalculateCellSize(problem);
-        gameDisplay.setGame(problem, solution);
+        statsDisplay.setScore(display.getScore(), display.getSubmitter());
+        recalculateCellSize(display);
+        gameDisplay.setGame(display);
     }
 
     private void hideGame() {
@@ -115,17 +104,17 @@ public final class Gui extends Scene {
 
     private void handleResize() {
         // PERF: Noticeable lag on large (100 by 100) maps on a modern computer.
-        recalculateCellSize(gameDisplay.getCurrentProblem());
+        recalculateCellSize(gameDisplay.getCurrentDisplay());
         gameDisplay.rerenderIfPresent();
     }
 
-    private void recalculateCellSize(final Problem problem) {
-        if (problem == null) {
+    private void recalculateCellSize(final Display display) {
+        if (display == null) {
             currentCellSizePx = MAX_CELL_SIZE_PX;
             return;
         }
-        final int numRows = problem.getBlankSolution().getNumRows();
-        final int numCols = problem.getBlankSolution().getNumCols();
+        final int numRows = display.getNumRows();
+        final int numCols = display.getNumCols();
         if (numRows <= 0 || numCols <= 0) {
             currentCellSizePx = MAX_CELL_SIZE_PX;
             return;
@@ -156,52 +145,42 @@ public final class Gui extends Scene {
 
 final class GameDisplay extends Group {
 
-    // These labels can be anything, but using whatever code the Pathery MapCode uses is probably
-    // most understandable. To avoid clutter, only these cell types are labeled. Like, labeling
-    // system walls would just be noise.
-    private static final String TELEPORT_IN = "t";
-    private static final String TELEPORT_OUT = "u";
-    private static final String CHECKPOINT = "c";
     private final Gui gui;
-    private Problem currentProblem;
-    private Solution currentSolution;
+    private Display currentDisplay;
 
     GameDisplay(final Gui gui) {
         this.gui = gui;
     }
 
-    public void setGame(final Problem problem, final Solution solution) {
-        currentProblem = problem;
-        currentSolution = solution;
+    public void setGame(final Display display) {
+        currentDisplay = display;
         render();
     }
 
     public void rerenderIfPresent() {
-        if (currentProblem != null && currentSolution != null) {
+        if (currentDisplay != null) {
             render();
         }
     }
 
-    public Problem getCurrentProblem() {
-        return currentProblem;
+    public Display getCurrentDisplay() {
+        return currentDisplay;
     }
 
     private void render() {
-        if (currentProblem == null || currentSolution == null) {
+        if (currentDisplay == null) {
             throw new IllegalStateException();
         }
         getChildren().clear();
-        final Grid<String> labels = makeLabels(currentProblem);
         final double cellSizePx = gui.getCurrentCellSizePx();
-        currentSolution
-            .getCopyOfBacking()
+        currentDisplay
+            .getAllCells()
             .stream()
-            .forEachOrdered(pair -> {
-                final Feature feature = pair.first();
-                final Cell cell = pair.second();
+            .forEachOrdered(cell -> {
+                final Display.Kind kind = currentDisplay.getKind(cell);
                 final CellDisplay cellDisplay = new CellDisplay(
-                    toColor(feature),
-                    labels.get(cell),
+                    toColor(kind),
+                    currentDisplay.getName(cell),
                     cellSizePx
                 );
                 cellDisplay.setLayoutY(cell.row() * cellSizePx);
@@ -210,56 +189,13 @@ final class GameDisplay extends Group {
             });
     }
 
-    private static Color toColor(final Feature feature) {
-        return switch (feature) {
+    private static Color toColor(final Display.Kind kind) {
+        return switch (kind) {
             case EMPTY -> PatheryColors.EMPTY;
             case CHECKPOINT -> PatheryColors.CHECKPOINT;
             case SYSTEM_WALL -> PatheryColors.SYSTEM_WALL;
             case PLAYER_WALL -> PatheryColors.PLAYER_WALL;
-            case TELEPORT_IN -> PatheryColors.TELEPORT;
-            case TELEPORT_OUT -> PatheryColors.TELEPORT;
         };
-    }
-
-    private static Grid<String> makeLabels(final Problem problem) {
-        // The backend was foolish enough to forget the order of teleports, so we cannot assign
-        // teleports their original labels. Fortunately, teleports are unordered, so we'll just
-        // assign arbitrary associations.
-        final int[] association = { 0 }; // Effectively final hack.
-        final Solution solution = problem.getBlankSolution();
-        final Grid<String> labels = new Grid<String>(
-            () -> "",
-            solution.getNumRows(),
-            solution.getNumCols()
-        );
-        final HashMap<Cell, Integer> checkpoints = new HashMap<>();
-        Iteration.enumerate(problem.getCheckpoints()).forEachOrdered(uniordered ->
-            checkpoints.put(uniordered.item(), uniordered.order())
-        );
-        final HashMap<Cell, Cell> teleports = problem.getTeleports();
-        final Consumer<Cell> assign = cell -> {
-            switch (solution.get(cell)) {
-                case TELEPORT_IN -> {
-                    if (!teleports.containsKey(cell)) {
-                        throw new IllegalStateException();
-                    }
-                    association[0] += 1;
-                    labels.set(cell, TELEPORT_IN + association[0]);
-                    labels.set(teleports.get(cell), TELEPORT_OUT + association[0]);
-                }
-                case CHECKPOINT -> {
-                    if (!checkpoints.containsKey(cell)) {
-                        throw new IllegalStateException();
-                    }
-                    labels.set(cell, CHECKPOINT + checkpoints.get(cell));
-                }
-                default -> {
-                    // Do nothing.
-                }
-            }
-        };
-        solution.getCopyOfBacking().stream().map(Pair::second).forEachOrdered(assign);
-        return labels;
     }
 }
 
@@ -383,7 +319,6 @@ final class PatheryColors {
     public static final Color PLAYER_WALL = Color.web("3c3d3c");
     public static final Color EMPTY = Color.web("e2e8eb");
     public static final Color CHECKPOINT = Color.web("8e4793");
-    public static final Color TELEPORT = Color.web("#214764");
     public static final Color FOREGROUND = Color.web("dddddd");
 
     private PatheryColors() {}

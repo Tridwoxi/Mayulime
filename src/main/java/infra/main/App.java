@@ -5,10 +5,11 @@ import infra.io.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import think.Manager;
-import think.repr.Problem;
-import think.repr.Problem.BadMapCodeException;
-import think.repr.Solution;
+import think2.Manager;
+import think2.domain.codec.Parser;
+import think2.domain.codec.Parser.BadMapCodeException;
+import think2.domain.repr.Display;
+import think2.domain.repr.Puzzle;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
@@ -51,36 +52,31 @@ public final class App extends Application {
 
     // == Connectors. =============================================================================
 
-    private void recieveSolution(
-        final String submitter,
-        final Problem problem,
-        final Solution solution,
-        final int score
-    ) {
+    private void recieveSolution(final Display display) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
         // PERF: Spamming the GUI with updates when each update invalidates all
         // previous updates is basically cyberbullying. Keep only the latest one.
-        Platform.runLater(() -> gui.update(submitter, problem, solution, score));
+        Platform.runLater(() -> gui.update(display));
     }
 
     private void recieveMapCode(final String mapCode) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
-        Problem problem = null;
+        Puzzle puzzle = null;
         try {
-            problem = new Problem(mapCode);
+            puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException exception) {
-            Logging.warning("Bad MapCode; problem rejected");
+            Logging.warning("Bad MapCode or unsupported feature; problem rejected");
         }
-        if (problem != null) {
-            manager.solve(problem);
+        if (puzzle != null) {
+            manager.solve(puzzle);
             if (gui.getWindow() instanceof Stage stage) {
-                final String problemName = problem.getName().isBlank()
+                final String problemName = puzzle.getName().isBlank()
                     ? UNNAMED_PROBLEM_NAME
-                    : problem.getName();
+                    : puzzle.getName();
                 stage.setTitle("\"" + problemName + "\"");
             }
         }

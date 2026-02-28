@@ -4,10 +4,11 @@ import infra.io.Logging;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import think.Manager;
-import think.repr.Problem;
-import think.repr.Problem.BadMapCodeException;
-import think.repr.Solution;
+import think2.Manager;
+import think2.domain.codec.Parser;
+import think2.domain.codec.Parser.BadMapCodeException;
+import think2.domain.repr.Display;
+import think2.domain.repr.Puzzle;
 
 /**
     Development-only headless alternative program launch point.
@@ -38,10 +39,10 @@ public final class Headless {
         Logging.announcement("Launch point: Headless");
 
         final Config config;
-        final Problem problem;
+        final Puzzle puzzle;
         try {
             config = parseConfig(args);
-            problem = new Problem(Files.readString(config.mapCodePath()));
+            puzzle = Parser.parse(Files.readString(config.mapCodePath()));
         } catch (IllegalArgumentException ignored) {
             Logging.warning("Failure: bad arguments.");
             return FAILURE;
@@ -52,7 +53,7 @@ public final class Headless {
             Logging.warning("Failure: can't read file.");
             return FAILURE;
         }
-        new Manager(this::recieveSolutionStub).solve(problem);
+        new Manager(this::recieveSolutionStub).solve(puzzle);
         try {
             Thread.sleep(1000 * config.timeoutSeconds());
         } catch (InterruptedException exception) {
@@ -62,12 +63,7 @@ public final class Headless {
         return SUCCESS;
     }
 
-    private void recieveSolutionStub(
-        final String submitter,
-        final Problem problem,
-        final Solution solution,
-        final int score
-    ) {
+    private void recieveSolutionStub(final Display display) {
         // Normally, we would display solutions, but we have no GUI. We also don't know how to
         // turn a problem or solution back into a MapCode. As for logging, the rest of the system
         // handles it. Hence, there's nothing to do here.
