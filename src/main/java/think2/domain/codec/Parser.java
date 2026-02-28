@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import think2.domain.codec.Parser.Requirer;
 import think2.domain.repr.Board.Feature;
@@ -50,21 +49,40 @@ public final class Parser {
 
     public static final class BadMapCodeException extends Exception {}
 
+    private static final String REGION_DELIM_RE = ":";
+    private static final String TOKEN_DELIM_RE = "\\.";
+    private static final String LINEBREAK_RE = "\\R";
+    private static final String DIGITS_RE = "\\d+";
+    private static final String FEATURE_RE = "[a-z]\\d+";
+
+    private static final int EXPECTED_REGIONS_SIZE = 2;
+    private static final int EXPECTED_METADATA_SIZE = 7;
+    private static final int EXPECTED_TOKEN_SIZE = 2;
+
+    private static final String WALL = "r";
+    private static final String START = "s";
+    private static final String FINISH = "f";
+    private static final String CHECKPOINT = "c";
+
+    private static final int FEATURE_TYPE_SIZE = 1;
+    private static final String DEFAULT_SKIP = "0";
+    private static final int MAX_NAME_LENGTH = 100;
+
     private Parser() {}
 
     @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:ExecutableStatementCount" })
     public static Puzzle parse(final String mapCode) throws BadMapCodeException {
-        final String[] regions = mapCode.split(":");
-        require(regions.length == 2);
+        final String[] regions = mapCode.split(REGION_DELIM_RE);
+        require(regions.length == EXPECTED_REGIONS_SIZE);
 
-        final String[] metadata = regions[0].split("\\.");
-        require(regions.length == 7);
+        final String[] metadata = regions[0].split(TOKEN_DELIM_RE);
+        require(metadata.length == EXPECTED_METADATA_SIZE);
         final int numCols = stringToInt(metadata[0]);
         final int numRows = stringToInt(metadata[1]);
         final int blockingBudget = stringToInt(metadata[2]);
         final String puzzleName = cleanName(metadata[3]);
 
-        final String[] boarddata = regions[1].split("\\.");
+        final String[] boarddata = regions[1].split(TOKEN_DELIM_RE);
         final CheckpointTracker<BadMapCodeException> checkpointTracker = new CheckpointTracker<>(
             Parser::require
         );
@@ -76,40 +94,39 @@ public final class Parser {
 
         // The token delimiter is not quite a delimiter, but rather an ender. Hence length-1.
         for (int index = 0; index < boarddata.length - 1; index++) {
-            final String[] tokens = boarddata[index].split("\\.");
-            require(tokens.length == 2);
-            final int numSkips = stringToInt(tokens[0].isBlank() ? "0" : tokens[0]);
+            final String[] tokens = boarddata[index].split(TOKEN_DELIM_RE);
+            require(tokens.length == EXPECTED_TOKEN_SIZE);
+            final int numSkips = stringToInt(tokens[0].isBlank() ? DEFAULT_SKIP : tokens[0]);
             final String feature = tokens[1];
-            require(feature.matches("[a-z]\\d+") && feature.length() >= 2);
-            final String featureType = feature.substring(0, 1);
-            final int featureOrder = stringToInt(feature.substring(1));
+            require(feature.matches(FEATURE_RE) && feature.length() >= FEATURE_TYPE_SIZE + 1);
+            final String featureType = feature.substring(0, FEATURE_TYPE_SIZE);
+            final int featureOrder = stringToInt(feature.substring(FEATURE_TYPE_SIZE));
 
-            if (("r".equals(featureType) && featureOrder == 1) || featureOrder == 3) {
-                gridTracker.add(featureType, numSkips);
-            } else if ("s".equals(featureType) && featureOrder == 1) {
-                gridTracker.add(featureType, numSkips);
+            if ((WALL.equals(featureType) && featureOrder == 1) || featureOrder == 3) {
+                // Do nothing.
+            } else if (START.equals(featureType) && featureOrder == 1) {
                 checkpointTracker.setStart(index);
-            } else if ("f".equals(featureType) && featureOrder == 1) {
-                gridTracker.add(featureType, numSkips);
+            } else if (FINISH.equals(featureType) && featureOrder == 1) {
                 checkpointTracker.setFinish(index);
-            } else if ("c".equals(featureType)) {
-                gridTracker.add(featureType, numSkips);
+            } else if (CHECKPOINT.equals(featureType)) {
+                checkpointTracker.addCheckpoint(index, featureOrder);
             } else {
                 require(false);
             }
+            gridTracker.add(featureType, numSkips);
         }
 
         final List<Optional<String>> graphBase = gridTracker.get();
         final Function<Cell, Optional<Feature>> graphDataSupplier = cell -> {
-            final Supplier<Integer> cellToIndex = () -> cell.row() * numCols + cell.col();
             final Function<String, Optional<Feature>> switcher = string ->
                 switch (string) {
-                    case "r" -> Optional.empty();
-                    case "s" -> Optional.of(Feature.CHECKPOINT);
-                    case "f" -> Optional.of(Feature.CHECKPOINT);
+                    case WALL -> Optional.empty();
+                    case START -> Optional.of(Feature.CHECKPOINT);
+                    case FINISH -> Optional.of(Feature.CHECKPOINT);
+                    case CHECKPOINT -> Optional.of(Feature.CHECKPOINT);
                     default -> throw new IllegalStateException();
                 };
-            return graphBase.get(cellToIndex.get()).flatMap(switcher);
+            return graphBase.get(cell.row() * numCols + cell.col()).flatMap(switcher);
         };
 
         final List<Integer> checkpointBase = checkpointTracker.get();
@@ -125,15 +142,15 @@ public final class Parser {
     }
 
     private static String cleanName(final String string) {
-        final String onOneLine = string.strip().replaceAll("\\R", " ");
-        if (onOneLine.length() > 100) {
-            return onOneLine.substring(0, 100) + "...";
+        final String onOneLine = string.strip().replaceAll(LINEBREAK_RE, " ");
+        if (onOneLine.length() > MAX_NAME_LENGTH) {
+            return onOneLine.substring(0, MAX_NAME_LENGTH) + "...";
         }
         return onOneLine;
     }
 
     private static int stringToInt(final String string) throws BadMapCodeException {
-        require(string.matches("\\d+"));
+        require(string.matches(DIGITS_RE));
         return Integer.parseInt(string);
     }
 
