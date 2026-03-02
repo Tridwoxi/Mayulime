@@ -22,7 +22,13 @@ import think.graph.impl.GridGraph.Cell;
  */
 public final class GridGraph<V> implements MutableVertexGraph<Cell, V, Integer> {
 
-    public record Cell(int row, int col) {
+    public record Cell(int row, int col) implements Comparable<Cell> {
+        @Override
+        public int compareTo(final Cell other) {
+            final int byRow = Integer.compare(row, other.row);
+            return byRow != 0 ? byRow : Integer.compare(col, other.col);
+        }
+
         private boolean isNeighbor(final Cell other) {
             return Math.abs(row - other.row) + Math.abs(col - other.col) == 1;
         }

@@ -49,7 +49,7 @@ public final class ClimbingSolver extends Solver {
     }
 
     private Board hillClimb() throws KilledException {
-        final Board board = getPuzzle().getOriginal();
+        final Board board = getPuzzle().getBoard();
         final AtomicInteger remainingSupply = new AtomicInteger(getPuzzle().getWallBudget());
         // The methods in this loop operate by side effects and return if they were successful.
         // This loop must terminate because both placeAdditionalWalls and relocateExistingWalls

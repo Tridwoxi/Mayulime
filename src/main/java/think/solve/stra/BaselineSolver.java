@@ -15,6 +15,6 @@ public final class BaselineSolver extends Solver {
     @Override
     protected void solve() throws KilledException {
         checkAlive();
-        getListener().listen(getClass().getSimpleName(), getPuzzle(), getPuzzle().getOriginal());
+        getListener().listen(getClass().getSimpleName(), getPuzzle(), getPuzzle().getBoard());
     }
 }

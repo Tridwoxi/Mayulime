@@ -51,7 +51,7 @@ public final class Display {
         this.kindsByCell = new HashMap<>(cells.size());
         this.namesByCell = new HashMap<>(cells.size());
 
-        final Board original = puzzle.getOriginal();
+        final Board original = puzzle.getBoard();
         final Graph<Cell, Feature, Integer> originalBacking = original.getBacking();
         final Graph<Cell, Feature, Integer> currentBacking = board.getBacking();
         final Map<Cell, Integer> checkpointOrder = new HashMap<>();
