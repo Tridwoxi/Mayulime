@@ -1,9 +1,9 @@
 package think.domain.codec;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph;
@@ -71,9 +71,9 @@ public final class Parser {
         if (allCells.size() != numCells) {
             throw new IllegalStateException();
         }
-        final SortedSet<Cell> originallyEmpty = new TreeSet<>(allCells);
-        final SortedSet<Cell> originallyMissing = new TreeSet<>();
-        final SortedSet<Cell> originallyCheckpoint = new TreeSet<>();
+        final Set<Cell> originallyEmpty = new HashSet<>(allCells);
+        final Set<Cell> originallyMissing = new HashSet<>();
+        final Set<Cell> originallyCheckpoint = new HashSet<>();
 
         int traversingIndex = 0;
         // The token delimiter is not quite a delimiter, but rather an ender. Hence length-1.

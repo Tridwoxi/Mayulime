@@ -57,7 +57,7 @@ public final class Display {
         final Set<Cell> originallyCheckpoint = new HashSet<>(puzzle.getOriginallyCheckpoint());
         final Map<Cell, Integer> checkpointOrder = new HashMap<>();
         int order = 0;
-        for (final Cell checkpoint : puzzle.getCheckpoints()) {
+        for (final Cell checkpoint : puzzle.getCheckpointOrder()) {
             checkpointOrder.put(checkpoint, order);
             order += 1;
         }

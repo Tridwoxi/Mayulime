@@ -18,7 +18,7 @@ public final class Evaluate {
         int score = 0;
         Cell start = null;
         final Graph<Cell, Object, Integer> graph = board.getTraversalGraph();
-        for (final Cell finish : puzzle.getCheckpoints()) {
+        for (final Cell finish : puzzle.getCheckpointOrder()) {
             if (start == null) {
                 start = finish;
                 continue;

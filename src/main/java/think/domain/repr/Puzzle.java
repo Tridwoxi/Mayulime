@@ -1,14 +1,13 @@
 package think.domain.repr;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import think.graph.impl.GridGraph.Cell;
 
 /**
-    Pathery problem specification. Contains metadata and empty board supplier. The {@code
-    getOriginally*} methods return cells in grid traversal order.
+    Pathery problem specification. Contains metadata, shared data, and empty board supplier.
  */
 public final class Puzzle {
 
@@ -17,20 +16,20 @@ public final class Puzzle {
     private final int numCols;
     private final Board original;
     private final List<Cell> allPossibleCells;
-    private final List<Cell> checkpoints;
-    private final SortedSet<Cell> originallyEmpty;
-    private final SortedSet<Cell> originallyMissing;
-    private final SortedSet<Cell> originallyCheckpoint;
+    private final List<Cell> checkpointOrder;
+    private final Set<Cell> originallyEmpty;
+    private final Set<Cell> originallyMissing;
+    private final Set<Cell> originallyCheckpoint;
     private final int wallBudget;
 
     public Puzzle(
         final String name,
         final int numRows,
         final int numCols,
-        final SortedSet<Cell> originallyEmpty,
-        final SortedSet<Cell> originallyMissing,
-        final SortedSet<Cell> originallyCheckpoint,
-        final List<Cell> checkpoints,
+        final Set<Cell> originallyEmpty,
+        final Set<Cell> originallyMissing,
+        final Set<Cell> originallyCheckpoint,
+        final List<Cell> checkpointOrder,
         final int wallBudget
     ) {
         if (numRows <= 0 || numCols <= 0) {
@@ -40,10 +39,10 @@ public final class Puzzle {
         this.numRows = numRows;
         this.numCols = numCols;
         this.allPossibleCells = createAllPossibleCells(numRows, numCols);
-        this.originallyEmpty = new TreeSet<>(originallyEmpty);
-        this.originallyMissing = new TreeSet<>(originallyMissing);
-        this.originallyCheckpoint = new TreeSet<>(originallyCheckpoint);
-        this.checkpoints = new ArrayList<>(checkpoints);
+        this.originallyEmpty = new HashSet<>(originallyEmpty);
+        this.originallyMissing = new HashSet<>(originallyMissing);
+        this.originallyCheckpoint = new HashSet<>(originallyCheckpoint);
+        this.checkpointOrder = new ArrayList<>(checkpointOrder);
         this.wallBudget = Math.min(wallBudget, this.originallyEmpty.size());
         this.original = new Board(this);
     }
@@ -68,24 +67,24 @@ public final class Puzzle {
         return new ArrayList<>(allPossibleCells);
     }
 
-    public List<Cell> getCheckpoints() {
-        return new ArrayList<>(checkpoints);
+    public List<Cell> getCheckpointOrder() {
+        return new ArrayList<>(checkpointOrder);
     }
 
     public int getWallBudget() {
         return wallBudget;
     }
 
-    public SortedSet<Cell> getOriginallyEmpty() {
-        return new TreeSet<>(originallyEmpty);
+    public Set<Cell> getOriginallyEmpty() {
+        return new HashSet<>(originallyEmpty);
     }
 
-    public SortedSet<Cell> getOriginallyMissing() {
-        return new TreeSet<>(originallyMissing);
+    public Set<Cell> getOriginallyMissing() {
+        return new HashSet<>(originallyMissing);
     }
 
-    public SortedSet<Cell> getOriginallyCheckpoint() {
-        return new TreeSet<>(originallyCheckpoint);
+    public Set<Cell> getOriginallyCheckpoint() {
+        return new HashSet<>(originallyCheckpoint);
     }
 
     public boolean isValid(final Board board) {
