@@ -65,18 +65,19 @@ public final class Manager {
         // excessively, it indicates a solver we asked to die refuses to do so.
         if (current != puzzle) {
             Logging.warning("Guard tripped (1).");
-        }
-        final Board copy = board.shallowCopy();
-        final int score = Evaluate.evaluate(puzzle, copy);
-        // We also check if the score is better in the synchronized section, but as solvers might
-        // give this method lots of garbage, if we can early exit without competing for the lock,
-        // it would be nice to.
-        if (score <= topScore) {
             return;
         }
         // Boards are mutable data structures, and Solvers make no promises to not mutate them
         // between the time they send it here and the long time later when the caller tries
         // to read it.
+        final Board copy = board.shallowCopy();
+        final int score = Evaluate.evaluate(puzzle, copy);
+        // We also check if the score is better in the synchronized section, but as solvers might
+        // give this method lots of garbage, if we can early exit without competing for the lock,
+        // it would be nice to. Same trick is used for the puzzle.
+        if (score <= topScore) {
+            return;
+        }
         synchronized (this) {
             if (current != puzzle) {
                 Logging.warning("Guard tripped (2).");
