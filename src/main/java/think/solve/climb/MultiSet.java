@@ -1,4 +1,4 @@
-package think.solve.tools;
+package think.solve.climb;
 
 import java.util.Collection;
 import java.util.HashMap;

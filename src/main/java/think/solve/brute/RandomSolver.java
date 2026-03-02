@@ -1,12 +1,11 @@
-package think.solve.stra;
+package think.solve.brute;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import think.domain.repr.Board;
 import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph.Cell;
 import think.solve.Solver;
-import think.solve.tools.Iteration;
-import think.solve.tools.RestrictedBinomial;
 
 /**
     Guess randomly.
@@ -34,7 +33,11 @@ public final class RandomSolver extends Solver {
 
     private Board createRandomBoard() {
         final Board board = getPuzzle().getBoard();
-        Iteration.randomly(emptyCells).limit(numWalls.sample()).forEach(board::placeWall);
+        final int toPlace = Math.min(emptyCells.size(), numWalls.sample());
+        Collections.shuffle(emptyCells);
+        for (int index = 0; index < toPlace; index += 1) {
+            board.placeWall(emptyCells.get(index));
+        }
         return board;
     }
 }

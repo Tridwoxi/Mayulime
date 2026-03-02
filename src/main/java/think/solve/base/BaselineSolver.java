@@ -1,4 +1,4 @@
-package think.solve.stra;
+package think.solve.base;
 
 import think.domain.repr.Puzzle;
 import think.solve.Solver;

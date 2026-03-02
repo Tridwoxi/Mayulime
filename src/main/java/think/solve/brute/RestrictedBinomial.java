@@ -1,4 +1,4 @@
-package think.solve.tools;
+package think.solve.brute;
 
 import java.util.ArrayList;
 import java.util.Collections;

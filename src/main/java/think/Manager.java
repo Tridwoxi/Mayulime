@@ -10,8 +10,8 @@ import think.domain.repr.Display;
 import think.domain.repr.Puzzle;
 import think.graph.algs.Evaluate;
 import think.solve.Solver;
-import think.solve.stra.BaselineSolver;
-import think.solve.stra.RandomSolver;
+import think.solve.base.BaselineSolver;
+import think.solve.brute.RandomSolver;
 
 public final class Manager {
 

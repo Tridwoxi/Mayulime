@@ -1,4 +1,4 @@
-package think.solve.stra;
+package think.solve.climb;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import think.domain.repr.Board;
