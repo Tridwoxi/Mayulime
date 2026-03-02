@@ -60,8 +60,11 @@ public final class Manager {
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Board board) {
-        if (current == null) {
-            throw new IllegalStateException();
+        // This guard is tripped when the user uploads a new problem but old worker threads haven't
+        // died and propose solutions to the old (stale) problem. If this guard is tripped
+        // excessively, it indicates a solver we asked to die refuses to do so.
+        if (current != puzzle) {
+            Logging.warning("Guard tripped (1).");
         }
         final Board copy = board.shallowCopy();
         final int score = Evaluate.evaluate(puzzle, copy);
@@ -75,11 +78,8 @@ public final class Manager {
         // between the time they send it here and the long time later when the caller tries
         // to read it.
         synchronized (this) {
-            // This guard is tripped when the user uploads a new problem but old worker threads
-            // haven't died and propose solutions to the old (stale) problem. If this guard is
-            // tripped excessively, it indicates a solver we asked to die refuses to do so.
             if (current != puzzle) {
-                Logging.warning("Guard tripped.");
+                Logging.warning("Guard tripped (2).");
                 return;
             }
             if (!puzzle.isValid(copy)) {
