@@ -36,7 +36,7 @@ record Token(int skips, Kind kind, int order) {
     private static final int DEFAULT_SKIP = 0;
 
     static Token parse(final String rawToken) throws BadMapCodeException {
-        final String[] tokenParts = FEATURE_DELIM_RE.split(rawToken);
+        final String[] tokenParts = FEATURE_DELIM_RE.split(rawToken, -1);
         Safety.require(tokenParts.length == EXPECTED_NUM_PARTS);
 
         final int skips = tokenParts[0].isBlank()
