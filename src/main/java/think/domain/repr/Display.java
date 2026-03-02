@@ -2,10 +2,11 @@ package think.domain.repr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import think.domain.repr.Board.Feature;
-import think.graph.Graph;
+import java.util.Set;
+import think.graph.impl.GridGraph;
 import think.graph.impl.GridGraph.Cell;
 
 /**
@@ -45,15 +46,15 @@ public final class Display {
         this.puzzleName = puzzle.getName();
         this.wallBudget = puzzle.getWallBudget();
         this.spentWallsCount = board.getNumSpentWalls();
-        this.cells = board.getAllPossibleCells();
+        this.cells = puzzle.getAllPossibleCells();
         this.numRows = calculateNumRows(cells) + 1;
         this.numCols = calculateNumCols(cells) + 1;
         this.kindsByCell = new HashMap<>(cells.size());
         this.namesByCell = new HashMap<>(cells.size());
 
-        final Board original = puzzle.getBoard();
-        final Graph<Cell, Feature, Integer> originalBacking = original.getBacking();
-        final Graph<Cell, Feature, Integer> currentBacking = board.getBacking();
+        final GridGraph<Object> currentGraph = board.getTraversalGraph();
+        final Set<Cell> originallyMissing = new HashSet<>(puzzle.getOriginallyMissing());
+        final Set<Cell> originallyCheckpoint = new HashSet<>(puzzle.getOriginallyCheckpoint());
         final Map<Cell, Integer> checkpointOrder = new HashMap<>();
         int order = 0;
         for (final Cell checkpoint : puzzle.getCheckpoints()) {
@@ -61,7 +62,10 @@ public final class Display {
             order += 1;
         }
         for (final Cell cell : cells) {
-            kindsByCell.put(cell, determineKind(cell, originalBacking, currentBacking));
+            kindsByCell.put(
+                cell,
+                determineKind(cell, originallyMissing, originallyCheckpoint, currentGraph)
+            );
             namesByCell.put(cell, determineName(cell, checkpointOrder));
         }
     }
@@ -114,19 +118,20 @@ public final class Display {
 
     private static Kind determineKind(
         final Cell cell,
-        final Graph<Cell, Feature, Integer> originalBacking,
-        final Graph<Cell, Feature, Integer> currentBacking
+        final Set<Cell> originallyMissing,
+        final Set<Cell> originallyCheckpoint,
+        final GridGraph<Object> currentGraph
     ) {
-        if (!originalBacking.containsVertexKey(cell)) {
+        if (originallyMissing.contains(cell)) {
             return Kind.SYSTEM_WALL;
         }
-        if (!currentBacking.containsVertexKey(cell)) {
+        if (originallyCheckpoint.contains(cell)) {
+            return Kind.CHECKPOINT;
+        }
+        if (!currentGraph.containsVertexKey(cell)) {
             return Kind.PLAYER_WALL;
         }
-        return switch (originalBacking.getVertexValue(cell)) {
-            case EMPTY -> Kind.EMPTY;
-            case CHECKPOINT -> Kind.CHECKPOINT;
-        };
+        return Kind.EMPTY;
     }
 
     private static String determineName(final Cell cell, final Map<Cell, Integer> checkpointOrder) {

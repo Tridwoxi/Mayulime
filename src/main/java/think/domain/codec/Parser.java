@@ -2,8 +2,9 @@ package think.domain.codec;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
-import think.domain.repr.Board.Feature;
 import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph;
 import think.graph.impl.GridGraph.Cell;
@@ -63,13 +64,16 @@ public final class Parser {
 
         final String[] boarddata = TOKEN_DELIM_RE.split(regions[1], -1);
         final Checkpoints checkpoints = new Checkpoints();
-        final GridGraph<Feature> graph = new GridGraph<>(numRows, numCols, ignoredCell ->
-            Optional.of(Feature.EMPTY)
+        final GridGraph<Void> grid = new GridGraph<>(numRows, numCols, ignoredCell ->
+            Optional.empty()
         );
-        final List<Cell> allCells = List.copyOf(graph.getAllPossibleCells());
+        final List<Cell> allCells = List.copyOf(grid.getAllPossibleCells());
         if (allCells.size() != numCells) {
             throw new IllegalStateException();
         }
+        final SortedSet<Cell> originallyEmpty = new TreeSet<>(allCells);
+        final SortedSet<Cell> originallyMissing = new TreeSet<>();
+        final SortedSet<Cell> originallyCheckpoint = new TreeSet<>();
 
         int traversingIndex = 0;
         // The token delimiter is not quite a delimiter, but rather an ender. Hence length-1.
@@ -83,36 +87,48 @@ public final class Parser {
             switch (token.kind()) {
                 case WALL -> {
                     Safety.require(token.order() == 1 || token.order() == 3);
-                    graph.removeVertex(featureCell);
+                    originallyEmpty.remove(featureCell);
+                    originallyCheckpoint.remove(featureCell);
+                    originallyMissing.add(featureCell);
                 }
                 case START -> {
                     Safety.require(token.order() == 1);
                     checkpoints.setStart(featureCell);
-                    graph.putVertex(featureCell, Feature.CHECKPOINT);
+                    originallyEmpty.remove(featureCell);
+                    originallyMissing.remove(featureCell);
+                    originallyCheckpoint.add(featureCell);
                 }
                 case FINISH -> {
                     Safety.require(token.order() == 1);
                     checkpoints.setFinish(featureCell);
-                    graph.putVertex(featureCell, Feature.CHECKPOINT);
+                    originallyEmpty.remove(featureCell);
+                    originallyMissing.remove(featureCell);
+                    originallyCheckpoint.add(featureCell);
                 }
                 case CHECKPOINT -> {
                     Safety.require(token.order() >= 1);
                     checkpoints.addCheckpoint(featureCell, token.order());
-                    graph.putVertex(featureCell, Feature.CHECKPOINT);
+                    originallyEmpty.remove(featureCell);
+                    originallyMissing.remove(featureCell);
+                    originallyCheckpoint.add(featureCell);
                 }
                 default -> throw new AssertionError();
             }
             traversingIndex = Safety.sum(featureIndex, 1);
         }
 
-        final int numEmptyCells = (int) graph
-            .getAllVertexKeys()
-            .stream()
-            .map(graph::getVertexValue)
-            .filter(Feature.EMPTY::equals)
-            .count();
+        final int numEmptyCells = originallyEmpty.size();
         final int clampedBlockingBudget = Math.min(wallBudget, numEmptyCells);
 
-        return new Puzzle(puzzleName, graph, checkpoints.toOrderedPath(), clampedBlockingBudget);
+        return new Puzzle(
+            puzzleName,
+            numRows,
+            numCols,
+            originallyEmpty,
+            originallyMissing,
+            originallyCheckpoint,
+            checkpoints.toOrderedPath(),
+            clampedBlockingBudget
+        );
     }
 }

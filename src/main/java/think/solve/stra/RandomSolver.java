@@ -20,7 +20,7 @@ public final class RandomSolver extends Solver {
 
     public RandomSolver(final ProposedSolution listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.emptyCells = new ArrayList<>(getPuzzle().getBoard().getOriginallyEmpty());
+        this.emptyCells = new ArrayList<>(getPuzzle().getOriginallyEmpty());
         this.numWalls = new RestrictedBinomial(emptyCells.size(), getPuzzle().getWallBudget());
     }
 

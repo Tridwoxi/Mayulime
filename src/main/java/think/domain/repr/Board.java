@@ -1,75 +1,65 @@
 package think.domain.repr;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import think.graph.Graph;
+import java.util.function.Function;
 import think.graph.impl.GridGraph;
 import think.graph.impl.GridGraph.Cell;
 
 /**
-    Represents a Pathery board. Exposes limited mutation and read-only accessor methods of a backing
-    GridGraph<Feature>. Boards are solutions to {@link Puzzle}s.
+    The solution-specific aspect of a Pathery board is the set of placed walls. This class enables
+    independent evolution of a wall set from other candidate boards. It enforces legality of wall
+    assignment, but allows for unlimited assignment. A method to extract a graph is provided.
  */
 public final class Board {
 
-    public enum Feature {
-        EMPTY,
-        CHECKPOINT,
-    }
-
-    private final GridGraph<Feature> backing;
+    private static final Object OBJECT = new Object();
+    private final Puzzle puzzle;
     private final Set<Cell> originallyEmpty;
+    private final Set<Cell> originallyMissing;
+    private final Set<Cell> originallyCheckpoint;
     private final Set<Cell> spentWalls;
 
-    Board(final GridGraph<Feature> original) {
-        this.backing = original.shallowCopy();
-        this.originallyEmpty = original
-            .getAllVertexKeys()
-            .stream()
-            .filter(cell -> original.getVertexValue(cell).equals(Feature.EMPTY))
-            .collect(Collectors.toCollection(HashSet::new));
+    Board(final Puzzle puzzle) {
+        this.puzzle = puzzle;
+        this.originallyEmpty = new HashSet<>(puzzle.getOriginallyEmpty());
+        this.originallyMissing = new HashSet<>(puzzle.getOriginallyMissing());
+        this.originallyCheckpoint = new HashSet<>(puzzle.getOriginallyCheckpoint());
         this.spentWalls = new HashSet<>();
     }
 
     private Board(
-        final GridGraph<Feature> backing,
+        final Puzzle puzzle,
         final Set<Cell> originallyEmpty,
+        final Set<Cell> originallyMissing,
+        final Set<Cell> originallyCheckpoint,
         final Set<Cell> spentWalls
     ) {
-        this.backing = backing.shallowCopy();
+        // We do not expose access to most of these. Only spentWalls is mutable and needs copying.
+        this.puzzle = puzzle;
         this.originallyEmpty = originallyEmpty;
+        this.originallyMissing = originallyMissing;
+        this.originallyCheckpoint = originallyCheckpoint;
         this.spentWalls = new HashSet<>(spentWalls);
     }
 
-    public Graph<Cell, Feature, Integer> getBacking() {
-        // You can mutate the returned graph by casting to a MutableVertexGraph, but don't you dare.
-        return backing;
-    }
-
-    public Set<Cell> getOriginallyEmpty() {
-        return new HashSet<>(originallyEmpty);
-    }
-
-    public Set<Cell> getSpentWalls() {
-        return new HashSet<>(spentWalls);
-    }
-
-    public List<Cell> getAllPossibleCells() {
-        return new ArrayList<>(backing.getAllPossibleCells());
+    public boolean isSpentWall(final Cell cell) {
+        return spentWalls.contains(cell);
     }
 
     public int getNumSpentWalls() {
         return spentWalls.size();
     }
 
+    public Set<Cell> getSpentWalls() {
+        return new HashSet<>(spentWalls);
+    }
+
     public boolean placeWall(final Cell cell) {
         if (!originallyEmpty.contains(cell) || spentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
-        backing.removeVertex(cell);
         spentWalls.add(cell);
         return true;
     }
@@ -78,12 +68,29 @@ public final class Board {
         if (!originallyEmpty.contains(cell) || !spentWalls.contains(cell)) {
             throw new IllegalArgumentException();
         }
-        backing.putVertex(cell, Feature.EMPTY);
         spentWalls.remove(cell);
         return true;
     }
 
+    public Puzzle getPuzzle() {
+        return puzzle;
+    }
+
+    public GridGraph<Object> getTraversalGraph() {
+        final Function<Cell, Optional<Object>> isPresent = cell ->
+            originallyMissing.contains(cell) || spentWalls.contains(cell)
+                ? Optional.empty()
+                : Optional.of(OBJECT);
+        return new GridGraph<>(puzzle.getNumRows(), puzzle.getNumCols(), isPresent);
+    }
+
     public Board shallowCopy() {
-        return new Board(backing.shallowCopy(), originallyEmpty, new HashSet<>(spentWalls));
+        return new Board(
+            puzzle,
+            originallyEmpty,
+            originallyMissing,
+            originallyCheckpoint,
+            spentWalls
+        );
     }
 }
