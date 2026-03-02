@@ -23,19 +23,6 @@ import think.solve.Solver;
  */
 public final class ClimbingSolver extends Solver {
 
-    private static final class Parameters {
-
-        /**
-            Adding more walls allows for delaying the snake more. However, adding too many deprives
-            it of space to travel. I estimated that if wall supply was unlimited, the optimal
-            solution would have some wall density (ideally, you'd scrape the best human solutions
-            to UCU and average their wall densities instead). Then, I assumed that it is a good
-            idea to have our solver target exactly that wall density. I did so under the
-            impression that the map would be mostly empty.
-         */
-        static final double OPTIMAL_DENSITY = 0.4;
-    }
-
     public ClimbingSolver(final ProposedSolution listener, final Puzzle puzzle) {
         super(listener, puzzle);
     }
