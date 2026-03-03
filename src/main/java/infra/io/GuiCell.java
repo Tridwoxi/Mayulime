@@ -6,16 +6,16 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-final class CellDisplay extends Group {
+final class GuiCell extends Group {
 
     private static final double HALF = 0.5;
     private static final double BASE_LABEL_SCALE = 0.32;
     private static final double MIN_FONT_PX = 7.0;
 
-    CellDisplay(final Color color, final String content, final double sizePx) {
+    GuiCell(final Color color, final String content, final double sizePx) {
         final Rectangle body = new Rectangle(sizePx, sizePx);
         body.setFill(color);
-        body.setStroke(PatheryColors.BACKGROUND.deriveColor(0.0, 1.0, 1.0, 0.6));
+        body.setStroke(GuiPalette.BACKGROUND.deriveColor(0.0, 1.0, 1.0, 0.7));
 
         final String labelText = GuiMath.cellLabel(content, sizePx);
         final Text label = new Text(labelText);

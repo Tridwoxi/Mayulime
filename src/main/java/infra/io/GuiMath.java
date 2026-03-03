@@ -78,8 +78,8 @@ final class GuiMath {
 
     static Color cellLabelColor(final Color background) {
         if (background.getBrightness() > 0.6) {
-            return PatheryColors.BACKGROUND;
+            return GuiPalette.BACKGROUND;
         }
-        return PatheryColors.FOREGROUND;
+        return GuiPalette.FOREGROUND;
     }
 }

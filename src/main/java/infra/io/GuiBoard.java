@@ -4,11 +4,11 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import think.domain.repr.Display;
 
-final class GameDisplay extends Group {
+final class GuiBoard extends Group {
 
     private Display currentDisplay;
 
-    GameDisplay() {
+    GuiBoard() {
         this.currentDisplay = null;
     }
 
@@ -31,7 +31,7 @@ final class GameDisplay extends Group {
             .stream()
             .forEachOrdered(cell -> {
                 final Display.Kind kind = this.currentDisplay.getKind(cell);
-                final CellDisplay cellDisplay = new CellDisplay(
+                final GuiCell cellDisplay = new GuiCell(
                     toColor(kind),
                     this.currentDisplay.getName(cell),
                     cellSizePx
@@ -44,10 +44,10 @@ final class GameDisplay extends Group {
 
     private static Color toColor(final Display.Kind kind) {
         return switch (kind) {
-            case EMPTY -> PatheryColors.EMPTY;
-            case CHECKPOINT -> PatheryColors.CHECKPOINT;
-            case SYSTEM_WALL -> PatheryColors.SYSTEM_WALL;
-            case PLAYER_WALL -> PatheryColors.PLAYER_WALL;
+            case EMPTY -> GuiPalette.EMPTY;
+            case CHECKPOINT -> GuiPalette.CHECKPOINT;
+            case SYSTEM_WALL -> GuiPalette.SYSTEM_WALL;
+            case PLAYER_WALL -> GuiPalette.PLAYER_WALL;
         };
     }
 }

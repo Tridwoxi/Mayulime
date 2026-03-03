@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
@@ -19,8 +20,13 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -45,13 +51,14 @@ final class GuiPanels {
         void onFilePickerCancelled();
     }
 
-    private static final double ROOT_PADDING_PX = 20.0;
-    private static final double ROOT_SPACING_PX = 14.0;
-    private static final double PANEL_PADDING_PX = 12.0;
-    private static final double PANEL_SPACING_PX = 8.0;
-    private static final double VIEWPORT_MIN_HEIGHT_PX = 180.0;
-    private static final double ROOT_BRIGHTNESS_SCALE = 1.28;
-    private static final double PANEL_BRIGHTNESS_SCALE = 0.88;
+    private static final double ROOT_PADDING_PX = 28.0;
+    private static final double ROOT_SPACING_PX = 20.0;
+    private static final double PANEL_PADDING_PX = 18.0;
+    private static final double PANEL_SPACING_PX = 12.0;
+    private static final double VIEWPORT_MIN_HEIGHT_PX = 240.0;
+    private static final double CARD_RADIUS_PX = 18.0;
+    private static final double CHIP_RADIUS_PX = 999.0;
+    private static final double KEYCAP_RADIUS_PX = 8.0;
 
     private final BorderPane root;
     private final Control control;
@@ -63,7 +70,7 @@ final class GuiPanels {
     private final Text stateText = new Text();
     private final Text statusText;
     private final Button detailsButton;
-    private final MetricsDisplay metrics;
+    private final GuiMetrics metrics;
     private final VBox legend;
     private final VBox detailsGroup;
     private final VBox actionsGroup;
@@ -79,7 +86,7 @@ final class GuiPanels {
 
     GuiPanels(
         final Parent root,
-        final GameDisplay gameDisplay,
+        final GuiBoard gameDisplay,
         final Consumer<String> mapCodeConsumer,
         final Control control
     ) {
@@ -94,7 +101,7 @@ final class GuiPanels {
         this.mapViewport = new ScrollPane(this.mapContainer);
         this.statusText = new Text();
         this.detailsButton = new Button();
-        this.metrics = new MetricsDisplay();
+        this.metrics = new GuiMetrics();
         this.legend = this.legendColumn();
         this.detailsGroup = this.panelContainer();
         this.actionsGroup = this.panelContainer();
@@ -175,19 +182,19 @@ final class GuiPanels {
     }
 
     private void configureHeader() {
-        this.titleText.setFill(PatheryColors.FOREGROUND);
-        this.titleText.setFont(Font.font(Gui.FONT_NAME, 26.0));
+        this.titleText.setFill(GuiPalette.FOREGROUND);
+        this.titleText.setFont(Font.font(Gui.FONT_NAME, 31.0));
 
-        this.stateText.setFill(PatheryColors.FOREGROUND);
-        this.stateText.setOpacity(0.9);
-        this.stateText.setFont(Font.font(Gui.FONT_NAME, 14.0));
+        this.stateText.setFill(GuiPalette.FOREGROUND);
+        this.stateText.setOpacity(0.85);
+        this.stateText.setFont(Font.font(Gui.FONT_NAME, 15.0));
 
-        this.statusText.setFill(PatheryColors.FOREGROUND);
-        this.statusText.setOpacity(0.85);
-        this.statusText.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        this.statusText.setFill(GuiPalette.FOREGROUND);
+        this.statusText.setOpacity(0.7);
+        this.statusText.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final VBox detailStack = new VBox();
-        detailStack.setSpacing(4.0);
+        detailStack.setSpacing(6.0);
         detailStack.setAlignment(Pos.CENTER_RIGHT);
         detailStack.getChildren().addAll(this.stateText, this.statusText);
 
@@ -220,7 +227,11 @@ final class GuiPanels {
         this.mapViewport.setBorder(Border.EMPTY);
         this.mapSurface.setMinSize(1.0, 1.0);
         this.mapSurface.setPrefSize(1.0, 1.0);
-        this.mapSurface.setBackground(Background.EMPTY);
+        this.mapSurface.setBackground(
+            new Background(
+                new BackgroundFill(GuiPalette.SURFACE_VARIANT, new CornerRadii(12.0), Insets.EMPTY)
+            )
+        );
         this.mapContainer.setMinSize(1.0, 1.0);
         this.mapContainer.setPrefSize(1.0, 1.0);
         this.mapContainer.setBackground(Background.EMPTY);
@@ -229,17 +240,30 @@ final class GuiPanels {
             this.centerViewportIfPending(this.currentRows, this.currentCols);
         });
 
-        BorderPane.setMargin(
-            this.mapViewport,
-            new Insets(ROOT_SPACING_PX, 0.0, ROOT_SPACING_PX, 0.0)
-        );
-        this.root.setCenter(this.mapViewport);
+        final StackPane viewportCard = new StackPane(this.mapViewport);
+        viewportCard.setPadding(new Insets(PANEL_PADDING_PX));
+        viewportCard.setBackground(this.cardBackground());
+        viewportCard.setBorder(this.cardBorder(CARD_RADIUS_PX));
+        viewportCard.setEffect(this.cardShadow());
+
+        BorderPane.setMargin(viewportCard, new Insets(ROOT_SPACING_PX, 0.0, ROOT_SPACING_PX, 0.0));
+        this.root.setCenter(viewportCard);
     }
 
     private void configureFooter() {
-        this.detailsButton.setBackground(Background.fill(PatheryColors.BACKGROUND));
-        this.detailsButton.setBorder(Border.EMPTY);
-        this.detailsButton.setTextFill(PatheryColors.FOREGROUND);
+        this.detailsButton.setBackground(
+            new Background(
+                new BackgroundFill(
+                    GuiPalette.SURFACE_VARIANT,
+                    new CornerRadii(CHIP_RADIUS_PX),
+                    Insets.EMPTY
+                )
+            )
+        );
+        this.detailsButton.setBorder(this.cardBorder(CHIP_RADIUS_PX));
+        this.detailsButton.setTextFill(GuiPalette.FOREGROUND);
+        this.detailsButton.setFont(Font.font(Gui.FONT_NAME, 13.0));
+        this.detailsButton.setPadding(new Insets(8.0, 18.0, 8.0, 18.0));
         this.detailsButton.setOnAction(event -> this.toggleDetails());
 
         final HBox detailsRow = new HBox();
@@ -267,12 +291,9 @@ final class GuiPanels {
         final VBox panel = new VBox();
         panel.setSpacing(PANEL_SPACING_PX);
         panel.setPadding(new Insets(PANEL_PADDING_PX));
-        panel.setBackground(
-            Background.fill(
-                PatheryColors.BACKGROUND.deriveColor(0.0, 1.0, PANEL_BRIGHTNESS_SCALE, 0.96)
-            )
-        );
-        panel.setBorder(Border.EMPTY);
+        panel.setBackground(this.cardBackground());
+        panel.setBorder(this.cardBorder(CARD_RADIUS_PX));
+        panel.setEffect(this.cardShadow());
         return panel;
     }
 
@@ -287,37 +308,37 @@ final class GuiPanels {
                 this.shortcutRow("Ctrl/Cmd+V", "Paste mapcode"),
                 this.shortcutRow("+ / -", "Zoom"),
                 this.shortcutRow("0", "Reset zoom"),
-                this.shortcutRow("Drag", "Pan map")
+                this.shortcutRow("Drag / Scroll", "Pan map")
             );
         return column;
     }
 
     private VBox legendColumn() {
         final VBox column = new VBox();
-        column.setSpacing(6.0);
+        column.setSpacing(8.0);
         column.setAlignment(Pos.CENTER_LEFT);
         column
             .getChildren()
             .addAll(
-                this.legendItem(PatheryColors.EMPTY, "Empty"),
-                this.legendItem(PatheryColors.CHECKPOINT, "Checkpoint"),
-                this.legendItem(PatheryColors.SYSTEM_WALL, "System wall"),
-                this.legendItem(PatheryColors.PLAYER_WALL, "Player wall")
+                this.legendItem(GuiPalette.EMPTY, "Empty"),
+                this.legendItem(GuiPalette.CHECKPOINT, "Checkpoint"),
+                this.legendItem(GuiPalette.SYSTEM_WALL, "System wall"),
+                this.legendItem(GuiPalette.PLAYER_WALL, "Player wall")
             );
         return column;
     }
 
-    private HBox legendItem(final javafx.scene.paint.Color color, final String label) {
-        final Rectangle swatch = new Rectangle(10.0, 10.0);
+    private HBox legendItem(final Color color, final String label) {
+        final Rectangle swatch = new Rectangle(12.0, 12.0);
         swatch.setFill(color);
-        swatch.setStroke(PatheryColors.BACKGROUND);
+        swatch.setStroke(GuiPalette.OUTLINE);
 
         final Text text = new Text(label);
-        text.setFill(PatheryColors.FOREGROUND);
-        text.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        text.setFill(GuiPalette.FOREGROUND);
+        text.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final HBox row = new HBox();
-        row.setSpacing(6.0);
+        row.setSpacing(10.0);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getChildren().addAll(swatch, text);
         return row;
@@ -325,32 +346,59 @@ final class GuiPanels {
 
     private Text sectionTitle(final String title) {
         final Text text = new Text(title);
-        text.setFill(PatheryColors.FOREGROUND);
-        text.setOpacity(0.8);
-        text.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        text.setFill(GuiPalette.FOREGROUND);
+        text.setOpacity(0.65);
+        text.setFont(Font.font(Gui.FONT_NAME, 11.0));
         return text;
     }
 
     private HBox shortcutRow(final String key, final String action) {
         final Label keycap = new Label(key);
-        keycap.setTextFill(PatheryColors.FOREGROUND);
-        keycap.setFont(Font.font("Monospaced", 11.0));
-        keycap.setPadding(new Insets(2.0, 6.0, 2.0, 6.0));
+        keycap.setTextFill(GuiPalette.FOREGROUND);
+        keycap.setFont(Font.font("Monospaced", 12.0));
+        keycap.setPadding(new Insets(4.0, 8.0, 4.0, 8.0));
         keycap.setBackground(
-            Background.fill(PatheryColors.FOREGROUND.deriveColor(0.0, 1.0, 1.0, 0.12))
+            new Background(
+                new BackgroundFill(
+                    GuiPalette.SURFACE_VARIANT,
+                    new CornerRadii(KEYCAP_RADIUS_PX),
+                    Insets.EMPTY
+                )
+            )
         );
-        keycap.setBorder(Border.EMPTY);
+        keycap.setBorder(this.cardBorder(KEYCAP_RADIUS_PX));
 
         final Text label = new Text(action);
-        label.setFill(PatheryColors.FOREGROUND);
-        label.setOpacity(0.9);
-        label.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        label.setFill(GuiPalette.FOREGROUND);
+        label.setOpacity(0.88);
+        label.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final HBox row = new HBox();
-        row.setSpacing(8.0);
+        row.setSpacing(10.0);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getChildren().addAll(keycap, label);
         return row;
+    }
+
+    private Background cardBackground() {
+        return new Background(
+            new BackgroundFill(GuiPalette.SURFACE, new CornerRadii(CARD_RADIUS_PX), Insets.EMPTY)
+        );
+    }
+
+    private Border cardBorder(final double radiusPx) {
+        return new Border(
+            new BorderStroke(
+                GuiPalette.OUTLINE,
+                BorderStrokeStyle.SOLID,
+                new CornerRadii(radiusPx),
+                BorderWidths.DEFAULT
+            )
+        );
+    }
+
+    private DropShadow cardShadow() {
+        return new DropShadow(12.0, 0.0, 3.0, Color.color(0.08, 0.1, 0.16, 0.14));
     }
 
     private void configureInteractions() {
@@ -554,6 +602,6 @@ final class GuiPanels {
     }
 
     private Color rootBackground() {
-        return PatheryColors.BACKGROUND.deriveColor(0.0, 1.0, ROOT_BRIGHTNESS_SCALE, 1.0);
+        return GuiPalette.BACKGROUND;
     }
 }

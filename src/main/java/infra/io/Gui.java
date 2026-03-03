@@ -1,5 +1,6 @@
 package infra.io;
 
+import infra.io.GuiPanels.Control;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javafx.animation.Animation;
@@ -9,18 +10,18 @@ import javafx.scene.Scene;
 import javafx.util.Duration;
 import think.domain.repr.Display;
 
-public final class Gui extends Scene implements GuiPanels.Control {
+public final class Gui extends Scene implements Control {
 
-    static final String FONT_NAME = "System";
+    static final String FONT_NAME = "Roboto";
     static final double MIN_CELL_SIZE_PX = 8.0;
     static final double MAX_CELL_SIZE_PX = 50.0;
 
     private static final String STATUS_WAITING = "Waiting for map";
-    private static final String STATUS_SOLVING = "Solving...";
-    private static final String STATUS_BEST_UPDATED = "Solving...";
+    private static final String STATUS_SOLVING = "Solving";
+    private static final String STATUS_BEST_UPDATED = "Solving";
     private static final String STATUS_MAP_REJECTED = "Map rejected";
 
-    private final GameDisplay gameDisplay;
+    private final GuiBoard gameDisplay;
     private final GuiPanels panels;
     private final Timeline metricsTicker;
 
@@ -44,7 +45,7 @@ public final class Gui extends Scene implements GuiPanels.Control {
 
     public Gui(final Consumer<String> mapCodeConsumer) {
         super(GuiPanels.createRoot());
-        this.gameDisplay = new GameDisplay();
+        this.gameDisplay = new GuiBoard();
         this.panels = new GuiPanels(getRoot(), this.gameDisplay, mapCodeConsumer, this);
         this.metricsTicker = new Timeline(
             new KeyFrame(Duration.seconds(1.0), ignored -> this.refreshUi())
@@ -56,7 +57,7 @@ public final class Gui extends Scene implements GuiPanels.Control {
         this.currentCellSizePx = MAX_CELL_SIZE_PX;
         this.updateCount = 0;
 
-        this.puzzleName = "Mayulime Pathery Solver";
+        this.puzzleName = "Welcome";
         this.puzzleRows = 0;
         this.puzzleCols = 0;
         this.wallBudget = 0;
@@ -93,7 +94,7 @@ public final class Gui extends Scene implements GuiPanels.Control {
         this.solvingState = STATUS_BEST_UPDATED;
         this.statusMessage = String.format(
             Locale.US,
-            "Latest score: %d by %s",
+            "Current score: %d by %s",
             display.getScore(),
             display.getSubmitter()
         );
@@ -120,7 +121,7 @@ public final class Gui extends Scene implements GuiPanels.Control {
         this.lastUpdateAtNanos = -1L;
 
         this.solvingState = STATUS_SOLVING;
-        this.statusMessage = "Searching for better solutions...";
+        this.statusMessage = "Searching for better solutions";
         this.panels.requestRecenter();
         this.pendingCellSizeReflow = true;
         this.pendingMapRerender = false;

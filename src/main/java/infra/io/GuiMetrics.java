@@ -5,15 +5,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import think.domain.repr.Display;
 
-final class MetricsDisplay extends GridPane {
+final class GuiMetrics extends GridPane {
 
     private static final int ROW_COUNT = 6;
     private final Text[] values;
 
-    MetricsDisplay() {
+    GuiMetrics() {
         this.values = new Text[ROW_COUNT];
-        this.setHgap(12.0);
-        this.setVgap(4.0);
+        this.setHgap(16.0);
+        this.setVgap(8.0);
 
         this.addRow(0, "Grid");
         this.addRow(1, "Walls");
@@ -48,13 +48,13 @@ final class MetricsDisplay extends GridPane {
 
     private void addRow(final int rowIndex, final String labelText) {
         final Text label = new Text(labelText + ":");
-        label.setFill(PatheryColors.FOREGROUND);
-        label.setOpacity(0.75);
-        label.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        label.setFill(GuiPalette.FOREGROUND);
+        label.setOpacity(0.72);
+        label.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final Text value = new Text("-");
-        value.setFill(PatheryColors.FOREGROUND);
-        value.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        value.setFill(GuiPalette.FOREGROUND);
+        value.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         this.values[rowIndex] = value;
         this.add(label, 0, rowIndex);
