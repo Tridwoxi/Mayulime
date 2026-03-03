@@ -12,9 +12,8 @@ execute `gradle run`. Gradle will install the dependencies [JavaFX](https://open
 [Checkstyle](https://checkstyle.org), and [Spotbugs](https://spotbugs.github.io), then run the
 project. If it doesn't work, message the author of this project.
 
-When run, the project launches a GUI with a button for a file selector. Upload a file with extension
-`.mapcode` that this project supports, and wait for it to display its solutions. Supported files in
-the Pathery [MapCode](https://www.pathery.com/mapeditor) format can be found in `examples/`.
+When run, the project launches a GUI. Upload a Pathery [MapCode](https://www.pathery.com/mapeditor),
+and wait for solutions. Supported examples are in `examples/`.
 
 ## Problem statement
 
