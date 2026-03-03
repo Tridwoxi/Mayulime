@@ -9,9 +9,9 @@ lies in the documentation, please inform the human.
 
 ## Testing
 
-If you edit code, execute `./gradlew test` to run all the tests. If you cannot do so because the
-Gradle wrapper or jar is missing, ask the human to create it. Do not attempt to launch the
-application itself unless explicitly asked.
+If you edit code, execute `./gradlew build` to compile and `./gradlew test` to run all the tests.
+If you cannot do so because the Gradle wrapper or jar is missing, ask the human to create it. Do
+not attempt to launch the application itself unless explicitly asked.
 
 If Checkstyle or Spotbugs complains during the build, evaluate if fixing the violations would
 improve or harm the design. Then either fix it or keep whatever you originally wrote and inform the
@@ -24,10 +24,11 @@ point). `think/` contains the backend. The backend is linked to the frontend by 
 
 The backend is split across `domain/`, `graph/`, and `solve/`. Domain does MapCode parsing in
 `codec/` and problem representation in `repr/`. Graphs have implementations in `impl/` and
-algorithms in `algs/`. Solvers have strategies in `stra/` and non-graph tools in `tools/`.
+algorithms in `algs/`. Solvers are grouped by approach as baseline in `base/`, brute force in
+`brute/`, and local search in `local/`
 
 Tests live in `src/test/java/`. Within tests, `e2e/` contains end-to-end and integration tests, and
-`unit/` contains unit tests grouped by package.
+`unit/` contains unit tests grouped by package. Only public objects are tested.
 
 ## Style
 

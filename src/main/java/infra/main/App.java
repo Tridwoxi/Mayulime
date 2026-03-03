@@ -70,15 +70,19 @@ public final class App extends Application {
             puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException exception) {
             Logging.warning("Bad MapCode or unsupported feature; problem rejected");
+            gui.mapRejected();
         }
         if (puzzle != null) {
+            final String problemName = puzzle.getName().isBlank()
+                ? UNNAMED_PROBLEM_NAME
+                : puzzle.getName();
+            gui.startSolving(
+                problemName,
+                puzzle.getNumRows(),
+                puzzle.getNumCols(),
+                puzzle.getWallBudget()
+            );
             manager.solve(puzzle);
-            if (gui.getWindow() instanceof Stage stage) {
-                final String problemName = puzzle.getName().isBlank()
-                    ? UNNAMED_PROBLEM_NAME
-                    : puzzle.getName();
-                stage.setTitle("\"" + problemName + "\"");
-            }
         }
     }
 }
