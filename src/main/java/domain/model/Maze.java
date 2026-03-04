@@ -7,7 +7,7 @@ package domain.model;
 public final class Maze {
 
     public enum Feature {
-        NOTHING(true),
+        BLANK(true),
         PLAYER_WALL(false),
         SYSTEM_WALL(false),
         CHECKPOINT(true);
