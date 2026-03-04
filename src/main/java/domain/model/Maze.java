@@ -67,4 +67,8 @@ public final class Maze {
     public Feature[] getGrid() {
         return grid.clone();
     }
+
+    public boolean isInBounds(final int index) {
+        return index >= 0 && index < numRows * numCols;
+    }
 }
