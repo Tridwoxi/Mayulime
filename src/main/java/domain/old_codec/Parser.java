@@ -1,6 +1,6 @@
 package domain.old_codec;
 
-import domain.model.Puzzle;
+import domain.old_model.Puzzle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;

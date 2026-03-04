@@ -1,10 +1,10 @@
 package unit;
 
-import domain.model.Board;
-import domain.model.Display;
-import domain.model.Puzzle;
 import domain.old_codec.Parser;
 import domain.old_codec.Parser.BadMapCodeException;
+import domain.old_model.Board;
+import domain.old_model.Display;
+import domain.old_model.Puzzle;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;

@@ -1,8 +1,8 @@
 package solvers;
 
-import domain.model.Board;
-import domain.model.Display;
-import domain.model.Puzzle;
+import domain.old_model.Board;
+import domain.old_model.Display;
+import domain.old_model.Puzzle;
 import infra.output.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;

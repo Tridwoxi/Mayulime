@@ -1,6 +1,6 @@
 package solvers.baseline;
 
-import domain.model.Puzzle;
+import domain.old_model.Puzzle;
 import solvers.Solver;
 
 /**

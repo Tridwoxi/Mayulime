@@ -1,6 +1,6 @@
 package infra.gui;
 
-import domain.model.Display;
+import domain.old_model.Display;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

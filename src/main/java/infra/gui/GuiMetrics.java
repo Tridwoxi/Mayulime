@@ -1,6 +1,6 @@
 package infra.gui;
 
-import domain.model.Display;
+import domain.old_model.Display;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;

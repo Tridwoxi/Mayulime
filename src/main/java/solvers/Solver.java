@@ -1,7 +1,7 @@
 package solvers;
 
-import domain.model.Board;
-import domain.model.Puzzle;
+import domain.old_model.Board;
+import domain.old_model.Puzzle;
 import infra.output.Logging;
 
 /**

@@ -1,6 +1,6 @@
 package infra.gui;
 
-import domain.model.Display;
+import domain.old_model.Display;
 import infra.gui.GuiPanels.Control;
 import java.util.Locale;
 import java.util.function.Consumer;

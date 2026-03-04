@@ -1,6 +1,6 @@
 package infra.gui;
 
-import domain.model.Display;
+import domain.old_model.Display;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 

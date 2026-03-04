@@ -1,7 +1,7 @@
 package solvers.graph.algs;
 
-import domain.model.Board;
-import domain.model.Puzzle;
+import domain.old_model.Board;
+import domain.old_model.Puzzle;
 import solvers.graph.Graph;
 import solvers.graph.algs.Search.Fill;
 import solvers.graph.impl.GridGraph.Cell;
