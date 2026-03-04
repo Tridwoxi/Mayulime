@@ -1,4 +1,4 @@
-package infra.io;
+package infra.gui;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;

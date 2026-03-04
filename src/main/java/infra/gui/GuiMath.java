@@ -1,4 +1,4 @@
-package infra.io;
+package infra.gui;
 
 import java.io.File;
 import java.util.Locale;

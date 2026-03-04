@@ -1,6 +1,6 @@
 package think.solve;
 
-import infra.io.Logging;
+import infra.output.Logging;
 import think.domain.repr.Board;
 import think.domain.repr.Puzzle;
 

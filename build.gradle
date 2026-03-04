@@ -18,7 +18,7 @@ java {
 }
 
 application {
-    mainClass = 'infra.main.App'
+    mainClass = 'infra.launch.App'
 }
 
 javafx {

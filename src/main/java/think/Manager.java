@@ -1,6 +1,6 @@
 package think;
 
-import infra.io.Logging;
+import infra.output.Logging;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

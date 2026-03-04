@@ -1,7 +1,7 @@
-package infra.main;
+package infra.launch;
 
-import infra.io.Gui;
-import infra.io.Logging;
+import infra.gui.Gui;
+import infra.output.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;

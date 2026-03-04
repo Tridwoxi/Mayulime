@@ -1,4 +1,4 @@
-package infra.io;
+package infra.output;
 
 import java.io.PrintStream;
 import java.lang.StackWalker.StackFrame;

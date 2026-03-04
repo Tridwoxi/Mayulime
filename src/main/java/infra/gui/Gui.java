@@ -1,6 +1,6 @@
-package infra.io;
+package infra.gui;
 
-import infra.io.GuiPanels.Control;
+import infra.gui.GuiPanels.Control;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javafx.animation.Animation;
