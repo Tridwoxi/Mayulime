@@ -1,16 +1,28 @@
 package domain.model;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 
 /**
-    Pathery problem specification metadata. The maze itself is accessible as a field.
+    Pathery puzzle metadata. The {@link Maze} itself is accessible as a field.
  */
 public final class Puzzle2 {
+
+    /**
+        Assume all puzzles contain blank cells, system walls, player walls, and the unique
+        checkpoint sequence. What additional mechanics do they have?
+     */
+    public enum Mechanic {
+        TELEPORTS,
+        MULTI_START, // And multi-finish.
+        ICE_TILES,
+    }
 
     private final String name;
     private final Maze maze;
     private final int[] checkpoints;
     private final int blockingBudget;
+    private final EnumSet<Mechanic> mechanics;
 
     public Puzzle2(
         final String name,
@@ -28,14 +40,16 @@ public final class Puzzle2 {
         this.maze = maze;
         this.checkpoints = checkpoints.clone();
         this.blockingBudget = blockingBudget;
-    }
-
-    public Maze getMaze() {
-        return maze;
+        this.mechanics = EnumSet.noneOf(Mechanic.class);
+        // TODO: Nobody supports any fancy mechanics, but if they do, we will detect them here.
     }
 
     public String getName() {
         return name;
+    }
+
+    public Maze getMaze() {
+        return maze;
     }
 
     public int[] getCheckpoints() {
@@ -44,5 +58,9 @@ public final class Puzzle2 {
 
     public int getBlockingBudget() {
         return blockingBudget;
+    }
+
+    public EnumSet<Mechanic> getMechanics() {
+        return EnumSet.copyOf(mechanics);
     }
 }
