@@ -27,10 +27,10 @@ import java.util.regex.Pattern;
     Order           -> int
     </pre>
 
-    Integers contain only digits and are strictly positive. {@code |} and {@code nothing} are
-    metasymbols representing alternation and an empty production. There are kinds beyond those
-    defined here, and can be learned of by looking at the map editor. Name must not contain the
-    {@code .} symbol.
+    Integers contain only digits and are strictly positive, except for BlockingBudget, which may
+    also be 0. {@code |} and {@code nothing} are metasymbols representing alternation and an empty
+    production. There are kinds beyond those defined here, and can be learned of by looking at the
+    map editor. Name must not contain the {@code .} symbol.
 
     This parser also enforces semantic correctness: features stay within bounds, checkpoints must
     have unique orders, and blocking budget cannot exceed blank cells. Pathery supports variants
@@ -64,7 +64,7 @@ public final class Parser {
 
         final int numCols = ParserSafety.stringToInt(metadata[0]);
         final int numRows = ParserSafety.stringToInt(metadata[1]);
-        final int blockingBudget = ParserSafety.stringToInt(metadata[2]);
+        final int blockingBudget = ParserSafety.stringToNonNegativeInt(metadata[2]);
         final String puzzleName = ParserSafety.cleanName(metadata[3]);
         ParserSafety.multiply(numRows, numCols);
 

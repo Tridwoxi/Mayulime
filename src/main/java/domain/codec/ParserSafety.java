@@ -29,6 +29,17 @@ final class ParserSafety {
         }
     }
 
+    static int stringToNonNegativeInt(final String string) throws BadMapCodeException {
+        try {
+            require(DIGITS_RE.matcher(string).matches());
+            final int value = Integer.parseInt(string);
+            require(value >= 0 && value <= BIG_NUMBER);
+            return value;
+        } catch (NumberFormatException exception) {
+            throw new BadMapCodeException();
+        }
+    }
+
     static int sum(final int first, final int second) throws BadMapCodeException {
         try {
             final int value = Math.addExact(first, second);
