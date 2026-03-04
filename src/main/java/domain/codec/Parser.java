@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
     Order           -> int
     </pre>
 
-    Integers contain only digits and are strictly positive. {@code |} and {@code nothing} are a
+    Integers contain only digits and are strictly positive. {@code |} and {@code nothing} are
     metasymbols representing alternation and an empty production. There are kinds beyond those
     defined here, and can be learned of by looking at the map editor. Name must not contain the
     {@code .} symbol.
@@ -69,13 +69,13 @@ public final class Parser {
         ParserSafety.multiply(numRows, numCols);
 
         final MazeData mazeData = parseMaze(regions[1], numRows, numCols);
-        ParserSafety.require(blockingBudget <= mazeData.numBlankCells());
+        final int clampedBudget = Math.min(blockingBudget, mazeData.numBlankCells());
 
         return new Puzzle(
             puzzleName,
             mazeData.maze(),
             mazeData.checkpoints(),
-            blockingBudget,
+            clampedBudget,
             mazeData.mechanics()
         );
     }

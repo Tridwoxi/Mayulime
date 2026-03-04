@@ -3,10 +3,6 @@ package domain.codec;
 import domain.codec.Parser.BadMapCodeException;
 import java.util.regex.Pattern;
 
-/**
-    String and numeric manipulation for safe parsing of MapCodes. This class defends against
-    negative numbers and resource exhaustion attacks.
- */
 final class ParserSafety {
 
     private static final Pattern DIGITS_RE = Pattern.compile("\\d+");
@@ -26,7 +22,7 @@ final class ParserSafety {
         try {
             require(DIGITS_RE.matcher(string).matches());
             final int value = Integer.parseInt(string);
-            require(value >= 0 && value <= BIG_NUMBER);
+            require(value > 0 && value <= BIG_NUMBER);
             return value;
         } catch (NumberFormatException exception) {
             throw new BadMapCodeException();
