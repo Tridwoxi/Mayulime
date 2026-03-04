@@ -19,6 +19,8 @@ human instead.
 
 ## Repository layout
 
+<!-- THIS DESCRIPTION IS OUT OF DATE AND SHOULD BE IGNORED. -->
+
 Application code lives in `src/main/java/`. `infra/` contains infrastructure (gui, logging, launch
 point). `think/` contains the backend. The backend is linked to the frontend by the Manager.
 
