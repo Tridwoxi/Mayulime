@@ -1,4 +1,4 @@
-package think.graph.impl;
+package solvers.graph.impl;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
-import think.graph.Graph;
-import think.graph.Graph.MutableGraph;
+import solvers.graph.Graph;
+import solvers.graph.Graph.MutableGraph;
 
 /**
     HashMap-backed implementation of a graph. All operations have theoretically optimal time

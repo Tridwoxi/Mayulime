@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     Keep track of checkpoint cells in traversal order.

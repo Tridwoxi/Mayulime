@@ -1,4 +1,4 @@
-package think.solve.climb;
+package solvers.hillclimb;
 
 import java.util.Collection;
 import java.util.HashMap;

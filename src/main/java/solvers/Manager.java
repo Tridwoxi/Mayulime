@@ -1,4 +1,4 @@
-package think;
+package solvers;
 
 import domain.model.Board;
 import domain.model.Display;
@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import think.graph.algs.Evaluate;
-import think.solve.Solver;
-import think.solve.base.BaselineSolver;
-import think.solve.brute.RandomSolver;
+import solvers.baseline.BaselineSolver;
+import solvers.bruteforce.RandomSolver;
+import solvers.graph.algs.Evaluate;
 
 public final class Manager {
 

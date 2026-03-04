@@ -1,4 +1,4 @@
-package think.graph.algs;
+package solvers.graph.algs;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import think.graph.Graph;
+import solvers.graph.Graph;
 
 /**
     Search algorithms upon a graph. The returned {@link Fill} parent maps of the search algorithms

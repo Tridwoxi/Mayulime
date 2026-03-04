@@ -1,10 +1,10 @@
-package think.solve.base;
+package solvers.baseline;
 
 import domain.model.Puzzle;
-import think.solve.Solver;
+import solvers.Solver;
 
 /**
-    Hack used by {@link think.Manager} to send baseline results.
+    Hack used by {@link solvers.Manager} to send baseline results.
  */
 public final class BaselineSolver extends Solver {
 

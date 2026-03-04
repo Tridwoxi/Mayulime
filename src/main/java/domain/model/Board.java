@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import think.graph.impl.GridGraph;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.impl.GridGraph;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     The solution-specific aspect of a Pathery board is the set of placed walls. This class enables

@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import think.graph.impl.GridGraph;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.impl.GridGraph;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     Immutable display adapter to allow for simpler querying of backend results.

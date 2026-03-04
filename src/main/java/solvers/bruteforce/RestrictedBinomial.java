@@ -1,4 +1,4 @@
-package think.solve.brute;
+package solvers.bruteforce;
 
 import java.util.ArrayList;
 import java.util.Collections;

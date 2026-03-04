@@ -1,4 +1,4 @@
-package think.graph.impl;
+package solvers.graph.impl;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -7,8 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.SequencedSet;
 import java.util.function.Function;
-import think.graph.Graph.MutableVertexGraph;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.Graph.MutableVertexGraph;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     ArrayList-backed implementation of a two-dimensional grid graph with holes. This is a highly

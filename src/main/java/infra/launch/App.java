@@ -9,7 +9,7 @@ import infra.output.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import think.Manager;
+import solvers.Manager;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).

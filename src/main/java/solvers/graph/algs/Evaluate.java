@@ -1,10 +1,10 @@
-package think.graph.algs;
+package solvers.graph.algs;
 
 import domain.model.Board;
 import domain.model.Puzzle;
-import think.graph.Graph;
-import think.graph.algs.Search.Fill;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.Graph;
+import solvers.graph.algs.Search.Fill;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     Pathery Snake simulator. Produces a score for a given board configuration.

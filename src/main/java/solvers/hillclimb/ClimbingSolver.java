@@ -1,9 +1,9 @@
-package think.solve.climb;
+package solvers.hillclimb;
 
 import domain.model.Board;
 import domain.model.Puzzle;
 import java.util.concurrent.atomic.AtomicInteger;
-import think.solve.Solver;
+import solvers.Solver;
 
 /**
     Random restart hill climbing.

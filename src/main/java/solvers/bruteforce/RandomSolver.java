@@ -1,11 +1,11 @@
-package think.solve.brute;
+package solvers.bruteforce;
 
 import domain.model.Board;
 import domain.model.Puzzle;
 import java.util.ArrayList;
 import java.util.Collections;
-import think.graph.impl.GridGraph.Cell;
-import think.solve.Solver;
+import solvers.Solver;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     Guess randomly.

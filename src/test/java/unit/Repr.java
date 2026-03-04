@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.impl.GridGraph.Cell;
 
 public final class Repr {
 

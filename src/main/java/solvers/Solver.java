@@ -1,4 +1,4 @@
-package think.solve;
+package solvers;
 
 import domain.model.Board;
 import domain.model.Puzzle;

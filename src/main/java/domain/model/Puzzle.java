@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import think.graph.impl.GridGraph.Cell;
+import solvers.graph.impl.GridGraph.Cell;
 
 /**
     Pathery problem specification. Contains metadata, shared data, and empty board supplier.
