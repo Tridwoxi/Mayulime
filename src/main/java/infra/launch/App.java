@@ -1,9 +1,9 @@
 package infra.launch;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
 import domain.model.Display;
 import domain.model.Puzzle;
+import domain.old_codec.Parser;
+import domain.old_codec.Parser.BadMapCodeException;
 import infra.gui.Gui;
 import infra.output.Logging;
 import javafx.application.Application;

@@ -1,7 +1,7 @@
 package unit;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
+import domain.old_codec.Parser;
+import domain.old_codec.Parser.BadMapCodeException;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

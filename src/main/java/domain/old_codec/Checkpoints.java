@@ -1,6 +1,6 @@
-package domain.codec;
+package domain.old_codec;
 
-import domain.codec.Parser.BadMapCodeException;
+import domain.old_codec.Parser.BadMapCodeException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;

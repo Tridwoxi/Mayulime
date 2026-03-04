@@ -1,8 +1,8 @@
 package e2e;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
 import domain.model.Puzzle;
+import domain.old_codec.Parser;
+import domain.old_codec.Parser.BadMapCodeException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

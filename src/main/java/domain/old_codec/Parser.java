@@ -1,4 +1,4 @@
-package domain.codec;
+package domain.old_codec;
 
 import domain.model.Puzzle;
 import java.util.HashSet;
