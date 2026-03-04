@@ -1,9 +1,9 @@
 package infra.gui;
 
+import domain.model.Display;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import think.domain.repr.Display;
 
 final class GuiMetrics extends GridPane {
 

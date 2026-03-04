@@ -1,7 +1,7 @@
-package think.domain.codec;
+package domain.codec;
 
+import domain.codec.Parser.BadMapCodeException;
 import java.util.regex.Pattern;
-import think.domain.codec.Parser.BadMapCodeException;
 
 /**
     String and numeric manipulation for safe parsing of map codes. This class defends against

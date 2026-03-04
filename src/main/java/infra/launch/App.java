@@ -1,15 +1,15 @@
 package infra.launch;
 
+import domain.codec.Parser;
+import domain.codec.Parser.BadMapCodeException;
+import domain.model.Display;
+import domain.model.Puzzle;
 import infra.gui.Gui;
 import infra.output.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import think.Manager;
-import think.domain.codec.Parser;
-import think.domain.codec.Parser.BadMapCodeException;
-import think.domain.repr.Display;
-import think.domain.repr.Puzzle;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).

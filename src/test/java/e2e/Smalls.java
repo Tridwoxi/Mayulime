@@ -1,12 +1,12 @@
 package e2e;
 
+import domain.codec.Parser;
+import domain.codec.Parser.BadMapCodeException;
+import domain.model.Puzzle;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.Manager;
-import think.domain.codec.Parser;
-import think.domain.codec.Parser.BadMapCodeException;
-import think.domain.repr.Puzzle;
 
 /**
     Testing on the smalls is a good way to check the backend doesn't crash. The expected scores are

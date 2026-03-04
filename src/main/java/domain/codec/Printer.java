@@ -1,4 +1,4 @@
-package think.domain.codec;
+package domain.codec;
 
 /**
     Convert a puzzle to a Pathery MapCode.

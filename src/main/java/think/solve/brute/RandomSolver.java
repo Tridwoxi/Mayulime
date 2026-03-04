@@ -1,9 +1,9 @@
 package think.solve.brute;
 
+import domain.model.Board;
+import domain.model.Puzzle;
 import java.util.ArrayList;
 import java.util.Collections;
-import think.domain.repr.Board;
-import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph.Cell;
 import think.solve.Solver;
 

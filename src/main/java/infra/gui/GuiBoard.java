@@ -1,8 +1,8 @@
 package infra.gui;
 
+import domain.model.Display;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import think.domain.repr.Display;
 
 final class GuiBoard extends Group {
 

@@ -1,11 +1,11 @@
-package think.domain.codec;
+package domain.codec;
 
+import domain.model.Puzzle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph;
 import think.graph.impl.GridGraph.Cell;
 

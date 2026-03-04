@@ -1,14 +1,14 @@
 package unit;
 
+import domain.codec.Parser;
+import domain.codec.Parser.BadMapCodeException;
+import domain.model.Board;
+import domain.model.Display;
+import domain.model.Puzzle;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import think.domain.codec.Parser;
-import think.domain.codec.Parser.BadMapCodeException;
-import think.domain.repr.Board;
-import think.domain.repr.Display;
-import think.domain.repr.Puzzle;
 import think.graph.impl.GridGraph.Cell;
 
 public final class Repr {

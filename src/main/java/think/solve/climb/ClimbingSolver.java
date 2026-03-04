@@ -1,8 +1,8 @@
 package think.solve.climb;
 
+import domain.model.Board;
+import domain.model.Puzzle;
 import java.util.concurrent.atomic.AtomicInteger;
-import think.domain.repr.Board;
-import think.domain.repr.Puzzle;
 import think.solve.Solver;
 
 /**

@@ -1,5 +1,6 @@
 package infra.gui;
 
+import domain.model.Display;
 import infra.gui.GuiPanels.Control;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -8,7 +9,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.util.Duration;
-import think.domain.repr.Display;
 
 public final class Gui extends Scene implements Control {
 

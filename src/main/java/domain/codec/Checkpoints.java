@@ -1,5 +1,6 @@
-package think.domain.codec;
+package domain.codec;
 
+import domain.codec.Parser.BadMapCodeException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -7,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import think.domain.codec.Parser.BadMapCodeException;
 import think.graph.impl.GridGraph.Cell;
 
 /**

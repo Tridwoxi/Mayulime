@@ -1,7 +1,7 @@
 package think.graph.algs;
 
-import think.domain.repr.Board;
-import think.domain.repr.Puzzle;
+import domain.model.Board;
+import domain.model.Puzzle;
 import think.graph.Graph;
 import think.graph.algs.Search.Fill;
 import think.graph.impl.GridGraph.Cell;

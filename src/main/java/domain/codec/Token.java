@@ -1,7 +1,7 @@
-package think.domain.codec;
+package domain.codec;
 
+import domain.codec.Parser.BadMapCodeException;
 import java.util.regex.Pattern;
-import think.domain.codec.Parser.BadMapCodeException;
 
 /**
     Parsed board token from map-code board region.

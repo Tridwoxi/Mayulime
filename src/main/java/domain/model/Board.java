@@ -1,4 +1,4 @@
-package think.domain.repr;
+package domain.model;
 
 import java.util.HashSet;
 import java.util.Optional;

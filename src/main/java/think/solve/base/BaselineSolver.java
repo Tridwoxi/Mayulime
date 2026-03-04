@@ -1,6 +1,6 @@
 package think.solve.base;
 
-import think.domain.repr.Puzzle;
+import domain.model.Puzzle;
 import think.solve.Solver;
 
 /**
