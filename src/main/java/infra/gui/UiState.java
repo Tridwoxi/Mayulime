@@ -19,7 +19,6 @@ record UiState(
     long timersFrozenAtNanos,
     boolean recenterPending
 ) {
-
     static UiState initial() {
         return new UiState(
             UiPhase.IDLE,

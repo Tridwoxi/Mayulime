@@ -232,6 +232,7 @@ final class UiController {
     }
 
     private final class IntentsBridge implements RootView.Intents {
+
         @Override
         public void submitMapCode(final String mapCode) {
             UiController.this.submitMapCode(mapCode);

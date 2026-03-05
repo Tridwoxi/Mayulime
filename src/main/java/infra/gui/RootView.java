@@ -133,11 +133,7 @@ final class RootView {
         this.root.setPadding(new Insets(ROOT_PADDING_PX));
         this.root.setBackground(
             new Background(
-                new BackgroundFill(
-                    UiPalette.BACKGROUND,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-                )
+                new BackgroundFill(UiPalette.BACKGROUND, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
     }
@@ -159,11 +155,7 @@ final class RootView {
         this.boardSurface.setPrefSize(1.0, 1.0);
         this.boardSurface.setBackground(
             new Background(
-                new BackgroundFill(
-                    UiPalette.SURFACE_VARIANT,
-                    new CornerRadii(12.0),
-                    Insets.EMPTY
-                )
+                new BackgroundFill(UiPalette.SURFACE_VARIANT, new CornerRadii(12.0), Insets.EMPTY)
             )
         );
 

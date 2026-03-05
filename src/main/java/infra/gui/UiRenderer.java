@@ -15,7 +15,8 @@ final class UiRenderer {
         final double cellSize = UiMath.clampCellSize(baseSize);
 
         final StatusUpdate display = state.bestUpdate();
-        final long timerNow = state.timersFrozenAtNanos() > 0 ? state.timersFrozenAtNanos() : nowNanos;
+        final long timerNow =
+            state.timersFrozenAtNanos() > 0 ? state.timersFrozenAtNanos() : nowNanos;
         final String elapsed = UiMath.elapsed(state.puzzleStartedAtNanos(), timerNow);
         final String sinceUpdate = UiMath.elapsed(state.lastUpdateAtNanos(), timerNow);
 
@@ -28,10 +29,7 @@ final class UiRenderer {
         );
         this.rootView.renderSidebar(state, sinceUpdate, elapsed, display);
 
-        if (
-            Double.compare(state.cellSizePx(), cellSize) == 0 &&
-            !state.recenterPending()
-        ) {
+        if (Double.compare(state.cellSizePx(), cellSize) == 0 && !state.recenterPending()) {
             return state;
         }
 
