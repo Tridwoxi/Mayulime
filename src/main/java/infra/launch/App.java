@@ -1,15 +1,15 @@
 package infra.launch;
 
-import domain.old_codec.Parser;
-import domain.old_codec.Parser.BadMapCodeException;
-import domain.old_model.Display;
-import domain.old_model.Puzzle;
+import domain.codec.Parser;
+import domain.codec.Parser.BadMapCodeException;
+import domain.model.Puzzle;
 import infra.gui.Gui;
 import infra.output.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import solvers.Manager;
+import think.manager.Manager;
+import think.manager.StatusUpdate;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
@@ -52,13 +52,13 @@ public final class App extends Application {
 
     // == Connectors. =============================================================================
 
-    private void recieveSolution(final Display display) {
+    private void recieveSolution(final StatusUpdate update) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
         // PERF: Spamming the GUI with updates when each update invalidates all
         // previous updates is basically cyberbullying. Keep only the latest one.
-        Platform.runLater(() -> gui.update(display));
+        Platform.runLater(() -> gui.update(update));
     }
 
     private void recieveMapCode(final String mapCode) {
@@ -78,9 +78,9 @@ public final class App extends Application {
                 : puzzle.getName();
             gui.startSolving(
                 problemName,
-                puzzle.getNumRows(),
-                puzzle.getNumCols(),
-                puzzle.getWallBudget()
+                puzzle.getMaze().getNumRows(),
+                puzzle.getMaze().getNumCols(),
+                puzzle.getBlockingBudget()
             );
             manager.solve(puzzle);
         }

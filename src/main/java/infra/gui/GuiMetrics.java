@@ -1,9 +1,10 @@
 package infra.gui;
 
-import domain.old_model.Display;
+import domain.model.Maze.Feature;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import think.manager.StatusUpdate;
 
 final class GuiMetrics extends GridPane {
 
@@ -24,7 +25,7 @@ final class GuiMetrics extends GridPane {
     }
 
     public void render(
-        final Display display,
+        final StatusUpdate display,
         final int rows,
         final int cols,
         final int wallBudget,
@@ -33,7 +34,7 @@ final class GuiMetrics extends GridPane {
         final String sinceUpdate,
         final String elapsed
     ) {
-        final int spentWalls = display == null ? 0 : display.getSpentWallsCount();
+        final int spentWalls = this.spentWalls(display);
         final boolean puzzleKnown = rows > 0 && cols > 0;
         final String walls = puzzleKnown ? GuiMath.walls(spentWalls, wallBudget) : "-";
         final String updates = puzzleKnown ? String.valueOf(updateCount) : "-";
@@ -44,6 +45,21 @@ final class GuiMetrics extends GridPane {
         this.values[3].setText(sinceUpdate);
         this.values[4].setText(elapsed);
         this.values[5].setText(GuiMath.zoomPercent(zoom));
+    }
+
+    private int spentWalls(final StatusUpdate display) {
+        if (display == null) {
+            return 0;
+        }
+        int count = 0;
+        for (int row = 0; row < display.getNumRows(); row += 1) {
+            for (int col = 0; col < display.getNumCols(); col += 1) {
+                if (display.getFeature(row, col) == Feature.PLAYER_WALL) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
     }
 
     private void addRow(final int rowIndex, final String labelText) {

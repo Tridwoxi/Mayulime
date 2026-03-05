@@ -18,8 +18,8 @@ public final class RandomSolver extends Solver {
         final Maze maze = puzzle.getMaze();
         this.emptyCellIndices = getEmptyCellIndices(maze.getGrid());
         this.wallDistribution = new RestrictedBinomial(
-            puzzle.getBlockingBudget(),
-            emptyCellIndices.length
+            emptyCellIndices.length,
+            puzzle.getBlockingBudget()
         );
         this.numRows = maze.getNumRows();
         this.numCols = maze.getNumCols();
@@ -40,7 +40,7 @@ public final class RandomSolver extends Solver {
         final int numWalls = wallDistribution.sample();
         for (int placement = 0; placement < numWalls; placement += 1) {
             final int cell = emptyCellIndices[placement];
-            grid[cell] = Feature.SYSTEM_WALL;
+            grid[cell] = Feature.PLAYER_WALL;
         }
         return new Maze(grid, numRows, numCols);
     }

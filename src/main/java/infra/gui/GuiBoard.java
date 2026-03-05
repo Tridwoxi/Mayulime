@@ -1,18 +1,19 @@
 package infra.gui;
 
-import domain.old_model.Display;
+import domain.model.Maze.Feature;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import think.manager.StatusUpdate;
 
 final class GuiBoard extends Group {
 
-    private Display currentDisplay;
+    private StatusUpdate currentDisplay;
 
     GuiBoard() {
         this.currentDisplay = null;
     }
 
-    public void setGame(final Display display) {
+    public void setGame(final StatusUpdate display) {
         this.currentDisplay = display;
     }
 
@@ -27,27 +28,34 @@ final class GuiBoard extends Group {
         }
 
         this.getChildren().clear();
-        this.currentDisplay.getAllCells()
-            .stream()
-            .forEachOrdered(cell -> {
-                final Display.Kind kind = this.currentDisplay.getKind(cell);
+        for (int row = 0; row < this.currentDisplay.getNumRows(); row += 1) {
+            for (int col = 0; col < this.currentDisplay.getNumCols(); col += 1) {
+                final Feature feature = this.currentDisplay.getFeature(row, col);
                 final GuiCell cellDisplay = new GuiCell(
-                    toColor(kind),
-                    this.currentDisplay.getName(cell),
+                    toColor(feature),
+                    cellLabel(feature),
                     cellSizePx
                 );
-                cellDisplay.setLayoutY(cell.row() * cellSizePx);
-                cellDisplay.setLayoutX(cell.col() * cellSizePx);
+                cellDisplay.setLayoutY(row * cellSizePx);
+                cellDisplay.setLayoutX(col * cellSizePx);
                 this.getChildren().add(cellDisplay);
-            });
+            }
+        }
     }
 
-    private static Color toColor(final Display.Kind kind) {
-        return switch (kind) {
-            case EMPTY -> GuiPalette.EMPTY;
+    private static Color toColor(final Feature feature) {
+        return switch (feature) {
+            case BLANK -> GuiPalette.EMPTY;
             case CHECKPOINT -> GuiPalette.CHECKPOINT;
             case SYSTEM_WALL -> GuiPalette.SYSTEM_WALL;
             case PLAYER_WALL -> GuiPalette.PLAYER_WALL;
+        };
+    }
+
+    private static String cellLabel(final Feature feature) {
+        return switch (feature) {
+            case CHECKPOINT -> "c";
+            default -> "";
         };
     }
 }

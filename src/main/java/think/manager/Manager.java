@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import think.common.StandardEvaluator;
 import think.solvers.Solver;
 import think.solvers.baseline.BaselineSolver;
+import think.solvers.random.RandomSolver;
 
 /**
     Solver orchestration and lifecycle management. Supports concurrency.
@@ -46,6 +47,7 @@ public final class Manager {
             executor.execute(solver);
         };
         run.accept(new BaselineSolver(this::consider, puzzle));
+        run.accept(new RandomSolver(this::consider, puzzle));
     }
 
     public void stop() {

@@ -1,6 +1,5 @@
 package infra.gui;
 
-import domain.old_model.Display;
 import infra.gui.GuiPanels.Control;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -9,6 +8,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.util.Duration;
+import think.manager.StatusUpdate;
 
 public final class Gui extends Scene implements Control {
 
@@ -25,7 +25,7 @@ public final class Gui extends Scene implements Control {
     private final GuiPanels panels;
     private final Timeline metricsTicker;
 
-    private Display currentDisplay;
+    private StatusUpdate currentDisplay;
     private double zoomMultiplier;
     private double displayedZoomMultiplier;
     private double currentCellSizePx;
@@ -74,7 +74,7 @@ public final class Gui extends Scene implements Control {
         this.refreshUi();
     }
 
-    public void update(final Display display) {
+    public void update(final StatusUpdate display) {
         final long nowNanos = System.nanoTime();
         if (this.currentDisplay == null || !this.isSamePuzzle(display)) {
             this.pendingCellSizeReflow = true;
@@ -84,12 +84,9 @@ public final class Gui extends Scene implements Control {
         this.currentDisplay = display;
         this.gameDisplay.setGame(display);
         this.pendingMapRerender = true;
-        this.puzzleName = display.getPuzzleName().isBlank()
-            ? "Unnamed Problem"
-            : display.getPuzzleName();
         this.puzzleRows = display.getNumRows();
         this.puzzleCols = display.getNumCols();
-        this.wallBudget = display.getWallBudget();
+        this.wallBudget = display.getBlockingBudget();
 
         this.solvingState = STATUS_BEST_UPDATED;
         this.statusMessage = String.format(
@@ -191,19 +188,15 @@ public final class Gui extends Scene implements Control {
         );
     }
 
-    private boolean isSamePuzzle(final Display display) {
-        final String displayName = display.getPuzzleName().isBlank()
-            ? "Unnamed Problem"
-            : display.getPuzzleName();
+    private boolean isSamePuzzle(final StatusUpdate display) {
         return (
             this.puzzleRows == display.getNumRows() &&
             this.puzzleCols == display.getNumCols() &&
-            this.wallBudget == display.getWallBudget() &&
-            this.puzzleName.equals(displayName)
+            this.wallBudget == display.getBlockingBudget()
         );
     }
 
-    private void recalculateCellSize(final Display display) {
+    private void recalculateCellSize(final StatusUpdate display) {
         if (display == null) {
             final double fallback = MAX_CELL_SIZE_PX * this.zoomMultiplier;
             this.currentCellSizePx = GuiMath.clampCellSize(fallback);

@@ -1,6 +1,5 @@
 package infra.gui;
 
-import domain.old_model.Display;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,6 +39,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import think.manager.StatusUpdate;
 
 @SuppressWarnings({ "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity" })
 final class GuiPanels {
@@ -143,7 +143,7 @@ final class GuiPanels {
     }
 
     public void render(
-        final Display display,
+        final StatusUpdate display,
         final String solvingState,
         final String status,
         final String puzzleName,

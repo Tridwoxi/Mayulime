@@ -1,12 +1,12 @@
 package e2e;
 
-import domain.old_codec.Parser;
-import domain.old_codec.Parser.BadMapCodeException;
-import domain.old_model.Puzzle;
+import domain.codec.Parser;
+import domain.codec.Parser.BadMapCodeException;
+import domain.model.Puzzle;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import solvers.Manager;
+import think.manager.Manager;
 
 /**
     Testing on the smalls is a good way to check the backend doesn't crash. The expected scores are
@@ -47,8 +47,8 @@ public final class Smalls {
         throws BadMapCodeException, InterruptedException {
         final Puzzle puzzle = Parser.parse(mapCode);
         final AtomicInteger topScore = new AtomicInteger(0);
-        final Manager manager = new Manager(display -> {
-            topScore.accumulateAndGet(display.getScore(), Math::max);
+        final Manager manager = new Manager(statusUpdate -> {
+            topScore.accumulateAndGet(statusUpdate.getScore(), Math::max);
         });
         manager.solve(puzzle);
         Thread.sleep(TIMEOUT_MS);
