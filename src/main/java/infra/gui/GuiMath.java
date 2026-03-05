@@ -6,35 +6,7 @@ import javafx.scene.paint.Color;
 
 final class GuiMath {
 
-    static final double DEFAULT_ZOOM = 1.0;
-
-    private static final double MIN_ZOOM = 0.4;
-    private static final double MAX_ZOOM = 3.0;
-    private static final double ZOOM_STEP = 1.15;
-
     private GuiMath() {}
-
-    static double clampZoom(final double requestedZoom) {
-        return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, requestedZoom));
-    }
-
-    static double clampZoomForBaseSize(final double requestedZoom, final double baseCellSizePx) {
-        final double bounded = clampZoom(requestedZoom);
-        if (baseCellSizePx <= 0.0) {
-            return bounded;
-        }
-        final double minReachableZoom = Gui.MIN_CELL_SIZE_PX / baseCellSizePx;
-        final double maxReachableZoom = Gui.MAX_CELL_SIZE_PX / baseCellSizePx;
-        return Math.max(minReachableZoom, Math.min(maxReachableZoom, bounded));
-    }
-
-    static double zoomIn(final double currentZoom) {
-        return clampZoom(currentZoom * ZOOM_STEP);
-    }
-
-    static double zoomOut(final double currentZoom) {
-        return clampZoom(currentZoom / ZOOM_STEP);
-    }
 
     static double clampCellSize(final double rawSize) {
         return Math.max(Gui.MIN_CELL_SIZE_PX, Math.min(Gui.MAX_CELL_SIZE_PX, rawSize));
@@ -54,12 +26,6 @@ final class GuiMath {
             return "-";
         }
         return String.format(Locale.US, "%d x %d", numRows, numCols);
-    }
-
-    static String zoomPercent(final double zoomMultiplier) {
-        final double bounded = Math.max(0.0, zoomMultiplier);
-        final int percent = (int) Math.round(bounded * 100.0);
-        return percent + "%";
     }
 
     static String elapsed(final long startNanos, final long nowNanos) {

@@ -2,6 +2,7 @@ package infra.launch;
 
 import infra.gui.Gui;
 import infra.output.Logging;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -18,13 +19,23 @@ public final class App extends Application {
 
     private static final String NAME = "Mayulime";
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
+    private static final String BAD_MAP_MESSAGE =
+        "Unable to parse that file as supported Pathery MapCode.";
     private static final double MIN_WIDTH_PX = 480.0;
     private static final double MIN_HEIGHT_PX = 320.0;
     private static final double DEFAULT_WIDTH_PX = 1280;
     private static final double DEFAULT_HEIGHT_PX = 720.0;
 
+    private final AtomicInteger puzzleEpoch;
+
     private Manager manager;
     private Gui gui;
+
+    public App() {
+        this.puzzleEpoch = new AtomicInteger(0);
+        this.manager = null;
+        this.gui = null;
+    }
 
     @Override
     public void init() {
@@ -38,8 +49,8 @@ public final class App extends Application {
     public void start(final Stage primaryStage) {
         Logging.announcement("Launch point: Application");
 
-        this.manager = new Manager(this::recieveSolution);
-        this.gui = new Gui(this::recieveMapCode);
+        this.manager = new Manager(this::receiveSolution);
+        this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
 
         primaryStage.setScene(gui);
         primaryStage.setTitle(NAME);
@@ -52,37 +63,50 @@ public final class App extends Application {
 
     // == Connectors. =============================================================================
 
-    private void recieveSolution(final StatusUpdate update) {
+    private void receiveSolution(final StatusUpdate update) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
-        // PERF: Spamming the GUI with updates when each update invalidates all
-        // previous updates is basically cyberbullying. Keep only the latest one.
-        Platform.runLater(() -> gui.update(update));
+        final int epoch = this.puzzleEpoch.get();
+        gui.enqueueSolverUpdate(update, epoch);
     }
 
-    private void recieveMapCode(final String mapCode) {
+    private void receiveMapCode(final String mapCode) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
+
+        final int epoch = this.puzzleEpoch.incrementAndGet();
         Puzzle puzzle = null;
         try {
             puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException exception) {
             Logging.warning("Bad MapCode or unsupported feature; problem rejected");
-            gui.mapRejected();
+            manager.stop();
+            gui.onPuzzleRejected(epoch, BAD_MAP_MESSAGE);
         }
+
         if (puzzle != null) {
             final String problemName = puzzle.getName().isBlank()
                 ? UNNAMED_PROBLEM_NAME
                 : puzzle.getName();
-            gui.startSolving(
+            gui.onPuzzleAccepted(
                 problemName,
                 puzzle.getNumRows(),
                 puzzle.getNumCols(),
-                puzzle.getBlockingBudget()
+                puzzle.getBlockingBudget(),
+                epoch
             );
             manager.solve(puzzle);
         }
+    }
+
+    private void stopRequestedByUser() {
+        if (gui == null || manager == null) {
+            throw new IllegalStateException();
+        }
+        final int epoch = this.puzzleEpoch.incrementAndGet();
+        manager.stop();
+        gui.onPuzzleStopped(epoch, "Solving stopped.");
     }
 }

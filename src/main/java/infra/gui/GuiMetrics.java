@@ -8,7 +8,7 @@ import think.manager.StatusUpdate;
 
 final class GuiMetrics extends GridPane {
 
-    private static final int ROW_COUNT = 6;
+    private static final int ROW_COUNT = 5;
     private final Text[] values;
 
     GuiMetrics() {
@@ -21,7 +21,6 @@ final class GuiMetrics extends GridPane {
         this.addRow(2, "Updates");
         this.addRow(3, "Since update");
         this.addRow(4, "Total elapsed");
-        this.addRow(5, "Zoom");
     }
 
     public void render(
@@ -30,7 +29,6 @@ final class GuiMetrics extends GridPane {
         final int cols,
         final int wallBudget,
         final int updateCount,
-        final double zoom,
         final String sinceUpdate,
         final String elapsed
     ) {
@@ -44,7 +42,6 @@ final class GuiMetrics extends GridPane {
         this.values[2].setText(updates);
         this.values[3].setText(sinceUpdate);
         this.values[4].setText(elapsed);
-        this.values[5].setText(GuiMath.zoomPercent(zoom));
     }
 
     private int spentWalls(final StatusUpdate display) {

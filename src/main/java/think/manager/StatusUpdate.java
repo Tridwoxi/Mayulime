@@ -1,5 +1,6 @@
 package think.manager;
 
+import java.util.Arrays;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
@@ -8,8 +9,11 @@ import think.domain.model.Puzzle;
  */
 public final class StatusUpdate {
 
+    private static final int NOT_A_CHECKPOINT = -1;
+
     private final String submitter;
     private final Feature[] grid;
+    private final int[] checkpointOrderByIndex;
     private final int numRows;
     private final int numCols;
     private final int score;
@@ -27,6 +31,7 @@ public final class StatusUpdate {
         this.numCols = puzzle.getNumCols();
         this.score = score;
         this.blockingBudget = puzzle.getBlockingBudget();
+        this.checkpointOrderByIndex = buildCheckpointOrderByIndex(puzzle, this.grid.length);
     }
 
     public String getSubmitter() {
@@ -45,11 +50,26 @@ public final class StatusUpdate {
         return grid[row * numCols + col];
     }
 
+    public int getCheckpointOrder(final int row, final int col) {
+        return checkpointOrderByIndex[row * numCols + col];
+    }
+
     public int getScore() {
         return score;
     }
 
     public int getBlockingBudget() {
         return blockingBudget;
+    }
+
+    private static int[] buildCheckpointOrderByIndex(final Puzzle puzzle, final int numCells) {
+        final int[] orderByIndex = new int[numCells];
+        Arrays.fill(orderByIndex, NOT_A_CHECKPOINT);
+
+        final int[] checkpoints = puzzle.getCheckpoints();
+        for (int order = 0; order < checkpoints.length; order += 1) {
+            orderByIndex[checkpoints[order]] = order;
+        }
+        return orderByIndex;
     }
 }
