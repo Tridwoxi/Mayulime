@@ -25,7 +25,8 @@ final class UiController {
     private final AtomicReference<PendingUpdate> latestPending;
 
     private UiState state;
-    private String lastSubmittedMapCode;
+    private String pendingSubmittedMapCode;
+    private String lastAcceptedMapCode;
 
     UiController(final Consumer<String> mapCodeConsumer, final Runnable stopConsumer) {
         this.rootView = new RootView();
@@ -34,7 +35,8 @@ final class UiController {
         this.stopConsumer = stopConsumer;
         this.latestPending = new AtomicReference<>(null);
         this.state = UiState.initial();
-        this.lastSubmittedMapCode = null;
+        this.pendingSubmittedMapCode = null;
+        this.lastAcceptedMapCode = null;
 
         this.rootView.bindIntents(new IntentsBridge());
 
@@ -58,6 +60,10 @@ final class UiController {
     ) {
         final long nowNanos = System.nanoTime();
         this.latestPending.set(null);
+        if (this.pendingSubmittedMapCode != null) {
+            this.lastAcceptedMapCode = this.pendingSubmittedMapCode;
+        }
+        this.pendingSubmittedMapCode = null;
         this.state = new UiState(
             UiPhase.SOLVING,
             puzzleEpoch,
@@ -68,7 +74,7 @@ final class UiController {
             null,
             0,
             this.state.cellSizePx(),
-            this.state.canRestart(),
+            this.lastAcceptedMapCode != null,
             "Solving: searching for better solutions",
             nowNanos,
             -1L,
@@ -80,17 +86,18 @@ final class UiController {
 
     public void onPuzzleRejected(final int puzzleEpoch, final String message) {
         this.latestPending.set(null);
+        this.pendingSubmittedMapCode = null;
         this.state = new UiState(
             UiPhase.REJECTED,
             puzzleEpoch,
-            this.state.puzzleName(),
-            this.state.rows(),
-            this.state.cols(),
-            this.state.wallBudget(),
+            "Rejected puzzle",
+            0,
+            0,
+            0,
             null,
             0,
             this.state.cellSizePx(),
-            this.state.canRestart(),
+            this.lastAcceptedMapCode != null,
             message,
             -1L,
             -1L,
@@ -114,7 +121,7 @@ final class UiController {
             this.state.bestUpdate(),
             this.state.updateCount(),
             this.state.cellSizePx(),
-            this.state.canRestart(),
+            this.lastAcceptedMapCode != null,
             finalStatus,
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
@@ -164,24 +171,7 @@ final class UiController {
     }
 
     private void submitMapCode(final String mapCode) {
-        this.lastSubmittedMapCode = mapCode;
-        this.state = new UiState(
-            this.state.phase(),
-            this.state.puzzleEpoch(),
-            this.state.puzzleName(),
-            this.state.rows(),
-            this.state.cols(),
-            this.state.wallBudget(),
-            this.state.bestUpdate(),
-            this.state.updateCount(),
-            this.state.cellSizePx(),
-            true,
-            this.state.statusMessage(),
-            this.state.puzzleStartedAtNanos(),
-            this.state.lastUpdateAtNanos(),
-            this.state.timersFrozenAtNanos(),
-            this.state.recenterPending()
-        );
+        this.pendingSubmittedMapCode = mapCode;
         this.mapCodeConsumer.accept(mapCode);
     }
 
@@ -190,8 +180,8 @@ final class UiController {
             this.stopConsumer.run();
             return;
         }
-        if (this.lastSubmittedMapCode != null) {
-            this.mapCodeConsumer.accept(this.lastSubmittedMapCode);
+        if (this.lastAcceptedMapCode != null) {
+            this.mapCodeConsumer.accept(this.lastAcceptedMapCode);
         }
     }
 
