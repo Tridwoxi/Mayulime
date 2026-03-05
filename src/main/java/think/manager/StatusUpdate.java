@@ -1,10 +1,6 @@
 package think.manager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import think.domain.model.Maze;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
@@ -13,17 +9,22 @@ import think.domain.model.Puzzle;
 public final class StatusUpdate {
 
     private final String submitter;
-    private final List<Feature> grid;
+    private final Feature[] grid;
     private final int numRows;
     private final int numCols;
     private final int score;
     private final int blockingBudget;
 
-    StatusUpdate(final String submitter, final Puzzle puzzle, final Maze maze, final int score) {
+    StatusUpdate(
+        final String submitter,
+        final Puzzle puzzle,
+        final Feature[] features,
+        final int score
+    ) {
         this.submitter = submitter;
-        this.grid = new ArrayList<>(Arrays.asList(maze.getGrid()));
-        this.numRows = maze.getNumRows();
-        this.numCols = maze.getNumCols();
+        this.grid = features.clone();
+        this.numRows = puzzle.getNumRows();
+        this.numCols = puzzle.getNumCols();
         this.score = score;
         this.blockingBudget = puzzle.getBlockingBudget();
     }
@@ -41,7 +42,7 @@ public final class StatusUpdate {
     }
 
     public Feature getFeature(final int row, final int col) {
-        return grid.get(row * numCols + col);
+        return grid[row * numCols + col];
     }
 
     public int getScore() {

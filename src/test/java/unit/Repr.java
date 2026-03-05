@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
-import think.domain.model.Maze;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 public final class Repr {
@@ -19,8 +18,7 @@ public final class Repr {
     @Test
     public void puzzleFaithfulToMapCode() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(SMALL1_MAPCODE);
-        final Maze maze = puzzle.getMaze();
-        final Feature[] grid = maze.getGrid();
+        final Feature[] grid = puzzle.getFeatures();
 
         int blankCount = 0;
         int systemWallCount = 0;
@@ -37,8 +35,8 @@ public final class Repr {
         }
 
         Assertions.assertEquals("Small1", puzzle.getName());
-        Assertions.assertEquals(6, maze.getNumRows());
-        Assertions.assertEquals(13, maze.getNumCols());
+        Assertions.assertEquals(6, puzzle.getNumRows());
+        Assertions.assertEquals(13, puzzle.getNumCols());
         Assertions.assertEquals(7, puzzle.getBlockingBudget());
         Assertions.assertEquals(78, grid.length);
         Assertions.assertEquals(60, blankCount);
@@ -49,9 +47,9 @@ public final class Repr {
         final int[] checkpoints = puzzle.getCheckpoints();
         Assertions.assertEquals(3, checkpoints.length);
         Assertions.assertEquals(5 * 13 + 3, checkpoints[1]);
-        Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[0]));
-        Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[1]));
-        Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[2]));
+        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[0]]);
+        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[1]]);
+        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[2]]);
     }
 
     @Test

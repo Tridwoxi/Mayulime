@@ -3,8 +3,7 @@ package think.domain.codec;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
-import think.domain.model.Maze;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
@@ -42,7 +41,7 @@ public final class Parser {
     public static final class BadMapCodeException extends Exception {}
 
     private record MazeData(
-        Maze maze,
+        Feature[] features,
         int[] checkpoints,
         int numBlankCells,
         EnumSet<Puzzle.Mechanic> mechanics
@@ -73,7 +72,9 @@ public final class Parser {
 
         return new Puzzle(
             puzzleName,
-            mazeData.maze(),
+            mazeData.features(),
+            numRows,
+            numCols,
             mazeData.checkpoints(),
             clampedBudget,
             mazeData.mechanics()
@@ -131,11 +132,6 @@ public final class Parser {
             }
         }
 
-        return new MazeData(
-            new Maze(grid, numRows, numCols),
-            orderedCheckpoints,
-            numBlankCells,
-            mechanics
-        );
+        return new MazeData(grid, orderedCheckpoints, numBlankCells, mechanics);
     }
 }

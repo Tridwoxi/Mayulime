@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import think.common.StandardEvaluator;
-import think.domain.model.Maze;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.baseline.BaselineSolver;
@@ -57,7 +57,7 @@ public final class Manager {
         topScore = 0;
     }
 
-    private void consider(final String submitter, final Puzzle puzzle, final Maze maze) {
+    private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
         // This guard is tripped when the user uploads a new problem but old worker threads haven't
         // died and propose solutions to the old (stale) problem. If this guard is tripped
         // excessively, it indicates a solver we asked to die refuses to do so.
@@ -65,7 +65,7 @@ public final class Manager {
             Logging.warning("Guard tripped (1).");
             return;
         }
-        final int score = StandardEvaluator.evaluate(puzzle, maze);
+        final int score = StandardEvaluator.evaluate(puzzle, features);
         // We also check if the score is better in the synchronized section, but as solvers might
         // give this method lots of garbage, if we can early exit without competing for the lock,
         // it would be nice to. Same trick is used for the puzzle.
@@ -87,7 +87,7 @@ public final class Manager {
                     Thread.currentThread().getName()
                 );
                 topScore = score;
-                listener.accept(new StatusUpdate(submitter, puzzle, maze, score));
+                listener.accept(new StatusUpdate(submitter, puzzle, features, score));
             }
         }
     }

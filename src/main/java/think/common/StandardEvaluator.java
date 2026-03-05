@@ -1,8 +1,7 @@
 package think.common;
 
 import java.util.Arrays;
-import think.domain.model.Maze;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
@@ -16,16 +15,17 @@ public final class StandardEvaluator {
 
     private StandardEvaluator() {}
 
-    public static int evaluate(final Puzzle puzzle, final Maze maze) {
+    public static int evaluate(final Puzzle puzzle, final Feature[] features) {
         final int[] checkpoints = puzzle.getCheckpoints();
-        final Feature[] features = maze.getGrid();
+        final int numRows = puzzle.getNumRows();
+        final int numCols = puzzle.getNumCols();
 
         int score = 0;
         for (int start = 0; start < checkpoints.length - 1; start += 1) {
             final int segmentDistance = findSegmentDistance(
                 features,
-                maze.getNumRows(),
-                maze.getNumCols(),
+                numRows,
+                numCols,
                 checkpoints[start],
                 checkpoints[start + 1]
             );

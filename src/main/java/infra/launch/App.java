@@ -78,8 +78,8 @@ public final class App extends Application {
                 : puzzle.getName();
             gui.startSolving(
                 problemName,
-                puzzle.getMaze().getNumRows(),
-                puzzle.getMaze().getNumCols(),
+                puzzle.getNumRows(),
+                puzzle.getNumCols(),
                 puzzle.getBlockingBudget()
             );
             manager.solve(puzzle);

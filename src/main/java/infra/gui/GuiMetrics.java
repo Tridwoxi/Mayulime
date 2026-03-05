@@ -3,7 +3,7 @@ package infra.gui;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.manager.StatusUpdate;
 
 final class GuiMetrics extends GridPane {

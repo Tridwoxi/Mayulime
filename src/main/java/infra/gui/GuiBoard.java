@@ -2,7 +2,7 @@ package infra.gui;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.manager.StatusUpdate;
 
 final class GuiBoard extends Group {

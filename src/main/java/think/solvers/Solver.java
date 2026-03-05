@@ -1,7 +1,7 @@
 package think.solvers;
 
 import infra.output.Logging;
-import think.domain.model.Maze;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
@@ -12,7 +12,7 @@ public abstract class Solver implements Runnable {
 
     @FunctionalInterface
     public interface ProposedSolution {
-        void listen(String submitter, Puzzle puzzle, Maze maze);
+        void listen(String submitter, Puzzle puzzle, Feature[] features);
     }
 
     private final ProposedSolution listener;
@@ -70,7 +70,7 @@ public abstract class Solver implements Runnable {
         return puzzle;
     }
 
-    protected final void propose(final Maze maze) {
-        listener.listen(getClass().getSimpleName(), puzzle, maze);
+    protected final void propose(final Feature[] features) {
+        listener.listen(getClass().getSimpleName(), puzzle, features);
     }
 }

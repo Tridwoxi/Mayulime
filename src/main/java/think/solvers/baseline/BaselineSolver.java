@@ -11,6 +11,6 @@ public final class BaselineSolver extends Solver {
 
     @Override
     protected void solve() throws KilledException {
-        propose(getPuzzle().getMaze());
+        propose(getPuzzle().getFeatures());
     }
 }

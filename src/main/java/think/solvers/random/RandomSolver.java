@@ -1,8 +1,7 @@
 package think.solvers.random;
 
 import think.common.IntArrays;
-import think.domain.model.Maze;
-import think.domain.model.Maze.Feature;
+import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 
@@ -10,19 +9,14 @@ public final class RandomSolver extends Solver {
 
     private final int[] emptyCellIndices;
     private final RestrictedBinomial wallDistribution;
-    private final int numRows;
-    private final int numCols;
 
     public RandomSolver(final ProposedSolution listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        final Maze maze = puzzle.getMaze();
-        this.emptyCellIndices = getEmptyCellIndices(maze.getGrid());
+        this.emptyCellIndices = getEmptyCellIndices(puzzle.getFeatures());
         this.wallDistribution = new RestrictedBinomial(
             emptyCellIndices.length,
             puzzle.getBlockingBudget()
         );
-        this.numRows = maze.getNumRows();
-        this.numCols = maze.getNumCols();
     }
 
     @Override
@@ -33,8 +27,8 @@ public final class RandomSolver extends Solver {
         }
     }
 
-    private Maze generateRandomSolution() {
-        final Feature[] grid = getPuzzle().getMaze().getGrid();
+    private Feature[] generateRandomSolution() {
+        final Feature[] grid = getPuzzle().getFeatures();
         IntArrays.shuffleInPlace(emptyCellIndices);
 
         final int numWalls = wallDistribution.sample();
@@ -42,7 +36,7 @@ public final class RandomSolver extends Solver {
             final int cell = emptyCellIndices[placement];
             grid[cell] = Feature.PLAYER_WALL;
         }
-        return new Maze(grid, numRows, numCols);
+        return grid;
     }
 
     private static int[] getEmptyCellIndices(final Feature[] features) {
