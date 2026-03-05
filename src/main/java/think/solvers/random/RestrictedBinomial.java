@@ -1,7 +1,6 @@
 package think.solvers.random;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -10,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class RestrictedBinomial {
 
-    private final ArrayList<Double> cumulativeDistribution;
+    private final double[] cumulativeDistribution;
 
     public RestrictedBinomial(final int population, final int limit) {
         if (population < limit) {
@@ -20,34 +19,30 @@ public final class RestrictedBinomial {
     }
 
     public int sample() {
-        if (cumulativeDistribution.isEmpty()) {
+        if (cumulativeDistribution.length == 0) {
             return 0;
         }
-        final double total = cumulativeDistribution.getLast();
+        final double total = cumulativeDistribution[cumulativeDistribution.length - 1];
         // Binary search returns "(-(insertion point) - 1)" if the value is not found. Since a
         // double has many bits, it will never be found.
-        final int index = -Collections.binarySearch(
+        final int index = -Arrays.binarySearch(
             cumulativeDistribution,
             ThreadLocalRandom.current().nextDouble() * total
         );
         return index - 1;
     }
 
-    private static ArrayList<Double> build(final int population, final int limit) {
-        final ArrayList<Double> rawLogProbs = new ArrayList<>(limit + 1);
+    private static double[] build(final int population, final int limit) {
+        final double[] rawLogProbs = new double[limit + 1];
+        double largest = 0.0;
         for (int element = 0; element <= limit; element += 1) {
-            rawLogProbs.add(logBinom(population, element));
+            rawLogProbs[element] = logBinom(population, element);
+            largest = Math.max(largest, rawLogProbs[element]);
         }
-        final double largest = rawLogProbs.stream().reduce(0.0, Math::max);
-        final ArrayList<Double> normLogProbs = new ArrayList<>(limit + 1);
+        final double[] cumulativeDistribution = new double[limit + 1];
         for (int element = 0; element <= limit; element += 1) {
-            normLogProbs.add(rawLogProbs.get(element) - largest);
-        }
-        final ArrayList<Double> cumulativeDistribution = new ArrayList<>(limit + 1);
-        double sum = 0.0;
-        for (int element = 0; element <= limit; element += 1) {
-            sum += Math.exp(normLogProbs.get(element));
-            cumulativeDistribution.add(sum);
+            final double previous = (element == 0) ? 0.0 : cumulativeDistribution[element - 1];
+            cumulativeDistribution[element] = previous + Math.exp(rawLogProbs[element] - largest);
         }
         return cumulativeDistribution;
     }
