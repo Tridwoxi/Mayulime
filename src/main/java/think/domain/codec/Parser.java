@@ -1,7 +1,6 @@
 package think.domain.codec;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.regex.Pattern;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
@@ -40,12 +39,7 @@ public final class Parser {
 
     public static final class BadMapCodeException extends Exception {}
 
-    private record MazeData(
-        Feature[] features,
-        int[] checkpoints,
-        int numBlankCells,
-        EnumSet<Puzzle.Mechanic> mechanics
-    ) {}
+    private record MazeData(Feature[] features, int[] checkpoints, int numBlankCells) {}
 
     private static final Pattern REGION_DELIM_RE = Pattern.compile(":");
     private static final Pattern TOKEN_DELIM_RE = Pattern.compile("\\.");
@@ -76,8 +70,7 @@ public final class Parser {
             numRows,
             numCols,
             mazeData.checkpoints(),
-            clampedBudget,
-            mazeData.mechanics()
+            clampedBudget
         );
     }
 
@@ -90,7 +83,6 @@ public final class Parser {
         final Feature[] grid = new Feature[numCells];
         Arrays.fill(grid, Feature.BLANK);
         final ParserCheckpoints checkpoints = new ParserCheckpoints();
-        final EnumSet<Puzzle.Mechanic> mechanics = EnumSet.noneOf(Puzzle.Mechanic.class);
 
         int traversingIndex = 0;
         for (int index = 0; index < tokens.length - 1; index += 1) {
@@ -132,6 +124,6 @@ public final class Parser {
             }
         }
 
-        return new MazeData(grid, orderedCheckpoints, numBlankCells, mechanics);
+        return new MazeData(grid, orderedCheckpoints, numBlankCells);
     }
 }
