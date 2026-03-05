@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
     <pre>
     MapCode         -> Metadata : Maze
-    Metadata        -> NumCols . NumRows . BlockingBudget . Name . . .
+    Metadata        -> NumCols . NumRows . BlockingBudget . Name . string . string . string
     NumCols         -> int
     NumRows         -> int
     BlockingBudget  -> int
@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
     </pre>
 
     Integers contain only digits and are strictly positive, except for BlockingBudget, which may
-    also be 0. {@code |} and {@code nothing} are metasymbols representing alternation and an empty
-    production. There are kinds beyond those defined here, and can be learned of by looking at the
-    map editor. Name must not contain the {@code .} symbol.
+    also be 0. Strings are alphanumeric and may contain spaces or be empty. {@code |} is a
+    metasymbol representing alternation. There are kinds beyond those defined here, and can be
+    learned of by looking at the map editor. The trailing Metadata strings are not understood.
 
     This parser also enforces semantic correctness: features stay within bounds, checkpoints must
     have unique orders, and blocking budget cannot exceed blank cells. Pathery supports variants
