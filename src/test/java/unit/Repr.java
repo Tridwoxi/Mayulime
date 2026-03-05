@@ -12,6 +12,9 @@ public final class Repr {
 
     private static final String SMALL1_MAPCODE = """
         13.6.7.Small1...:,r3.11,r3.,r3.2,r1.8,r3.,r3.8,r1.2,f1.,s1.11,r3.,r3.2,r1.,r1.4,r1.2,r3.,r3.2,c1.8,r3.""";
+    private static final String MANY_WALLS_MAPCODE = """
+        3.3.10.Unlimited blocking budget...:,s1.,f1.
+        """;
 
     @Test
     public void puzzleFaithfulToMapCode() throws BadMapCodeException {
@@ -49,5 +52,11 @@ public final class Repr {
         Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[0]));
         Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[1]));
         Assertions.assertEquals(Feature.CHECKPOINT, maze.getFeature(checkpoints[2]));
+    }
+
+    @Test
+    public void manyWalls() throws BadMapCodeException {
+        final Puzzle puzzle = Parser.parse(MANY_WALLS_MAPCODE);
+        Assertions.assertEquals(7, puzzle.getBlockingBudget());
     }
 }
