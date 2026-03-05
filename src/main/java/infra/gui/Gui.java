@@ -138,7 +138,8 @@ public final class Gui extends Scene implements Control {
 
     @Override
     public void adjustZoom(final double requestedZoom) {
-        this.zoomMultiplier = GuiMath.clampZoom(requestedZoom);
+        final double baseSize = this.currentBaseCellSize();
+        this.zoomMultiplier = GuiMath.clampZoomForBaseSize(requestedZoom, baseSize);
         this.pendingCellSizeReflow = true;
         this.refreshUi();
     }
@@ -219,18 +220,26 @@ public final class Gui extends Scene implements Control {
             return;
         }
 
-        final double width = Math.max(1.0, this.panels.getViewportWidth());
-        final double height = Math.max(1.0, this.panels.getViewportHeight());
-
-        final double fitByWidth = width / numCols;
-        final double fitByHeight = height / numRows;
-        final double baseSize = Math.min(fitByWidth, fitByHeight);
-        final double maxReachableZoom = MAX_CELL_SIZE_PX / baseSize;
-        if (this.zoomMultiplier > maxReachableZoom) {
-            this.zoomMultiplier = maxReachableZoom;
-        }
-        final double rawSize = baseSize * this.zoomMultiplier;
+        final double baseSize = this.currentBaseCellSize();
+        final double effectiveZoom = GuiMath.clampZoomForBaseSize(this.zoomMultiplier, baseSize);
+        final double rawSize = baseSize * effectiveZoom;
         this.currentCellSizePx = GuiMath.clampCellSize(rawSize);
         this.displayedZoomMultiplier = this.currentCellSizePx / MAX_CELL_SIZE_PX;
+    }
+
+    private double currentBaseCellSize() {
+        if (this.currentDisplay == null) {
+            return -1.0;
+        }
+        final int numRows = this.currentDisplay.getNumRows();
+        final int numCols = this.currentDisplay.getNumCols();
+        if (numRows <= 0 || numCols <= 0) {
+            return -1.0;
+        }
+        final double width = Math.max(1.0, this.panels.getViewportWidth());
+        final double height = Math.max(1.0, this.panels.getViewportHeight());
+        final double fitByWidth = width / numCols;
+        final double fitByHeight = height / numRows;
+        return Math.min(fitByWidth, fitByHeight);
     }
 }

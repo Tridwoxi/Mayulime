@@ -18,6 +18,16 @@ final class GuiMath {
         return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, requestedZoom));
     }
 
+    static double clampZoomForBaseSize(final double requestedZoom, final double baseCellSizePx) {
+        final double bounded = clampZoom(requestedZoom);
+        if (baseCellSizePx <= 0.0) {
+            return bounded;
+        }
+        final double minReachableZoom = Gui.MIN_CELL_SIZE_PX / baseCellSizePx;
+        final double maxReachableZoom = Gui.MAX_CELL_SIZE_PX / baseCellSizePx;
+        return Math.max(minReachableZoom, Math.min(maxReachableZoom, bounded));
+    }
+
     static double zoomIn(final double currentZoom) {
         return clampZoom(currentZoom * ZOOM_STEP);
     }
