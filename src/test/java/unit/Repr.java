@@ -1,12 +1,12 @@
 package unit;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
-import domain.model.Maze;
-import domain.model.Maze.Feature;
-import domain.model.Puzzle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import think.domain.codec.Parser;
+import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.model.Maze;
+import think.domain.model.Maze.Feature;
+import think.domain.model.Puzzle;
 
 public final class Repr {
 

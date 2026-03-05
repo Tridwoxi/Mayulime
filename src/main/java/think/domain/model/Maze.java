@@ -1,4 +1,4 @@
-package domain.model;
+package think.domain.model;
 
 /**
     Array-backed Pathery maze. A Cell can be converted to an index of the backing grid using the

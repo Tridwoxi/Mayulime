@@ -1,13 +1,13 @@
 package infra.launch;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
-import domain.model.Puzzle;
 import infra.gui.Gui;
 import infra.output.Logging;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import think.domain.codec.Parser;
+import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.StatusUpdate;
 

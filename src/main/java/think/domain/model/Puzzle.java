@@ -1,4 +1,4 @@
-package domain.model;
+package think.domain.model;
 
 import java.util.EnumSet;
 import java.util.HashSet;

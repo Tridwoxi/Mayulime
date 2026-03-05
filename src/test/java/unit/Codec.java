@@ -1,10 +1,10 @@
 package unit;
 
-import domain.codec.Parser;
-import domain.codec.Parser.BadMapCodeException;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import think.domain.codec.Parser;
+import think.domain.codec.Parser.BadMapCodeException;
 
 public final class Codec {
 

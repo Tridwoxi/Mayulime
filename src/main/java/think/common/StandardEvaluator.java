@@ -1,10 +1,10 @@
 package think.common;
 
-import domain.model.Maze;
-import domain.model.Maze.Feature;
-import domain.model.Puzzle;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import think.domain.model.Maze;
+import think.domain.model.Maze.Feature;
+import think.domain.model.Puzzle;
 
 /**
     Simple stateless reference evaluator implementation. Computes sum of pairwise distances between

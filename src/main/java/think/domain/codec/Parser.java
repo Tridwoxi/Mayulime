@@ -1,11 +1,11 @@
-package domain.codec;
+package think.domain.codec;
 
-import domain.model.Maze;
-import domain.model.Maze.Feature;
-import domain.model.Puzzle;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
+import think.domain.model.Maze;
+import think.domain.model.Maze.Feature;
+import think.domain.model.Puzzle;
 
 /**
     This class constructs a {@link Puzzle} from a string, or throws a {@link BadMapCodeException}

@@ -1,7 +1,5 @@
 package think.manager;
 
-import domain.model.Maze;
-import domain.model.Puzzle;
 import infra.output.Logging;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +7,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import think.common.StandardEvaluator;
+import think.domain.model.Maze;
+import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.baseline.BaselineSolver;
 import think.solvers.random.RandomSolver;

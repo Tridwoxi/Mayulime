@@ -1,11 +1,11 @@
 package think.manager;
 
-import domain.model.Maze;
-import domain.model.Maze.Feature;
-import domain.model.Puzzle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import think.domain.model.Maze;
+import think.domain.model.Maze.Feature;
+import think.domain.model.Puzzle;
 
 /**
     Backend to frontend adapter.

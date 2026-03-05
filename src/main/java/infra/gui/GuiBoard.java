@@ -1,8 +1,8 @@
 package infra.gui;
 
-import domain.model.Maze.Feature;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import think.domain.model.Maze.Feature;
 import think.manager.StatusUpdate;
 
 final class GuiBoard extends Group {

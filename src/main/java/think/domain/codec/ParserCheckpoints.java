@@ -1,8 +1,8 @@
-package domain.codec;
+package think.domain.codec;
 
-import domain.codec.Parser.BadMapCodeException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import think.domain.codec.Parser.BadMapCodeException;
 
 final class ParserCheckpoints {
 

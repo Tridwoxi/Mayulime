@@ -1,9 +1,9 @@
 package infra.gui;
 
-import domain.model.Maze.Feature;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import think.domain.model.Maze.Feature;
 import think.manager.StatusUpdate;
 
 final class GuiMetrics extends GridPane {

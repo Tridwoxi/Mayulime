@@ -1,7 +1,7 @@
-package domain.codec;
+package think.domain.codec;
 
-import domain.codec.Parser.BadMapCodeException;
 import java.util.regex.Pattern;
+import think.domain.codec.Parser.BadMapCodeException;
 
 final class ParserSafety {
 

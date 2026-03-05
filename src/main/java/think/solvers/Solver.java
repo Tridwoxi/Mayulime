@@ -1,8 +1,8 @@
 package think.solvers;
 
-import domain.model.Maze;
-import domain.model.Puzzle;
 import infra.output.Logging;
+import think.domain.model.Maze;
+import think.domain.model.Puzzle;
 
 /**
     Find board configurations to solve Pathery puzzles. This abstract class provides useful getters

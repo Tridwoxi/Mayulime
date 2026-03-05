@@ -1,9 +1,9 @@
 package think.solvers.random;
 
-import domain.model.Maze;
-import domain.model.Maze.Feature;
-import domain.model.Puzzle;
 import think.common.IntArrays;
+import think.domain.model.Maze;
+import think.domain.model.Maze.Feature;
+import think.domain.model.Puzzle;
 import think.solvers.Solver;
 
 public final class RandomSolver extends Solver {

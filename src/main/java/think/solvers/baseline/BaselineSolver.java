@@ -1,6 +1,6 @@
 package think.solvers.baseline;
 
-import domain.model.Puzzle;
+import think.domain.model.Puzzle;
 import think.solvers.Solver;
 
 public final class BaselineSolver extends Solver {
