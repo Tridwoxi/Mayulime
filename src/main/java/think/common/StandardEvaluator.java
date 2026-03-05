@@ -1,6 +1,5 @@
 package think.common;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
 import think.domain.model.Maze;
 import think.domain.model.Maze.Feature;
@@ -50,10 +49,10 @@ public final class StandardEvaluator {
         }
 
         final int[] distances = new int[features.length];
-        final ArrayDeque<Integer> frontier = new ArrayDeque<>(distances.length);
+        final IntDeque frontier = new IntDeque(distances.length);
         Arrays.fill(distances, UNREACHABLE);
         distances[start] = 0;
-        frontier.add(start);
+        frontier.addLast(start);
 
         while (!frontier.isEmpty()) {
             final int current = frontier.removeFirst();
@@ -72,7 +71,7 @@ public final class StandardEvaluator {
                 if (nextUp == finish) {
                     return nextDistance;
                 }
-                frontier.add(nextUp);
+                frontier.addLast(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
@@ -83,7 +82,7 @@ public final class StandardEvaluator {
                 if (nextRight == finish) {
                     return nextDistance;
                 }
-                frontier.add(nextRight);
+                frontier.addLast(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
@@ -94,14 +93,14 @@ public final class StandardEvaluator {
                 if (nextDown == finish) {
                     return nextDistance;
                 }
-                frontier.add(nextDown);
+                frontier.addLast(nextDown);
                 distances[nextDown] = nextDistance;
             }
             if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
                 if (nextLeft == finish) {
                     return nextDistance;
                 }
-                frontier.add(nextLeft);
+                frontier.addLast(nextLeft);
                 distances[nextLeft] = nextDistance;
             }
         }
