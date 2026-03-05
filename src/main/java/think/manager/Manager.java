@@ -65,6 +65,9 @@ public final class Manager {
             Logging.warning("Guard tripped (1).");
             return;
         }
+        if (!puzzle.isValid(features)) {
+            throw new IllegalArgumentException();
+        }
         final int score = StandardEvaluator.evaluate(puzzle, features);
         // We also check if the score is better in the synchronized section, but as solvers might
         // give this method lots of garbage, if we can early exit without competing for the lock,

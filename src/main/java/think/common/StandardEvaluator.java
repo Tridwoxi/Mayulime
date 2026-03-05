@@ -16,6 +16,9 @@ public final class StandardEvaluator {
     private StandardEvaluator() {}
 
     public static int evaluate(final Puzzle puzzle, final Feature[] features) {
+        if (puzzle.getNumRows() * puzzle.getNumCols() != features.length) {
+            throw new IllegalArgumentException();
+        }
         final int[] checkpoints = puzzle.getCheckpoints();
         final int numRows = puzzle.getNumRows();
         final int numCols = puzzle.getNumCols();

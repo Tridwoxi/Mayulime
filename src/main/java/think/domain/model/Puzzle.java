@@ -1,5 +1,6 @@
 package think.domain.model;
 
+import infra.output.Logging;
 import java.util.HashSet;
 
 /**
@@ -58,5 +59,25 @@ public final class Puzzle {
 
     public int getBlockingBudget() {
         return blockingBudget;
+    }
+
+    public boolean isValid(final Feature[] solution) {
+        if (features.length != solution.length) {
+            Logging.warning("Wrong dimension: %d vs %d", features.length, solution.length);
+            return false;
+        }
+        int numWalls = 0;
+        for (int index = 0; index < features.length; index += 1) {
+            final boolean unchanged = features[index] == solution[index];
+            final boolean wallPlaced =
+                features[index] == Feature.BLANK && solution[index] == Feature.PLAYER_WALL;
+            if (wallPlaced) {
+                numWalls += 1;
+            }
+            if (!(unchanged || wallPlaced)) {
+                return false;
+            }
+        }
+        return numWalls <= blockingBudget;
     }
 }
