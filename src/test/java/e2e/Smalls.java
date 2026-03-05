@@ -14,7 +14,7 @@ import solvers.Manager;
  */
 public final class Smalls {
 
-    private static final long TIMEOUT_MS = 1000;
+    private static final long TIMEOUT_MS = 100; // Requires about 5 MS on my machine.
 
     private static final String SMALL1_MAPCODE = """
         13.6.7.Small1...:,r3.11,r3.,r3.2,r1.8,r3.,r3.8,r1.2,f1.,s1.11,r3.,r3.2,r1.,r1.4,r1.2,r3.,r3.2,c1.8,r3.""";
