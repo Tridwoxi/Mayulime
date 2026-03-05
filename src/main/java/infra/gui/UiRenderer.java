@@ -12,12 +12,12 @@ final class UiRenderer {
 
     public UiState render(final UiState state, final long nowNanos) {
         final double baseSize = this.currentBaseCellSize(state);
-        final double cellSize = GuiMath.clampCellSize(baseSize);
+        final double cellSize = UiMath.clampCellSize(baseSize);
 
         final StatusUpdate display = state.bestUpdate();
         final long timerNow = state.timersFrozenAtNanos() > 0 ? state.timersFrozenAtNanos() : nowNanos;
-        final String elapsed = GuiMath.elapsed(state.puzzleStartedAtNanos(), timerNow);
-        final String sinceUpdate = GuiMath.elapsed(state.lastUpdateAtNanos(), timerNow);
+        final String elapsed = UiMath.elapsed(state.puzzleStartedAtNanos(), timerNow);
+        final String sinceUpdate = UiMath.elapsed(state.lastUpdateAtNanos(), timerNow);
 
         this.rootView.renderBoard(
             display,

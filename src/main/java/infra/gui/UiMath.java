@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Locale;
 import javafx.scene.paint.Color;
 
-final class GuiMath {
+final class UiMath {
 
-    private GuiMath() {}
+    private UiMath() {}
 
     static double clampCellSize(final double rawSize) {
         return Math.max(Gui.MIN_CELL_SIZE_PX, Math.min(Gui.MAX_CELL_SIZE_PX, rawSize));
@@ -54,8 +54,8 @@ final class GuiMath {
 
     static Color cellLabelColor(final Color background) {
         if (background.getBrightness() > 0.6) {
-            return GuiPalette.BACKGROUND;
+            return UiPalette.BACKGROUND;
         }
-        return GuiPalette.FOREGROUND;
+        return UiPalette.FOREGROUND;
     }
 }

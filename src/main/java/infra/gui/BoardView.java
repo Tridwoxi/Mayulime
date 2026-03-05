@@ -17,7 +17,7 @@ final class BoardView extends Group {
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {
                 final Feature feature = display.getFeature(row, col);
-                final GuiCell cell = new GuiCell(
+                final BoardCellView cell = new BoardCellView(
                     toColor(feature),
                     cellLabel(display, row, col, feature),
                     cellSizePx
@@ -35,10 +35,10 @@ final class BoardView extends Group {
 
     private static Color toColor(final Feature feature) {
         return switch (feature) {
-            case BLANK -> GuiPalette.EMPTY;
-            case CHECKPOINT -> GuiPalette.CHECKPOINT;
-            case SYSTEM_WALL -> GuiPalette.SYSTEM_WALL;
-            case PLAYER_WALL -> GuiPalette.PLAYER_WALL;
+            case BLANK -> UiPalette.EMPTY;
+            case CHECKPOINT -> UiPalette.CHECKPOINT;
+            case SYSTEM_WALL -> UiPalette.SYSTEM_WALL;
+            case PLAYER_WALL -> UiPalette.PLAYER_WALL;
         };
     }
 

@@ -6,12 +6,12 @@ import javafx.scene.text.Text;
 import think.domain.model.Feature;
 import think.manager.StatusUpdate;
 
-final class GuiMetrics extends GridPane {
+final class MetricsView extends GridPane {
 
     private static final int ROW_COUNT = 5;
     private final Text[] values;
 
-    GuiMetrics() {
+    MetricsView() {
         this.values = new Text[ROW_COUNT];
         this.setHgap(16.0);
         this.setVgap(8.0);
@@ -34,10 +34,10 @@ final class GuiMetrics extends GridPane {
     ) {
         final int spentWalls = this.spentWalls(display);
         final boolean puzzleKnown = rows > 0 && cols > 0;
-        final String walls = puzzleKnown ? GuiMath.walls(spentWalls, wallBudget) : "-";
+        final String walls = puzzleKnown ? UiMath.walls(spentWalls, wallBudget) : "-";
         final String updates = puzzleKnown ? String.valueOf(updateCount) : "-";
 
-        this.values[0].setText(GuiMath.grid(rows, cols));
+        this.values[0].setText(UiMath.grid(rows, cols));
         this.values[1].setText(walls);
         this.values[2].setText(updates);
         this.values[3].setText(sinceUpdate);
@@ -61,12 +61,12 @@ final class GuiMetrics extends GridPane {
 
     private void addRow(final int rowIndex, final String labelText) {
         final Text label = new Text(labelText + ":");
-        label.setFill(GuiPalette.FOREGROUND);
+        label.setFill(UiPalette.FOREGROUND);
         label.setOpacity(0.72);
         label.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final Text value = new Text("-");
-        value.setFill(GuiPalette.FOREGROUND);
+        value.setFill(UiPalette.FOREGROUND);
         value.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         this.values[rowIndex] = value;

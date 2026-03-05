@@ -134,7 +134,7 @@ final class RootView {
         this.root.setBackground(
             new Background(
                 new BackgroundFill(
-                    GuiPalette.BACKGROUND,
+                    UiPalette.BACKGROUND,
                     CornerRadii.EMPTY,
                     Insets.EMPTY
                 )
@@ -160,7 +160,7 @@ final class RootView {
         this.boardSurface.setBackground(
             new Background(
                 new BackgroundFill(
-                    GuiPalette.SURFACE_VARIANT,
+                    UiPalette.SURFACE_VARIANT,
                     new CornerRadii(12.0),
                     Insets.EMPTY
                 )
@@ -178,13 +178,13 @@ final class RootView {
         viewportCard.setPadding(new Insets(16.0));
         viewportCard.setBackground(
             new Background(
-                new BackgroundFill(GuiPalette.SURFACE, new CornerRadii(18.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(18.0), Insets.EMPTY)
             )
         );
         viewportCard.setBorder(
             new Border(
                 new BorderStroke(
-                    GuiPalette.OUTLINE,
+                    UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
                     new CornerRadii(18.0),
                     BorderWidths.DEFAULT
@@ -265,7 +265,7 @@ final class RootView {
 
     private void handleDragOver(final DragEvent event) {
         final List<File> files = event.getDragboard().getFiles();
-        if (files.size() == 1 && GuiMath.isSupportedMapFile(files.get(0))) {
+        if (files.size() == 1 && UiMath.isSupportedMapFile(files.get(0))) {
             event.acceptTransferModes(TransferMode.COPY);
         }
         event.consume();
@@ -304,7 +304,7 @@ final class RootView {
         if (intents == null) {
             return false;
         }
-        if (!GuiMath.isSupportedMapFile(file)) {
+        if (!UiMath.isSupportedMapFile(file)) {
             intents.reportMapInputError("Unsupported file type. Expected .mapcode.");
             return false;
         }

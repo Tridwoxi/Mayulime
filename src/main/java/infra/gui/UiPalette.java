@@ -2,7 +2,7 @@ package infra.gui;
 
 import javafx.scene.paint.Color;
 
-final class GuiPalette {
+final class UiPalette {
 
     // Mystery unrelated colors.
     public static final Color SURFACE = Color.web("1a1f28");
@@ -18,5 +18,5 @@ final class GuiPalette {
     public static final Color EMPTY = Color.web("e2e8eb");
     public static final Color CHECKPOINT = Color.web("8e4793");
 
-    private GuiPalette() {}
+    private UiPalette() {}
 }

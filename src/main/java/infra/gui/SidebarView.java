@@ -35,7 +35,7 @@ final class SidebarView extends VBox {
     private final VBox actionsGroup;
     private final VBox legendGroup;
 
-    private final GuiMetrics metrics;
+    private final MetricsView metrics;
 
     SidebarView() {
         this.setSpacing(PANEL_SPACING_PX);
@@ -47,7 +47,7 @@ final class SidebarView extends VBox {
         this.detailsGroup = this.panelCard();
         this.actionsGroup = this.panelCard();
         this.legendGroup = this.panelCard();
-        this.metrics = new GuiMetrics();
+        this.metrics = new MetricsView();
 
         this.configureHeader();
         this.configureButtons();
@@ -84,10 +84,10 @@ final class SidebarView extends VBox {
     }
 
     private void configureHeader() {
-        this.titleText.setFill(GuiPalette.FOREGROUND);
+        this.titleText.setFill(UiPalette.FOREGROUND);
         this.titleText.setFont(Font.font(Gui.FONT_NAME, 29.0));
 
-        this.statusText.setFill(GuiPalette.FOREGROUND);
+        this.statusText.setFill(UiPalette.FOREGROUND);
         this.statusText.setOpacity(0.8);
         this.statusText.setWrappingWidth(360.0);
         this.statusText.setFont(Font.font(Gui.FONT_NAME, 13.0));
@@ -98,7 +98,7 @@ final class SidebarView extends VBox {
     }
 
     private void configureButtons() {
-        stylePrimaryButton(this.stopOrRestartButton, GuiPalette.PRIMARY, Color.web("#111827"));
+        stylePrimaryButton(this.stopOrRestartButton, UiPalette.PRIMARY, Color.web("#111827"));
 
         final HBox row = new HBox();
         row.setSpacing(PANEL_SPACING_PX);
@@ -132,17 +132,17 @@ final class SidebarView extends VBox {
 
     private HBox commandRow(final String key, final String action) {
         final Label keycap = new Label(key);
-        keycap.setTextFill(GuiPalette.FOREGROUND);
+        keycap.setTextFill(UiPalette.FOREGROUND);
         keycap.setFont(Font.font("Monospaced", 12.0));
         keycap.setPadding(new Insets(4.0, 8.0, 4.0, 8.0));
         keycap.setBackground(
             new Background(
-                new BackgroundFill(GuiPalette.SURFACE_VARIANT, new CornerRadii(8.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE_VARIANT, new CornerRadii(8.0), Insets.EMPTY)
             )
         );
 
         final Text label = new Text(action);
-        label.setFill(GuiPalette.FOREGROUND);
+        label.setFill(UiPalette.FOREGROUND);
         label.setOpacity(0.85);
         label.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
@@ -159,10 +159,10 @@ final class SidebarView extends VBox {
         box
             .getChildren()
             .addAll(
-                this.legendRow(GuiPalette.EMPTY, "Empty"),
-                this.legendRow(GuiPalette.CHECKPOINT, "Checkpoint"),
-                this.legendRow(GuiPalette.SYSTEM_WALL, "System wall"),
-                this.legendRow(GuiPalette.PLAYER_WALL, "Player wall")
+                this.legendRow(UiPalette.EMPTY, "Empty"),
+                this.legendRow(UiPalette.CHECKPOINT, "Checkpoint"),
+                this.legendRow(UiPalette.SYSTEM_WALL, "System wall"),
+                this.legendRow(UiPalette.PLAYER_WALL, "Player wall")
             );
         return box;
     }
@@ -170,10 +170,10 @@ final class SidebarView extends VBox {
     private HBox legendRow(final Color color, final String label) {
         final Rectangle swatch = new Rectangle(12.0, 12.0);
         swatch.setFill(color);
-        swatch.setStroke(GuiPalette.OUTLINE);
+        swatch.setStroke(UiPalette.OUTLINE);
 
         final Text text = new Text(label);
-        text.setFill(GuiPalette.FOREGROUND);
+        text.setFill(UiPalette.FOREGROUND);
         text.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
         final HBox row = new HBox();
@@ -185,7 +185,7 @@ final class SidebarView extends VBox {
 
     private Text sectionTitle(final String text) {
         final Text title = new Text(text);
-        title.setFill(GuiPalette.FOREGROUND);
+        title.setFill(UiPalette.FOREGROUND);
         title.setOpacity(0.65);
         title.setFont(Font.font(Gui.FONT_NAME, 11.0));
         return title;
@@ -197,13 +197,13 @@ final class SidebarView extends VBox {
         card.setPadding(new Insets(PANEL_PADDING_PX));
         card.setBackground(
             new Background(
-                new BackgroundFill(GuiPalette.SURFACE, new CornerRadii(16.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(16.0), Insets.EMPTY)
             )
         );
         card.setBorder(
             new Border(
                 new BorderStroke(
-                    GuiPalette.OUTLINE,
+                    UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
                     new CornerRadii(16.0),
                     BorderWidths.DEFAULT
