@@ -4,10 +4,9 @@ The game "Pathery" is an exercise in creating the longest shortest path on a maz
 of walls. The full problem statement is in the README. This repository contains an automated Pathery
 solver.
 
-You own the GUI. In the GUI, you may write documentation, change contracts, restructure
-architecture, and engineer anything you see fit. In the non-GUI areas, consider yourself a guest
-and prefer to make minimal and precise edits. Write comments as needed. If you stumble upon lies in
-the documentation, please inform the human. Do not write documentation outside of the GUI.
+You own the GUI. Treat it as your codebase. Redesign it, replace patterns, and change contracts as
+needed to improve it. Do not limit yourself to minimal edits there. Outside of the GUI, you are a
+guest, so should prefer precise changes and avoid opportunistic refactors.
 
 ## Testing
 
