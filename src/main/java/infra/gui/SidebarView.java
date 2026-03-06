@@ -3,7 +3,6 @@ package infra.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -30,9 +29,10 @@ final class SidebarView extends VBox {
     private final Text statusText;
 
     private final Button stopOrRestartButton;
+    private final Button uploadMapCodeButton;
+    private final Button pasteMapCodeButton;
 
     private final VBox detailsGroup;
-    private final VBox actionsGroup;
     private final VBox legendGroup;
 
     private final MetricsView metrics;
@@ -44,8 +44,9 @@ final class SidebarView extends VBox {
         this.titleText = new Text();
         this.statusText = new Text();
         this.stopOrRestartButton = new Button("Stop");
+        this.uploadMapCodeButton = new Button("Upload MapCode");
+        this.pasteMapCodeButton = new Button("Paste MapCode");
         this.detailsGroup = this.panelCard();
-        this.actionsGroup = this.panelCard();
         this.legendGroup = this.panelCard();
         this.metrics = new MetricsView();
 
@@ -56,6 +57,14 @@ final class SidebarView extends VBox {
 
     public void onStopOrRestart(final Runnable listener) {
         this.stopOrRestartButton.setOnAction(event -> listener.run());
+    }
+
+    public void onUploadMapCode(final Runnable listener) {
+        this.uploadMapCodeButton.setOnAction(event -> listener.run());
+    }
+
+    public void onPasteMapCode(final Runnable listener) {
+        this.pasteMapCodeButton.setOnAction(event -> listener.run());
     }
 
     public void render(
@@ -99,58 +108,35 @@ final class SidebarView extends VBox {
 
     private void configureButtons() {
         stylePrimaryButton(this.stopOrRestartButton, UiPalette.PRIMARY, Color.web("#111827"));
+        stylePrimaryButton(
+            this.uploadMapCodeButton,
+            UiPalette.SURFACE_VARIANT,
+            UiPalette.FOREGROUND
+        );
+        stylePrimaryButton(
+            this.pasteMapCodeButton,
+            UiPalette.SURFACE_VARIANT,
+            UiPalette.FOREGROUND
+        );
 
-        final HBox row = new HBox();
+        final VBox row = new VBox();
         row.setSpacing(PANEL_SPACING_PX);
         row.setAlignment(Pos.CENTER_LEFT);
         this.stopOrRestartButton.setMaxWidth(Double.MAX_VALUE);
-        row.getChildren().add(this.stopOrRestartButton);
+        this.uploadMapCodeButton.setMaxWidth(Double.MAX_VALUE);
+        this.pasteMapCodeButton.setMaxWidth(Double.MAX_VALUE);
+        row
+            .getChildren()
+            .addAll(this.stopOrRestartButton, this.uploadMapCodeButton, this.pasteMapCodeButton);
 
         this.getChildren().add(row);
     }
 
     private void configurePanels() {
         this.detailsGroup.getChildren().addAll(this.sectionTitle("Statistics"), this.metrics);
-        this.actionsGroup.getChildren().addAll(this.sectionTitle("Commands"), this.commandsText());
         this.legendGroup.getChildren().addAll(this.sectionTitle("Legend"), this.legendRows());
 
-        this.getChildren().addAll(this.detailsGroup, this.actionsGroup, this.legendGroup);
-    }
-
-    private VBox commandsText() {
-        final VBox box = new VBox();
-        box.setSpacing(8.0);
-        box
-            .getChildren()
-            .addAll(
-                this.commandRow("Ctrl/Cmd+O", "Open mapcode"),
-                this.commandRow("Ctrl/Cmd+V", "Paste mapcode"),
-                this.commandRow("Drag", "Pan the board")
-            );
-        return box;
-    }
-
-    private HBox commandRow(final String key, final String action) {
-        final Label keycap = new Label(key);
-        keycap.setTextFill(UiPalette.FOREGROUND);
-        keycap.setFont(Font.font("Monospaced", 12.0));
-        keycap.setPadding(new Insets(4.0, 8.0, 4.0, 8.0));
-        keycap.setBackground(
-            new Background(
-                new BackgroundFill(UiPalette.SURFACE_VARIANT, new CornerRadii(8.0), Insets.EMPTY)
-            )
-        );
-
-        final Text label = new Text(action);
-        label.setFill(UiPalette.FOREGROUND);
-        label.setOpacity(0.85);
-        label.setFont(Font.font(Gui.FONT_NAME, 13.0));
-
-        final HBox row = new HBox();
-        row.setSpacing(10.0);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.getChildren().addAll(keycap, label);
-        return row;
+        this.getChildren().addAll(this.detailsGroup, this.legendGroup);
     }
 
     private VBox legendRows() {

@@ -12,8 +12,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
@@ -86,6 +84,8 @@ final class RootView {
     public void bindIntents(final Intents intentsToBind) {
         this.intents = intentsToBind;
         this.sidebar.onStopOrRestart(intentsToBind::stopOrRestart);
+        this.sidebar.onUploadMapCode(this::openChooser);
+        this.sidebar.onPasteMapCode(this::pasteMapCode);
         this.configureInteractions();
     }
 
@@ -198,28 +198,11 @@ final class RootView {
     }
 
     private void configureInteractions() {
-        this.root.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
         this.viewport.addEventFilter(MouseEvent.MOUSE_PRESSED, this::handleMousePressed);
         this.viewport.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::handleMouseDragged);
 
         this.root.setOnDragOver(this::handleDragOver);
         this.root.setOnDragDropped(this::handleDragDropped);
-    }
-
-    private void handleKeyPress(final KeyEvent event) {
-        if (intents == null) {
-            return;
-        }
-        if (event.isShortcutDown() && event.getCode() == KeyCode.O) {
-            this.openChooser();
-            event.consume();
-            return;
-        }
-        if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
-            this.pasteMapCode();
-            event.consume();
-            return;
-        }
     }
 
     private void handleMousePressed(final MouseEvent event) {
