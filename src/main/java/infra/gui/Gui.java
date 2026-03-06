@@ -39,6 +39,10 @@ public final class Gui extends Scene {
         controller.onPuzzleRejected(puzzleEpoch, message);
     }
 
+    public void onMapCodeRejected(final String message) {
+        controller.onMapCodeRejected(message);
+    }
+
     public void onPuzzleStopped(final int puzzleEpoch, final String message) {
         controller.onPuzzleStopped(puzzleEpoch, message);
     }

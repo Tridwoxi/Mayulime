@@ -76,41 +76,41 @@ public final class App extends Application {
             throw new IllegalStateException();
         }
 
-        final int epoch = this.puzzleEpoch.incrementAndGet();
-        Puzzle puzzle = null;
+        final Puzzle puzzle;
         try {
             puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException exception) {
             Logging.warning("Bad MapCode or unsupported feature; problem rejected");
-            manager.stop();
-            gui.onPuzzleRejected(epoch, BAD_MAP_MESSAGE);
+            gui.onMapCodeRejected(BAD_MAP_MESSAGE);
+            return;
         }
 
-        if (puzzle != null) {
-            final String problemName = puzzle.getName().isBlank()
-                ? UNNAMED_PROBLEM_NAME
-                : puzzle.getName();
-            gui.onPuzzleAccepted(
-                new Puzzle(
-                    problemName,
-                    puzzle.getFeatures(),
-                    puzzle.getNumRows(),
-                    puzzle.getNumCols(),
-                    puzzle.getCheckpoints(),
-                    puzzle.getBlockingBudget()
-                ),
-                epoch
-            );
-            manager.solve(puzzle);
-        }
+        manager.stop();
+
+        final int epoch = this.puzzleEpoch.incrementAndGet();
+        final String problemName = puzzle.getName().isBlank()
+            ? UNNAMED_PROBLEM_NAME
+            : puzzle.getName();
+        gui.onPuzzleAccepted(
+            new Puzzle(
+                problemName,
+                puzzle.getFeatures(),
+                puzzle.getNumRows(),
+                puzzle.getNumCols(),
+                puzzle.getCheckpoints(),
+                puzzle.getBlockingBudget()
+            ),
+            epoch
+        );
+        manager.solve(puzzle);
     }
 
     private void stopRequestedByUser() {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
-        final int epoch = this.puzzleEpoch.incrementAndGet();
         manager.stop();
+        final int epoch = this.puzzleEpoch.incrementAndGet();
         gui.onPuzzleStopped(epoch, "Solving stopped.");
     }
 }

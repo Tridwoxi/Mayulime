@@ -79,6 +79,10 @@ final class UiController {
         runOnFxThread(() -> this.rejectPuzzle(puzzleEpoch, message));
     }
 
+    public void onMapCodeRejected(final String message) {
+        runOnFxThread(() -> this.rejectMapCode(message));
+    }
+
     public void onPuzzleStopped(final int puzzleEpoch, final String message) {
         runOnFxThread(() -> this.stopPuzzle(puzzleEpoch, message));
     }
@@ -168,6 +172,11 @@ final class UiController {
             false
         );
         this.renderState(freezeAtNanos);
+    }
+
+    private void rejectMapCode(final String message) {
+        this.pendingSubmittedMapCode = Optional.empty();
+        this.reportMapInputError(message);
     }
 
     private void flushPendingUpdate() {
