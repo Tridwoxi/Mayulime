@@ -4,14 +4,16 @@ The game "Pathery" is an exercise in creating the longest shortest path on a maz
 of walls. The full problem statement is in the README. This repository contains an automated Pathery
 solver.
 
-Do not write documentation unless explicitly asked. Write comments as needed. If you stumble upon
-lies in the documentation, please inform the human.
+You own the GUI. In the GUI, you may write documentation, change contracts, restructure
+architecture, and engineer anything you see fit. In the non-GUI areas, consider yourself a guest
+and prefer to make minimal and precise edits. Write comments as needed. If you stumble upon lies in
+the documentation, please inform the human. Do not write documentation outside of the GUI.
 
 ## Testing
 
-If you edit code, execute `./gradlew build` to compile and `./gradlew test` to run all the tests.
-If you cannot do so because the Gradle wrapper or jar is missing, ask the human to create it. Do
-not attempt to launch the application itself unless explicitly asked.
+If you edit code, execute `./gradlew build` to compile and test. If you cannot do so because the
+Gradle wrapper or jar is missing, ask the human to create it. Do not attempt to launch the
+application itself unless explicitly asked.
 
 If Checkstyle or Spotbugs complains during the build, evaluate if fixing the violations would
 improve or harm the design. Then either fix it or keep whatever you originally wrote and inform the
