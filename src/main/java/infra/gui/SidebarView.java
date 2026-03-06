@@ -24,7 +24,6 @@ final class SidebarView extends VBox {
 
     private static final double PANEL_SPACING_PX = 12.0;
     private static final double PANEL_PADDING_PX = 16.0;
-    private static final double CHIP_RADIUS_PX = 999.0;
 
     private final Text titleText;
     private final Text statusText;
@@ -178,7 +177,7 @@ final class SidebarView extends VBox {
         card.setPadding(new Insets(PANEL_PADDING_PX));
         card.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(16.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
         card.setBorder(
@@ -186,7 +185,7 @@ final class SidebarView extends VBox {
                 new BorderStroke(
                     UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
-                    new CornerRadii(16.0),
+                    CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
                 )
             )
@@ -202,7 +201,7 @@ final class SidebarView extends VBox {
             new Background(
                 new BackgroundFill(
                     UiPalette.SURFACE_VARIANT,
-                    new CornerRadii(CHIP_RADIUS_PX),
+                    CornerRadii.EMPTY,
                     Insets.EMPTY
                 )
             )
@@ -212,7 +211,7 @@ final class SidebarView extends VBox {
                 new BorderStroke(
                     UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
-                    new CornerRadii(CHIP_RADIUS_PX),
+                    CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
                 )
             )
@@ -225,7 +224,7 @@ final class SidebarView extends VBox {
         button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
         button.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(CHIP_RADIUS_PX), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
         button.setBorder(
@@ -233,7 +232,7 @@ final class SidebarView extends VBox {
                 new BorderStroke(
                     UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
-                    new CornerRadii(CHIP_RADIUS_PX),
+                    CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
                 )
             )

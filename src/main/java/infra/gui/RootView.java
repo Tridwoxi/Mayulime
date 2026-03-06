@@ -159,7 +159,7 @@ final class RootView {
         this.boardContainer.setPrefSize(1.0, 1.0);
         this.boardContainer.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(12.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
 
@@ -171,7 +171,7 @@ final class RootView {
         viewportCard.setPadding(new Insets(16.0));
         viewportCard.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(18.0), Insets.EMPTY)
+                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
         viewportCard.setBorder(
@@ -179,7 +179,7 @@ final class RootView {
                 new BorderStroke(
                     UiPalette.OUTLINE,
                     BorderStrokeStyle.SOLID,
-                    new CornerRadii(18.0),
+                    CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
                 )
             )
