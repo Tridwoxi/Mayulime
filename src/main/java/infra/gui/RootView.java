@@ -1,8 +1,6 @@
 package infra.gui;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -10,7 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.input.Clipboard;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -23,17 +20,17 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
 import think.manager.StatusUpdate;
 
 @SuppressWarnings({ "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity" })
 final class RootView {
 
     interface Intents {
-        void submitMapCode(String mapCode);
-        void stopOrRestart();
-        void reportMapInputError(String message);
+        void onStopOrRestartRequested();
+        void onUploadMapCodeRequested();
+        void onPasteMapCodeRequested();
+        void onMapCodeFilesDropped(List<File> files);
     }
 
     private static final double ROOT_PADDING_PX = 24.0;
@@ -83,10 +80,28 @@ final class RootView {
 
     public void bindIntents(final Intents intentsToBind) {
         this.intents = intentsToBind;
-        this.sidebar.onStopOrRestart(intentsToBind::stopOrRestart);
-        this.sidebar.onUploadMapCode(this::openChooser);
-        this.sidebar.onPasteMapCode(this::pasteMapCode);
+        this.sidebar.onStopOrRestart(intentsToBind::onStopOrRestartRequested);
+        this.sidebar.onUploadMapCode(intentsToBind::onUploadMapCodeRequested);
+        this.sidebar.onPasteMapCode(intentsToBind::onPasteMapCodeRequested);
         this.configureInteractions();
+    }
+
+    public void onViewportChanged(final Runnable listener) {
+        this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
+            this.resizeBoardViewportContent(
+                this.currentRows,
+                this.currentCols,
+                this.currentCellSizePx
+            );
+            listener.run();
+        });
+    }
+
+    public Window getWindow() {
+        if (this.root.getScene() == null) {
+            return null;
+        }
+        return this.root.getScene().getWindow();
     }
 
     public double getViewportWidth() {
@@ -97,13 +112,8 @@ final class RootView {
         return Math.max(1.0, this.viewport.getViewportBounds().getHeight());
     }
 
-    public void renderSidebar(
-        final UiState state,
-        final String sinceUpdate,
-        final String elapsed,
-        final StatusUpdate display
-    ) {
-        this.sidebar.render(state, sinceUpdate, elapsed, display);
+    public void renderSidebar(final UiState state, final String sinceUpdate, final String elapsed) {
+        this.sidebar.render(state, sinceUpdate, elapsed);
     }
 
     public void renderBoard(
@@ -182,13 +192,6 @@ final class RootView {
         this.boardViewportContent.setMinSize(1.0, 1.0);
         this.boardViewportContent.setPrefSize(1.0, 1.0);
         this.boardViewportContent.setAlignment(Pos.CENTER);
-        this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
-            this.resizeBoardViewportContent(
-                this.currentRows,
-                this.currentCols,
-                this.currentCellSizePx
-            );
-        });
 
         this.viewportCard.setPadding(new Insets(16.0));
 
@@ -247,77 +250,21 @@ final class RootView {
 
     private void handleDragOver(final DragEvent event) {
         final List<File> files = event.getDragboard().getFiles();
-        if (files.size() == 1 && UiMath.isSupportedMapFile(files.get(0))) {
+        if (files.size() == 1) {
             event.acceptTransferModes(TransferMode.COPY);
         }
         event.consume();
     }
 
     private void handleDragDropped(final DragEvent event) {
-        final List<File> files = event.getDragboard().getFiles();
-        if (files.size() != 1) {
-            if (intents != null) {
-                intents.reportMapInputError("Drop exactly one .mapcode file.");
-            }
+        if (this.intents == null) {
             event.setDropCompleted(false);
             event.consume();
             return;
         }
-        final boolean loaded = this.loadMapCodeFile(files.get(0));
-        event.setDropCompleted(loaded);
+        this.intents.onMapCodeFilesDropped(List.copyOf(event.getDragboard().getFiles()));
+        event.setDropCompleted(true);
         event.consume();
-    }
-
-    private void openChooser() {
-        if (intents == null) {
-            return;
-        }
-        final FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new ExtensionFilter("Pathery MapCode", "*.mapcode"));
-        final File chosen = chooser.showOpenDialog(this.root.getScene().getWindow());
-        if (chosen == null) {
-            intents.reportMapInputError("File picker cancelled.");
-            return;
-        }
-        this.loadMapCodeFile(chosen);
-    }
-
-    private boolean loadMapCodeFile(final File file) {
-        if (intents == null) {
-            return false;
-        }
-        if (!UiMath.isSupportedMapFile(file)) {
-            intents.reportMapInputError("Unsupported file type. Expected .mapcode.");
-            return false;
-        }
-
-        final String mapCode;
-        try {
-            mapCode = Files.readString(file.toPath());
-        } catch (IOException exception) {
-            intents.reportMapInputError("Can't read that file.");
-            return false;
-        }
-
-        intents.submitMapCode(mapCode);
-        return true;
-    }
-
-    private void pasteMapCode() {
-        if (intents == null) {
-            return;
-        }
-        final Clipboard clipboard = Clipboard.getSystemClipboard();
-        if (!clipboard.hasString()) {
-            intents.reportMapInputError("Clipboard does not contain text.");
-            return;
-        }
-        final String mapCode = clipboard.getString();
-        if (mapCode == null || mapCode.isBlank()) {
-            intents.reportMapInputError("Clipboard text is empty.");
-            return;
-        }
-        intents.submitMapCode(mapCode);
     }
 
     private void resizeBoardViewportContent(

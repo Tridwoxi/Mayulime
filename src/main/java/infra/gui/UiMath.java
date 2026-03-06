@@ -3,6 +3,8 @@ package infra.gui;
 import java.io.File;
 import java.util.Locale;
 import javafx.scene.paint.Color;
+import think.domain.model.Feature;
+import think.manager.StatusUpdate;
 
 final class UiMath {
 
@@ -19,6 +21,21 @@ final class UiMath {
 
     static String walls(final int spentWalls, final int wallBudget) {
         return String.format(Locale.US, "%d/%d", spentWalls, wallBudget);
+    }
+
+    static int countPlayerWalls(final StatusUpdate display) {
+        if (display == null) {
+            return 0;
+        }
+        int count = 0;
+        for (int row = 0; row < display.getNumRows(); row += 1) {
+            for (int col = 0; col < display.getNumCols(); col += 1) {
+                if (display.getFeature(row, col) == Feature.PLAYER_WALL) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
     }
 
     static String grid(final int numRows, final int numCols) {

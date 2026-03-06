@@ -17,6 +17,10 @@ session.
 The board must be rendered with a single `Canvas`. A one-node-per-cell JavaFX implementation made
 window resizing catastrophically slow, while the current canvas-based board performs acceptably.
 
+Controller-owned input handling is preferred over view-owned IO. The view should surface user
+intent, while clipboard access, file loading, chooser policy, and user-facing validation live with
+the UI controller so the layout can be redesigned without moving application behavior.
+
 The board must occupy most of the screen and remain visually stable while solving. Solver updates
 should change cell contents only, not move or resize the board. Users need to see as much of the
 board as possible because wall effects are highly non-local. Dragging is only meaningful when the
@@ -35,6 +39,10 @@ Status messaging should generally prefer the latest important event. Layout and 
 including the choice of a right sidebar, as long as performance, board dominance, low information
 density, and the minimal control surface are preserved. Mouse-first interaction is acceptable;
 keyboard support is optional and not currently planned.
+
+Rendering should be event-driven where possible. Solver updates, puzzle lifecycle events, theme
+changes, and viewport changes should trigger real board renders, while timer text can refresh on a
+separate coarse cadence. The GUI should not rely on a continuous high-frequency repaint loop.
 
 ## Future direction
 

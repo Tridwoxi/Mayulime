@@ -3,8 +3,6 @@ package infra.gui;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import think.domain.model.Feature;
-import think.manager.StatusUpdate;
 
 final class MetricsView extends GridPane {
 
@@ -25,21 +23,14 @@ final class MetricsView extends GridPane {
         this.addRow(4, "Total elapsed");
     }
 
-    public void render(
-        final StatusUpdate display,
-        final int rows,
-        final int cols,
-        final int wallBudget,
-        final int updateCount,
-        final String sinceUpdate,
-        final String elapsed
-    ) {
-        final int spentWalls = this.spentWalls(display);
-        final boolean puzzleKnown = rows > 0 && cols > 0;
-        final String walls = puzzleKnown ? UiMath.walls(spentWalls, wallBudget) : "-";
-        final String updates = puzzleKnown ? String.valueOf(updateCount) : "-";
+    public void render(final UiState state, final String sinceUpdate, final String elapsed) {
+        final boolean puzzleKnown = state.rows() > 0 && state.cols() > 0;
+        final String walls = puzzleKnown
+            ? UiMath.walls(state.spentWalls(), state.wallBudget())
+            : "-";
+        final String updates = puzzleKnown ? String.valueOf(state.updateCount()) : "-";
 
-        this.values[0].setText(UiMath.grid(rows, cols));
+        this.values[0].setText(UiMath.grid(state.rows(), state.cols()));
         this.values[1].setText(walls);
         this.values[2].setText(updates);
         this.values[3].setText(sinceUpdate);
@@ -51,21 +42,6 @@ final class MetricsView extends GridPane {
             this.labels[index].setFill(palette.mutedForeground());
             this.values[index].setFill(palette.foreground());
         }
-    }
-
-    private int spentWalls(final StatusUpdate display) {
-        if (display == null) {
-            return 0;
-        }
-        int count = 0;
-        for (int row = 0; row < display.getNumRows(); row += 1) {
-            for (int col = 0; col < display.getNumCols(); col += 1) {
-                if (display.getFeature(row, col) == Feature.PLAYER_WALL) {
-                    count += 1;
-                }
-            }
-        }
-        return count;
     }
 
     private void addRow(final int rowIndex, final String labelText) {

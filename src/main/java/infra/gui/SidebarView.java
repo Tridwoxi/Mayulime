@@ -17,7 +17,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import think.manager.StatusUpdate;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 final class SidebarView extends VBox {
@@ -80,26 +79,13 @@ final class SidebarView extends VBox {
         this.pasteMapCodeButton.setOnAction(event -> listener.run());
     }
 
-    public void render(
-        final UiState state,
-        final String sinceUpdate,
-        final String elapsed,
-        final StatusUpdate display
-    ) {
+    public void render(final UiState state, final String sinceUpdate, final String elapsed) {
         this.state = state;
         this.titleText.setText(state.puzzleName());
         this.statusText.setText(state.statusMessage());
         this.renderStopOrRestartButton(state);
 
-        this.metrics.render(
-            display,
-            state.rows(),
-            state.cols(),
-            state.wallBudget(),
-            state.updateCount(),
-            sinceUpdate,
-            elapsed
-        );
+        this.metrics.render(state, sinceUpdate, elapsed);
     }
 
     public void applyPalette(final UiPalette paletteToApply) {
@@ -170,12 +156,14 @@ final class SidebarView extends VBox {
     private VBox legendRows() {
         final VBox box = new VBox();
         box.setSpacing(8.0);
-        box.getChildren().addAll(
-            this.legendRow(0, "Empty"),
-            this.legendRow(1, "Checkpoint"),
-            this.legendRow(2, "System wall"),
-            this.legendRow(3, "Player wall")
-        );
+        box
+            .getChildren()
+            .addAll(
+                this.legendRow(0, "Empty"),
+                this.legendRow(1, "Checkpoint"),
+                this.legendRow(2, "System wall"),
+                this.legendRow(3, "Player wall")
+            );
         return box;
     }
 
@@ -261,9 +249,7 @@ final class SidebarView extends VBox {
         button.setFont(Font.font(Gui.FONT_NAME, 13.0));
         button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
         button.setBackground(
-            new Background(
-                new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY)
-            )
+            new Background(new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY))
         );
         button.setBorder(
             new Border(

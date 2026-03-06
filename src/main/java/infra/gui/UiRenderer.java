@@ -41,7 +41,7 @@ final class UiRenderer {
             this.lastRenderedCols = state.cols();
             this.lastRenderedCellSizePx = cellSize;
         }
-        this.rootView.renderSidebar(state, sinceUpdate, elapsed, display);
+        this.rootView.renderSidebar(state, sinceUpdate, elapsed);
 
         if (Double.compare(state.cellSizePx(), cellSize) == 0 && !state.recenterPending()) {
             return state;
@@ -55,6 +55,7 @@ final class UiRenderer {
             state.cols(),
             state.wallBudget(),
             state.bestUpdate(),
+            state.spentWalls(),
             state.updateCount(),
             cellSize,
             state.canRestart(),
