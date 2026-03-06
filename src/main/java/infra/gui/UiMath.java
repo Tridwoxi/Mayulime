@@ -46,7 +46,7 @@ final class UiMath {
     }
 
     static String elapsed(final long startNanos, final long nowNanos) {
-        if (startNanos <= 0L || nowNanos <= startNanos) {
+        if (startNanos <= 0L || nowNanos < startNanos) {
             return "-";
         }
         final long elapsedSeconds = (nowNanos - startNanos) / 1_000_000_000L;
