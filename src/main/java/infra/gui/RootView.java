@@ -22,7 +22,6 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -46,8 +45,7 @@ final class RootView {
     private final SidebarView sidebar;
     private final BoardView board;
     private final ScrollPane viewport;
-    private final Pane boardContainer;
-    private final Pane boardSurface;
+    private final StackPane boardViewportContent;
 
     private Intents intents;
 
@@ -61,9 +59,8 @@ final class RootView {
         this.root = new BorderPane();
         this.sidebar = new SidebarView();
         this.board = new BoardView();
-        this.boardSurface = new Pane(this.board);
-        this.boardContainer = new Pane(this.boardSurface);
-        this.viewport = new ScrollPane(this.boardContainer);
+        this.boardViewportContent = new StackPane(this.board);
+        this.viewport = new ScrollPane(this.boardViewportContent);
 
         this.intents = null;
         this.currentRows = 0;
@@ -123,7 +120,7 @@ final class RootView {
             this.board.render(display, cellSizePx);
         }
 
-        this.resizeBoardSurface(rows, cols, cellSizePx);
+        this.resizeBoardViewportContent(rows, cols, cellSizePx);
         if (recenter) {
             this.centerViewport();
         }
@@ -151,20 +148,21 @@ final class RootView {
                 "-fx-control-inner-background: transparent;"
         );
 
-        this.boardSurface.setMinSize(1.0, 1.0);
-        this.boardSurface.setPrefSize(1.0, 1.0);
-        this.boardSurface.setBackground(Background.EMPTY);
-
-        this.boardContainer.setMinSize(1.0, 1.0);
-        this.boardContainer.setPrefSize(1.0, 1.0);
-        this.boardContainer.setBackground(
+        this.boardViewportContent.setMinSize(1.0, 1.0);
+        this.boardViewportContent.setPrefSize(1.0, 1.0);
+        this.boardViewportContent.setAlignment(Pos.CENTER);
+        this.boardViewportContent.setBackground(
             new Background(
                 new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
 
         this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
-            this.resizeBoardSurface(this.currentRows, this.currentCols, this.currentCellSizePx);
+            this.resizeBoardViewportContent(
+                this.currentRows,
+                this.currentCols,
+                this.currentCellSizePx
+            );
         });
 
         final StackPane viewportCard = new StackPane(this.viewport);
@@ -221,8 +219,8 @@ final class RootView {
     }
 
     private void panByPixels(final double deltaX, final double deltaY) {
-        final double contentWidth = this.boardContainer.getWidth();
-        final double contentHeight = this.boardContainer.getHeight();
+        final double contentWidth = this.boardViewportContent.getWidth();
+        final double contentHeight = this.boardViewportContent.getHeight();
         final double viewportWidth = this.viewport.getViewportBounds().getWidth();
         final double viewportHeight = this.viewport.getViewportBounds().getHeight();
 
@@ -314,7 +312,11 @@ final class RootView {
         intents.submitMapCode(mapCode);
     }
 
-    private void resizeBoardSurface(final int rows, final int cols, final double cellSizePx) {
+    private void resizeBoardViewportContent(
+        final int rows,
+        final int cols,
+        final double cellSizePx
+    ) {
         if (rows <= 0 || cols <= 0 || cellSizePx <= 0.0) {
             return;
         }
@@ -324,16 +326,10 @@ final class RootView {
         final double viewportWidth = Math.max(1.0, this.viewport.getViewportBounds().getWidth());
         final double viewportHeight = Math.max(1.0, this.viewport.getViewportBounds().getHeight());
 
-        this.boardSurface.setMinSize(boardWidth, boardHeight);
-        this.boardSurface.setPrefSize(boardWidth, boardHeight);
-
         final double containerWidth = Math.max(boardWidth, viewportWidth);
         final double containerHeight = Math.max(boardHeight, viewportHeight);
-        this.boardContainer.setMinSize(containerWidth, containerHeight);
-        this.boardContainer.setPrefSize(containerWidth, containerHeight);
-
-        this.boardSurface.setLayoutX((containerWidth - boardWidth) * 0.5);
-        this.boardSurface.setLayoutY((containerHeight - boardHeight) * 0.5);
+        this.boardViewportContent.setMinSize(containerWidth, containerHeight);
+        this.boardViewportContent.setPrefSize(containerWidth, containerHeight);
     }
 
     private void centerViewport() {

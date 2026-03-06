@@ -11,7 +11,6 @@ final class UiPalette {
     public static final Color FOREGROUND = Color.web("e4e8e5");
     public static final Color MUTED_FOREGROUND = Color.web("99a29c");
     public static final Color PRIMARY = Color.web("4fa36b");
-    public static final Color BOARD_GRID = Color.web("565b57");
 
     // Pathery-inspired board colors, tuned to sit with the darker shell.
     public static final Color EMPTY = Color.web("dde6e2");
