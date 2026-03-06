@@ -93,7 +93,7 @@ final class UiController {
     private void acceptPuzzle(final Puzzle puzzle, final int puzzleEpoch) {
         final long nowNanos = System.nanoTime();
         this.latestPending.set(null);
-        this.lastAcceptedMapCode = this.pendingSubmittedMapCode;
+        this.lastAcceptedMapCode = this.pendingSubmittedMapCode.or(() -> this.lastAcceptedMapCode);
         this.pendingSubmittedMapCode = Optional.empty();
         this.currentPuzzle = Optional.of(puzzle);
         this.state = new UiState(
@@ -160,7 +160,7 @@ final class UiController {
             this.state.updateCount(),
             this.state.cellSizePx(),
             this.lastAcceptedMapCode.isPresent(),
-            this.currentPuzzle.isPresent(),
+            this.lastAcceptedMapCode.isPresent(),
             finalStatus,
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
@@ -224,7 +224,7 @@ final class UiController {
             this.stopConsumer.run();
             return;
         }
-        this.lastAcceptedMapCode.ifPresent(this.mapCodeConsumer);
+        this.lastAcceptedMapCode.ifPresent(this::submitMapCode);
     }
 
     private void requestUploadMapCode() {
