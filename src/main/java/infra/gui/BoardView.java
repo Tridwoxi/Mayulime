@@ -30,7 +30,7 @@ final class BoardView extends Canvas {
         graphics.setTextBaseline(VPos.CENTER);
         graphics.setFont(Font.font(Gui.FONT_NAME, Math.max(7.0, cellSizePx * 0.32)));
         graphics.setLineWidth(Math.max(0.7, cellSizePx * 0.04));
-        graphics.setStroke(UiPalette.BACKGROUND);
+        graphics.setStroke(UiPalette.OUTLINE);
 
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {

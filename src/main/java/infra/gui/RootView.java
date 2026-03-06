@@ -182,7 +182,7 @@ final class RootView {
                 )
             )
         );
-        viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, Color.color(0.08, 0.1, 0.16, 0.14)));
+        viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, Color.color(0.17, 0.29, 0.39, 0.12)));
 
         BorderPane.setMargin(viewportCard, new Insets(0.0, ROOT_SPACING_PX, 0.0, 0.0));
         this.root.setCenter(viewportCard);
