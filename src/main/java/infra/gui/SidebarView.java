@@ -11,6 +11,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -47,6 +48,7 @@ final class SidebarView extends VBox {
         this.palette = initialPalette;
         this.setSpacing(PANEL_SPACING_PX);
         this.setPadding(new Insets(0.0));
+        this.setMaxHeight(Region.USE_PREF_SIZE);
 
         this.titleText = new Text();
         this.statusText = new Text();
