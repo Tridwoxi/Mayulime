@@ -61,9 +61,8 @@ final class MetricsView extends GridPane {
 
     private void addRow(final int rowIndex, final String labelText) {
         final Text label = new Text(labelText + ":");
-        label.setFill(UiPalette.FOREGROUND);
-        label.setOpacity(0.72);
-        label.setFont(Font.font(Gui.FONT_NAME, 13.0));
+        label.setFill(UiPalette.MUTED_FOREGROUND);
+        label.setFont(Font.font(Gui.FONT_NAME, 12.0));
 
         final Text value = new Text("-");
         value.setFill(UiPalette.FOREGROUND);

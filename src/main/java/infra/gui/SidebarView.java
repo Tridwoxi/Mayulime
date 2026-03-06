@@ -15,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import think.manager.StatusUpdate;
 
@@ -77,9 +78,13 @@ final class SidebarView extends VBox {
         this.statusText.setText(state.statusMessage());
 
         this.stopOrRestartButton.setText(state.phase() == UiPhase.SOLVING ? "Stop" : "Restart");
-        this.stopOrRestartButton.setDisable(
-            state.phase() != UiPhase.SOLVING && !state.canRestart()
-        );
+        final boolean stopButtonDisabled = state.phase() != UiPhase.SOLVING && !state.canRestart();
+        this.stopOrRestartButton.setDisable(stopButtonDisabled);
+        if (stopButtonDisabled) {
+            styleDisabledActionButton(this.stopOrRestartButton);
+        } else {
+            styleActionButton(this.stopOrRestartButton);
+        }
 
         this.metrics.render(
             display,
@@ -94,10 +99,9 @@ final class SidebarView extends VBox {
 
     private void configureHeader() {
         this.titleText.setFill(UiPalette.FOREGROUND);
-        this.titleText.setFont(Font.font(Gui.FONT_NAME, 29.0));
+        this.titleText.setFont(Font.font(Gui.FONT_NAME, FontWeight.SEMI_BOLD, 27.0));
 
         this.statusText.setFill(UiPalette.FOREGROUND);
-        this.statusText.setOpacity(0.8);
         this.statusText.setWrappingWidth(360.0);
         this.statusText.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
@@ -163,9 +167,8 @@ final class SidebarView extends VBox {
 
     private Text sectionTitle(final String text) {
         final Text title = new Text(text);
-        title.setFill(UiPalette.FOREGROUND);
-        title.setOpacity(0.65);
-        title.setFont(Font.font(Gui.FONT_NAME, 11.0));
+        title.setFill(UiPalette.MUTED_FOREGROUND);
+        title.setFont(Font.font(Gui.FONT_NAME, 12.0));
         return title;
     }
 
@@ -202,6 +205,27 @@ final class SidebarView extends VBox {
                     new CornerRadii(CHIP_RADIUS_PX),
                     Insets.EMPTY
                 )
+            )
+        );
+        button.setBorder(
+            new Border(
+                new BorderStroke(
+                    UiPalette.OUTLINE,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(CHIP_RADIUS_PX),
+                    BorderWidths.DEFAULT
+                )
+            )
+        );
+    }
+
+    private static void styleDisabledActionButton(final Button button) {
+        button.setTextFill(UiPalette.MUTED_FOREGROUND);
+        button.setFont(Font.font(Gui.FONT_NAME, 13.0));
+        button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
+        button.setBackground(
+            new Background(
+                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(CHIP_RADIUS_PX), Insets.EMPTY)
             )
         );
         button.setBorder(

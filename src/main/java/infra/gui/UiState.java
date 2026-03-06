@@ -23,7 +23,7 @@ record UiState(
         return new UiState(
             UiPhase.IDLE,
             0,
-            "Welcome",
+            "Mayulime",
             0,
             0,
             0,
@@ -31,7 +31,7 @@ record UiState(
             0,
             Gui.MAX_CELL_SIZE_PX,
             false,
-            "Open, drop, or paste a MapCode to begin",
+            "Drop, upload, or paste a MapCode to analyze",
             -1L,
             -1L,
             -1L,

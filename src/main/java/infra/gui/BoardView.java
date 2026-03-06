@@ -29,9 +29,8 @@ final class BoardView extends Canvas {
         graphics.setTextAlign(TextAlignment.CENTER);
         graphics.setTextBaseline(VPos.CENTER);
         graphics.setFont(Font.font(Gui.FONT_NAME, Math.max(7.0, cellSizePx * 0.32)));
-
-        final Color strokeColor = UiPalette.BACKGROUND.deriveColor(0.0, 1.0, 1.0, 0.7);
-        graphics.setStroke(strokeColor);
+        graphics.setLineWidth(Math.max(0.7, cellSizePx * 0.04));
+        graphics.setStroke(UiPalette.BACKGROUND);
 
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {

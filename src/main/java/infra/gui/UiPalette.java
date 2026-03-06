@@ -4,18 +4,20 @@ import javafx.scene.paint.Color;
 
 final class UiPalette {
 
-    // Mystery unrelated colors.
-    public static final Color SURFACE = Color.web("1a1f28");
-    public static final Color SURFACE_VARIANT = Color.web("232a35");
-    public static final Color OUTLINE = Color.web("495366");
-    public static final Color FOREGROUND = Color.web("e6e8ee");
+    public static final Color BACKGROUND = Color.web("0f1110");
+    public static final Color SURFACE = Color.web("171a18");
+    public static final Color SURFACE_VARIANT = Color.web("1d2220");
+    public static final Color OUTLINE = Color.web("39403c");
+    public static final Color FOREGROUND = Color.web("e4e8e5");
+    public static final Color MUTED_FOREGROUND = Color.web("99a29c");
+    public static final Color PRIMARY = Color.web("4fa36b");
+    public static final Color BOARD_GRID = Color.web("565b57");
 
-    // Approximate average color, picked from Pathery's default color theme.
-    public static final Color BACKGROUND = Color.web("10131a");
-    public static final Color SYSTEM_WALL = Color.web("723736");
-    public static final Color PLAYER_WALL = Color.web("3c3d3c");
-    public static final Color EMPTY = Color.web("e2e8eb");
-    public static final Color CHECKPOINT = Color.web("8e4793");
+    // Pathery-inspired board colors, tuned to sit with the darker shell.
+    public static final Color EMPTY = Color.web("dde6e2");
+    public static final Color SYSTEM_WALL = Color.web("7a4943");
+    public static final Color PLAYER_WALL = Color.web("4a4d49");
+    public static final Color CHECKPOINT = Color.web("c09649");
 
     private UiPalette() {}
 }

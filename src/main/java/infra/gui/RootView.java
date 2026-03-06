@@ -153,14 +153,15 @@ final class RootView {
 
         this.boardSurface.setMinSize(1.0, 1.0);
         this.boardSurface.setPrefSize(1.0, 1.0);
-        this.boardSurface.setBackground(
-            new Background(
-                new BackgroundFill(UiPalette.SURFACE_VARIANT, new CornerRadii(12.0), Insets.EMPTY)
-            )
-        );
+        this.boardSurface.setBackground(Background.EMPTY);
 
         this.boardContainer.setMinSize(1.0, 1.0);
         this.boardContainer.setPrefSize(1.0, 1.0);
+        this.boardContainer.setBackground(
+            new Background(
+                new BackgroundFill(UiPalette.SURFACE, new CornerRadii(12.0), Insets.EMPTY)
+            )
+        );
 
         this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
             this.resizeBoardSurface(this.currentRows, this.currentCols, this.currentCellSizePx);
