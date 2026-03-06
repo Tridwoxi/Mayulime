@@ -9,7 +9,6 @@ final class UiPalette {
     public static final Color SURFACE_VARIANT = Color.web("232a35");
     public static final Color OUTLINE = Color.web("495366");
     public static final Color FOREGROUND = Color.web("e6e8ee");
-    public static final Color PRIMARY = Color.web("8ab4f8");
 
     // Approximate average color, picked from Pathery's default color theme.
     public static final Color BACKGROUND = Color.web("10131a");

@@ -107,17 +107,9 @@ final class SidebarView extends VBox {
     }
 
     private void configureButtons() {
-        stylePrimaryButton(this.stopOrRestartButton, UiPalette.PRIMARY, Color.web("#111827"));
-        stylePrimaryButton(
-            this.uploadMapCodeButton,
-            UiPalette.SURFACE_VARIANT,
-            UiPalette.FOREGROUND
-        );
-        stylePrimaryButton(
-            this.pasteMapCodeButton,
-            UiPalette.SURFACE_VARIANT,
-            UiPalette.FOREGROUND
-        );
+        styleActionButton(this.stopOrRestartButton);
+        styleActionButton(this.uploadMapCodeButton);
+        styleActionButton(this.pasteMapCodeButton);
 
         final VBox row = new VBox();
         row.setSpacing(PANEL_SPACING_PX);
@@ -199,16 +191,28 @@ final class SidebarView extends VBox {
         return card;
     }
 
-    private static void stylePrimaryButton(
-        final Button button,
-        final Color fill,
-        final Color textColor
-    ) {
-        button.setTextFill(textColor);
+    private static void styleActionButton(final Button button) {
+        button.setTextFill(UiPalette.FOREGROUND);
         button.setFont(Font.font(Gui.FONT_NAME, 13.0));
         button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
         button.setBackground(
-            new Background(new BackgroundFill(fill, new CornerRadii(CHIP_RADIUS_PX), Insets.EMPTY))
+            new Background(
+                new BackgroundFill(
+                    UiPalette.SURFACE_VARIANT,
+                    new CornerRadii(CHIP_RADIUS_PX),
+                    Insets.EMPTY
+                )
+            )
+        );
+        button.setBorder(
+            new Border(
+                new BorderStroke(
+                    UiPalette.OUTLINE,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(CHIP_RADIUS_PX),
+                    BorderWidths.DEFAULT
+                )
+            )
         );
     }
 }
