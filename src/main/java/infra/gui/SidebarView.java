@@ -34,6 +34,7 @@ final class SidebarView extends VBox {
     private final Button stopOrRestartButton;
     private final Button uploadMapCodeButton;
     private final Button pasteMapCodeButton;
+    private final Button copyMapCodeButton;
 
     private final VBox headerGroup;
     private final VBox detailsGroup;
@@ -55,6 +56,7 @@ final class SidebarView extends VBox {
         this.stopOrRestartButton = new Button("Stop");
         this.uploadMapCodeButton = new Button("Upload MapCode");
         this.pasteMapCodeButton = new Button("Paste MapCode");
+        this.copyMapCodeButton = new Button("Copy MapCode");
         this.headerGroup = this.panelCard();
         this.detailsGroup = this.panelCard();
         this.legendGroup = this.panelCard();
@@ -77,6 +79,10 @@ final class SidebarView extends VBox {
 
     public void onPasteMapCode(final Runnable listener) {
         this.pasteMapCodeButton.setOnAction(event -> listener.run());
+    }
+
+    public void onCopyMapCode(final Runnable listener) {
+        this.copyMapCodeButton.setOnAction(event -> listener.run());
     }
 
     public void render(final UiState state, final String sinceUpdate, final String elapsed) {
@@ -113,6 +119,7 @@ final class SidebarView extends VBox {
         this.renderStopOrRestartButton(this.state);
         styleActionButton(this.uploadMapCodeButton, this.palette);
         styleActionButton(this.pasteMapCodeButton, this.palette);
+        styleActionButton(this.copyMapCodeButton, this.palette);
     }
 
     private void configureHeader() {
@@ -129,6 +136,7 @@ final class SidebarView extends VBox {
         styleActionButton(this.stopOrRestartButton, this.palette);
         styleActionButton(this.uploadMapCodeButton, this.palette);
         styleActionButton(this.pasteMapCodeButton, this.palette);
+        styleActionButton(this.copyMapCodeButton, this.palette);
 
         final VBox row = new VBox();
         row.setSpacing(PANEL_SPACING_PX);
@@ -136,9 +144,15 @@ final class SidebarView extends VBox {
         this.stopOrRestartButton.setMaxWidth(Double.MAX_VALUE);
         this.uploadMapCodeButton.setMaxWidth(Double.MAX_VALUE);
         this.pasteMapCodeButton.setMaxWidth(Double.MAX_VALUE);
+        this.copyMapCodeButton.setMaxWidth(Double.MAX_VALUE);
         row
             .getChildren()
-            .addAll(this.stopOrRestartButton, this.uploadMapCodeButton, this.pasteMapCodeButton);
+            .addAll(
+                this.stopOrRestartButton,
+                this.uploadMapCodeButton,
+                this.pasteMapCodeButton,
+                this.copyMapCodeButton
+            );
 
         this.getChildren().add(row);
     }
@@ -190,6 +204,7 @@ final class SidebarView extends VBox {
 
     private void renderStopOrRestartButton(final UiState state) {
         this.stopOrRestartButton.setText(state.phase() == UiPhase.SOLVING ? "Stop" : "Restart");
+        this.copyMapCodeButton.setDisable(!state.canCopyMapCode());
 
         final boolean disabled = state.phase() != UiPhase.SOLVING && !state.canRestart();
         this.stopOrRestartButton.setDisable(disabled);

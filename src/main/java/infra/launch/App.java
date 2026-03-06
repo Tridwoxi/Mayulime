@@ -91,10 +91,14 @@ public final class App extends Application {
                 ? UNNAMED_PROBLEM_NAME
                 : puzzle.getName();
             gui.onPuzzleAccepted(
-                problemName,
-                puzzle.getNumRows(),
-                puzzle.getNumCols(),
-                puzzle.getBlockingBudget(),
+                new Puzzle(
+                    problemName,
+                    puzzle.getFeatures(),
+                    puzzle.getNumRows(),
+                    puzzle.getNumCols(),
+                    puzzle.getCheckpoints(),
+                    puzzle.getBlockingBudget()
+                ),
                 epoch
             );
             manager.solve(puzzle);

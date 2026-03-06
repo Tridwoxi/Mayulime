@@ -46,6 +46,10 @@ public final class StatusUpdate {
         return numCols;
     }
 
+    public Feature[] getFeatures() {
+        return grid.clone();
+    }
+
     public Feature getFeature(final int row, final int col) {
         return grid[row * numCols + col];
     }

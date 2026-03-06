@@ -46,5 +46,4 @@ separate coarse cadence. The GUI should not rely on a continuous high-frequency 
 
 ## Future direction
 
-Copying the current state to MapCode would be useful, but it is not currently supported. The
-MapCode should use include player walls. The Pathery Map Editor handles player walls fine.
+Nothing planned.

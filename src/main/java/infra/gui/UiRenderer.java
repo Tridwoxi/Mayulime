@@ -59,6 +59,7 @@ final class UiRenderer {
             state.updateCount(),
             cellSize,
             state.canRestart(),
+            state.canCopyMapCode(),
             state.statusMessage(),
             state.puzzleStartedAtNanos(),
             state.lastUpdateAtNanos(),

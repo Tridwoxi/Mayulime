@@ -30,6 +30,7 @@ final class RootView {
         void onStopOrRestartRequested();
         void onUploadMapCodeRequested();
         void onPasteMapCodeRequested();
+        void onCopyMapCodeRequested();
         void onMapCodeFilesDropped(List<File> files);
     }
 
@@ -83,6 +84,7 @@ final class RootView {
         this.sidebar.onStopOrRestart(intentsToBind::onStopOrRestartRequested);
         this.sidebar.onUploadMapCode(intentsToBind::onUploadMapCodeRequested);
         this.sidebar.onPasteMapCode(intentsToBind::onPasteMapCodeRequested);
+        this.sidebar.onCopyMapCode(intentsToBind::onCopyMapCodeRequested);
         this.configureInteractions();
     }
 

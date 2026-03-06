@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
@@ -37,6 +38,12 @@ final class InputHandler {
             return new RejectedMapCode("Clipboard text is empty.");
         }
         return new AcceptedMapCode(mapCode);
+    }
+
+    boolean copyMapCode(final String mapCode) {
+        final ClipboardContent clipboardContent = new ClipboardContent();
+        clipboardContent.putString(mapCode);
+        return Clipboard.getSystemClipboard().setContent(clipboardContent);
     }
 
     Result loadDroppedFiles(final List<File> files) {

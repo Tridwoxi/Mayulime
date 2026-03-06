@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import think.domain.model.Puzzle;
 import think.manager.StatusUpdate;
 
 public final class Gui extends Scene {
@@ -30,14 +31,8 @@ public final class Gui extends Scene {
         );
     }
 
-    public void onPuzzleAccepted(
-        final String puzzleName,
-        final int numRows,
-        final int numCols,
-        final int wallBudget,
-        final int puzzleEpoch
-    ) {
-        controller.onPuzzleAccepted(puzzleName, numRows, numCols, wallBudget, puzzleEpoch);
+    public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {
+        controller.onPuzzleAccepted(puzzle, puzzleEpoch);
     }
 
     public void onPuzzleRejected(final int puzzleEpoch, final String message) {

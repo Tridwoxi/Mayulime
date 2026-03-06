@@ -3,6 +3,7 @@ package infra.gui;
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -13,6 +14,8 @@ import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.util.Duration;
+import think.domain.codec.Serializer;
+import think.domain.model.Puzzle;
 import think.manager.StatusUpdate;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
@@ -32,8 +35,9 @@ final class UiController {
     private final AtomicBoolean updateFlushScheduled;
 
     private UiState state;
-    private String pendingSubmittedMapCode;
-    private String lastAcceptedMapCode;
+    private Optional<Puzzle> currentPuzzle;
+    private Optional<String> pendingSubmittedMapCode;
+    private Optional<String> lastAcceptedMapCode;
 
     UiController(final Consumer<String> mapCodeConsumer, final Runnable stopConsumer) {
         this.rootView = new RootView();
@@ -45,8 +49,9 @@ final class UiController {
         this.latestPending = new AtomicReference<>(null);
         this.updateFlushScheduled = new AtomicBoolean(false);
         this.state = UiState.initial();
-        this.pendingSubmittedMapCode = null;
-        this.lastAcceptedMapCode = null;
+        this.currentPuzzle = Optional.empty();
+        this.pendingSubmittedMapCode = Optional.empty();
+        this.lastAcceptedMapCode = Optional.empty();
 
         this.rootView.bindIntents(new IntentsBridge());
         this.rootView.onViewportChanged(this::onViewportChanged);
@@ -66,14 +71,8 @@ final class UiController {
         });
     }
 
-    public void onPuzzleAccepted(
-        final String puzzleName,
-        final int rows,
-        final int cols,
-        final int wallBudget,
-        final int puzzleEpoch
-    ) {
-        runOnFxThread(() -> this.acceptPuzzle(puzzleName, rows, cols, wallBudget, puzzleEpoch));
+    public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {
+        runOnFxThread(() -> this.acceptPuzzle(puzzle, puzzleEpoch));
     }
 
     public void onPuzzleRejected(final int puzzleEpoch, final String message) {
@@ -91,31 +90,25 @@ final class UiController {
         }
     }
 
-    private void acceptPuzzle(
-        final String puzzleName,
-        final int rows,
-        final int cols,
-        final int wallBudget,
-        final int puzzleEpoch
-    ) {
+    private void acceptPuzzle(final Puzzle puzzle, final int puzzleEpoch) {
         final long nowNanos = System.nanoTime();
         this.latestPending.set(null);
-        if (this.pendingSubmittedMapCode != null) {
-            this.lastAcceptedMapCode = this.pendingSubmittedMapCode;
-        }
-        this.pendingSubmittedMapCode = null;
+        this.lastAcceptedMapCode = this.pendingSubmittedMapCode;
+        this.pendingSubmittedMapCode = Optional.empty();
+        this.currentPuzzle = Optional.of(puzzle);
         this.state = new UiState(
             UiPhase.SOLVING,
             puzzleEpoch,
-            puzzleName,
-            rows,
-            cols,
-            wallBudget,
+            puzzle.getName(),
+            puzzle.getNumRows(),
+            puzzle.getNumCols(),
+            puzzle.getBlockingBudget(),
             null,
             0,
             0,
             this.state.cellSizePx(),
-            this.lastAcceptedMapCode != null,
+            this.lastAcceptedMapCode.isPresent(),
+            true,
             "Solving: searching for better solutions",
             nowNanos,
             -1L,
@@ -127,7 +120,8 @@ final class UiController {
 
     private void rejectPuzzle(final int puzzleEpoch, final String message) {
         this.latestPending.set(null);
-        this.pendingSubmittedMapCode = null;
+        this.pendingSubmittedMapCode = Optional.empty();
+        this.currentPuzzle = Optional.empty();
         this.state = new UiState(
             UiPhase.REJECTED,
             puzzleEpoch,
@@ -139,7 +133,8 @@ final class UiController {
             0,
             0,
             this.state.cellSizePx(),
-            this.lastAcceptedMapCode != null,
+            this.lastAcceptedMapCode.isPresent(),
+            false,
             message,
             -1L,
             -1L,
@@ -164,7 +159,8 @@ final class UiController {
             this.state.spentWalls(),
             this.state.updateCount(),
             this.state.cellSizePx(),
-            this.lastAcceptedMapCode != null,
+            this.lastAcceptedMapCode.isPresent(),
+            this.currentPuzzle.isPresent(),
             finalStatus,
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
@@ -196,6 +192,7 @@ final class UiController {
                 this.state.updateCount() + 1,
                 this.state.cellSizePx(),
                 this.state.canRestart(),
+                this.state.canCopyMapCode(),
                 String.format(
                     Locale.US,
                     "Solving: current score %d by %s",
@@ -218,7 +215,7 @@ final class UiController {
     }
 
     private void submitMapCode(final String mapCode) {
-        this.pendingSubmittedMapCode = mapCode;
+        this.pendingSubmittedMapCode = Optional.of(mapCode);
         this.mapCodeConsumer.accept(mapCode);
     }
 
@@ -227,9 +224,7 @@ final class UiController {
             this.stopConsumer.run();
             return;
         }
-        if (this.lastAcceptedMapCode != null) {
-            this.mapCodeConsumer.accept(this.lastAcceptedMapCode);
-        }
+        this.lastAcceptedMapCode.ifPresent(this.mapCodeConsumer);
     }
 
     private void requestUploadMapCode() {
@@ -238,6 +233,19 @@ final class UiController {
 
     private void requestPasteMapCode() {
         this.handleMapCodeInput(this.mapCodeInputHandler.loadPastedMapCode());
+    }
+
+    private void requestCopyMapCode() {
+        final Optional<String> mapCode = this.currentMapCode();
+        if (mapCode.isEmpty()) {
+            this.reportMapInputError("No puzzle is loaded.");
+            return;
+        }
+
+        final String message = this.mapCodeInputHandler.copyMapCode(mapCode.orElseThrow())
+            ? "Copied current board state as MapCode."
+            : "Couldn't copy MapCode to clipboard.";
+        this.reportMapInputError(message);
     }
 
     private void handleDroppedFiles(final List<File> files) {
@@ -266,6 +274,7 @@ final class UiController {
             this.state.updateCount(),
             this.state.cellSizePx(),
             this.state.canRestart(),
+            this.state.canCopyMapCode(),
             message,
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
@@ -321,6 +330,15 @@ final class UiController {
         );
     }
 
+    private Optional<String> currentMapCode() {
+        if (this.state.bestUpdate() == null) {
+            return this.currentPuzzle.map(Serializer::serialize);
+        }
+        return this.currentPuzzle.map(puzzle ->
+            Serializer.serialize(puzzle, this.state.bestUpdate().getFeatures())
+        );
+    }
+
     private final class IntentsBridge implements RootView.Intents {
 
         @Override
@@ -336,6 +354,11 @@ final class UiController {
         @Override
         public void onPasteMapCodeRequested() {
             UiController.this.requestPasteMapCode();
+        }
+
+        @Override
+        public void onCopyMapCodeRequested() {
+            UiController.this.requestCopyMapCode();
         }
 
         @Override

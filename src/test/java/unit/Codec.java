@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.codec.Serializer;
+import think.domain.model.Feature;
+import think.domain.model.Puzzle;
 
 public final class Codec {
 
@@ -36,5 +39,33 @@ public final class Codec {
         INVALID.forEach(mapCode ->
             Assertions.assertThrows(BadMapCodeException.class, () -> Parser.parse(mapCode), mapCode)
         );
+    }
+
+    @Test
+    public void serializerRoundTripsPuzzle() throws BadMapCodeException {
+        final Puzzle puzzle = Parser.parse(VALID.get(0));
+
+        final String serialized = Serializer.serialize(puzzle);
+        final Puzzle reparsed = Parser.parse(serialized);
+
+        Assertions.assertEquals(puzzle.getName(), reparsed.getName());
+        Assertions.assertEquals(puzzle.getNumRows(), reparsed.getNumRows());
+        Assertions.assertEquals(puzzle.getNumCols(), reparsed.getNumCols());
+        Assertions.assertEquals(puzzle.getBlockingBudget(), reparsed.getBlockingBudget());
+        Assertions.assertArrayEquals(puzzle.getCheckpoints(), reparsed.getCheckpoints());
+        Assertions.assertArrayEquals(puzzle.getFeatures(), reparsed.getFeatures());
+    }
+
+    @Test
+    public void serializerIncludesPlayerWalls() throws BadMapCodeException {
+        final Puzzle puzzle = Parser.parse("3.3.2.Copy state...:,s1.,f1.");
+        final Feature[] features = puzzle.getFeatures();
+        features[2] = Feature.PLAYER_WALL;
+        features[7] = Feature.PLAYER_WALL;
+
+        final String serialized = Serializer.serialize(puzzle, features);
+
+        Assertions.assertTrue(serialized.contains(",r2."));
+        Assertions.assertTrue(serialized.contains("4,r2."));
     }
 }
