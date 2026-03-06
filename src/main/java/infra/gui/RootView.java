@@ -23,7 +23,6 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import think.manager.StatusUpdate;
@@ -41,11 +40,13 @@ final class RootView {
     private static final double ROOT_SPACING_PX = 18.0;
     private static final double VIEWPORT_MIN_HEIGHT_PX = 280.0;
 
+    private UiPalette palette;
     private final BorderPane root;
     private final SidebarView sidebar;
     private final BoardView board;
     private final ScrollPane viewport;
     private final StackPane boardViewportContent;
+    private final StackPane viewportCard;
 
     private Intents intents;
 
@@ -56,11 +57,13 @@ final class RootView {
     private double dragLastSceneY;
 
     RootView() {
+        this.palette = UiPalette.fromColorScheme(Platform.getPreferences().getColorScheme());
         this.root = new BorderPane();
-        this.sidebar = new SidebarView();
-        this.board = new BoardView();
+        this.sidebar = new SidebarView(this.palette);
+        this.board = new BoardView(this.palette);
         this.boardViewportContent = new StackPane(this.board);
         this.viewport = new ScrollPane(this.boardViewportContent);
+        this.viewportCard = new StackPane(this.viewport);
 
         this.intents = null;
         this.currentRows = 0;
@@ -126,13 +129,41 @@ final class RootView {
         }
     }
 
-    private void configureShell() {
-        this.root.setPadding(new Insets(ROOT_PADDING_PX));
+    public void applyPalette(final UiPalette paletteToApply) {
+        this.palette = paletteToApply;
         this.root.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.BACKGROUND, CornerRadii.EMPTY, Insets.EMPTY)
+                new BackgroundFill(this.palette.background(), CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
+        this.boardViewportContent.setBackground(
+            new Background(
+                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
+            )
+        );
+        this.viewportCard.setBackground(
+            new Background(
+                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
+            )
+        );
+        this.viewportCard.setBorder(
+            new Border(
+                new BorderStroke(
+                    this.palette.outline(),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    BorderWidths.DEFAULT
+                )
+            )
+        );
+        this.viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, this.palette.shadow()));
+        this.sidebar.applyPalette(this.palette);
+        this.board.applyPalette(this.palette);
+    }
+
+    private void configureShell() {
+        this.root.setPadding(new Insets(ROOT_PADDING_PX));
+        this.applyPalette(this.palette);
     }
 
     private void configureViewport() {
@@ -151,12 +182,6 @@ final class RootView {
         this.boardViewportContent.setMinSize(1.0, 1.0);
         this.boardViewportContent.setPrefSize(1.0, 1.0);
         this.boardViewportContent.setAlignment(Pos.CENTER);
-        this.boardViewportContent.setBackground(
-            new Background(
-                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-
         this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
             this.resizeBoardViewportContent(
                 this.currentRows,
@@ -165,27 +190,10 @@ final class RootView {
             );
         });
 
-        final StackPane viewportCard = new StackPane(this.viewport);
-        viewportCard.setPadding(new Insets(16.0));
-        viewportCard.setBackground(
-            new Background(
-                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-        viewportCard.setBorder(
-            new Border(
-                new BorderStroke(
-                    UiPalette.OUTLINE,
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    BorderWidths.DEFAULT
-                )
-            )
-        );
-        viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, Color.color(0.17, 0.29, 0.39, 0.12)));
+        this.viewportCard.setPadding(new Insets(16.0));
 
-        BorderPane.setMargin(viewportCard, new Insets(0.0, ROOT_SPACING_PX, 0.0, 0.0));
-        this.root.setCenter(viewportCard);
+        BorderPane.setMargin(this.viewportCard, new Insets(0.0, ROOT_SPACING_PX, 0.0, 0.0));
+        this.root.setCenter(this.viewportCard);
     }
 
     private void configureSidebar() {

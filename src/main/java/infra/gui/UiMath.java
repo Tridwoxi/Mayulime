@@ -52,10 +52,10 @@ final class UiMath {
         return content;
     }
 
-    static Color cellLabelColor(final Color background) {
+    static Color cellLabelColor(final Color background, final UiPalette palette) {
         if (background.getBrightness() > 0.6) {
-            return UiPalette.BACKGROUND;
+            return palette.background();
         }
-        return UiPalette.FOREGROUND;
+        return palette.foreground();
     }
 }

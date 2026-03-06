@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.ColorScheme;
 import javafx.scene.Parent;
 import javafx.util.Duration;
 import think.manager.StatusUpdate;
@@ -49,6 +50,10 @@ final class UiController {
 
     public Parent getRoot() {
         return this.rootView.getRoot();
+    }
+
+    public void applyColorScheme(final ColorScheme colorScheme) {
+        this.rootView.applyPalette(UiPalette.fromColorScheme(colorScheme));
     }
 
     public void onPuzzleAccepted(

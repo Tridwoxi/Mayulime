@@ -25,34 +25,47 @@ final class SidebarView extends VBox {
     private static final double PANEL_SPACING_PX = 12.0;
     private static final double PANEL_PADDING_PX = 16.0;
 
+    private UiPalette palette;
     private final Text titleText;
     private final Text statusText;
+    private final Text[] sectionTitles;
+    private final Text[] legendTexts;
+    private final Rectangle[] legendSwatches;
 
     private final Button stopOrRestartButton;
     private final Button uploadMapCodeButton;
     private final Button pasteMapCodeButton;
 
+    private final VBox headerGroup;
     private final VBox detailsGroup;
     private final VBox legendGroup;
 
     private final MetricsView metrics;
+    private UiState state;
 
-    SidebarView() {
+    SidebarView(final UiPalette initialPalette) {
+        this.palette = initialPalette;
         this.setSpacing(PANEL_SPACING_PX);
         this.setPadding(new Insets(0.0));
 
         this.titleText = new Text();
         this.statusText = new Text();
+        this.sectionTitles = new Text[2];
+        this.legendTexts = new Text[4];
+        this.legendSwatches = new Rectangle[4];
         this.stopOrRestartButton = new Button("Stop");
         this.uploadMapCodeButton = new Button("Upload MapCode");
         this.pasteMapCodeButton = new Button("Paste MapCode");
+        this.headerGroup = this.panelCard();
         this.detailsGroup = this.panelCard();
         this.legendGroup = this.panelCard();
         this.metrics = new MetricsView();
+        this.state = UiState.initial();
 
         this.configureHeader();
         this.configureButtons();
         this.configurePanels();
+        this.applyPalette(initialPalette);
     }
 
     public void onStopOrRestart(final Runnable listener) {
@@ -73,6 +86,7 @@ final class SidebarView extends VBox {
         final String elapsed,
         final StatusUpdate display
     ) {
+        this.state = state;
         this.titleText.setText(state.puzzleName());
         this.statusText.setText(state.statusMessage());
         this.renderStopOrRestartButton(state);
@@ -88,23 +102,47 @@ final class SidebarView extends VBox {
         );
     }
 
+    public void applyPalette(final UiPalette paletteToApply) {
+        this.palette = paletteToApply;
+        this.titleText.setFill(this.palette.foreground());
+        this.statusText.setFill(this.palette.foreground());
+        for (final Text sectionTitle : this.sectionTitles) {
+            sectionTitle.setFill(this.palette.mutedForeground());
+        }
+        for (final Text legendText : this.legendTexts) {
+            legendText.setFill(this.palette.foreground());
+        }
+        for (int index = 0; index < this.legendSwatches.length; index += 1) {
+            this.legendSwatches[index].setStroke(this.palette.outline());
+        }
+        this.legendSwatches[0].setFill(this.palette.empty());
+        this.legendSwatches[1].setFill(this.palette.checkpoint());
+        this.legendSwatches[2].setFill(this.palette.systemWall());
+        this.legendSwatches[3].setFill(this.palette.playerWall());
+
+        this.applyCardStyle(this.headerGroup);
+        this.applyCardStyle(this.detailsGroup);
+        this.applyCardStyle(this.legendGroup);
+        this.metrics.applyPalette(this.palette);
+        this.renderStopOrRestartButton(this.state);
+        styleActionButton(this.uploadMapCodeButton, this.palette);
+        styleActionButton(this.pasteMapCodeButton, this.palette);
+    }
+
     private void configureHeader() {
-        this.titleText.setFill(UiPalette.FOREGROUND);
         this.titleText.setFont(Font.font(Gui.FONT_NAME, FontWeight.SEMI_BOLD, 27.0));
 
-        this.statusText.setFill(UiPalette.FOREGROUND);
         this.statusText.setWrappingWidth(360.0);
         this.statusText.setFont(Font.font(Gui.FONT_NAME, 13.0));
 
-        final VBox header = this.panelCard();
-        header.getChildren().addAll(this.titleText, this.statusText);
-        this.getChildren().add(header);
+        this.headerGroup.getChildren().addAll(this.titleText, this.statusText);
+        this.getChildren().add(this.headerGroup);
     }
 
     private void configureButtons() {
-        styleActionButton(this.stopOrRestartButton);
-        styleActionButton(this.uploadMapCodeButton);
-        styleActionButton(this.pasteMapCodeButton);
+        styleActionButton(this.stopOrRestartButton, this.palette);
+        styleActionButton(this.uploadMapCodeButton, this.palette);
+        styleActionButton(this.pasteMapCodeButton, this.palette);
 
         final VBox row = new VBox();
         row.setSpacing(PANEL_SPACING_PX);
@@ -120,8 +158,11 @@ final class SidebarView extends VBox {
     }
 
     private void configurePanels() {
-        this.detailsGroup.getChildren().addAll(this.sectionTitle("Statistics"), this.metrics);
-        this.legendGroup.getChildren().addAll(this.sectionTitle("Legend"), this.legendRows());
+        this.sectionTitles[0] = this.sectionTitle("Statistics");
+        this.sectionTitles[1] = this.sectionTitle("Legend");
+
+        this.detailsGroup.getChildren().addAll(this.sectionTitles[0], this.metrics);
+        this.legendGroup.getChildren().addAll(this.sectionTitles[1], this.legendRows());
 
         this.getChildren().addAll(this.detailsGroup, this.legendGroup);
     }
@@ -129,25 +170,22 @@ final class SidebarView extends VBox {
     private VBox legendRows() {
         final VBox box = new VBox();
         box.setSpacing(8.0);
-        box
-            .getChildren()
-            .addAll(
-                this.legendRow(UiPalette.EMPTY, "Empty"),
-                this.legendRow(UiPalette.CHECKPOINT, "Checkpoint"),
-                this.legendRow(UiPalette.SYSTEM_WALL, "System wall"),
-                this.legendRow(UiPalette.PLAYER_WALL, "Player wall")
-            );
+        box.getChildren().addAll(
+            this.legendRow(0, "Empty"),
+            this.legendRow(1, "Checkpoint"),
+            this.legendRow(2, "System wall"),
+            this.legendRow(3, "Player wall")
+        );
         return box;
     }
 
-    private HBox legendRow(final Color color, final String label) {
+    private HBox legendRow(final int index, final String label) {
         final Rectangle swatch = new Rectangle(12.0, 12.0);
-        swatch.setFill(color);
-        swatch.setStroke(UiPalette.OUTLINE);
+        this.legendSwatches[index] = swatch;
 
         final Text text = new Text(label);
-        text.setFill(UiPalette.FOREGROUND);
         text.setFont(Font.font(Gui.FONT_NAME, 13.0));
+        this.legendTexts[index] = text;
 
         final HBox row = new HBox();
         row.setSpacing(10.0);
@@ -158,7 +196,6 @@ final class SidebarView extends VBox {
 
     private Text sectionTitle(final String text) {
         final Text title = new Text(text);
-        title.setFill(UiPalette.MUTED_FOREGROUND);
         title.setFont(Font.font(Gui.FONT_NAME, 12.0));
         return title;
     }
@@ -171,15 +208,17 @@ final class SidebarView extends VBox {
         if (disabled) {
             applyButtonStyle(
                 this.stopOrRestartButton,
-                UiPalette.SURFACE,
-                UiPalette.MUTED_FOREGROUND
+                this.palette,
+                this.palette.surface(),
+                this.palette.mutedForeground()
             );
             return;
         }
         applyButtonStyle(
             this.stopOrRestartButton,
-            UiPalette.SURFACE_VARIANT,
-            UiPalette.FOREGROUND
+            this.palette,
+            this.palette.surfaceVariant(),
+            this.palette.foreground()
         );
     }
 
@@ -187,30 +226,34 @@ final class SidebarView extends VBox {
         final VBox card = new VBox();
         card.setSpacing(PANEL_SPACING_PX);
         card.setPadding(new Insets(PANEL_PADDING_PX));
+        return card;
+    }
+
+    private void applyCardStyle(final VBox card) {
         card.setBackground(
             new Background(
-                new BackgroundFill(UiPalette.SURFACE, CornerRadii.EMPTY, Insets.EMPTY)
+                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
             )
         );
         card.setBorder(
             new Border(
                 new BorderStroke(
-                    UiPalette.OUTLINE,
+                    this.palette.outline(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
                 )
             )
         );
-        return card;
     }
 
-    private static void styleActionButton(final Button button) {
-        applyButtonStyle(button, UiPalette.SURFACE_VARIANT, UiPalette.FOREGROUND);
+    private static void styleActionButton(final Button button, final UiPalette palette) {
+        applyButtonStyle(button, palette, palette.surfaceVariant(), palette.foreground());
     }
 
     private static void applyButtonStyle(
         final Button button,
+        final UiPalette palette,
         final Color backgroundColor,
         final Color textColor
     ) {
@@ -225,7 +268,7 @@ final class SidebarView extends VBox {
         button.setBorder(
             new Border(
                 new BorderStroke(
-                    UiPalette.OUTLINE,
+                    palette.outline(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     BorderWidths.DEFAULT
