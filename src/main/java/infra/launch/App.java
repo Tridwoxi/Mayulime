@@ -17,7 +17,6 @@ import think.manager.StatusUpdate;
  */
 public final class App extends Application {
 
-    private static final String NAME = "Mayulime";
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final String BAD_MAP_MESSAGE =
         "Unable to parse that file as supported Pathery MapCode.";
@@ -53,7 +52,6 @@ public final class App extends Application {
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
 
         primaryStage.setScene(gui);
-        primaryStage.setTitle(NAME);
         primaryStage.setMinWidth(MIN_WIDTH_PX);
         primaryStage.setMinHeight(MIN_HEIGHT_PX);
         primaryStage.setWidth(DEFAULT_WIDTH_PX);
