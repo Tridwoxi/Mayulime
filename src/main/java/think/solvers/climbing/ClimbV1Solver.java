@@ -6,13 +6,26 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 
+/**
+    Basic random restart hill climber. The tactics used here should be common to all hill climbers:
+
+    <ul>
+        <li>Seed the board with a varying number of walls.
+        <li>Improve score by placing or moving a single wall.
+    </ul>
+
+    @implNote
+        This class is final and future versions should just copy and paste the whole thing because
+        they are expected to evolve independently. This class should be deleted once it is
+        sufficiently dominated by its successors.
+ */
 public final class ClimbV1Solver extends Solver {
 
-    private final int[] initiallyBlank;
+    private final int[] initiallyBlankCells;
 
     public ClimbV1Solver(final ProposedSolution listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.initiallyBlank = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
+        this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
     }
 
     @Override
@@ -28,7 +41,7 @@ public final class ClimbV1Solver extends Solver {
         final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
         final int[] scoreBox = new int[] { StandardEvaluator.evaluate(getPuzzle(), features) };
 
-        while (true) {
+        for (;;) {
             final int[] blankCells = getCellsWhere(features, Feature.BLANK);
             final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
@@ -45,12 +58,12 @@ public final class ClimbV1Solver extends Solver {
     }
 
     private int seed(final Feature[] features) {
-        IntArrays.shuffleInPlace(initiallyBlank);
+        IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
-            features[initiallyBlank[placement]] = Feature.PLAYER_WALL;
+            features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
             if (StandardEvaluator.evaluate(getPuzzle(), features) < 0) {
-                features[initiallyBlank[placement]] = Feature.BLANK;
+                features[initiallyBlankCells[placement]] = Feature.BLANK;
                 return placement;
             }
         }
