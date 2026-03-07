@@ -45,6 +45,14 @@ tasks.named('run') {
     jvmArgs '-ea'
 }
 
+tasks.register('bench', JavaExec) {
+    group = 'application'
+    dependsOn 'classes', 'checkstyleMain', 'spotbugsMain'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'infra.launch.Bench'
+    jvmArgs '-ea'
+}
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     jvmArgs '-ea'
