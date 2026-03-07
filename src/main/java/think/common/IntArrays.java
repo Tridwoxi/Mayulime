@@ -1,10 +1,22 @@
 package think.common;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntPredicate;
 
 public final class IntArrays {
 
     private IntArrays() {}
+
+    public static int[] ofRange(final int startInclusive, final int endExclusive) {
+        if (startInclusive >= endExclusive) {
+            throw new IllegalArgumentException();
+        }
+        final int[] range = new int[endExclusive - startInclusive];
+        for (int index = 0; index < range.length; index += 1) {
+            range[index] = startInclusive + index;
+        }
+        return range;
+    }
 
     public static void shuffleInPlace(final int[] array) {
         // Reference: https://en.wikipedia.org/wiki/Fisher–Yates_shuffle
@@ -25,11 +37,11 @@ public final class IntArrays {
         return trimmed;
     }
 
-    public static int[] filteredCopy(final int[] array, final int excludedValue) {
+    public static int[] filteredCopy(final int[] array, final IntPredicate keepIff) {
         final int[] filtered = new int[array.length];
         int count = 0;
         for (final int value : array) {
-            if (value != excludedValue) {
+            if (keepIff.test(value)) {
                 filtered[count] = value;
                 count += 1;
             }

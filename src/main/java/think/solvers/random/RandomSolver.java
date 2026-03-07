@@ -40,10 +40,7 @@ public final class RandomSolver extends Solver {
     }
 
     private static int[] getEmptyCellIndices(final Feature[] features) {
-        final int[] emptyCellIndices = new int[features.length];
-        for (int index = 0; index < features.length; index += 1) {
-            emptyCellIndices[index] = features[index] == Feature.BLANK ? index : -1;
-        }
-        return IntArrays.filteredCopy(emptyCellIndices, -1);
+        final int[] allCellIndices = IntArrays.ofRange(0, features.length);
+        return IntArrays.filteredCopy(allCellIndices, index -> features[index] == Feature.BLANK);
     }
 }
