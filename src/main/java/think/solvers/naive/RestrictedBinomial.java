@@ -1,4 +1,4 @@
-package think.solvers.random;
+package think.solvers.naive;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -7,18 +7,18 @@ import java.util.concurrent.ThreadLocalRandom;
     Sample {@code element} from range {@code 0} (inclusive) to {@code limit} (inclusive) with weight
     {@code population choose element}. This implementation is approximate.
  */
-public final class RestrictedBinomial {
+final class RestrictedBinomial {
 
     private final double[] cumulativeDistribution;
 
-    public RestrictedBinomial(final int population, final int limit) {
+    RestrictedBinomial(final int population, final int limit) {
         if (population < limit) {
             throw new IllegalArgumentException();
         }
         this.cumulativeDistribution = build(population, limit);
     }
 
-    public int sample() {
+    int sample() {
         if (cumulativeDistribution.length == 0) {
             return 0;
         }

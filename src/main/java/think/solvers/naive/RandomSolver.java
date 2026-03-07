@@ -1,4 +1,4 @@
-package think.solvers.random;
+package think.solvers.naive;
 
 import java.util.function.IntPredicate;
 import think.common.IntArrays;

@@ -1,4 +1,4 @@
-package think.solvers.baseline;
+package think.solvers.naive;
 
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
