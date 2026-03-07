@@ -1,5 +1,6 @@
 package think.solvers.random;
 
+import java.util.function.IntPredicate;
 import think.common.IntArrays;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
@@ -7,14 +8,14 @@ import think.solvers.Solver;
 
 public final class RandomSolver extends Solver {
 
-    private final int[] emptyCellIndices;
+    private final int[] blankCellIndices;
     private final RestrictedBinomial wallDistribution;
 
     public RandomSolver(final ProposedSolution listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.emptyCellIndices = getEmptyCellIndices(puzzle.getFeatures());
+        this.blankCellIndices = getBlankCellIndices(puzzle.getFeatures());
         this.wallDistribution = new RestrictedBinomial(
-            emptyCellIndices.length,
+            blankCellIndices.length,
             puzzle.getBlockingBudget()
         );
     }
@@ -29,18 +30,18 @@ public final class RandomSolver extends Solver {
 
     private Feature[] generateRandomSolution() {
         final Feature[] grid = getPuzzle().getFeatures();
-        IntArrays.shuffleInPlace(emptyCellIndices);
+        IntArrays.shuffleInPlace(blankCellIndices);
 
         final int numWalls = wallDistribution.sample();
         for (int placement = 0; placement < numWalls; placement += 1) {
-            final int cell = emptyCellIndices[placement];
+            final int cell = blankCellIndices[placement];
             grid[cell] = Feature.PLAYER_WALL;
         }
         return grid;
     }
 
-    private static int[] getEmptyCellIndices(final Feature[] features) {
-        final int[] allCellIndices = IntArrays.ofRange(0, features.length);
-        return IntArrays.filteredCopy(allCellIndices, index -> features[index] == Feature.BLANK);
+    private static int[] getBlankCellIndices(final Feature[] features) {
+        final IntPredicate isBlank = index -> features[index] == Feature.BLANK;
+        return IntArrays.ofRangeWhere(0, features.length, isBlank);
     }
 }

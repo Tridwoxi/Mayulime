@@ -18,6 +18,26 @@ public final class IntArrays {
         return range;
     }
 
+    public static int[] ofRangeWhere(
+        final int startInclusive,
+        final int endExclusive,
+        final IntPredicate keepIff
+    ) {
+        if (startInclusive >= endExclusive) {
+            throw new IllegalArgumentException();
+        }
+        final int[] filtered = new int[endExclusive - startInclusive];
+        int count = 0;
+        for (int index = 0; index < filtered.length; index += 1) {
+            final int value = startInclusive + index;
+            if (keepIff.test(value)) {
+                filtered[count] = value;
+                count += 1;
+            }
+        }
+        return trimmedCopy(filtered, count);
+    }
+
     public static void shuffleInPlace(final int[] array) {
         // Reference: https://en.wikipedia.org/wiki/Fisher–Yates_shuffle
         for (int i = array.length - 1; i > 0; i--) {
