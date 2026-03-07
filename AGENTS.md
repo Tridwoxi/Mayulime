@@ -24,7 +24,7 @@ Application packages are in `src/main/java/`:
 
 `infra.gui` - JavaFX GUI.
 `infra.launch` - Application launch point.
-`infra.output` - Text-based IO.
+`infra.output` - Logging.
 
 `think.common` - Shared backend classes.
 `think.domain` - Problem model and codec.
@@ -41,10 +41,11 @@ Test packages are in `src/test/java/`:
 Use descriptive variable names. Abbreviation is acceptable when meaning is clear. Avoid one letter
 variable names.
 
-Null pointers may be produced and checked for, but `null` is never accepted or passed by any
-subroutine defined in this project.
+Repo code may receive `null` from library code, pass `null` to library code, and use `null` for
+private implementation details. Repo subroutines must never accept `null`, return `null`, or let
+`null` escape into other repo code. Hence there is no need to check for `null` in repo code.
 
 If an interface already exists, accept and return that interface rather than the implementation. If
-no interface exists, just use the implementation.
+no interface already exists, just use the implementation.
 
 Extending or implementing custom classes and interfaces is discouraged beyond one layer deep.
