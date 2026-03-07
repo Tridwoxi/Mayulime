@@ -6,19 +6,6 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 
-/**
-    Basic random restart hill climber. The tactics used here should be common to all hill climbers:
-
-    <ul>
-        <li>Seed the board with a varying number of walls.
-        <li>Improve score by placing or moving a single wall.
-    </ul>
-
-    @implNote
-        This class is final and future versions should just copy and paste the whole thing because
-        they are expected to evolve independently. This class should be deleted once it is
-        sufficiently dominated by its successors.
- */
 public final class ClimbV1Solver extends Solver {
 
     private final int[] initiallyBlankCells;
