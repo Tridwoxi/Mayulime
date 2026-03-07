@@ -47,16 +47,14 @@ public final class ClimbV1Solver extends Solver {
     private int seed(final Feature[] features) {
         IntArrays.shuffleInPlace(initiallyBlank);
         final int budget = getPuzzle().getBlockingBudget();
-        int placed = 0;
         for (int placement = 0; placement < budget; placement += 1) {
             features[initiallyBlank[placement]] = Feature.PLAYER_WALL;
             if (StandardEvaluator.evaluate(getPuzzle(), features) < 0) {
                 features[initiallyBlank[placement]] = Feature.BLANK;
-                placed = placement;
-                break;
+                return placement;
             }
         }
-        return placed;
+        return budget;
     }
 
     private boolean placeMoreWalls(
