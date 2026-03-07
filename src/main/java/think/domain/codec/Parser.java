@@ -1,6 +1,7 @@
 package think.domain.codec;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
@@ -32,19 +33,27 @@ import think.domain.model.Puzzle;
 
     This parser also enforces semantic correctness: features stay within bounds, checkpoints must
     have unique orders, and blocking budget cannot exceed blank cells. Pathery supports variants
-    with multiple starts / finishes / checkpoints, but we do not yet. Player walls are not
-    supported because they are part of solutions, not problem specifications.
+    with multiple starts / finishes / checkpoints, but we do not yet. Player walls are silently
+    converted to system walls and deducted from the blocking budget. Doing so enables the user to
+    copy a partially solved puzzle and send it back to this system but with walls locked in place.
  */
 public final class Parser {
 
     public static final class BadMapCodeException extends Exception {}
 
-    private record MazeData(Feature[] features, int[] checkpoints, int numBlankCells) {}
+    private record MazeData(
+        Feature[] features,
+        int[] checkpoints,
+        int numBlankCells,
+        int consumedBudget
+    ) {}
 
     private static final Pattern REGION_DELIM_RE = Pattern.compile(":");
     private static final Pattern TOKEN_DELIM_RE = Pattern.compile("\\.");
     private static final int EXPECTED_REGIONS_SIZE = 2;
     private static final int EXPECTED_METADATA_SIZE = 7;
+    private static final List<Integer> SYSTEM_WALL_ORDERS = List.of(1, 3);
+    private static final List<Integer> PLAYER_WALL_ORDERS = List.of(2);
 
     private Parser() {}
 
@@ -62,8 +71,9 @@ public final class Parser {
         ParserSafety.multiply(numRows, numCols);
 
         final MazeData mazeData = parseMaze(regions[1], numRows, numCols);
-        final int clampedBudget = Math.min(blockingBudget, mazeData.numBlankCells());
-
+        final int remainingBudget = blockingBudget - mazeData.consumedBudget();
+        final int clampedBudget = Math.min(remainingBudget, mazeData.numBlankCells());
+        ParserSafety.require(clampedBudget >= 0);
         return new Puzzle(
             puzzleName,
             mazeData.features(),
@@ -84,6 +94,7 @@ public final class Parser {
         Arrays.fill(grid, Feature.BLANK);
         final ParserCheckpoints checkpoints = new ParserCheckpoints();
 
+        int consumedBudget = 0;
         int traversingIndex = 0;
         for (int index = 0; index < tokens.length - 1; index += 1) {
             final ParserToken token = ParserToken.parse(tokens[index]);
@@ -92,8 +103,11 @@ public final class Parser {
 
             switch (token.kind()) {
                 case WALL -> {
-                    if (token.order() == 1 || token.order() == 3) {
+                    if (SYSTEM_WALL_ORDERS.contains(token.order())) {
                         grid[featureIndex] = Feature.SYSTEM_WALL;
+                    } else if (PLAYER_WALL_ORDERS.contains(token.order())) {
+                        grid[featureIndex] = Feature.SYSTEM_WALL;
+                        consumedBudget += 1;
                     } else {
                         throw new BadMapCodeException();
                     }
@@ -123,7 +137,6 @@ public final class Parser {
                 numBlankCells += 1;
             }
         }
-
-        return new MazeData(grid, orderedCheckpoints, numBlankCells);
+        return new MazeData(grid, orderedCheckpoints, numBlankCells, consumedBudget);
     }
 }
