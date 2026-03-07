@@ -11,7 +11,7 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.baseline.BaselineSolver;
-import think.solvers.climbing.ClimbV1Solver;
+import think.solvers.local.ClimbV1Solver;
 import think.solvers.random.RandomSolver;
 
 /**

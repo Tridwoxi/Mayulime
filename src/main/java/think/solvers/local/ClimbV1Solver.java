@@ -1,4 +1,4 @@
-package think.solvers.climbing;
+package think.solvers.local;
 
 import think.common.IntArrays;
 import think.common.StandardEvaluator;
