@@ -3,10 +3,11 @@ package think.common;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -20,36 +21,35 @@ import java.util.Set;
 
     This implementation is HashMap-backed. Its operations have theoretically optimal time
     complexity in exchange for poor constant factor performance. If different implementations are
-    desired, you may find the Graph interface (look for it in git history) useful.
+    desired, you may find reviving the Graph interface (look for it in git history) useful.
  */
 public final class HashGraph<K, V, E> {
 
     private final Map<K, Map<K, E>> children;
     private final Map<K, Map<K, E>> parents;
     private final Map<K, V> values;
-    private final Map<K, Map<K, E>> either; // Alias, for when either map would do.
 
     public HashGraph(final int expectedSize) {
         this.children = HashMap.newHashMap(expectedSize);
         this.parents = HashMap.newHashMap(expectedSize);
         this.values = HashMap.newHashMap(expectedSize);
-        this.either = this.children;
     }
 
     public HashGraph(final HashGraph<K, V, E> other) {
         this(other.getNumVertices());
-        for (final K vertexKey : other.getAllVertexKeys()) {
-            putVertex(vertexKey, other.getVertexValue(vertexKey));
-            for (final K destinationKey : other.getChildren(vertexKey)) {
-                putEdge(vertexKey, destinationKey, other.getEdge(vertexKey, destinationKey));
-            }
+        for (final Entry<K, Map<K, E>> entry : other.children.entrySet()) {
+            this.children.put(entry.getKey(), new HashMap<>(entry.getValue()));
         }
+        for (final Entry<K, Map<K, E>> entry : other.parents.entrySet()) {
+            this.parents.put(entry.getKey(), new HashMap<>(entry.getValue()));
+        }
+        this.values.putAll(other.values);
     }
 
     // == Querying. ==
 
     public boolean containsVertexKey(final K vertexKey) {
-        return either.containsKey(vertexKey);
+        return children.containsKey(vertexKey);
     }
 
     public V getVertexValue(final K vertexKey) {
@@ -58,60 +58,66 @@ public final class HashGraph<K, V, E> {
     }
 
     public boolean containsEdge(final K sourceKey, final K destinationKey) {
-        throwIfNotContains(sourceKey);
         throwIfNotContains(destinationKey);
-        return children.get(sourceKey).containsKey(destinationKey);
+        return getConnections(children, sourceKey).containsKey(destinationKey);
     }
 
     public E getEdge(final K sourceKey, final K destinationKey) {
-        throwIfNotContains(sourceKey);
         throwIfNotContains(destinationKey);
-        if (!children.get(sourceKey).containsKey(destinationKey)) {
+        final Map<K, E> sourceChildren = getConnections(children, sourceKey);
+        final E edge = sourceChildren.get(destinationKey);
+        if (edge == null && !sourceChildren.containsKey(destinationKey)) {
             throw new NoSuchElementException();
         }
-        return children.get(sourceKey).get(destinationKey);
+        return edge;
     }
 
     public Set<K> getChildren(final K parentKey) {
-        throwIfNotContains(parentKey);
-        return new HashSet<>(children.get(parentKey).keySet());
+        return new HashSet<>(getConnections(children, parentKey).keySet());
     }
 
     public Set<K> getParents(final K childKey) {
-        throwIfNotContains(childKey);
-        return new HashSet<>(parents.get(childKey).keySet());
+        return new HashSet<>(getConnections(parents, childKey).keySet());
     }
 
     public Set<K> getAllVertexKeys() {
-        return new HashSet<>(either.keySet());
+        return new HashSet<>(children.keySet());
     }
 
     public int getNumVertices() {
-        return either.size();
+        return children.size();
     }
 
     // == Mutation. ==
 
     public boolean putVertex(final K vertexKey, final V vertexValue) {
-        if (!containsVertexKey(vertexKey)) {
-            children.put(vertexKey, new LinkedHashMap<>());
-            parents.put(vertexKey, new LinkedHashMap<>());
+        final boolean hadVertex = children.containsKey(vertexKey);
+        if (!hadVertex) {
+            children.put(vertexKey, new HashMap<>());
+            parents.put(vertexKey, new HashMap<>());
         }
-        if (values.get(vertexKey) == null || !values.get(vertexKey).equals(vertexValue)) {
-            values.put(vertexKey, vertexValue);
-            return true;
+        final V previousValue = values.get(vertexKey);
+        if (hadVertex && Objects.equals(previousValue, vertexValue)) {
+            return false;
         }
-        return false;
+        values.put(vertexKey, vertexValue);
+        return true;
     }
 
     public boolean removeVertex(final K vertexKey) {
-        if (!containsVertexKey(vertexKey)) {
+        final Map<K, E> vertexChildren = children.get(vertexKey);
+        if (vertexChildren == null) {
             return false;
         }
-        final List<K> childrenCopy = new ArrayList<>(children.get(vertexKey).keySet());
-        final List<K> parentsCopy = new ArrayList<>(parents.get(vertexKey).keySet());
-        childrenCopy.forEach(other -> parents.get(other).remove(vertexKey));
-        parentsCopy.forEach(other -> children.get(other).remove(vertexKey));
+        final Map<K, E> vertexParents = parents.get(vertexKey);
+        final List<K> childrenCopy = new ArrayList<>(vertexChildren.keySet());
+        final List<K> parentsCopy = new ArrayList<>(vertexParents.keySet());
+        for (final K childKey : childrenCopy) {
+            parents.get(childKey).remove(vertexKey);
+        }
+        for (final K parentKey : parentsCopy) {
+            children.get(parentKey).remove(vertexKey);
+        }
         children.remove(vertexKey);
         parents.remove(vertexKey);
         values.remove(vertexKey);
@@ -119,26 +125,24 @@ public final class HashGraph<K, V, E> {
     }
 
     public boolean putEdge(final K sourceKey, final K destinationKey, final E edge) {
-        throwIfNotContains(sourceKey);
         throwIfNotContains(destinationKey);
-        if (
-            children.get(sourceKey).containsKey(destinationKey) &&
-            edge.equals(children.get(sourceKey).get(destinationKey))
-        ) {
+        final Map<K, E> sourceChildren = getConnections(children, sourceKey);
+        final E previousEdge = sourceChildren.get(destinationKey);
+        if (sourceChildren.containsKey(destinationKey) && Objects.equals(previousEdge, edge)) {
             return false;
         }
-        children.get(sourceKey).put(destinationKey, edge);
+        sourceChildren.put(destinationKey, edge);
         parents.get(destinationKey).put(sourceKey, edge);
         return true;
     }
 
     public boolean removeEdge(final K sourceKey, final K destinationKey) {
-        throwIfNotContains(sourceKey);
         throwIfNotContains(destinationKey);
-        if (!children.get(sourceKey).containsKey(destinationKey)) {
+        final Map<K, E> sourceChildren = getConnections(children, sourceKey);
+        if (!sourceChildren.containsKey(destinationKey)) {
             return false;
         }
-        children.get(sourceKey).remove(destinationKey);
+        sourceChildren.remove(destinationKey);
         parents.get(destinationKey).remove(sourceKey);
         return true;
     }
@@ -146,8 +150,16 @@ public final class HashGraph<K, V, E> {
     // == Helpers. ==
 
     private void throwIfNotContains(final K vertexKey) {
-        if (!containsVertexKey(vertexKey)) {
+        if (!children.containsKey(vertexKey)) {
             throw new NoSuchElementException();
         }
+    }
+
+    private Map<K, E> getConnections(final Map<K, Map<K, E>> direction, final K vertexKey) {
+        final Map<K, E> connections = direction.get(vertexKey);
+        if (connections == null) {
+            throw new NoSuchElementException();
+        }
+        return connections;
     }
 }
