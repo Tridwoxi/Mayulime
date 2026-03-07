@@ -47,6 +47,7 @@ public final class StandardEvaluator {
         final int start,
         final int finish
     ) {
+        // PERF: VisualVM says this method takes up about 99% of thread runtime for ClimbV1Solver.
         if (features[start].isBlocked() || features[finish].isBlocked()) {
             return NO_PATH_EXISTS;
         }
@@ -70,6 +71,8 @@ public final class StandardEvaluator {
             final int nextLeft = current - 1;
             final int nextDistance = currentDistance + 1;
 
+            // "If passable and unseen" is 3-15% faster than "If unseen and passable" according to
+            // benchmark of RandomSolver on 10 maps and ~200 trials each.
             if (currentRow > 0 && features[nextUp].isPassable() && distances[nextUp] < 0) {
                 if (nextUp == finish) {
                     return nextDistance;
