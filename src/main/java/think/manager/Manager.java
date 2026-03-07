@@ -10,9 +10,6 @@ import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
-import think.solvers.local.ClimbV1Solver;
-import think.solvers.naive.BaselineSolver;
-import think.solvers.naive.RandomSolver;
 
 /**
     Solver orchestration and lifecycle management. Supports concurrency.
@@ -44,13 +41,13 @@ public final class Manager {
     public void solve(final Puzzle puzzle) {
         stop();
         current = puzzle;
-        final Consumer<Solver> run = solver -> {
+        // Manager can be made stronger by making 1 BaselineSolver then spamming whatever the best
+        // solver is until the user's computer runs out of threads. But this is fine for now.
+        final SolverFactory factory = new SolverFactory(this::consider, puzzle);
+        for (final Solver solver : factory.createOneOfEach()) {
             solvers.add(solver);
             executor.execute(solver);
-        };
-        run.accept(new BaselineSolver(this::consider, puzzle));
-        run.accept(new RandomSolver(this::consider, puzzle));
-        run.accept(new ClimbV1Solver(this::consider, puzzle));
+        }
     }
 
     public void stop() {
