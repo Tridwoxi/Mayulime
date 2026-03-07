@@ -11,7 +11,7 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.baseline.BaselineSolver;
-import think.solvers.climbing.BlueberrySolver;
+import think.solvers.climbing.ClimbV1Solver;
 import think.solvers.random.RandomSolver;
 
 /**
@@ -50,7 +50,7 @@ public final class Manager {
         };
         run.accept(new BaselineSolver(this::consider, puzzle));
         run.accept(new RandomSolver(this::consider, puzzle));
-        run.accept(new BlueberrySolver(this::consider, puzzle));
+        run.accept(new ClimbV1Solver(this::consider, puzzle));
     }
 
     public void stop() {
