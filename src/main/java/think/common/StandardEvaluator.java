@@ -6,12 +6,12 @@ import think.domain.model.Puzzle;
 
 /**
     Simple stateless reference evaluator implementation. Computes sum of pairwise distances between
-    checkpoints, or any negative number if no path exists. Solvers are encouraged to write their own
-    specialized implementations, but may use this one if it is good enough.
+    checkpoints, or -1 if no path exists. Solvers are encouraged to write their own specialized
+    implementations, but may use this one if it is good enough.
  */
 public final class StandardEvaluator {
 
-    private static final int UNREACHABLE = -1;
+    private static final int NO_PATH_EXISTS = -1;
 
     private StandardEvaluator() {}
 
@@ -32,8 +32,8 @@ public final class StandardEvaluator {
                 checkpoints[start],
                 checkpoints[start + 1]
             );
-            if (segmentDistance < 0) {
-                return UNREACHABLE;
+            if (segmentDistance == NO_PATH_EXISTS) {
+                return NO_PATH_EXISTS;
             }
             score += segmentDistance;
         }
@@ -48,12 +48,12 @@ public final class StandardEvaluator {
         final int finish
     ) {
         if (features[start].isBlocked() || features[finish].isBlocked()) {
-            return UNREACHABLE;
+            return NO_PATH_EXISTS;
         }
 
         final int[] distances = new int[features.length];
         final IntDeque frontier = new IntDeque(distances.length);
-        Arrays.fill(distances, UNREACHABLE);
+        Arrays.fill(distances, -1);
         distances[start] = 0;
         frontier.addLast(start);
 
@@ -107,6 +107,6 @@ public final class StandardEvaluator {
                 distances[nextLeft] = nextDistance;
             }
         }
-        return UNREACHABLE;
+        return NO_PATH_EXISTS;
     }
 }

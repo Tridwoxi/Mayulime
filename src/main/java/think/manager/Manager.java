@@ -18,6 +18,7 @@ import think.solvers.random.RandomSolver;
  */
 public final class Manager {
 
+    private static final int UNSCORED = Integer.MIN_VALUE;
     private final Consumer<StatusUpdate> listener;
     private final Executor executor;
     private final List<Solver> solvers;
@@ -36,7 +37,7 @@ public final class Manager {
         });
         this.solvers = new ArrayList<>();
         this.current = null;
-        this.topScore = 0;
+        this.topScore = UNSCORED;
     }
 
     public void solve(final Puzzle puzzle) {
@@ -54,7 +55,7 @@ public final class Manager {
         current = null;
         solvers.forEach(Solver::requestTermination);
         solvers.clear();
-        topScore = 0;
+        topScore = UNSCORED;
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
@@ -69,10 +70,13 @@ public final class Manager {
             throw new IllegalArgumentException();
         }
         final int score = StandardEvaluator.evaluate(puzzle, features);
+        if (score == UNSCORED) {
+            throw new IllegalStateException();
+        }
         // We also check if the score is better in the synchronized section, but as solvers might
         // give this method lots of garbage, if we can early exit without competing for the lock,
         // it would be nice to. Same trick is used for the puzzle.
-        if (score <= topScore) {
+        if (score <= topScore && topScore != UNSCORED) {
             return;
         }
         synchronized (this) {
@@ -80,7 +84,7 @@ public final class Manager {
                 Logging.warning("Guard tripped (2).");
                 return;
             }
-            if (score > topScore) {
+            if (score > topScore || topScore == UNSCORED) {
                 Logging.info(
                     "Score %d -> %d on %s by %s from %s",
                     topScore,
