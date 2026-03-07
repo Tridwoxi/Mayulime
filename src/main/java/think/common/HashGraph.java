@@ -1,8 +1,8 @@
 package think.common;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +19,9 @@ import java.util.Set;
     V)}, {@link #removeVertex(V)} throw a {@link NoSuchElementException} if the key is not
     contained in this graph.
 
+    Set-returning query methods expose unmodifiable live views rather than defensive copies because
+    it is more performant. This means callers may need to copy the returned sets.
+
     This implementation is HashMap-backed. Its operations have theoretically optimal time
     complexity in exchange for poor constant factor performance. If different implementations are
     desired, you may find reviving the Graph interface (look for it in git history) useful.
@@ -27,21 +30,34 @@ public final class HashGraph<K, V, E> {
 
     private final Map<K, Map<K, E>> children;
     private final Map<K, Map<K, E>> parents;
+    private final Map<K, Set<K>> childKeyViews;
+    private final Map<K, Set<K>> parentKeyViews;
     private final Map<K, V> values;
+    private final Set<K> allVertexKeysView;
 
     public HashGraph(final int expectedSize) {
         this.children = HashMap.newHashMap(expectedSize);
         this.parents = HashMap.newHashMap(expectedSize);
+        this.childKeyViews = HashMap.newHashMap(expectedSize);
+        this.parentKeyViews = HashMap.newHashMap(expectedSize);
         this.values = HashMap.newHashMap(expectedSize);
+        this.allVertexKeysView = Collections.unmodifiableSet(this.children.keySet());
     }
 
     public HashGraph(final HashGraph<K, V, E> other) {
         this(other.getNumVertices());
         for (final Entry<K, Map<K, E>> entry : other.children.entrySet()) {
-            this.children.put(entry.getKey(), new HashMap<>(entry.getValue()));
+            final Map<K, E> childMap = new HashMap<>(entry.getValue());
+            this.children.put(entry.getKey(), childMap);
+            this.childKeyViews.put(entry.getKey(), Collections.unmodifiableSet(childMap.keySet()));
         }
         for (final Entry<K, Map<K, E>> entry : other.parents.entrySet()) {
-            this.parents.put(entry.getKey(), new HashMap<>(entry.getValue()));
+            final Map<K, E> parentMap = new HashMap<>(entry.getValue());
+            this.parents.put(entry.getKey(), parentMap);
+            this.parentKeyViews.put(
+                entry.getKey(),
+                Collections.unmodifiableSet(parentMap.keySet())
+            );
         }
         this.values.putAll(other.values);
     }
@@ -73,15 +89,15 @@ public final class HashGraph<K, V, E> {
     }
 
     public Set<K> getChildren(final K parentKey) {
-        return new HashSet<>(getConnections(children, parentKey).keySet());
+        return getKeyView(childKeyViews, parentKey);
     }
 
     public Set<K> getParents(final K childKey) {
-        return new HashSet<>(getConnections(parents, childKey).keySet());
+        return getKeyView(parentKeyViews, childKey);
     }
 
     public Set<K> getAllVertexKeys() {
-        return new HashSet<>(children.keySet());
+        return allVertexKeysView;
     }
 
     public int getNumVertices() {
@@ -93,8 +109,12 @@ public final class HashGraph<K, V, E> {
     public boolean putVertex(final K vertexKey, final V vertexValue) {
         final boolean hadVertex = children.containsKey(vertexKey);
         if (!hadVertex) {
-            children.put(vertexKey, new HashMap<>());
-            parents.put(vertexKey, new HashMap<>());
+            final Map<K, E> childMap = new HashMap<>();
+            final Map<K, E> parentMap = new HashMap<>();
+            children.put(vertexKey, childMap);
+            parents.put(vertexKey, parentMap);
+            childKeyViews.put(vertexKey, Collections.unmodifiableSet(childMap.keySet()));
+            parentKeyViews.put(vertexKey, Collections.unmodifiableSet(parentMap.keySet()));
         }
         final V previousValue = values.get(vertexKey);
         if (hadVertex && Objects.equals(previousValue, vertexValue)) {
@@ -120,6 +140,8 @@ public final class HashGraph<K, V, E> {
         }
         children.remove(vertexKey);
         parents.remove(vertexKey);
+        childKeyViews.remove(vertexKey);
+        parentKeyViews.remove(vertexKey);
         values.remove(vertexKey);
         return true;
     }
@@ -157,6 +179,14 @@ public final class HashGraph<K, V, E> {
 
     private Map<K, E> getConnections(final Map<K, Map<K, E>> direction, final K vertexKey) {
         final Map<K, E> connections = direction.get(vertexKey);
+        if (connections == null) {
+            throw new NoSuchElementException();
+        }
+        return connections;
+    }
+
+    private Set<K> getKeyView(final Map<K, Set<K>> direction, final K vertexKey) {
+        final Set<K> connections = direction.get(vertexKey);
         if (connections == null) {
             throw new NoSuchElementException();
         }
