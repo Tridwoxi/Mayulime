@@ -59,7 +59,7 @@ public final class App extends Application {
         primaryStage.show();
     }
 
-    // == Connectors. =============================================================================
+    // == Connectors. ==
 
     private void receiveSolution(final StatusUpdate update) {
         if (gui == null || manager == null) {

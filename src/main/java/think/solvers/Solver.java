@@ -25,7 +25,7 @@ public abstract class Solver implements Runnable {
         this.alive = true;
     }
 
-    // == Public API. =============================================================================
+    // == Public API. ==
 
     @Override
     public final void run() {
@@ -47,7 +47,7 @@ public abstract class Solver implements Runnable {
         this.alive = false;
     }
 
-    // == Subclass contract. ======================================================================
+    // == Subclass contract. ==
 
     /**
         Concrete subclasses should do all non-trivial work in this method, as opposed to the
@@ -56,7 +56,7 @@ public abstract class Solver implements Runnable {
      */
     protected abstract void solve() throws KilledException;
 
-    // == Protected API. ==========================================================================
+    // == Protected API. ==
 
     protected static final class KilledException extends Exception {}
 
