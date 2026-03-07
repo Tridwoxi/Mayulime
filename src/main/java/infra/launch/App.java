@@ -109,6 +109,6 @@ public final class App extends Application {
         }
         manager.stop();
         final int epoch = this.puzzleEpoch.incrementAndGet();
-        gui.onPuzzleStopped(epoch, "Solving stopped.");
+        gui.onPuzzleStopped(epoch, "Solving stopped");
     }
 }

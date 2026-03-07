@@ -2,7 +2,6 @@ package infra.gui;
 
 import java.io.File;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -113,7 +112,9 @@ final class UiController {
             this.state.cellSizePx(),
             this.lastAcceptedMapCode.isPresent(),
             true,
-            "Solving: searching for better solutions",
+            "Solving in progress",
+            "-",
+            "-",
             nowNanos,
             -1L,
             -1L,
@@ -140,6 +141,8 @@ final class UiController {
             this.lastAcceptedMapCode.isPresent(),
             false,
             message,
+            "-",
+            "-",
             -1L,
             -1L,
             -1L,
@@ -151,7 +154,6 @@ final class UiController {
     private void stopPuzzle(final int puzzleEpoch, final String message) {
         this.latestPending.set(null);
         final long freezeAtNanos = System.nanoTime();
-        final String finalStatus = buildStoppedStatusMessage(this.state.bestUpdate(), message);
         this.state = new UiState(
             UiPhase.STOPPED,
             puzzleEpoch,
@@ -165,7 +167,9 @@ final class UiController {
             this.state.cellSizePx(),
             this.lastAcceptedMapCode.isPresent(),
             this.lastAcceptedMapCode.isPresent(),
-            finalStatus,
+            message,
+            this.state.bestScoreText(),
+            this.state.submitterText(),
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
             freezeAtNanos,
@@ -202,12 +206,9 @@ final class UiController {
                 this.state.cellSizePx(),
                 this.state.canRestart(),
                 this.state.canCopyMapCode(),
-                String.format(
-                    Locale.US,
-                    "Solving: current score %d by %s",
-                    update.getScore(),
-                    update.getSubmitter()
-                ),
+                "Solving in progress",
+                String.valueOf(update.getScore()),
+                update.getSubmitter(),
                 this.state.puzzleStartedAtNanos(),
                 nowNanos,
                 this.state.timersFrozenAtNanos(),
@@ -285,6 +286,8 @@ final class UiController {
             this.state.canRestart(),
             this.state.canCopyMapCode(),
             message,
+            this.state.bestScoreText(),
+            this.state.submitterText(),
             this.state.puzzleStartedAtNanos(),
             this.state.lastUpdateAtNanos(),
             this.state.timersFrozenAtNanos(),
@@ -322,21 +325,6 @@ final class UiController {
             return;
         }
         Platform.runLater(action);
-    }
-
-    private static String buildStoppedStatusMessage(
-        final StatusUpdate bestUpdate,
-        final String fallback
-    ) {
-        if (bestUpdate == null) {
-            return fallback;
-        }
-        return String.format(
-            Locale.US,
-            "Final score: %d by %s",
-            bestUpdate.getScore(),
-            bestUpdate.getSubmitter()
-        );
     }
 
     private Optional<String> currentMapCode() {

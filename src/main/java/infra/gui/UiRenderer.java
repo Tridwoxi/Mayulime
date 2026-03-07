@@ -61,6 +61,8 @@ final class UiRenderer {
             state.canRestart(),
             state.canCopyMapCode(),
             state.statusMessage(),
+            state.bestScoreText(),
+            state.submitterText(),
             state.puzzleStartedAtNanos(),
             state.lastUpdateAtNanos(),
             state.timersFrozenAtNanos(),

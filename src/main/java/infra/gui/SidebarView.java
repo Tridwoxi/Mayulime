@@ -160,7 +160,7 @@ final class SidebarView extends VBox {
     }
 
     private void configurePanels() {
-        this.sectionTitles[0] = this.sectionTitle("Statistics");
+        this.sectionTitles[0] = this.sectionTitle("Details");
         this.sectionTitles[1] = this.sectionTitle("Legend");
 
         this.detailsGroup.getChildren().addAll(this.sectionTitles[0], this.metrics);

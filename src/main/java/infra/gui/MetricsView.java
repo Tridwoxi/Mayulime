@@ -6,7 +6,7 @@ import javafx.scene.text.Text;
 
 final class MetricsView extends GridPane {
 
-    private static final int ROW_COUNT = 5;
+    private static final int ROW_COUNT = 7;
     private final Text[] labels;
     private final Text[] values;
 
@@ -18,9 +18,11 @@ final class MetricsView extends GridPane {
 
         this.addRow(0, "Grid");
         this.addRow(1, "Walls");
-        this.addRow(2, "Updates");
-        this.addRow(3, "Since update");
-        this.addRow(4, "Total elapsed");
+        this.addRow(2, "Best score");
+        this.addRow(3, "Submitter");
+        this.addRow(4, "Updates");
+        this.addRow(5, "Since update");
+        this.addRow(6, "Total elapsed");
     }
 
     public void render(final UiState state, final String sinceUpdate, final String elapsed) {
@@ -32,9 +34,11 @@ final class MetricsView extends GridPane {
 
         this.values[0].setText(UiMath.grid(state.rows(), state.cols()));
         this.values[1].setText(walls);
-        this.values[2].setText(updates);
-        this.values[3].setText(sinceUpdate);
-        this.values[4].setText(elapsed);
+        this.values[2].setText(state.bestScoreText());
+        this.values[3].setText(state.submitterText());
+        this.values[4].setText(updates);
+        this.values[5].setText(sinceUpdate);
+        this.values[6].setText(elapsed);
     }
 
     public void applyPalette(final UiPalette palette) {
