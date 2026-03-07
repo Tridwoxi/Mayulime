@@ -1,11 +1,18 @@
 package think.common;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntPredicate;
 
 public final class IntArrays {
 
     private IntArrays() {}
+
+    public static int[] ofConstant(final int value, final int length) {
+        final int[] array = new int[length];
+        Arrays.fill(array, value);
+        return array;
+    }
 
     public static int[] ofRange(final int startInclusive, final int endExclusive) {
         if (startInclusive > endExclusive) {
