@@ -8,7 +8,7 @@ public final class IntArrays {
     private IntArrays() {}
 
     public static int[] ofRange(final int startInclusive, final int endExclusive) {
-        if (startInclusive >= endExclusive) {
+        if (startInclusive > endExclusive) {
             throw new IllegalArgumentException();
         }
         final int[] range = new int[endExclusive - startInclusive];
@@ -23,7 +23,7 @@ public final class IntArrays {
         final int endExclusive,
         final IntPredicate keepIff
     ) {
-        if (startInclusive >= endExclusive) {
+        if (startInclusive > endExclusive) {
             throw new IllegalArgumentException();
         }
         final int[] filtered = new int[endExclusive - startInclusive];
@@ -35,7 +35,7 @@ public final class IntArrays {
                 count += 1;
             }
         }
-        return trimmedCopy(filtered, count);
+        return slicedCopy(filtered, 0, count);
     }
 
     public static void shuffleInPlace(final int[] array) {
@@ -48,13 +48,17 @@ public final class IntArrays {
         }
     }
 
-    public static int[] trimmedCopy(final int[] array, final int size) {
-        if (size < 0 || size > array.length) {
+    public static int[] slicedCopy(
+        final int[] array,
+        final int startInclusive,
+        final int endExclusive
+    ) {
+        if (startInclusive < 0 || endExclusive > array.length || startInclusive > endExclusive) {
             throw new IllegalArgumentException();
         }
-        final int[] trimmed = new int[size];
-        System.arraycopy(array, 0, trimmed, 0, size);
-        return trimmed;
+        final int[] sliced = new int[endExclusive - startInclusive];
+        System.arraycopy(array, startInclusive, sliced, 0, sliced.length);
+        return sliced;
     }
 
     public static int[] filteredCopy(final int[] array, final IntPredicate keepIff) {
@@ -66,6 +70,6 @@ public final class IntArrays {
                 count += 1;
             }
         }
-        return trimmedCopy(filtered, count);
+        return slicedCopy(filtered, 0, count);
     }
 }
