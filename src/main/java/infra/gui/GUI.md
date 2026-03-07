@@ -1,18 +1,17 @@
-# GUI Architecture Decision Record
+# GUI
 
 <!-- NOTE TO CODING AGENTS: Please keep this document up to date. -->
 
-## Context
-
-The GUI is for users who already understand Pathery. It should be understandable at a glance, keep
-the board as the focus, and avoid design choices that hurt performance on large boards.
+This application is for users who already understand Pathery. The GUI should be understandable
+at a glance, keep the board as the focus, and avoid design choices that hurt performance on large
+boards.
 
 After loading a puzzle, the user will often leave the application running and return later to
 inspect the current best board. The GUI is therefore board-first rather than a rich live-monitoring
 dashboard, though input and restart flows still matter because users may try multiple maps in one
 session.
 
-## Decisions
+## ADR
 
 The board must be rendered with a single `Canvas`. A one-node-per-cell JavaFX implementation made
 window resizing catastrophically slow, while the current canvas-based board performs acceptably.
@@ -46,4 +45,9 @@ separate coarse cadence. The GUI should not rely on a continuous high-frequency 
 
 ## Future direction
 
-Nothing planned.
+The color scheme is bad, but we might just be doomed to live with it.
+
+It's weird that GUI thinking bleeds into the Application launch point.
+
+It'd be nice if the user knew how many threads of theirs we were using, since that's a good
+indicator of the impact we're having on their machine.
