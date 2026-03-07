@@ -5,8 +5,8 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    Converts supported puzzles and puzzle states into Pathery MapCode. Little effort is made to
-    verify the validity of the input because that is the Parser's job.
+    Converts {@link Puzzle}s and their states into Pathery MapCodes. Little effort is made to
+    verify the validity of the input because this class does not interact with externals.
  */
 public final class Serializer {
 

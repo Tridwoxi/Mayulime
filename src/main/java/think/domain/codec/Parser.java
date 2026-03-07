@@ -7,35 +7,8 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    This class constructs a {@link Puzzle} from a string, or throws a {@link BadMapCodeException}
-    if it is unable (either because the input is malformed or contains unsupported features).
-
-    Simplified Pathery MapCode (please see https://www.pathery.com/mapeditor) grammar:
-
-    <pre>
-    MapCode         -> Metadata : Maze
-    Metadata        -> NumCols . NumRows . BlockingBudget . Name . string . string . string
-    NumCols         -> int
-    NumRows         -> int
-    BlockingBudget  -> int
-    Name            -> string
-    Maze            -> Token Maze | nothing
-    Token           -> Skip , Kind Order .
-    Skip            -> int | nothing
-    Kind            -> s | f | r | c
-    Order           -> int
-    </pre>
-
-    Integers contain only digits and are strictly positive, except for BlockingBudget, which may
-    also be 0. Strings are alphanumeric and may contain spaces or be empty. {@code |} is a
-    metasymbol representing alternation. There are kinds beyond those defined here, and can be
-    learned of by looking at the map editor. The trailing Metadata strings are not understood.
-
-    This parser also enforces semantic correctness: features stay within bounds, checkpoints must
-    have unique orders, and blocking budget cannot exceed blank cells. Pathery supports variants
-    with multiple starts / finishes / checkpoints, but we do not yet. Player walls are silently
-    converted to system walls and deducted from the blocking budget. Doing so enables the user to
-    copy a partially solved puzzle and send it back to this system but with walls locked in place.
+    Construct a {@link Puzzle} from a string, or throw a {@link BadMapCodeException} if we are
+    unable (either because the input is malformed or contains unsupported features).
  */
 public final class Parser {
 
