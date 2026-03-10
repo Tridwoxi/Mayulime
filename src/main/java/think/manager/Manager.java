@@ -1,6 +1,5 @@
 package think.manager;
 
-import infra.output.Logging;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -16,15 +15,15 @@ import think.solvers.Solver;
  */
 public final class Manager {
 
-    private static final int UNSCORED = Integer.MIN_VALUE;
-    private final Consumer<StatusUpdate> listener;
+    private final Consumer<Submission> listener;
+    private final List<SolverRegistry> registry;
     private final Executor executor;
     private final List<Solver> solvers;
     private volatile Puzzle current;
-    private volatile int topScore;
 
-    public Manager(final Consumer<StatusUpdate> listener) {
+    public Manager(final Consumer<Submission> listener, final List<SolverRegistry> registry) {
         this.listener = listener;
+        this.registry = new ArrayList<>(registry);
         // "The shutdown sequence begins when all started non-daemon threads have terminated.".
         // Workers that spin longer than we want shouldn't prevent Java from shutting down, so
         // we'll make them into daemons.
@@ -33,18 +32,15 @@ public final class Manager {
             thread.setDaemon(true);
             return thread;
         });
-        this.solvers = new ArrayList<>();
+        this.solvers = new ArrayList<>(registry.size());
         this.current = null;
-        this.topScore = UNSCORED;
     }
 
     public void solve(final Puzzle puzzle) {
         stop();
         current = puzzle;
-        // Manager can be made stronger by making 1 BaselineSolver then spamming whatever the best
-        // solver is until the user's computer runs out of threads. But this is fine for now.
         final SolverFactory factory = new SolverFactory(this::consider, puzzle);
-        for (final Solver solver : factory.createOneOfEach()) {
+        for (final Solver solver : registry.stream().map(factory::create).toList()) {
             solvers.add(solver);
             executor.execute(solver);
         }
@@ -54,47 +50,21 @@ public final class Manager {
         current = null;
         solvers.forEach(Solver::requestTermination);
         solvers.clear();
-        topScore = UNSCORED;
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
-        // This guard is tripped when the user uploads a new problem but old worker threads haven't
-        // died and propose solutions to the old (stale) problem. If this guard is tripped
-        // excessively, it indicates a solver we asked to die refuses to do so.
-        if (current != puzzle) {
-            Logging.warning("Guard tripped (1).");
-            return;
-        }
-        if (!puzzle.isValid(features)) {
+        final Feature[] copy = features.clone();
+        if (!puzzle.isValid(copy)) {
             throw new IllegalArgumentException();
         }
-        final int score = StandardEvaluator.evaluate(puzzle, features);
-        if (score == UNSCORED) {
-            throw new IllegalStateException();
-        }
-        // We also check if the score is better in the synchronized section, but as solvers might
-        // give this method lots of garbage, if we can early exit without competing for the lock,
-        // it would be nice to. Same trick is used for the puzzle.
-        if (score <= topScore && topScore != UNSCORED) {
-            return;
-        }
+        final int score = StandardEvaluator.evaluate(puzzle, copy);
         synchronized (this) {
-            if (current != puzzle) {
-                Logging.warning("Guard tripped (2).");
+            // This guard is tripped when the user uploads a new problem but old worker threads
+            // haven't died and propose solutions to the old (stale) problem.
+            if (puzzle != current) {
                 return;
             }
-            if (score > topScore || topScore == UNSCORED) {
-                Logging.info(
-                    "Score %d -> %d on %s by %s from %s",
-                    topScore,
-                    score,
-                    puzzle.getName(),
-                    submitter,
-                    Thread.currentThread().getName()
-                );
-                topScore = score;
-                listener.accept(new StatusUpdate(submitter, puzzle, features, score));
-            }
+            listener.accept(new Submission(submitter, puzzle, copy, score));
         }
     }
 }

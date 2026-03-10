@@ -7,12 +7,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import think.domain.model.Feature;
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 final class BoardView extends Canvas {
 
     private UiPalette palette;
-    private StatusUpdate display;
+    private Submission display;
     private double cellSizePx;
 
     BoardView(final UiPalette initialPalette) {
@@ -21,7 +21,7 @@ final class BoardView extends Canvas {
         this.cellSizePx = 0.0;
     }
 
-    public void render(final StatusUpdate display, final double cellSizePx) {
+    public void render(final Submission display, final double cellSizePx) {
         this.display = display;
         this.cellSizePx = cellSizePx;
         if (display == null) {
@@ -89,7 +89,7 @@ final class BoardView extends Canvas {
     }
 
     private static String cellLabel(
-        final StatusUpdate display,
+        final Submission display,
         final int row,
         final int col,
         final Feature feature

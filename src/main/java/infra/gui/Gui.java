@@ -5,7 +5,7 @@ import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import think.domain.model.Puzzle;
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 public final class Gui extends Scene {
 
@@ -26,9 +26,9 @@ public final class Gui extends Scene {
         this.activeColorScheme = Platform.getPreferences().getColorScheme();
 
         this.controller.applyColorScheme(this.activeColorScheme);
-        Platform.getPreferences().colorSchemeProperty().addListener((ignored, oldValue, newValue) ->
-            this.applyColorScheme(newValue)
-        );
+        Platform.getPreferences()
+            .colorSchemeProperty()
+            .addListener((ignored, oldValue, newValue) -> this.applyColorScheme(newValue));
     }
 
     public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {
@@ -47,7 +47,7 @@ public final class Gui extends Scene {
         controller.onPuzzleStopped(puzzleEpoch, message);
     }
 
-    public void enqueueSolverUpdate(final StatusUpdate update, final int puzzleEpoch) {
+    public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
         controller.enqueueSolverUpdate(update, puzzleEpoch);
     }
 

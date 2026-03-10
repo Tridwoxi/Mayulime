@@ -21,7 +21,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Window;
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 @SuppressWarnings({ "checkstyle:ClassDataAbstractionCoupling", "checkstyle:ClassFanOutComplexity" })
 final class RootView {
@@ -119,7 +119,7 @@ final class RootView {
     }
 
     public void renderBoard(
-        final StatusUpdate display,
+        final Submission display,
         final int rows,
         final int cols,
         final double cellSizePx,

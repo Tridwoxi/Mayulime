@@ -1,6 +1,6 @@
 package infra.gui;
 
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 record UiState(
     UiPhase phase,
@@ -9,7 +9,7 @@ record UiState(
     int rows,
     int cols,
     int wallBudget,
-    StatusUpdate bestUpdate,
+    Submission bestUpdate,
     int spentWalls,
     int updateCount,
     double cellSizePx,

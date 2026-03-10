@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Locale;
 import javafx.scene.paint.Color;
 import think.domain.model.Feature;
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 final class UiMath {
 
@@ -23,7 +23,7 @@ final class UiMath {
         return String.format(Locale.US, "%d/%d", spentWalls, wallBudget);
     }
 
-    static int countPlayerWalls(final StatusUpdate display) {
+    static int countPlayerWalls(final Submission display) {
         if (display == null) {
             return 0;
         }

@@ -2,6 +2,7 @@ package infra.launch;
 
 import infra.gui.Gui;
 import infra.output.Logging;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,13 +11,15 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
-import think.manager.StatusUpdate;
+import think.manager.SolverRegistry;
+import think.manager.Submission;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
  */
 public final class App extends Application {
 
+    private static final int UNSCORED = -2; // StandardEvaluator uses -1.
     private static final String UNNAMED_PROBLEM_NAME = "Unnamed Problem";
     private static final String BAD_MAP_MESSAGE =
         "Unable to parse that file as supported Pathery MapCode.";
@@ -24,14 +27,21 @@ public final class App extends Application {
     private static final double MIN_HEIGHT_PX = 320.0;
     private static final double DEFAULT_WIDTH_PX = 1280;
     private static final double DEFAULT_HEIGHT_PX = 720.0;
+    private static final List<SolverRegistry> DEFAULT_SOLVERS = List.of(
+        SolverRegistry.BASELINE,
+        SolverRegistry.RANDOM,
+        SolverRegistry.CLIMBV1
+    );
 
     private final AtomicInteger puzzleEpoch;
+    private volatile int topScore;
 
     private Manager manager;
     private Gui gui;
 
     public App() {
         this.puzzleEpoch = new AtomicInteger(0);
+        this.topScore = UNSCORED;
         this.manager = null;
         this.gui = null;
     }
@@ -48,7 +58,7 @@ public final class App extends Application {
     public void start(final Stage primaryStage) {
         Logging.announcement("Launch point: Application");
 
-        this.manager = new Manager(this::receiveSolution);
+        this.manager = new Manager(this::receiveSolution, DEFAULT_SOLVERS);
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
 
         primaryStage.setScene(gui);
@@ -61,12 +71,16 @@ public final class App extends Application {
 
     // == Connectors. ==
 
-    private void receiveSolution(final StatusUpdate update) {
+    private synchronized void receiveSolution(final Submission update) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
         final int epoch = this.puzzleEpoch.get();
-        gui.enqueueSolverUpdate(update, epoch);
+        if (update.getScore() <= this.topScore) {
+            return;
+        }
+        this.topScore = update.getScore();
+        this.gui.enqueueSolverUpdate(update, epoch);
     }
 
     private void receiveMapCode(final String mapCode) {
@@ -84,6 +98,7 @@ public final class App extends Application {
         }
 
         manager.stop();
+        this.topScore = UNSCORED;
 
         final int epoch = this.puzzleEpoch.incrementAndGet();
         final String problemName = puzzle.getName().isBlank()
@@ -108,6 +123,7 @@ public final class App extends Application {
             throw new IllegalStateException();
         }
         manager.stop();
+        this.topScore = UNSCORED;
         final int epoch = this.puzzleEpoch.incrementAndGet();
         gui.onPuzzleStopped(epoch, "Solving stopped");
     }

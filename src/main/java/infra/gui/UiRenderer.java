@@ -1,11 +1,11 @@
 package infra.gui;
 
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 final class UiRenderer {
 
     private final RootView rootView;
-    private StatusUpdate lastRenderedDisplay;
+    private Submission lastRenderedDisplay;
     private int lastRenderedRows;
     private int lastRenderedCols;
     private double lastRenderedCellSizePx;
@@ -22,7 +22,7 @@ final class UiRenderer {
         final double baseSize = this.currentBaseCellSize(state);
         final double cellSize = UiMath.clampCellSize(baseSize);
 
-        final StatusUpdate display = state.bestUpdate();
+        final Submission display = state.bestUpdate();
         final long timerNow =
             state.timersFrozenAtNanos() > 0 ? state.timersFrozenAtNanos() : nowNanos;
         final String elapsed = UiMath.elapsed(state.puzzleStartedAtNanos(), timerNow);
@@ -71,7 +71,7 @@ final class UiRenderer {
     }
 
     private boolean shouldRenderBoard(
-        final StatusUpdate display,
+        final Submission display,
         final int rows,
         final int cols,
         final double cellSizePx,

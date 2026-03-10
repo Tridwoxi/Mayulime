@@ -15,12 +15,12 @@ import javafx.scene.Parent;
 import javafx.util.Duration;
 import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
-import think.manager.StatusUpdate;
+import think.manager.Submission;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 final class UiController {
 
-    private record PendingUpdate(StatusUpdate update, int epoch) {}
+    private record PendingUpdate(Submission update, int epoch) {}
 
     private static final Duration TIMER_TICK = Duration.seconds(1.0);
 
@@ -86,7 +86,7 @@ final class UiController {
         runOnFxThread(() -> this.stopPuzzle(puzzleEpoch, message));
     }
 
-    public void enqueueSolverUpdate(final StatusUpdate update, final int puzzleEpoch) {
+    public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
         this.latestPending.set(new PendingUpdate(update, puzzleEpoch));
         if (this.updateFlushScheduled.compareAndSet(false, true)) {
             Platform.runLater(this::flushPendingUpdate);
@@ -191,7 +191,7 @@ final class UiController {
             pending.epoch() == this.state.puzzleEpoch() &&
             this.state.phase() == UiPhase.SOLVING
         ) {
-            final StatusUpdate update = pending.update();
+            final Submission update = pending.update();
             final long nowNanos = System.nanoTime();
             this.state = new UiState(
                 this.state.phase(),

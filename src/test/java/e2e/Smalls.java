@@ -7,6 +7,7 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
+import think.manager.SolverRegistry;
 
 /**
     Testing on the smalls is a good way to check the backend doesn't crash. The expected scores are
@@ -49,7 +50,7 @@ public final class Smalls {
         final AtomicInteger topScore = new AtomicInteger(0);
         final Manager manager = new Manager(statusUpdate -> {
             topScore.accumulateAndGet(statusUpdate.getScore(), Math::max);
-        });
+        }, java.util.List.of(SolverRegistry.BASELINE, SolverRegistry.RANDOM, SolverRegistry.CLIMBV1));
         manager.solve(puzzle);
         Thread.sleep(TIMEOUT_MS);
         manager.stop();

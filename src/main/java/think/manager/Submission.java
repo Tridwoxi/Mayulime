@@ -7,7 +7,7 @@ import think.domain.model.Puzzle;
 /**
     Backend to frontend adapter.
  */
-public final class StatusUpdate {
+public final class Submission {
 
     private static final int NOT_A_CHECKPOINT = -1;
 
@@ -19,7 +19,7 @@ public final class StatusUpdate {
     private final int score;
     private final int blockingBudget;
 
-    StatusUpdate(
+    Submission(
         final String submitter,
         final Puzzle puzzle,
         final Feature[] features,
