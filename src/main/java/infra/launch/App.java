@@ -35,6 +35,7 @@ public final class App extends Application {
 
     private final AtomicInteger puzzleEpoch;
     private volatile int topScore;
+    private volatile String currentPuzzleName;
 
     private Manager manager;
     private Gui gui;
@@ -42,6 +43,7 @@ public final class App extends Application {
     public App() {
         this.puzzleEpoch = new AtomicInteger(0);
         this.topScore = UNSCORED;
+        this.currentPuzzleName = UNNAMED_PROBLEM_NAME;
         this.manager = null;
         this.gui = null;
     }
@@ -79,6 +81,17 @@ public final class App extends Application {
         if (update.getScore() <= this.topScore) {
             return;
         }
+        final String priorScoreText = this.topScore == UNSCORED
+            ? "Unscored"
+            : Integer.toString(this.topScore);
+        Logging.info(
+            "Score %s -> %d on %s by %s from %s",
+            priorScoreText,
+            update.getScore(),
+            this.currentPuzzleName,
+            update.getSubmitter(),
+            Thread.currentThread().getName()
+        );
         this.topScore = update.getScore();
         this.gui.enqueueSolverUpdate(update, epoch);
     }
@@ -104,6 +117,7 @@ public final class App extends Application {
         final String problemName = puzzle.getName().isBlank()
             ? UNNAMED_PROBLEM_NAME
             : puzzle.getName();
+        this.currentPuzzleName = problemName;
         gui.onPuzzleAccepted(
             new Puzzle(
                 problemName,
@@ -124,6 +138,7 @@ public final class App extends Application {
         }
         manager.stop();
         this.topScore = UNSCORED;
+        this.currentPuzzleName = UNNAMED_PROBLEM_NAME;
         final int epoch = this.puzzleEpoch.incrementAndGet();
         gui.onPuzzleStopped(epoch, "Solving stopped");
     }
