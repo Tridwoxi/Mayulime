@@ -47,17 +47,18 @@ public final class Bench {
 
         final List<Proposal> results = new ArrayList<>(queue.size());
         queue.drainTo(results);
-        final Consumer<Proposal> ifPresent = best -> {
+        final Consumer<Proposal> displayResults = best -> {
             Logging.results("Solution: %s", Serializer.serialize(params.puzzle(), best.features()));
             Logging.results("Score: %d", best.score());
+            Logging.results("Found after: %d ms", System.currentTimeMillis() - best.createdAtMs());
         };
-        final Runnable orElse = () -> {
+        final Runnable complain = () -> {
             Logging.results("Nothing found.");
         };
         results
             .stream()
-            .max(Comparator.comparingInt(Proposal::score))
-            .ifPresentOrElse(ifPresent, orElse);
+            .max(Comparator.comparingInt(Proposal::score).thenComparingLong(Proposal::createdAtMs))
+            .ifPresentOrElse(displayResults, complain);
     }
 
     public static void main(final String[] args) {

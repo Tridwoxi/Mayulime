@@ -33,13 +33,16 @@ import think.solvers.Solver;
     In this implementation, if a solver works on a puzzle, then solving is stopped, then solving
     starts again on the same puzzle, then the solver submits a solution, the submission will be
     considered valid. This is awkward and can be fixed, but there isn't a need (yet) to fix it.
-
-    Typically, one would shutdown(void) their ExecutorService, but we have a newCachedThreadPool
-    here, and those will clean up their threads automatically, so there's no need to call shutdown.
-*/
+ */
 public final class Manager {
 
-    public record Proposal(String submitter, Puzzle puzzle, Feature[] features, int score) {
+    public record Proposal(
+        String submitter,
+        Puzzle puzzle,
+        Feature[] features,
+        int score,
+        long createdAtMs
+    ) {
         public Proposal {
             features = features.clone();
         }
@@ -73,22 +76,29 @@ public final class Manager {
         final SolverFactory factory = new SolverFactory(this::consider, puzzle);
         for (final Solver solver : registry.stream().map(factory::create).toList()) {
             solvers.add(solver);
+            // Must use execute instead of submit or any other method because exceptions must be
+            // propagated all the way up.
             executor.execute(solver);
         }
     }
 
     public void stop() {
+        // Shutting down the Executor would be nice but it is a newCachedThreadPool so the need
+        // isn't so pressing, and not shutting it down means we can reuse it.
         current = null;
         solvers.forEach(Solver::requestTermination);
         solvers.clear();
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
+        // It takes non-trivial (10 ms) time to evaluate gargantuan1-like maps, and we're measuring
+        // submission time, so it's best to grab the time before validation and evaluation.
+        final long createdAtMs = System.currentTimeMillis();
         if (!puzzle.isValid(features)) {
             throw new IllegalArgumentException();
         }
         final int score = StandardEvaluator.evaluate(puzzle, features);
-        final Proposal proposal = new Proposal(submitter, puzzle, features, score);
+        final Proposal proposal = new Proposal(submitter, puzzle, features, score, createdAtMs);
         if (puzzle == current) {
             listener.accept(proposal);
         }
