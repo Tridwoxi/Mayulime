@@ -1,29 +1,22 @@
-# Ignore miscellaneous files by default.
+# Whitelist-like pattern.
 *
-
-# Include folders so git can walk the tree.
 !*/
 
-# Include source code.
+# Project source, scripts, docs, examples.
 !*.java
 !*.py
-
-# Include documentation.
 !*.md
-
-# Include Pathery MapCode format.
 !*.mapcode
 
-# Ignore hidden files (usually garbage or tests).
+# Mystery files, build artifacts.
 .*
-
-# Ignore build artifacts.
 bin/
 build/
 gradle/
 
-# Include tooling configuration.
+# Tooling configuration.
 !build.gradle
 !.gitignore
+!.project
 !checkstyle.xml
 !spotbugs-exclude.xml
