@@ -20,8 +20,10 @@ public final class Codec {
     private static final List<String> INVALID = List.of(
         "3.1.10.Multiple starts...:,s1.,s1.,f1.",
         "3.1.9.Missing finish...:,s1.",
+        "4.1.0.Duplicate checkpoint orders...:,s1.,c1.,c1.,f1.",
         "3.2.9.Unsupported teleport (for now)...:,s1.,t1.,f1.1,u1.", // Move when supported.
-        "1000000.1000000.1000000.DOS attack...:,s1.,f1.",
+        "3.1.0.Unsupported wall order...:,s1.,r4.,f1.",
+        "1001.1001.0.DOS attack...:,s1.,f1.",
         "3.2.10.Out of bounds...:,s1.1,r1.,r3.2,c1.1,f1.",
         "3.3.10.Spurious comma...:,s1.1,r1.,r3,.2,c1.1,f1.",
         "3.3.10.Spurious period...:s1.1,r1.,r3..2,c1.1,f1."

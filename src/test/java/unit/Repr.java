@@ -1,5 +1,6 @@
 package unit;
 
+import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.codec.Parser;
@@ -13,6 +14,9 @@ public final class Repr {
         13.6.7.Small1...:,r3.11,r3.,r3.2,r1.8,r3.,r3.8,r1.2,f1.,s1.11,r3.,r3.2,r1.,r1.4,r1.2,r3.,r3.2,c1.8,r3.""";
     private static final String MANY_WALLS_MAPCODE = """
         3.3.10.Unlimited blocking budget...:,s1.,f1.
+        """;
+    private static final String PARTIAL_FILL_MAPCODE = """
+        3.3.2.Partial fill...:,s1.,r2.,f1.
         """;
 
     @Test
@@ -56,5 +60,17 @@ public final class Repr {
     public void manyWalls() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(MANY_WALLS_MAPCODE);
         Assertions.assertEquals(7, puzzle.getBlockingBudget());
+    }
+
+    @Test
+    public void playerWallsAreLockedAndSpent() throws BadMapCodeException {
+        final Puzzle puzzle = Parser.parse(PARTIAL_FILL_MAPCODE);
+        final Feature[] grid = puzzle.getFeatures();
+        final int system = (int) Arrays.stream(grid).filter(Feature.SYSTEM_WALL::equals).count();
+        final int player = (int) Arrays.stream(grid).filter(Feature.PLAYER_WALL::equals).count();
+        Assertions.assertEquals(1, system);
+        Assertions.assertEquals(0, player);
+        Assertions.assertEquals(Feature.SYSTEM_WALL, grid[1]);
+        Assertions.assertEquals(1, puzzle.getBlockingBudget());
     }
 }
