@@ -36,6 +36,7 @@ public final class Bench {
     private void run() {
         final BlockingQueue<Proposal> queue = new LinkedBlockingQueue<>();
         final Manager manager = new Manager(queue::add, List.of(params.registry()));
+        final long startTimeMs = System.currentTimeMillis();
 
         manager.solve(params.puzzle());
         try {
@@ -50,7 +51,7 @@ public final class Bench {
         final Consumer<Proposal> displayResults = best -> {
             Logging.results("Solution: %s", Serializer.serialize(params.puzzle(), best.features()));
             Logging.results("Score: %d", best.score());
-            Logging.results("Found after: %d ms", System.currentTimeMillis() - best.createdAtMs());
+            Logging.results("Found after: %d ms", best.createdAtMs() - startTimeMs);
         };
         final Runnable complain = () -> {
             Logging.results("Nothing found.");
