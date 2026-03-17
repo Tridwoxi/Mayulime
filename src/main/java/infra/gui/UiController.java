@@ -15,7 +15,6 @@ import javafx.scene.Parent;
 import javafx.util.Duration;
 import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
-import think.manager.Submission;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 final class UiController {

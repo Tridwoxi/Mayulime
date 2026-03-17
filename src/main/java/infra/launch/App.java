@@ -1,6 +1,7 @@
 package infra.launch;
 
 import infra.gui.Gui;
+import infra.gui.Submission;
 import infra.output.Logging;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,8 +12,8 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
+import think.manager.Manager.Proposal;
 import think.manager.SolverRegistry;
-import think.manager.Submission;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
@@ -73,17 +74,22 @@ public final class App extends Application {
 
     // == Connectors. ==
 
-    private synchronized void receiveSolution(final Submission update) {
+    private synchronized void receiveSolution(final Proposal proposal) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
+        final Submission update = new Submission(
+            proposal.submitter(),
+            proposal.puzzle(),
+            proposal.features(),
+            proposal.score()
+        );
         final int epoch = this.puzzleEpoch.get();
         if (update.getScore() <= this.topScore) {
             return;
         }
-        final String priorScoreText = this.topScore == UNSCORED
-            ? "Unscored"
-            : Integer.toString(this.topScore);
+        final String priorScoreText =
+            this.topScore == UNSCORED ? "Unscored" : Integer.toString(this.topScore);
         Logging.info(
             "Score %s -> %d on %s by %s from %s",
             priorScoreText,

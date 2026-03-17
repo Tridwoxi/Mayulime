@@ -1,5 +1,6 @@
 package e2e;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,12 @@ public final class Smalls {
         throws BadMapCodeException, InterruptedException {
         final Puzzle puzzle = Parser.parse(mapCode);
         final AtomicInteger topScore = new AtomicInteger(0);
-        final Manager manager = new Manager(statusUpdate -> {
-            topScore.accumulateAndGet(statusUpdate.getScore(), Math::max);
-        }, java.util.List.of(SolverRegistry.BASELINE, SolverRegistry.RANDOM, SolverRegistry.CLIMBV1));
+        final Manager manager = new Manager(
+            statusUpdate -> {
+                topScore.accumulateAndGet(statusUpdate.score(), Math::max);
+            },
+            Arrays.asList(SolverRegistry.values())
+        );
         manager.solve(puzzle);
         Thread.sleep(TIMEOUT_MS);
         manager.stop();

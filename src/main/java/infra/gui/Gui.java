@@ -5,7 +5,6 @@ import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import think.domain.model.Puzzle;
-import think.manager.Submission;
 
 public final class Gui extends Scene {
 

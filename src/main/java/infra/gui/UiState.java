@@ -1,7 +1,5 @@
 package infra.gui;
 
-import think.manager.Submission;
-
 record UiState(
     UiPhase phase,
     int puzzleEpoch,

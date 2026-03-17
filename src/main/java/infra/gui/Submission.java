@@ -1,11 +1,11 @@
-package think.manager;
+package infra.gui;
 
 import java.util.Arrays;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    Backend to frontend adapter.
+    Snapshot of a solver proposal prepared for GUI rendering.
  */
 public final class Submission {
 
@@ -19,7 +19,7 @@ public final class Submission {
     private final int score;
     private final int blockingBudget;
 
-    Submission(
+    public Submission(
         final String submitter,
         final Puzzle puzzle,
         final Feature[] features,

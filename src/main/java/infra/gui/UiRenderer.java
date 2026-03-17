@@ -1,7 +1,5 @@
 package infra.gui;
 
-import think.manager.Submission;
-
 final class UiRenderer {
 
     private final RootView rootView;

@@ -7,7 +7,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import think.domain.model.Feature;
-import think.manager.Submission;
 
 final class BoardView extends Canvas {
 

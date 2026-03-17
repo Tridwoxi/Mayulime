@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Locale;
 import javafx.scene.paint.Color;
 import think.domain.model.Feature;
-import think.manager.Submission;
 
 final class UiMath {
 
