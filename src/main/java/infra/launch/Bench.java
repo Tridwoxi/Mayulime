@@ -22,11 +22,11 @@ import think.manager.SolverRegistry;
 import think.manager.SolverRegistry.NoSuchSolverException;
 
 /**
-    Development-only headless launch point. Runs the solver specified by its first command line
-    argument against Huge1 (a particularly difficult puzzle) as a benchmark.
+    Development-only headless launch point.
  */
 public final class Bench {
 
+    private static final long GRACE_PERIOD_MS = 50;
     private final Parameters params;
 
     private Bench(final Parameters params) {
@@ -45,6 +45,14 @@ public final class Bench {
             Logging.warning("%s", exception.toString());
         }
         manager.stop();
+        try {
+            // Wait for in-flight proposals to finish. Technically this is the wrong way to go
+            // about it (you should make stop(void) wait instead), but it's a good enough
+            // heuristic. It takes 10 MS to evaluate gargantuan1, so this is a practical solution.
+            Thread.sleep(GRACE_PERIOD_MS);
+        } catch (InterruptedException exception) {
+            Logging.warning("%s", exception.toString());
+        }
 
         final List<Proposal> results = new ArrayList<>(queue.size());
         queue.drainTo(results);
