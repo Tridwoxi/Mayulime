@@ -61,7 +61,7 @@ final class InputHandler {
         final String mapCode;
         try {
             mapCode = Files.readString(file.toPath());
-        } catch (IOException exception) {
+        } catch (IOException _) {
             return new RejectedMapCode("Can't read that file.");
         }
         return new AcceptedMapCode(mapCode);

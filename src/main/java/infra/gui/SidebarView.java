@@ -72,19 +72,19 @@ final class SidebarView extends VBox {
     }
 
     public void onStopOrRestart(final Runnable listener) {
-        this.stopOrRestartButton.setOnAction(event -> listener.run());
+        this.stopOrRestartButton.setOnAction(_ -> listener.run());
     }
 
     public void onUploadMapCode(final Runnable listener) {
-        this.uploadMapCodeButton.setOnAction(event -> listener.run());
+        this.uploadMapCodeButton.setOnAction(_ -> listener.run());
     }
 
     public void onPasteMapCode(final Runnable listener) {
-        this.pasteMapCodeButton.setOnAction(event -> listener.run());
+        this.pasteMapCodeButton.setOnAction(_ -> listener.run());
     }
 
     public void onCopyMapCode(final Runnable listener) {
-        this.copyMapCodeButton.setOnAction(event -> listener.run());
+        this.copyMapCodeButton.setOnAction(_ -> listener.run());
     }
 
     public void render(final UiState state, final String sinceUpdate, final String elapsed) {

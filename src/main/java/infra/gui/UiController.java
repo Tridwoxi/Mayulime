@@ -43,7 +43,7 @@ final class UiController {
         this.mapCodeInputHandler = new InputHandler();
         this.mapCodeConsumer = mapCodeConsumer;
         this.stopConsumer = stopConsumer;
-        this.timerTicker = new Timeline(new KeyFrame(TIMER_TICK, ignored -> this.refreshTimers()));
+        this.timerTicker = new Timeline(new KeyFrame(TIMER_TICK, _ -> this.refreshTimers()));
         this.latestPending = new AtomicReference<>(null);
         this.updateFlushScheduled = new AtomicBoolean(false);
         this.state = UiState.initial();

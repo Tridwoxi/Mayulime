@@ -88,7 +88,7 @@ final class RootView {
     }
 
     public void onViewportChanged(final Runnable listener) {
-        this.viewport.viewportBoundsProperty().addListener((ignored, oldValue, newValue) -> {
+        this.viewport.viewportBoundsProperty().addListener((_, _, _) -> {
             this.resizeBoardViewportContent(
                 this.currentRows,
                 this.currentCols,

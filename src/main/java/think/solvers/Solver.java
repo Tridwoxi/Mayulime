@@ -38,7 +38,7 @@ public abstract class Solver implements Runnable {
         try {
             solve();
             Logging.info("Terminated %s (returned normally)", getClass().getSimpleName());
-        } catch (final KilledException exception) {
+        } catch (KilledException _) {
             Logging.info("Terminated %s (killed)", getClass().getSimpleName());
         }
     }

@@ -1,6 +1,6 @@
 package infra.launch;
 
-import infra.launch.Parameters.InvalidArgumentsException;
+import infra.launch.Parameters.UnparseableArgumentsException;
 import infra.output.Logging;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -74,7 +74,7 @@ public final class Bench {
         Logging.announcement("Launch point: Bench");
         try {
             new Bench(Parameters.parseArguments(args)).run();
-        } catch (final InvalidArgumentsException ignored) {
+        } catch (UnparseableArgumentsException _) {
             Parameters.printUsage();
             System.exit(1);
         }
@@ -83,40 +83,35 @@ public final class Bench {
 }
 
 record Parameters(Puzzle puzzle, SolverRegistry registry, long timeoutMs) {
-    static final class InvalidArgumentsException extends Exception {}
+    static final class UnparseableArgumentsException extends Exception {}
 
-    static Parameters parseArguments(final String[] args) throws InvalidArgumentsException {
+    static Parameters parseArguments(final String[] args) throws UnparseableArgumentsException {
         if (args.length != 3) {
-            throw new InvalidArgumentsException();
+            throw new UnparseableArgumentsException();
         }
 
         final Puzzle puzzle;
         try {
             puzzle = Parser.parse(Files.readString(Path.of(args[0])));
-        } catch (
-            InvalidPathException
-            | IOException
-            | OutOfMemoryError
-            | BadMapCodeException ignored
-        ) {
-            throw new InvalidArgumentsException();
+        } catch (InvalidPathException | IOException | OutOfMemoryError | BadMapCodeException _) {
+            throw new UnparseableArgumentsException();
         }
 
         final SolverRegistry registry;
         try {
             registry = SolverRegistry.fromString(args[1]);
-        } catch (final NoSuchSolverException ignored) {
-            throw new InvalidArgumentsException();
+        } catch (NoSuchSolverException _) {
+            throw new UnparseableArgumentsException();
         }
 
         final long timeoutMs;
         try {
             timeoutMs = Long.parseLong(args[2]);
             if (timeoutMs < 0) {
-                throw new InvalidArgumentsException();
+                throw new UnparseableArgumentsException();
             }
-        } catch (final NumberFormatException exception) {
-            throw new InvalidArgumentsException();
+        } catch (NumberFormatException _) {
+            throw new UnparseableArgumentsException();
         }
 
         return new Parameters(puzzle, registry, timeoutMs);

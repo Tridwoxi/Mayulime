@@ -27,7 +27,7 @@ public final class Gui extends Scene {
         this.controller.applyColorScheme(this.activeColorScheme);
         Platform.getPreferences()
             .colorSchemeProperty()
-            .addListener((ignored, oldValue, newValue) -> this.applyColorScheme(newValue));
+            .addListener((_, _, newValue) -> this.applyColorScheme(newValue));
     }
 
     public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {

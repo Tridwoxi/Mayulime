@@ -24,7 +24,7 @@ final class ParserSafety {
             final int value = Integer.parseInt(string);
             require(value > 0 && value <= BIG_NUMBER);
             return value;
-        } catch (NumberFormatException exception) {
+        } catch (NumberFormatException _) {
             throw new BadMapCodeException();
         }
     }
@@ -35,7 +35,7 @@ final class ParserSafety {
             final int value = Integer.parseInt(string);
             require(value >= 0 && value <= BIG_NUMBER);
             return value;
-        } catch (NumberFormatException exception) {
+        } catch (NumberFormatException _) {
             throw new BadMapCodeException();
         }
     }
@@ -45,7 +45,7 @@ final class ParserSafety {
             final int value = Math.addExact(first, second);
             require(value <= BIG_NUMBER);
             return value;
-        } catch (ArithmeticException exception) {
+        } catch (ArithmeticException _) {
             throw new BadMapCodeException();
         }
     }
@@ -55,7 +55,7 @@ final class ParserSafety {
             final int value = Math.multiplyExact(first, second);
             require(value > 0 && value < BIG_NUMBER);
             return value;
-        } catch (ArithmeticException exception) {
+        } catch (ArithmeticException _) {
             throw new BadMapCodeException();
         }
     }

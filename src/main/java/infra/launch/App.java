@@ -51,7 +51,7 @@ public final class App extends Application {
 
     @Override
     public void init() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+        Thread.setDefaultUncaughtExceptionHandler((_, exception) -> {
             exception.printStackTrace();
             Platform.exit();
         });
@@ -110,7 +110,7 @@ public final class App extends Application {
         final Puzzle puzzle;
         try {
             puzzle = Parser.parse(mapCode);
-        } catch (BadMapCodeException exception) {
+        } catch (BadMapCodeException _) {
             Logging.warning("Bad MapCode or unsupported feature; problem rejected");
             gui.onMapCodeRejected(BAD_MAP_MESSAGE);
             return;
