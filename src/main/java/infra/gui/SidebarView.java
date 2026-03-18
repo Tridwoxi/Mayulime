@@ -206,25 +206,10 @@ final class SidebarView extends VBox {
 
     private void renderStopOrRestartButton(final UiState state) {
         this.stopOrRestartButton.setText(state.phase() == UiPhase.SOLVING ? "Stop" : "Restart");
-        this.copyMapCodeButton.setDisable(!state.canCopyMapCode());
+        this.renderActionButtonState(this.copyMapCodeButton, !state.canCopyMapCode());
 
         final boolean disabled = state.phase() != UiPhase.SOLVING && !state.canRestart();
-        this.stopOrRestartButton.setDisable(disabled);
-        if (disabled) {
-            applyButtonStyle(
-                this.stopOrRestartButton,
-                this.palette,
-                this.palette.surface(),
-                this.palette.mutedForeground()
-            );
-            return;
-        }
-        applyButtonStyle(
-            this.stopOrRestartButton,
-            this.palette,
-            this.palette.surfaceVariant(),
-            this.palette.foreground()
-        );
+        this.renderActionButtonState(this.stopOrRestartButton, disabled);
     }
 
     private VBox panelCard() {
@@ -254,6 +239,20 @@ final class SidebarView extends VBox {
 
     private static void styleActionButton(final Button button, final UiPalette palette) {
         applyButtonStyle(button, palette, palette.surfaceVariant(), palette.foreground());
+    }
+
+    private void renderActionButtonState(final Button button, final boolean disabled) {
+        button.setDisable(disabled);
+        if (disabled) {
+            applyButtonStyle(
+                button,
+                this.palette,
+                this.palette.surface(),
+                this.palette.mutedForeground()
+            );
+            return;
+        }
+        styleActionButton(button, this.palette);
     }
 
     private static void applyButtonStyle(
