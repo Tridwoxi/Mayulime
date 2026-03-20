@@ -23,6 +23,10 @@ import think.solvers.SolverCatalog;
     Managers are reuseable. {@link #solve(Puzzle)}, {@link #stop()}, and {@link #close()} must be
     called from the same thread. The listener callback will always come from the same thread and
     never sends stale proposals, but must not call the controls.
+
+    On my machine (Apple M4 Pro chip) for small1, this implementation can handle ~2.5M proposals
+    /second, but a single RandomSolver can supply ~1.6M proposals/second, so solvers should either
+    only propose improvements or guess slower.
  */
 public final class Manager implements AutoCloseable {
 
@@ -44,7 +48,7 @@ public final class Manager implements AutoCloseable {
 
     // Small buffer means poor burst tolerance (burst tolerance = buffer size / throughput). Big
     // buffer means less cache. One ought to measure buffer capacity and tune it.
-    private static final int BUFFER_SIZE = 4096; // Untuned arbitrary power of 2.
+    private static final int BUFFER_SIZE = 1024;
     private final ReadWriteLock lock;
     private final Disruptor<Event> disruptor;
     private final RingBuffer<Event> buffer;
@@ -55,8 +59,6 @@ public final class Manager implements AutoCloseable {
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.lock = new ReentrantReadWriteLock(true);
-        // We don't really need Disruptor for this (an ArrayBlockingQueue will do just fine; input
-        // is like 12 million/second for 10 RandomSolvers) but I wanted to use it LOLLLLL!
         this.disruptor = new Disruptor<>(Event::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE);
         disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
         this.buffer = disruptor.start();
