@@ -1,11 +1,13 @@
 package think.solvers.naive;
 
+import java.util.function.Consumer;
 import think.domain.model.Puzzle;
+import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class BaselineSolver extends Solver {
 
-    public BaselineSolver(final ProposedSolution listener, final Puzzle puzzle) {
+    public BaselineSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
     }
 

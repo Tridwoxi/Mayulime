@@ -4,7 +4,7 @@ import infra.launch.Bench.Params;
 import infra.output.Logging;
 import java.util.List;
 import think.manager.Manager;
-import think.manager.Manager.Proposal;
+import think.manager.Proposal;
 
 public final class Throughput implements Runnable {
 
@@ -36,7 +36,7 @@ public final class Throughput implements Runnable {
     }
 
     private void process(final Proposal proposal) {
-        if (proposal.createdAtMs() - startTimeMs <= params.durationMs()) {
+        if (proposal.getCreatedAtMs() - startTimeMs <= params.durationMs()) {
             numProposals += 1;
         }
     }

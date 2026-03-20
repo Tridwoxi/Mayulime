@@ -5,7 +5,7 @@ import infra.output.Logging;
 import java.util.List;
 import think.domain.codec.Serializer;
 import think.manager.Manager;
-import think.manager.Manager.Proposal;
+import think.manager.Proposal;
 
 public final class Score implements Runnable {
 
@@ -33,10 +33,10 @@ public final class Score implements Runnable {
         }
 
         if (best != null) {
-            final String mapCode = Serializer.serialize(params.puzzle(), best.features());
-            final long elapsed = best.createdAtMs() - startTimeMs;
+            final String mapCode = Serializer.serialize(params.puzzle(), best.getFeatures());
+            final long elapsed = best.getCreatedAtMs() - startTimeMs;
             Logging.results("Solution: %s", mapCode);
-            Logging.results("Score: %d", best.score());
+            Logging.results("Score: %d", best.getScore());
             Logging.results("Found after: %d ms", elapsed);
         } else {
             Logging.results("Nothing found.");
@@ -44,8 +44,8 @@ public final class Score implements Runnable {
     }
 
     private void process(final Proposal proposal) {
-        final boolean preferred = best == null || proposal.score() > best.score();
-        final boolean legal = proposal.createdAtMs() - startTimeMs < params.durationMs();
+        final boolean preferred = best == null || proposal.getScore() > best.getScore();
+        final boolean legal = proposal.getCreatedAtMs() - startTimeMs < params.durationMs();
         if (preferred && legal) {
             best = proposal;
         }

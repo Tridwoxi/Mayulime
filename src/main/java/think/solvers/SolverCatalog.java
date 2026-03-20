@@ -1,18 +1,19 @@
 package think.solvers;
 
+import java.util.function.Consumer;
 import think.domain.model.Puzzle;
+import think.manager.Proposal;
 import think.manager.SolverKind;
-import think.solvers.Solver.ProposedSolution;
 import think.solvers.local.ClimbV1Solver;
 import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
 
 public final class SolverCatalog {
 
-    private final ProposedSolution listener;
+    private final Consumer<Proposal> listener;
     private final Puzzle puzzle;
 
-    public SolverCatalog(final ProposedSolution listener, final Puzzle puzzle) {
+    public SolverCatalog(final Consumer<Proposal> listener, final Puzzle puzzle) {
         this.listener = listener;
         this.puzzle = puzzle;
     }

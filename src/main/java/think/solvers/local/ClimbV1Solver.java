@@ -1,16 +1,18 @@
 package think.solvers.local;
 
+import java.util.function.Consumer;
 import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class ClimbV1Solver extends Solver {
 
     private final int[] initiallyBlankCells;
 
-    public ClimbV1Solver(final ProposedSolution listener, final Puzzle puzzle) {
+    public ClimbV1Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
     }

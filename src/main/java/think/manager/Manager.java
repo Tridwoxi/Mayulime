@@ -11,8 +11,6 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
-import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.SolverCatalog;
@@ -29,22 +27,6 @@ import think.solvers.SolverCatalog;
     only propose improvements or guess slower.
  */
 public final class Manager implements AutoCloseable {
-
-    public record Proposal(
-        String submitter,
-        Puzzle puzzle,
-        Feature[] features,
-        int score,
-        long createdAtMs
-    ) {
-        public Proposal {
-            features = features.clone();
-        }
-
-        public Feature[] features() {
-            return features.clone();
-        }
-    }
 
     // Small buffer means poor burst tolerance (burst tolerance = buffer size / throughput). Big
     // buffer means less cache. One ought to measure buffer capacity and tune it.
@@ -103,21 +85,13 @@ public final class Manager implements AutoCloseable {
         disruptor.shutdown();
     }
 
-    private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
-        // It takes non-trivial (10 ms) time to evaluate gargantuan1-like maps, and we're measuring
-        // submission time, so it's most honest to grab the time as early as possible.
-        final long createdAtMs = System.currentTimeMillis();
-        if (!puzzle.isValid(features)) {
-            throw new IllegalArgumentException();
-        }
-        final int score = StandardEvaluator.evaluate(puzzle, features);
-        final Proposal proposal = new Proposal(submitter, puzzle, features, score, createdAtMs);
+    private void consider(final Proposal proposal) {
         lock.readLock().lock();
         try {
             // If a solver works on a puzzle, then solving is stopped, then solving starts again on
             // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
             // technically correct when you want solutions, albeit awkward for benchmarking.
-            if (current == puzzle) {
+            if (current == proposal.getPuzzle()) {
                 buffer.publishEvent((event, sequence) -> event.proposal = proposal);
             }
         } finally {

@@ -12,7 +12,7 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
-import think.manager.Manager.Proposal;
+import think.manager.Proposal;
 import think.manager.SolverKind;
 
 /**
@@ -79,10 +79,10 @@ public final class App extends Application {
             throw new IllegalStateException();
         }
         final Submission update = new Submission(
-            proposal.submitter(),
-            proposal.puzzle(),
-            proposal.features(),
-            proposal.score()
+            proposal.getSubmitter(),
+            proposal.getPuzzle(),
+            proposal.getFeatures(),
+            proposal.getScore()
         );
         final int epoch = this.puzzleEpoch.get();
         if (update.getScore() <= this.topScore) {

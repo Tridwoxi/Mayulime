@@ -1,8 +1,10 @@
 package think.solvers;
 
 import infra.output.Logging;
+import java.util.function.Consumer;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.manager.Proposal;
 
 /**
     Find board configurations to solve Pathery puzzles. This abstract class provides useful getters
@@ -10,16 +12,11 @@ import think.domain.model.Puzzle;
  */
 public abstract class Solver implements Runnable {
 
-    @FunctionalInterface
-    public interface ProposedSolution {
-        void listen(String submitter, Puzzle puzzle, Feature[] features);
-    }
-
-    private final ProposedSolution listener;
+    private final Consumer<Proposal> listener;
     private final Puzzle puzzle;
     private volatile boolean alive;
 
-    public Solver(final ProposedSolution listener, final Puzzle puzzle) {
+    public Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         this.listener = listener;
         this.puzzle = puzzle;
         this.alive = true;
@@ -71,6 +68,6 @@ public abstract class Solver implements Runnable {
     }
 
     protected final void propose(final Feature[] features) {
-        listener.listen(getClass().getSimpleName(), puzzle, features);
+        listener.accept(new Proposal(getClass().getSimpleName(), puzzle, features));
     }
 }
