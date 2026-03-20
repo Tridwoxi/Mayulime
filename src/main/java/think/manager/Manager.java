@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -21,7 +22,7 @@ import think.solvers.SolverCatalog;
 
     Managers are reuseable. {@link #solve(Puzzle)}, {@link #stop()}, and {@link #close()} must be
     called from the same thread. The listener callback will always come from the same thread and
-    never sends stale proposals.
+    never sends stale proposals, but must not call the controls.
  */
 public final class Manager implements AutoCloseable {
 
@@ -45,7 +46,6 @@ public final class Manager implements AutoCloseable {
     // buffer means less cache. One ought to measure buffer capacity and tune it.
     private static final int BUFFER_SIZE = 4096; // Untuned arbitrary power of 2.
     private final ReadWriteLock lock;
-    private final Consumer<Proposal> listener;
     private final Disruptor<Event> disruptor;
     private final RingBuffer<Event> buffer;
     private final Executor executor;
@@ -55,11 +55,10 @@ public final class Manager implements AutoCloseable {
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.lock = new ReentrantReadWriteLock(true);
-        this.listener = listener;
         // We don't really need Disruptor for this (an ArrayBlockingQueue will do just fine; input
         // is like 12 million/second for 10 RandomSolvers) but I wanted to use it LOLLLLL!
         this.disruptor = new Disruptor<>(Event::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE);
-        disruptor.handleEventsWith((event, _, _) -> send(event));
+        disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
         this.buffer = disruptor.start();
         this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
         this.solvers = new ArrayList<>(solverKinds.size());
@@ -88,6 +87,9 @@ public final class Manager implements AutoCloseable {
             // really slow, and the current guards are probably good enough.
             solvers.forEach(Solver::requestTermination);
             solvers.clear();
+            while (buffer.remainingCapacity() < buffer.getBufferSize()) {
+                LockSupport.parkNanos(1L);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -108,8 +110,6 @@ public final class Manager implements AutoCloseable {
         }
         final int score = StandardEvaluator.evaluate(puzzle, features);
         final Proposal proposal = new Proposal(submitter, puzzle, features, score, createdAtMs);
-        // This lock is necessary because Disruptor.shutdown requires an abscence of publishing
-        // during shutdown, but redundant for ensuring no stale proposals are sent.
         lock.readLock().lock();
         try {
             // If a solver works on a puzzle, then solving is stopped, then solving starts again on
@@ -117,17 +117,6 @@ public final class Manager implements AutoCloseable {
             // technically correct when you want solutions, albeit awkward for benchmarking.
             if (current == puzzle) {
                 buffer.publishEvent((event, sequence) -> event.proposal = proposal);
-            }
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    private void send(final Event event) {
-        lock.readLock().lock();
-        try {
-            if (current == event.proposal.puzzle) {
-                listener.accept(event.proposal);
             }
         } finally {
             lock.readLock().unlock();
