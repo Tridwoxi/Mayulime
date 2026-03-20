@@ -1,121 +1,94 @@
 package infra.launch;
 
-import infra.launch.Parameters.UnparseableArgumentsException;
-import infra.output.Logging;
-import java.io.IOException;
+import infra.bench.Score;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.Objects;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ITypeConverter;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.TypeConversionException;
 import think.domain.codec.Parser;
-import think.domain.codec.Parser.BadMapCodeException;
-import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
-import think.manager.Manager;
-import think.manager.Manager.Proposal;
 import think.manager.SolverKind;
-import think.manager.SolverKind.NoSuchSolverException;
 
 /**
-    Development-only headless launch point.
+    Development-only benchmark runner.
  */
-public final class Bench {
+@Command(name = "bench", version = "Mayulime 0.1.0", mixinStandardHelpOptions = true)
+public final class Bench implements Runnable {
 
-    private final Parameters params;
-    private Proposal best;
+    public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs) {}
 
-    private Bench(final Parameters params) {
-        this.params = params;
-        this.best = null;
-    }
+    @Parameters(
+        paramLabel = "<benchKind>",
+        description = "Name of benchmark to run, one of ${COMPLETION-CANDIDATES}."
+    )
+    private BenchKind benchKind;
 
-    private void run() {
-        final Consumer<Proposal> listener = statusUpdate -> {
-            if (best == null || statusUpdate.score() > best.score()) {
-                best = statusUpdate;
-            }
-        };
+    @Parameters(
+        paramLabel = "<solverKind>",
+        description = "Name of solver to use, one of ${COMPLETION-CANDIDATES}"
+    )
+    private SolverKind solverKind;
 
-        final long startTimeMs;
-        try (Manager manager = new Manager(listener, List.of(params.solverKind()))) {
-            startTimeMs = System.currentTimeMillis();
-            manager.solve(params.puzzle());
-            try {
-                Thread.sleep(params.timeoutMs());
-            } catch (InterruptedException exception) {
-                Logging.warning("%s", exception.toString());
-            }
-            manager.stop();
+    @Parameters(
+        paramLabel = "<mapCodeFile>",
+        description = "Path to the Pathery MapCode file.",
+        converter = StringToPuzzle.class
+    )
+    private Puzzle mapCodeFile;
+
+    @Parameters(
+        paramLabel = "<durationMs>",
+        description = "How long to run benchmark for.",
+        converter = StringToNonNegativeLong.class
+    )
+    private Long durationMs;
+
+    private Bench() {}
+
+    @Override
+    public void run() {
+        final Params params = new Params(
+            Objects.requireNonNull(solverKind),
+            Objects.requireNonNull(mapCodeFile),
+            Objects.requireNonNull(durationMs)
+        );
+        switch (Objects.requireNonNull(benchKind)) {
+            case SCORE -> new Score().accept(params);
+            default -> throw new AssertionError();
         }
-
-        final Consumer<Proposal> displayResults = best -> {
-            Logging.results("Solution: %s", Serializer.serialize(params.puzzle(), best.features()));
-            Logging.results("Score: %d", best.score());
-            Logging.results("Found after: %d ms", best.createdAtMs() - startTimeMs);
-        };
-        final Runnable complain = () -> {
-            Logging.results("Nothing found.");
-        };
-        Optional.ofNullable(best).ifPresentOrElse(displayResults, complain);
     }
 
     public static void main(final String[] args) {
-        Logging.announcement("Launch point: Bench");
-        try {
-            new Bench(Parameters.parseArguments(args)).run();
-        } catch (UnparseableArgumentsException _) {
-            Parameters.printUsage();
-            System.exit(1);
-        }
-        System.exit(0);
-    }
-}
-
-record Parameters(Puzzle puzzle, SolverKind solverKind, long timeoutMs) {
-    static final class UnparseableArgumentsException extends Exception {}
-
-    static Parameters parseArguments(final String[] args) throws UnparseableArgumentsException {
-        if (args.length != 3) {
-            throw new UnparseableArgumentsException();
-        }
-
-        final Puzzle puzzle;
-        try {
-            puzzle = Parser.parse(Files.readString(Path.of(args[0])));
-        } catch (InvalidPathException | IOException | OutOfMemoryError | BadMapCodeException _) {
-            throw new UnparseableArgumentsException();
-        }
-
-        final SolverKind solverKind;
-        try {
-            solverKind = SolverKind.parse(args[1]);
-        } catch (NoSuchSolverException _) {
-            throw new UnparseableArgumentsException();
-        }
-
-        final long timeoutMs;
-        try {
-            timeoutMs = Long.parseLong(args[2]);
-            if (timeoutMs < 0) {
-                throw new UnparseableArgumentsException();
-            }
-        } catch (NumberFormatException _) {
-            throw new UnparseableArgumentsException();
-        }
-
-        return new Parameters(puzzle, solverKind, timeoutMs);
-    }
-
-    static void printUsage() {
-        Logging.warning("Usage: gradle bench --args=\"MAPCODE_PATH SOLVER_NAME TIMEOUT_MS\"");
-        Logging.warning("MAPCODE_PATH (path): path to the MapCode file to solve");
-        Logging.warning(
-            "SOLVER_NAME (text): one of [%s]",
-            String.join("|", Arrays.stream(SolverKind.values()).map(Enum::toString).toList())
+        System.exit(
+            new CommandLine(new Bench()).setCaseInsensitiveEnumValuesAllowed(true).execute(args)
         );
-        Logging.warning("TIMEOUT_MS (number): how many miliseconds to run the solver for");
+    }
+
+    private enum BenchKind {
+        SCORE,
+    }
+
+    private static final class StringToPuzzle implements ITypeConverter<Puzzle> {
+
+        @Override
+        public Puzzle convert(final String value) throws Exception {
+            return Parser.parse(Files.readString(Path.of(value)).strip());
+        }
+    }
+
+    private static final class StringToNonNegativeLong implements ITypeConverter<Long> {
+
+        @Override
+        public Long convert(final String value) throws Exception {
+            final long result = Long.parseLong(value);
+            if (result < 0L) {
+                throw new TypeConversionException("Duration must be non-negative");
+            }
+            return result;
+        }
     }
 }
