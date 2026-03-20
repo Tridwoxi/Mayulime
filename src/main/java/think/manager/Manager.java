@@ -1,9 +1,14 @@
 package think.manager;
 
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.util.DaemonThreadFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import think.common.StandardEvaluator;
 import think.domain.model.Feature;
@@ -14,26 +19,8 @@ import think.solvers.SolverCatalog;
 /**
     Concurrent solver orchestration and lifecycle management.
 
-    Managers are resuable. The callback may come from any thread. At most a small number of
-    in-flight proposals will be sent after {@link #stop()}, (this is unavoidable if stopping is
-    instant) and all in-flight proposals will be completed.
- */
-/*
-    "The scheduler does not currently implement time sharing for virtual threads" (JEP 444). We
-    support an unbounded number of solvers that may never terminate, so we must use platform
-    threads and live with the increased memory costs. If parallelism is really coming from "spawn
-    more solvers" so the number of platform threads is large, maybe solvers need revision.
-
-    "The [JVM] shutdown sequence begins when all started non-daemon threads have terminated."
-    (java.lang.Thread.setDaemon). Workers that spin longer than we want shouldn't prevent Java from
-    shutting down, so we'll make them into daemons. But what about wasting resources working on old
-    puzzles? That is a legitimate shortcoming, and future work should fix this using ProcessBuilder
-    or running Mayulime in a subprocess since after Thread.stop(void) got deprecated you can't
-    forcefully stop threads.
-
-    In this implementation, if a solver works on a puzzle, then solving is stopped, then solving
-    starts again on the same puzzle, then the solver submits a solution, the submission will be
-    considered valid. This is awkward and can be fixed, but there isn't a need (yet) to fix it.
+    Bridges are reuseable. {@link #solve(Puzzle)} and {@link #stop()} must be called from the same
+    thread. The listener callback will always come from the same thread.
  */
 public final class Manager {
 
@@ -53,29 +40,35 @@ public final class Manager {
         }
     }
 
-    private final Consumer<Proposal> listener;
-    private final List<SolverKind> solverKinds;
+    // Small buffer means poor burst tolerance (burst tolerance = buffer size / throughput). Big
+    // buffer means less cache. One ought to measure buffer capacity and tune it.
+    private static final int BUFFER_SIZE = 4096; // Untuned arbitrary power of 2.
+    private final ReadWriteLock lock;
+    private final Disruptor<Event> disruptor;
+    private final RingBuffer<Event> buffer;
     private final Executor executor;
     private final List<Solver> solvers;
-    private volatile Puzzle current;
+    private final List<SolverKind> solverKinds;
+    private Puzzle current;
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
-        this.listener = listener;
-        this.solverKinds = new ArrayList<>(solverKinds);
-        this.executor = Executors.newCachedThreadPool(task -> {
-            final Thread thread = new Thread(task);
-            thread.setDaemon(true);
-            return thread;
-        });
+        this.lock = new ReentrantReadWriteLock(true);
+        // We don't really need Disruptor for this (an ArrayBlockingQueue will do just fine; input
+        // is like 12 million/second for 10 RandomSolvers) but I wanted to use it LOLLLLL!
+        this.disruptor = new Disruptor<>(Event::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE);
+        disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
+        this.buffer = disruptor.start();
+        this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
         this.solvers = new ArrayList<>(solverKinds.size());
+        this.solverKinds = new ArrayList<>(solverKinds);
         this.current = null;
     }
 
     public void solve(final Puzzle puzzle) {
         stop();
-        current = puzzle;
-        final SolverCatalog factory = new SolverCatalog(this::consider, puzzle);
-        for (final Solver solver : solverKinds.stream().map(factory::create).toList()) {
+        this.current = puzzle;
+        final SolverCatalog catalog = new SolverCatalog(this::consider, puzzle);
+        for (final Solver solver : solverKinds.stream().map(catalog::create).toList()) {
             solvers.add(solver);
             // Must use execute instead of submit or any other method because exceptions must be
             // propagated all the way up.
@@ -84,24 +77,43 @@ public final class Manager {
     }
 
     public void stop() {
-        // Shutting down the Executor would be nice but it is a newCachedThreadPool so the need
-        // isn't so pressing, and not shutting it down means we can reuse it.
-        current = null;
-        solvers.forEach(Solver::requestTermination);
-        solvers.clear();
+        lock.writeLock().lock();
+        try {
+            this.current = null;
+            // Solvers may terminate after unbounded time (because user controls input size) so
+            // Process.destroyForcibly is the right approach, but it requires serialization, is
+            // really slow, and the current guards are probably good enough.
+            solvers.forEach(Solver::requestTermination);
+            solvers.clear();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
         // It takes non-trivial (10 ms) time to evaluate gargantuan1-like maps, and we're measuring
-        // submission time, so it's best to grab the time before validation and evaluation.
+        // submission time, so it's most honest to grab the time as early as possible.
         final long createdAtMs = System.currentTimeMillis();
         if (!puzzle.isValid(features)) {
             throw new IllegalArgumentException();
         }
         final int score = StandardEvaluator.evaluate(puzzle, features);
         final Proposal proposal = new Proposal(submitter, puzzle, features, score, createdAtMs);
-        if (puzzle == current) {
-            listener.accept(proposal);
+        lock.readLock().lock();
+        try {
+            // If a solver works on a puzzle, then solving is stopped, then solving starts again on
+            // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
+            // technically correct when you want solutions, but awkward for benchmarking.
+            if (current == puzzle) {
+                buffer.publishEvent((event, sequence) -> event.proposal = proposal);
+            }
+        } finally {
+            lock.readLock().unlock();
         }
+    }
+
+    private static final class Event {
+
+        private Proposal proposal;
     }
 }
