@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Optional;
 import java.util.function.Consumer;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
@@ -26,36 +24,33 @@ import think.manager.SolverKind.NoSuchSolverException;
  */
 public final class Bench {
 
-    private static final long GRACE_PERIOD_MS = 50;
     private final Parameters params;
+    private Proposal best;
 
     private Bench(final Parameters params) {
         this.params = params;
+        this.best = null;
     }
 
     private void run() {
-        final BlockingQueue<Proposal> queue = new LinkedBlockingQueue<>();
-        final Manager manager = new Manager(queue::add, List.of(params.solverKind()));
-        final long startTimeMs = System.currentTimeMillis();
+        final Consumer<Proposal> listener = statusUpdate -> {
+            if (best == null || statusUpdate.score() > best.score()) {
+                best = statusUpdate;
+            }
+        };
 
-        manager.solve(params.puzzle());
-        try {
-            Thread.sleep(params.timeoutMs());
-        } catch (InterruptedException exception) {
-            Logging.warning("%s", exception.toString());
-        }
-        manager.stop();
-        try {
-            // Wait for in-flight proposals to finish. Technically this is the wrong way to go
-            // about it (you should make stop(void) wait instead), but it's a good enough
-            // heuristic. It takes 10 MS to evaluate gargantuan1, so this is a practical solution.
-            Thread.sleep(GRACE_PERIOD_MS);
-        } catch (InterruptedException exception) {
-            Logging.warning("%s", exception.toString());
+        final long startTimeMs;
+        try (Manager manager = new Manager(listener, List.of(params.solverKind()))) {
+            startTimeMs = System.currentTimeMillis();
+            manager.solve(params.puzzle());
+            try {
+                Thread.sleep(params.timeoutMs());
+            } catch (InterruptedException exception) {
+                Logging.warning("%s", exception.toString());
+            }
+            manager.stop();
         }
 
-        final List<Proposal> results = new ArrayList<>(queue.size());
-        queue.drainTo(results);
         final Consumer<Proposal> displayResults = best -> {
             Logging.results("Solution: %s", Serializer.serialize(params.puzzle(), best.features()));
             Logging.results("Score: %d", best.score());
@@ -64,10 +59,7 @@ public final class Bench {
         final Runnable complain = () -> {
             Logging.results("Nothing found.");
         };
-        results
-            .stream()
-            .max(Comparator.comparingInt(Proposal::score).thenComparingLong(Proposal::createdAtMs))
-            .ifPresentOrElse(displayResults, complain);
+        Optional.ofNullable(best).ifPresentOrElse(displayResults, complain);
     }
 
     public static void main(final String[] args) {
@@ -122,7 +114,7 @@ record Parameters(Puzzle puzzle, SolverKind solverKind, long timeoutMs) {
         Logging.warning("MAPCODE_PATH (path): path to the MapCode file to solve");
         Logging.warning(
             "SOLVER_NAME (text): one of [%s]",
-            String.join("|", java.util.Arrays.stream(SolverKind.values()).map(Enum::toString).toList())
+            String.join("|", Arrays.stream(SolverKind.values()).map(Enum::toString).toList())
         );
         Logging.warning("TIMEOUT_MS (number): how many miliseconds to run the solver for");
     }

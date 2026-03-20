@@ -1,5 +1,8 @@
 package think.manager;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum SolverKind {
     BASELINE,
     RANDOM,
@@ -14,5 +17,9 @@ public enum SolverKind {
             }
         }
         throw new NoSuchSolverException();
+    }
+
+    public static List<SolverKind> asList() {
+        return Arrays.asList(values());
     }
 }

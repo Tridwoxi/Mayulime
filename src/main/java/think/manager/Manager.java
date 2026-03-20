@@ -19,10 +19,10 @@ import think.solvers.SolverCatalog;
 /**
     Concurrent solver orchestration and lifecycle management.
 
-    Bridges are reuseable. {@link #solve(Puzzle)} and {@link #stop()} must be called from the same
-    thread. The listener callback will always come from the same thread.
+    Managers are reuseable. {@link #solve(Puzzle)}, {@link #stop()}, and {@link #close()} must be
+    called from the same thread. The listener callback will always come from the same thread.
  */
-public final class Manager {
+public final class Manager implements AutoCloseable {
 
     public record Proposal(
         String submitter,
@@ -44,6 +44,7 @@ public final class Manager {
     // buffer means less cache. One ought to measure buffer capacity and tune it.
     private static final int BUFFER_SIZE = 4096; // Untuned arbitrary power of 2.
     private final ReadWriteLock lock;
+    private final Consumer<Proposal> listener;
     private final Disruptor<Event> disruptor;
     private final RingBuffer<Event> buffer;
     private final Executor executor;
@@ -53,10 +54,11 @@ public final class Manager {
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.lock = new ReentrantReadWriteLock(true);
+        this.listener = listener;
         // We don't really need Disruptor for this (an ArrayBlockingQueue will do just fine; input
         // is like 12 million/second for 10 RandomSolvers) but I wanted to use it LOLLLLL!
         this.disruptor = new Disruptor<>(Event::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE);
-        disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
+        disruptor.handleEventsWith((event, _, _) -> send(event));
         this.buffer = disruptor.start();
         this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
         this.solvers = new ArrayList<>(solverKinds.size());
@@ -90,6 +92,12 @@ public final class Manager {
         }
     }
 
+    @Override
+    public void close() {
+        stop();
+        disruptor.shutdown();
+    }
+
     private void consider(final String submitter, final Puzzle puzzle, final Feature[] features) {
         // It takes non-trivial (10 ms) time to evaluate gargantuan1-like maps, and we're measuring
         // submission time, so it's most honest to grab the time as early as possible.
@@ -106,6 +114,17 @@ public final class Manager {
             // technically correct when you want solutions, but awkward for benchmarking.
             if (current == puzzle) {
                 buffer.publishEvent((event, sequence) -> event.proposal = proposal);
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private void send(final Event event) {
+        lock.readLock().lock();
+        try {
+            if (current == event.proposal.puzzle) {
+                listener.accept(event.proposal);
             }
         } finally {
             lock.readLock().unlock();
