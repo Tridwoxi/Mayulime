@@ -20,7 +20,8 @@ import think.solvers.SolverCatalog;
     Concurrent solver orchestration and lifecycle management.
 
     Managers are reuseable. {@link #solve(Puzzle)}, {@link #stop()}, and {@link #close()} must be
-    called from the same thread. The listener callback will always come from the same thread.
+    called from the same thread. The listener callback will always come from the same thread and
+    never sends stale proposals.
  */
 public final class Manager implements AutoCloseable {
 
@@ -107,11 +108,13 @@ public final class Manager implements AutoCloseable {
         }
         final int score = StandardEvaluator.evaluate(puzzle, features);
         final Proposal proposal = new Proposal(submitter, puzzle, features, score, createdAtMs);
+        // This lock is necessary because Disruptor.shutdown requires an abscence of publishing
+        // during shutdown, but redundant for ensuring no stale proposals are sent.
         lock.readLock().lock();
         try {
             // If a solver works on a puzzle, then solving is stopped, then solving starts again on
             // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
-            // technically correct when you want solutions, but awkward for benchmarking.
+            // technically correct when you want solutions, albeit awkward for benchmarking.
             if (current == puzzle) {
                 buffer.publishEvent((event, sequence) -> event.proposal = proposal);
             }
