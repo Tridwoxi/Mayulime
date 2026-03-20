@@ -8,7 +8,7 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
-import think.manager.SolverRegistry;
+import think.manager.SolverKind;
 
 /**
     Testing on the smalls is a good way to check the backend doesn't crash. The expected scores are
@@ -53,7 +53,7 @@ public final class Smalls {
             statusUpdate -> {
                 topScore.accumulateAndGet(statusUpdate.score(), Math::max);
             },
-            Arrays.asList(SolverRegistry.values())
+            Arrays.asList(SolverKind.values())
         );
         manager.solve(puzzle);
         Thread.sleep(TIMEOUT_MS);

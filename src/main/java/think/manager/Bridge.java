@@ -14,6 +14,7 @@ import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
+import think.solvers.SolverCatalog;
 
 /**
     Concurrent solver orchestration and lifecycle management.
@@ -47,10 +48,10 @@ public final class Bridge {
     private final RingBuffer<Event> buffer;
     private final Executor executor;
     private final List<Solver> solvers;
-    private final List<SolverRegistry> registry;
+    private final List<SolverKind> solverKinds;
     private Puzzle current;
 
-    public Bridge(final Consumer<Proposal> listener, final List<SolverRegistry> registry) {
+    public Bridge(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.lock = new ReentrantReadWriteLock(true);
         // We don't really need Disruptor for this (an ArrayBlockingQueue will do just fine; input
         // is like 12 million/second for 10 RandomSolvers) but I wanted to use it LOLLLLL!
@@ -58,16 +59,16 @@ public final class Bridge {
         disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
         this.buffer = disruptor.start();
         this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
-        this.solvers = new ArrayList<>(registry.size());
-        this.registry = new ArrayList<>(registry);
+        this.solvers = new ArrayList<>(solverKinds.size());
+        this.solverKinds = new ArrayList<>(solverKinds);
         this.current = null;
     }
 
     public void solve(final Puzzle puzzle) {
         stop();
         this.current = puzzle;
-        final SolverFactory factory = new SolverFactory(this::consider, puzzle);
-        for (final Solver solver : registry.stream().map(factory::create).toList()) {
+        final SolverCatalog catalog = new SolverCatalog(this::consider, puzzle);
+        for (final Solver solver : solverKinds.stream().map(catalog::create).toList()) {
             solvers.add(solver);
             // Must use execute instead of submit or any other method because exceptions must be
             // propagated all the way up.

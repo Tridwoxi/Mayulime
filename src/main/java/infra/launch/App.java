@@ -13,7 +13,7 @@ import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Manager.Proposal;
-import think.manager.SolverRegistry;
+import think.manager.SolverKind;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
@@ -28,10 +28,10 @@ public final class App extends Application {
     private static final double MIN_HEIGHT_PX = 320.0;
     private static final double DEFAULT_WIDTH_PX = 1280;
     private static final double DEFAULT_HEIGHT_PX = 720.0;
-    private static final List<SolverRegistry> DEFAULT_SOLVERS = List.of(
-        SolverRegistry.BASELINE,
-        SolverRegistry.RANDOM,
-        SolverRegistry.CLIMBV1
+    private static final List<SolverKind> DEFAULT_SOLVER_KINDS = List.of(
+        SolverKind.BASELINE,
+        SolverKind.RANDOM,
+        SolverKind.CLIMBV1
     );
 
     private final AtomicInteger puzzleEpoch;
@@ -61,7 +61,7 @@ public final class App extends Application {
     public void start(final Stage primaryStage) {
         Logging.announcement("Launch point: Application");
 
-        this.manager = new Manager(this::receiveSolution, DEFAULT_SOLVERS);
+        this.manager = new Manager(this::receiveSolution, DEFAULT_SOLVER_KINDS);
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
 
         primaryStage.setScene(gui);

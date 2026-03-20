@@ -9,6 +9,7 @@ import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
+import think.solvers.SolverCatalog;
 
 /**
     Concurrent solver orchestration and lifecycle management.
@@ -53,28 +54,28 @@ public final class Manager {
     }
 
     private final Consumer<Proposal> listener;
-    private final List<SolverRegistry> registry;
+    private final List<SolverKind> solverKinds;
     private final Executor executor;
     private final List<Solver> solvers;
     private volatile Puzzle current;
 
-    public Manager(final Consumer<Proposal> listener, final List<SolverRegistry> registry) {
+    public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.listener = listener;
-        this.registry = new ArrayList<>(registry);
+        this.solverKinds = new ArrayList<>(solverKinds);
         this.executor = Executors.newCachedThreadPool(task -> {
             final Thread thread = new Thread(task);
             thread.setDaemon(true);
             return thread;
         });
-        this.solvers = new ArrayList<>(registry.size());
+        this.solvers = new ArrayList<>(solverKinds.size());
         this.current = null;
     }
 
     public void solve(final Puzzle puzzle) {
         stop();
         current = puzzle;
-        final SolverFactory factory = new SolverFactory(this::consider, puzzle);
-        for (final Solver solver : registry.stream().map(factory::create).toList()) {
+        final SolverCatalog factory = new SolverCatalog(this::consider, puzzle);
+        for (final Solver solver : solverKinds.stream().map(factory::create).toList()) {
             solvers.add(solver);
             // Must use execute instead of submit or any other method because exceptions must be
             // propagated all the way up.

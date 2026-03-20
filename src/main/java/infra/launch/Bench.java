@@ -18,8 +18,8 @@ import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Manager.Proposal;
-import think.manager.SolverRegistry;
-import think.manager.SolverRegistry.NoSuchSolverException;
+import think.manager.SolverKind;
+import think.manager.SolverKind.NoSuchSolverException;
 
 /**
     Development-only headless launch point.
@@ -35,7 +35,7 @@ public final class Bench {
 
     private void run() {
         final BlockingQueue<Proposal> queue = new LinkedBlockingQueue<>();
-        final Manager manager = new Manager(queue::add, List.of(params.registry()));
+        final Manager manager = new Manager(queue::add, List.of(params.solverKind()));
         final long startTimeMs = System.currentTimeMillis();
 
         manager.solve(params.puzzle());
@@ -82,7 +82,7 @@ public final class Bench {
     }
 }
 
-record Parameters(Puzzle puzzle, SolverRegistry registry, long timeoutMs) {
+record Parameters(Puzzle puzzle, SolverKind solverKind, long timeoutMs) {
     static final class UnparseableArgumentsException extends Exception {}
 
     static Parameters parseArguments(final String[] args) throws UnparseableArgumentsException {
@@ -97,9 +97,9 @@ record Parameters(Puzzle puzzle, SolverRegistry registry, long timeoutMs) {
             throw new UnparseableArgumentsException();
         }
 
-        final SolverRegistry registry;
+        final SolverKind solverKind;
         try {
-            registry = SolverRegistry.fromString(args[1]);
+            solverKind = SolverKind.parse(args[1]);
         } catch (NoSuchSolverException _) {
             throw new UnparseableArgumentsException();
         }
@@ -114,13 +114,16 @@ record Parameters(Puzzle puzzle, SolverRegistry registry, long timeoutMs) {
             throw new UnparseableArgumentsException();
         }
 
-        return new Parameters(puzzle, registry, timeoutMs);
+        return new Parameters(puzzle, solverKind, timeoutMs);
     }
 
     static void printUsage() {
         Logging.warning("Usage: gradle bench --args=\"MAPCODE_PATH SOLVER_NAME TIMEOUT_MS\"");
         Logging.warning("MAPCODE_PATH (path): path to the MapCode file to solve");
-        Logging.warning("SOLVER_NAME (text): one of [%s]", SolverRegistry.prettyNameAll());
+        Logging.warning(
+            "SOLVER_NAME (text): one of [%s]",
+            String.join("|", java.util.Arrays.stream(SolverKind.values()).map(Enum::toString).toList())
+        );
         Logging.warning("TIMEOUT_MS (number): how many miliseconds to run the solver for");
     }
 }
