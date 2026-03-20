@@ -5,7 +5,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -34,7 +34,7 @@ public final class Manager implements AutoCloseable {
     private final ReadWriteLock lock;
     private final Disruptor<Event> disruptor;
     private final RingBuffer<Event> buffer;
-    private final Executor executor;
+    private final ExecutorService executor;
     private final List<Solver> solvers;
     private final List<SolverKind> solverKinds;
     private Puzzle current;
@@ -83,6 +83,7 @@ public final class Manager implements AutoCloseable {
     public void close() {
         stop();
         disruptor.shutdown();
+        executor.shutdown();
     }
 
     private void consider(final Proposal proposal) {
