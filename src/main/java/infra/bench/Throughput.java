@@ -3,20 +3,19 @@ package infra.bench;
 import infra.launch.Bench.Params;
 import infra.output.Logging;
 import java.util.List;
-import think.domain.codec.Serializer;
 import think.manager.Manager;
 import think.manager.Manager.Proposal;
 
-public final class Score implements Runnable {
+public final class Throughput implements Runnable {
 
     private final Params params;
-    private volatile Proposal best;
     private volatile long startTimeMs;
+    private volatile long numProposals;
 
-    public Score(final Params params) {
+    public Throughput(final Params params) {
         this.params = params;
-        this.best = null;
         this.startTimeMs = 0L;
+        this.numProposals = 0L;
     }
 
     @Override
@@ -31,23 +30,14 @@ public final class Score implements Runnable {
             }
             manager.stop();
         }
-
-        if (best != null) {
-            final String mapCode = Serializer.serialize(params.puzzle(), best.features());
-            final long elapsed = best.createdAtMs() - startTimeMs;
-            Logging.results("Solution: %s", mapCode);
-            Logging.results("Score: %d", best.score());
-            Logging.results("Found after: %d ms", elapsed);
-        } else {
-            Logging.results("Nothing found.");
-        }
+        final double rate = ((double) numProposals / params.durationMs()) * 1000.0;
+        Logging.results("Saw %d proposals in %d ms", numProposals, params.durationMs());
+        Logging.results("That is %f per second", rate);
     }
 
     private void process(final Proposal proposal) {
-        final boolean preferred = best == null || proposal.score() > best.score();
-        final boolean legal = proposal.createdAtMs() - startTimeMs < params.durationMs();
-        if (preferred && legal) {
-            best = proposal;
+        if (proposal.createdAtMs() - startTimeMs <= params.durationMs()) {
+            numProposals += 1;
         }
     }
 }

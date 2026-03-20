@@ -1,6 +1,7 @@
 package infra.launch;
 
 import infra.bench.Score;
+import infra.bench.Throughput;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public final class Bench implements Runnable {
     @Parameters(
         paramLabel = "<durationMs>",
         description = "How long to run benchmark for.",
-        converter = StringToNonNegativeLong.class
+        converter = StringToPositiveLong.class
     )
     private Long durationMs;
 
@@ -57,7 +58,8 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(durationMs)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case SCORE -> new Score().accept(params);
+            case SCORE -> new Score(params).run();
+            case THROUGHPUT -> new Throughput(params).run();
             default -> throw new AssertionError();
         }
     }
@@ -70,6 +72,7 @@ public final class Bench implements Runnable {
 
     private enum BenchKind {
         SCORE,
+        THROUGHPUT,
     }
 
     private static final class StringToPuzzle implements ITypeConverter<Puzzle> {
@@ -80,13 +83,13 @@ public final class Bench implements Runnable {
         }
     }
 
-    private static final class StringToNonNegativeLong implements ITypeConverter<Long> {
+    private static final class StringToPositiveLong implements ITypeConverter<Long> {
 
         @Override
         public Long convert(final String value) throws Exception {
             final long result = Long.parseLong(value);
-            if (result < 0L) {
-                throw new TypeConversionException("Duration must be non-negative");
+            if (result <= 0L) {
+                throw new TypeConversionException("Duration must be strictly positive");
             }
             return result;
         }

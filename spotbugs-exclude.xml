@@ -9,4 +9,7 @@
     <Match>
         <Bug pattern="MS_EXPOSE_REP" />
     </Match>
+    <Match>
+        <Bug pattern="VO_VOLATILE_INCREMENT" />
+    </Match>
 </FindBugsFilter>
