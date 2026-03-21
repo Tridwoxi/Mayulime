@@ -22,8 +22,9 @@ human instead.
 
 Application packages are in `src/main/java/`:
 
+`infra.bench` - Benchmarks.
 `infra.gui` - JavaFX GUI.
-`infra.launch` - Application launch point.
+`infra.launch` - Launch points.
 `infra.output` - Logging.
 
 `think.common` - Shared backend classes.
@@ -41,11 +42,14 @@ Test packages are in `src/test/java/`:
 Use descriptive variable names. Abbreviation is acceptable when meaning is clear. Avoid one letter
 variable names.
 
-Repo code may receive `null` from library code, pass `null` to library code, and use `null` for
-private implementation details. Repo subroutines must never accept `null`, return `null`, or let
-`null` escape into other repo code. Hence there is no need to check for `null` in repo code.
+Repo code may use `null` when interacting with library code or for private implementation details.
+However, repo code must never accept, return, or let `null` escape into other repo code. Hence
+there is usually no need to check.
 
 If an interface already exists, accept and return that interface rather than the implementation. If
 no interface already exists, just use the implementation.
 
 Extending or implementing custom classes and interfaces is discouraged beyond one layer deep.
+
+Prefer imported simple type names over fully-qualified names. For example, `List` via `import 
+java.util.List` instead of `java.util.List` inline.
