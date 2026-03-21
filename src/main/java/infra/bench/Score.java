@@ -2,7 +2,6 @@ package infra.bench;
 
 import infra.launch.Bench.Params;
 import infra.output.Logging;
-import java.util.List;
 import think.domain.codec.Serializer;
 import think.manager.Manager;
 import think.manager.Proposal;
@@ -21,7 +20,7 @@ public final class Score implements Runnable {
 
     @Override
     public void run() {
-        try (Manager manager = new Manager(this::process, List.of(params.solverKind()))) {
+        try (Manager manager = new Manager(this::process, params.buildSolverKinds())) {
             startTimeMs = System.currentTimeMillis();
             manager.solve(params.puzzle());
             try {

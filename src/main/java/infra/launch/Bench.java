@@ -4,6 +4,8 @@ import infra.bench.Score;
 import infra.bench.Throughput;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -20,7 +22,11 @@ import think.manager.SolverKind;
 @Command(name = "bench", version = "Mayulime 0.1.0", mixinStandardHelpOptions = true)
 public final class Bench implements Runnable {
 
-    public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs) {}
+    public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs, int parallelism) {
+        public List<SolverKind> buildSolverKinds() {
+            return Collections.nCopies(parallelism, solverKind);
+        }
+    }
 
     @Parameters(
         paramLabel = "<benchKind>",
@@ -48,6 +54,13 @@ public final class Bench implements Runnable {
     )
     private Long durationMs;
 
+    @Parameters(
+        paramLabel = "<parallelism>",
+        description = "How many identical workers to run.",
+        converter = StringToPositiveInt.class
+    )
+    private Integer parallelism;
+
     private Bench() {}
 
     @Override
@@ -55,7 +68,8 @@ public final class Bench implements Runnable {
         final Params params = new Params(
             Objects.requireNonNull(solverKind),
             Objects.requireNonNull(mapCodeFile),
-            Objects.requireNonNull(durationMs)
+            Objects.requireNonNull(durationMs),
+            Objects.requireNonNull(parallelism)
         );
         switch (Objects.requireNonNull(benchKind)) {
             case SCORE -> new Score(params).run();
@@ -90,6 +104,18 @@ public final class Bench implements Runnable {
             final long result = Long.parseLong(value);
             if (result <= 0L) {
                 throw new TypeConversionException("Duration must be strictly positive");
+            }
+            return result;
+        }
+    }
+
+    private static final class StringToPositiveInt implements ITypeConverter<Integer> {
+
+        @Override
+        public Integer convert(final String value) throws Exception {
+            final int result = Integer.parseInt(value);
+            if (result <= 0) {
+                throw new TypeConversionException("Parallelism must be strictly positive");
             }
             return result;
         }
