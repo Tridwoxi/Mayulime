@@ -13,13 +13,11 @@ public final class Proposal {
     private final long createdAtMs;
 
     public Proposal(final String submitter, final Puzzle puzzle, final Feature[] features) {
-        // It takes non-trivial (10 ms) time to evaluate gargantuan1-like maps, and we're measuring
-        // submission time, so it's most honest to grab the time as early as possible.
-        this.createdAtMs = System.currentTimeMillis();
         this.submitter = submitter;
         this.puzzle = puzzle;
         this.features = features.clone();
         this.score = StandardEvaluator.evaluate(puzzle, features);
+        this.createdAtMs = System.currentTimeMillis();
         if (!puzzle.isValid(features)) {
             throw new IllegalArgumentException();
         }
