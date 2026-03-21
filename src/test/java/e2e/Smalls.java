@@ -1,6 +1,7 @@
 package e2e;
 
 import infra.output.Logging;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
-import think.manager.Manager.Proposal;
+import think.manager.Proposal;
 import think.manager.SolverKind;
 
 /**
@@ -49,9 +50,9 @@ public final class Smalls {
     private boolean solve(final String mapCode, final int minimumRequiredScore)
         throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(mapCode);
-        final int[] topScore = new int[] { 0 };
-        final Consumer<Proposal> listener = statusUpdate -> {
-            topScore[0] = Math.max(topScore[0], statusUpdate.score());
+        final AtomicInteger topScore = new AtomicInteger(0);
+        final Consumer<Proposal> listener = proposal -> {
+            topScore.accumulateAndGet(proposal.getScore(), Math::max);
         };
         try (Manager manager = new Manager(listener, SolverKind.asList())) {
             manager.solve(puzzle);
@@ -62,6 +63,6 @@ public final class Smalls {
             }
             manager.stop();
         }
-        return topScore[0] >= minimumRequiredScore;
+        return topScore.get() >= minimumRequiredScore;
     }
 }
