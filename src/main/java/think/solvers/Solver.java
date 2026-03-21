@@ -1,6 +1,7 @@
 package think.solvers;
 
 import infra.output.Logging;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
@@ -12,11 +13,14 @@ import think.manager.Proposal;
  */
 public abstract class Solver implements Runnable {
 
+    private static final AtomicInteger ID = new AtomicInteger(0);
+    private final String name;
     private final Consumer<Proposal> listener;
     private final Puzzle puzzle;
     private volatile boolean alive;
 
     public Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+        this.name = getClass().getSimpleName() + "~" + ID.getAndIncrement();
         this.listener = listener;
         this.puzzle = puzzle;
         this.alive = true;
@@ -68,6 +72,6 @@ public abstract class Solver implements Runnable {
     }
 
     protected final void propose(final Feature[] features) {
-        listener.accept(new Proposal(getClass().getSimpleName(), puzzle, features));
+        listener.accept(new Proposal(name, puzzle, features));
     }
 }

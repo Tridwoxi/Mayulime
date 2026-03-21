@@ -28,11 +28,7 @@ public final class App extends Application {
     private static final double MIN_HEIGHT_PX = 320.0;
     private static final double DEFAULT_WIDTH_PX = 1280;
     private static final double DEFAULT_HEIGHT_PX = 720.0;
-    private static final List<SolverKind> DEFAULT_SOLVER_KINDS = List.of(
-        SolverKind.BASELINE,
-        SolverKind.RANDOM,
-        SolverKind.CLIMBV1
-    );
+    private static final List<SolverKind> DEFAULT_SOLVER_KINDS = SolverKind.asList();
 
     private final AtomicInteger puzzleEpoch;
     private volatile int topScore;
@@ -91,12 +87,11 @@ public final class App extends Application {
         final String priorScoreText =
             this.topScore == UNSCORED ? "Unscored" : Integer.toString(this.topScore);
         Logging.info(
-            "Score %s -> %d on %s by %s from %s",
+            "Score %s -> %d on %s by %s",
             priorScoreText,
             update.getScore(),
             this.currentPuzzleName,
-            update.getSubmitter(),
-            Thread.currentThread().getName()
+            update.getSubmitter()
         );
         this.topScore = update.getScore();
         this.gui.enqueueSolverUpdate(update, epoch);
