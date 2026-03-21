@@ -34,6 +34,7 @@ final class SingleManager {
     }
 
     void solve(final Puzzle puzzle) {
+        stop();
         current = puzzle;
         solvers.add(new SolverCatalog(this::consider, puzzle).create(solverKind));
         executor.execute(solvers.get(0));
