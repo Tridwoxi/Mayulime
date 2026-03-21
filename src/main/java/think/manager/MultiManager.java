@@ -33,7 +33,7 @@ final class MultiManager {
     private final ExecutorService executor;
     private final List<Solver> solvers;
     private final List<SolverKind> solverKinds;
-    private Puzzle current;
+    private volatile Puzzle current;
 
     MultiManager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.inFlight = new LongAdder();
