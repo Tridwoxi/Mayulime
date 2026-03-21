@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
@@ -33,7 +32,7 @@ public final class Manager implements AutoCloseable {
     // Small buffer means poor burst tolerance (burst tolerance = buffer size / throughput). Big
     // buffer means less cache. One ought to measure buffer capacity and tune it.
     private static final int BUFFER_SIZE = 1024;
-    private final ReadWriteLock lock;
+    private final LongAdder inFlight;
     private final Disruptor<Event> disruptor;
     private final RingBuffer<Event> buffer;
     private final ExecutorService executor;
@@ -42,7 +41,7 @@ public final class Manager implements AutoCloseable {
     private Puzzle current;
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
-        this.lock = new ReentrantReadWriteLock(true);
+        this.inFlight = new LongAdder();
         this.disruptor = new Disruptor<>(
             Event::new,
             BUFFER_SIZE,
@@ -71,21 +70,19 @@ public final class Manager implements AutoCloseable {
     }
 
     public void stop() {
-        lock.writeLock().lock();
-        try {
-            this.current = null;
-            // Solvers may terminate after unbounded time (because user controls input size) so
-            // Process.destroyForcibly is the right approach, but it requires serialization, is
-            // really slow, and the current guards are probably good enough.
-            solvers.forEach(Solver::requestTermination);
-            solvers.clear();
-            // This condition works for draining because in Disruptor 4.0.0, remaining capacity is
-            // only changed after an event has been fully consumed.
-            while (buffer.remainingCapacity() < buffer.getBufferSize()) {
-                LockSupport.parkNanos(1L);
-            }
-        } finally {
-            lock.writeLock().unlock();
+        this.current = null;
+        // Solvers may terminate after unbounded time (because user controls input size) so
+        // Process.destroyForcibly is the right approach, but it requires serialization, is
+        // really slow, and the current guards are probably good enough.
+        solvers.forEach(Solver::requestTermination);
+        solvers.clear();
+        while (inFlight.longValue() > 0L) {
+            LockSupport.parkNanos(1L);
+        }
+        // This condition works for draining because in Disruptor 4.0.0, remaining capacity is
+        // only changed after an event has been fully consumed.
+        while (buffer.remainingCapacity() < buffer.getBufferSize()) {
+            LockSupport.parkNanos(1L);
         }
     }
 
@@ -97,17 +94,19 @@ public final class Manager implements AutoCloseable {
     }
 
     private void consider(final Proposal proposal) {
-        lock.readLock().lock();
-        try {
-            // If a solver works on a puzzle, then solving is stopped, then solving starts again on
-            // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
-            // technically correct when you want solutions, albeit awkward for benchmarking.
-            if (current == proposal.getPuzzle()) {
-                buffer.publishEvent((event, sequence) -> event.proposal = proposal);
-            }
-        } finally {
-            lock.readLock().unlock();
+        if (current != proposal.getPuzzle()) {
+            return;
         }
+        inFlight.increment();
+        if (current != proposal.getPuzzle()) {
+            inFlight.decrement();
+            return;
+        }
+        // If a solver works on a puzzle, then solving is stopped, then solving starts again on
+        // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
+        // technically correct when you want solutions, albeit awkward for benchmarking.
+        buffer.publishEvent((event, _) -> event.proposal = proposal);
+        inFlight.decrement();
     }
 
     private static final class Event {
