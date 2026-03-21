@@ -1,7 +1,9 @@
 package think.manager;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,13 @@ public final class Manager implements AutoCloseable {
 
     public Manager(final Consumer<Proposal> listener, final List<SolverKind> solverKinds) {
         this.lock = new ReentrantReadWriteLock(true);
-        this.disruptor = new Disruptor<>(Event::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE);
+        this.disruptor = new Disruptor<>(
+            Event::new,
+            BUFFER_SIZE,
+            DaemonThreadFactory.INSTANCE,
+            solverKinds.size() <= 1 ? ProducerType.SINGLE : ProducerType.MULTI,
+            new BlockingWaitStrategy() // Fastest for 10 RandomSolvers.
+        );
         disruptor.handleEventsWith((event, _, _) -> listener.accept(event.proposal));
         this.buffer = disruptor.start();
         this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
@@ -71,6 +79,8 @@ public final class Manager implements AutoCloseable {
             // really slow, and the current guards are probably good enough.
             solvers.forEach(Solver::requestTermination);
             solvers.clear();
+            // This condition works for draining because in Disruptor 4.0.0, remaining capacity is
+            // only changed after an event has been fully consumed.
             while (buffer.remainingCapacity() < buffer.getBufferSize()) {
                 LockSupport.parkNanos(1L);
             }
