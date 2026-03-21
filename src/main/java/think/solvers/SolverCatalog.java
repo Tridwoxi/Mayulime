@@ -3,7 +3,6 @@ package think.solvers;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
-import think.manager.SolverKind;
 import think.solvers.local.ClimbV1Solver;
 import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;

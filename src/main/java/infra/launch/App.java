@@ -13,7 +13,7 @@ import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Proposal;
-import think.manager.SolverKind;
+import think.solvers.SolverKind;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).

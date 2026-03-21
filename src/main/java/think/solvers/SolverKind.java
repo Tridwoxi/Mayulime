@@ -1,4 +1,4 @@
-package think.manager;
+package think.solvers;
 
 import java.util.Arrays;
 import java.util.List;

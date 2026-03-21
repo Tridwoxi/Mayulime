@@ -10,12 +10,12 @@ import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.SolverCatalog;
+import think.solvers.SolverKind;
 
 /**
-    Optimized version of {@link Manager} for a single producer and single lightweight consumer.
-    About 1.5x faster (1.2M per second versus 800k per second) for RandomSolver on small1.
+    This implementation has almost no concurrency overhead.
  */
-public final class Runner implements AutoCloseable {
+final class SingleManager {
 
     private final Consumer<Proposal> listener;
     private final SolverKind solverKind;
@@ -24,7 +24,7 @@ public final class Runner implements AutoCloseable {
     private volatile Puzzle current;
     private volatile int inFlight;
 
-    public Runner(final Consumer<Proposal> listener, final SolverKind solverKind) {
+    SingleManager(final Consumer<Proposal> listener, final SolverKind solverKind) {
         this.listener = listener;
         this.solverKind = solverKind;
         this.executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
@@ -33,13 +33,13 @@ public final class Runner implements AutoCloseable {
         this.inFlight = 0;
     }
 
-    public void solve(final Puzzle puzzle) {
+    void solve(final Puzzle puzzle) {
         current = puzzle;
         solvers.add(new SolverCatalog(this::consider, puzzle).create(solverKind));
         executor.execute(solvers.get(0));
     }
 
-    public void stop() {
+    void stop() {
         current = null;
         solvers.forEach(Solver::requestTermination);
         solvers.clear();
@@ -48,8 +48,7 @@ public final class Runner implements AutoCloseable {
         }
     }
 
-    @Override
-    public void close() {
+    void close() {
         stop();
         executor.shutdown();
     }
@@ -58,14 +57,11 @@ public final class Runner implements AutoCloseable {
         if (current != proposal.getPuzzle()) {
             return;
         }
-        // Optimization: single producer enables LongAdder begone.
         inFlight = 1;
         if (current != proposal.getPuzzle()) {
             inFlight = 0;
             return;
         }
-        // Optimization: lightweight listener enables consumption directly from producer thread,
-        // but perhaps more importantly, no Disruptor.
         listener.accept(proposal);
         inFlight = 0;
     }

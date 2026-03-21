@@ -10,7 +10,7 @@ import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Proposal;
-import think.manager.SolverKind;
+import think.solvers.SolverKind;
 
 /**
     Testing on the smalls is a good way to check the backend doesn't crash. The expected scores are

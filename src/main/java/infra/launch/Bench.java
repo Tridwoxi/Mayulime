@@ -14,7 +14,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.TypeConversionException;
 import think.domain.codec.Parser;
 import think.domain.model.Puzzle;
-import think.manager.SolverKind;
+import think.solvers.SolverKind;
 
 /**
     Development-only benchmark runner.
