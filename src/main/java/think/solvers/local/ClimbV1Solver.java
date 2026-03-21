@@ -31,6 +31,7 @@ public final class ClimbV1Solver extends Solver {
         final int[] scoreBox = new int[] { StandardEvaluator.evaluate(getPuzzle(), features) };
 
         for (;;) {
+            checkAlive();
             final int[] blankCells = getCellsWhere(features, Feature.BLANK);
             final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
@@ -46,10 +47,11 @@ public final class ClimbV1Solver extends Solver {
         return features;
     }
 
-    private int seed(final Feature[] features) {
+    private int seed(final Feature[] features) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
+            checkAlive();
             features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
             if (StandardEvaluator.evaluate(getPuzzle(), features) < 0) {
                 features[initiallyBlankCells[placement]] = Feature.BLANK;
@@ -64,11 +66,12 @@ public final class ClimbV1Solver extends Solver {
         final int[] blankCells,
         final int[] budgetBox,
         final int[] scoreBox
-    ) {
+    ) throws KilledException {
         if (budgetBox[0] <= 0) {
             return false;
         }
         for (final int blankCell : blankCells) {
+            checkAlive();
             features[blankCell] = Feature.PLAYER_WALL;
             final int newScore = StandardEvaluator.evaluate(getPuzzle(), features);
             if (newScore > scoreBox[0]) {
@@ -86,10 +89,11 @@ public final class ClimbV1Solver extends Solver {
         final int[] blankCells,
         final int[] playerCells,
         final int[] scoreBox
-    ) {
+    ) throws KilledException {
         for (int blankIndex = 0; blankIndex < blankCells.length; blankIndex += 1) {
             final int blankCell = blankCells[blankIndex];
             for (int playerIndex = 0; playerIndex < playerCells.length; playerIndex += 1) {
+                checkAlive();
                 final int playerCell = playerCells[playerIndex];
                 features[blankCell] = Feature.PLAYER_WALL;
                 features[playerCell] = Feature.BLANK;
