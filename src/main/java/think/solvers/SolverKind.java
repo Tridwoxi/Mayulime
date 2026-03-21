@@ -6,7 +6,8 @@ import java.util.List;
 public enum SolverKind {
     BASELINE,
     RANDOM,
-    CLIMBV1;
+    CLIMBV1,
+    CLIMBV2;
 
     public static final class NoSuchSolverException extends Exception {}
 

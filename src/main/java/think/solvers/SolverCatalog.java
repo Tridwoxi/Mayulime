@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.local.ClimbV1Solver;
+import think.solvers.local.ClimbV2Solver;
 import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
 
@@ -22,6 +23,7 @@ public final class SolverCatalog {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
             case CLIMBV1 -> new ClimbV1Solver(listener, puzzle);
+            case CLIMBV2 -> new ClimbV2Solver(listener, puzzle);
         };
     }
 }
