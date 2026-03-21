@@ -3,36 +3,39 @@ package infra.gui;
 import javafx.application.ColorScheme;
 import javafx.scene.paint.Color;
 
+/**
+    Supposedly colorblind-friendly.
+ */
 final class UiPalette {
 
     private static final UiPalette LIGHT = new UiPalette(
-        Color.web("e8dece"),
-        Color.web("eee3d3"),
-        Color.web("dacbb5"),
-        Color.web("bba88d"),
-        Color.web("274463"),
-        Color.web("7f725f"),
-        Color.web("bc5b3a"),
-        Color.web("e1d4c0"),
-        Color.web("274463"),
-        Color.web("bc5b3a"),
-        Color.web("6d8d4e"),
-        Color.color(0.17, 0.29, 0.39, 0.12)
+        Color.web("dddddd"),
+        Color.web("eeeeee"),
+        Color.web("cccccc"),
+        Color.web("999999"),
+        Color.web("111111"),
+        Color.web("777777"),
+        Color.web("333333"),
+        Color.web("eeeeee"),
+        Color.web("0077bb"),
+        Color.web("ee7733"),
+        Color.web("009988"),
+        Color.web("00000022")
     );
 
     private static final UiPalette DARK = new UiPalette(
-        Color.web("181412"),
-        Color.web("241d19"),
-        Color.web("332822"),
-        Color.web("5f5145"),
-        Color.web("f0e2cf"),
-        Color.web("b7a690"),
-        Color.web("c97a58"),
-        Color.web("3a312b"),
-        Color.web("6a86a4"),
-        Color.web("c97a58"),
-        Color.web("738a58"),
-        Color.color(0.0, 0.0, 0.0, 0.38)
+        Color.web("111111"),
+        Color.web("222222"),
+        Color.web("333333"),
+        Color.web("555555"),
+        Color.web("eeeeee"),
+        Color.web("999999"),
+        Color.web("cccccc"),
+        Color.web("222222"),
+        Color.web("0088cc"),
+        Color.web("ee8844"),
+        Color.web("00aa88"),
+        Color.web("00000066")
     );
 
     private final Color background;
