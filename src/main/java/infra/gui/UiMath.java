@@ -69,9 +69,32 @@ final class UiMath {
     }
 
     static Color cellLabelColor(final Color background, final UiPalette palette) {
-        if (background.getBrightness() > 0.6) {
-            return palette.background();
+        final Color darkLabel = palette.background();
+        final Color lightLabel = palette.foreground();
+        if (contrastRatio(background, darkLabel) >= contrastRatio(background, lightLabel)) {
+            return darkLabel;
         }
-        return palette.foreground();
+        return lightLabel;
+    }
+
+    private static double contrastRatio(final Color left, final Color right) {
+        final double leftLuminance = relativeLuminance(left);
+        final double rightLuminance = relativeLuminance(right);
+        final double lighter = Math.max(leftLuminance, rightLuminance);
+        final double darker = Math.min(leftLuminance, rightLuminance);
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    private static double relativeLuminance(final Color color) {
+        return 0.2126 * channelLuminance(color.getRed())
+            + 0.7152 * channelLuminance(color.getGreen())
+            + 0.0722 * channelLuminance(color.getBlue());
+    }
+
+    private static double channelLuminance(final double channel) {
+        if (channel <= 0.03928) {
+            return channel / 12.92;
+        }
+        return Math.pow((channel + 0.055) / 1.055, 2.4);
     }
 }

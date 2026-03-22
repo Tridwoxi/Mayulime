@@ -19,7 +19,7 @@ final class UiPalette {
         Color.web("eeeeee"),
         Color.web("0077bb"),
         Color.web("ee7733"),
-        Color.web("009988"),
+        Color.web("444444"),
         Color.web("00000022")
     );
 
@@ -34,7 +34,7 @@ final class UiPalette {
         Color.web("222222"),
         Color.web("0088cc"),
         Color.web("ee8844"),
-        Color.web("00aa88"),
+        Color.web("dddddd"),
         Color.web("00000066")
     );
 
