@@ -42,30 +42,17 @@ public final class IntArrays {
                 count += 1;
             }
         }
-        return slicedCopy(filtered, 0, count);
+        return Arrays.copyOfRange(filtered, 0, count);
     }
 
     public static void shuffleInPlace(final int[] array) {
         // Reference: https://en.wikipedia.org/wiki/Fisher–Yates_shuffle
-        for (int i = array.length - 1; i > 0; i--) {
-            final int j = ThreadLocalRandom.current().nextInt(i + 1);
-            final int temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
+        for (int index = array.length - 1; index > 0; index -= 1) {
+            final int pick = ThreadLocalRandom.current().nextInt(index + 1);
+            final int temp = array[index];
+            array[index] = array[pick];
+            array[pick] = temp;
         }
-    }
-
-    public static int[] slicedCopy(
-        final int[] array,
-        final int startInclusive,
-        final int endExclusive
-    ) {
-        if (startInclusive < 0 || endExclusive > array.length || startInclusive > endExclusive) {
-            throw new IllegalArgumentException();
-        }
-        final int[] sliced = new int[endExclusive - startInclusive];
-        System.arraycopy(array, startInclusive, sliced, 0, sliced.length);
-        return sliced;
     }
 
     public static int[] filteredCopy(final int[] array, final IntPredicate keepIff) {
@@ -77,6 +64,6 @@ public final class IntArrays {
                 count += 1;
             }
         }
-        return slicedCopy(filtered, 0, count);
+        return Arrays.copyOfRange(filtered, 0, count);
     }
 }
