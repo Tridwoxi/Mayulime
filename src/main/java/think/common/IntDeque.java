@@ -10,7 +10,10 @@ final class IntDeque {
     private int size;
 
     IntDeque(final int initialCapacity) {
-        buffer = new int[initialCapacity];
+        this.buffer = new int[initialCapacity];
+        this.head = 0;
+        this.tail = 0;
+        this.size = 0;
     }
 
     void addLast(final int value) {
@@ -38,6 +41,12 @@ final class IntDeque {
 
     int size() {
         return size;
+    }
+
+    void clear() {
+        head = 0;
+        tail = 0;
+        size = 0;
     }
 
     private void grow() {
