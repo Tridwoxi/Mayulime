@@ -5,35 +5,42 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    Simple stateless reference evaluator implementation. Computes sum of pairwise distances between
-    checkpoints, or -1 if no path exists. Solvers are encouraged to write their own specialized
-    implementations, but may use this one if it is good enough.
+    Simple reference evaluator implementation. Computes sum of pairwise distances between
+    checkpoints, or NO_PATH_EXISTS if checkpoints are disconnected. Not thread-safe.
  */
 public final class StandardEvaluator {
 
-    private static final int NO_PATH_EXISTS = -1;
+    public static final int NO_PATH_EXISTS = -1;
 
-    private StandardEvaluator() {}
+    private final int numRows;
+    private final int numCols;
+    private final int size;
+    private final IntDeque frontier;
+    private final int[] distances;
+    private final int[] checkpoints;
 
+    public StandardEvaluator(final Puzzle puzzle) {
+        this.numRows = puzzle.getNumRows();
+        this.numCols = puzzle.getNumCols();
+        this.size = numRows * numCols;
+        this.frontier = new IntDeque(size);
+        this.distances = new int[size];
+        this.checkpoints = puzzle.getCheckpoints();
+    }
+
+    @Deprecated
     public static int evaluate(final Puzzle puzzle, final Feature[] features) {
-        if (puzzle.getNumRows() * puzzle.getNumCols() != features.length) {
+        return new StandardEvaluator(puzzle).evaluate(features);
+    }
+
+    public int evaluate(final Feature[] features) {
+        if (features.length != size) {
             throw new IllegalArgumentException();
         }
-        // Reusing frontier and distances across findSegmentDistance invocations is 9% faster.
-        final IntDeque frontier = new IntDeque(features.length);
-        final int[] distances = new int[features.length];
-        final int[] checkpoints = puzzle.getCheckpoints();
-        final int numRows = puzzle.getNumRows();
-        final int numCols = puzzle.getNumCols();
-
         int score = 0;
         for (int start = 0; start < checkpoints.length - 1; start += 1) {
             final int segmentDistance = findSegmentDistance(
-                frontier,
-                distances,
                 features,
-                numRows,
-                numCols,
                 checkpoints[start],
                 checkpoints[start + 1]
             );
@@ -45,15 +52,7 @@ public final class StandardEvaluator {
         return score;
     }
 
-    private static int findSegmentDistance(
-        final IntDeque frontier,
-        final int[] distances,
-        final Feature[] features,
-        final int numRows,
-        final int numCols,
-        final int start,
-        final int finish
-    ) {
+    private int findSegmentDistance(final Feature[] features, final int start, final int finish) {
         // PERF: VisualVM says this method takes up about 99% of thread runtime for ClimbV1Solver.
         if (features[start].isBlocked() || features[finish].isBlocked()) {
             return NO_PATH_EXISTS;
