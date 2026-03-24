@@ -5,7 +5,7 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    Simple reference evaluator implementation. Computes sum of pairwise distances between
+    Simple reference evaluator implementation. Calculates sum of pairwise distances between
     checkpoints, or NO_PATH_EXISTS if checkpoints are disconnected. Not thread-safe.
  */
 public final class StandardEvaluator {
@@ -53,7 +53,6 @@ public final class StandardEvaluator {
     }
 
     private int findSegmentDistance(final Feature[] features, final int start, final int finish) {
-        // PERF: VisualVM says this method takes up about 99% of thread runtime for ClimbV1Solver.
         if (features[start].isBlocked() || features[finish].isBlocked()) {
             return NO_PATH_EXISTS;
         }

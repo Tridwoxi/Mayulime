@@ -1,65 +1,45 @@
 package think.common;
 
-import java.util.NoSuchElementException;
-
+/**
+    Fixed-size circular buffer-backed deque of ints. It is unspecified behaviour to fill
+    this implementation to full capacity.
+ */
 final class IntDeque {
 
-    private int[] buffer;
+    private final int[] buffer;
+    private final int mask;
     private int head;
     private int tail;
-    private int size;
 
-    IntDeque(final int initialCapacity) {
-        this.buffer = new int[initialCapacity];
+    IntDeque(final int finalCapacity) {
+        int actualCapacity = Integer.highestOneBit(finalCapacity);
+        if (actualCapacity < finalCapacity) {
+            actualCapacity <<= 1;
+        }
+        this.buffer = new int[actualCapacity];
+        this.mask = actualCapacity - 1;
         this.head = 0;
         this.tail = 0;
-        this.size = 0;
     }
 
     void addLast(final int value) {
-        if (size == buffer.length) {
-            grow();
-        }
+        // PERF: Async profiler says this method is 74% of thread runtime for ClimbV1Solver.
         buffer[tail] = value;
-        tail = (tail + 1) % buffer.length;
-        size += 1;
+        tail = (tail + 1) & mask;
     }
 
     int removeFirst() {
-        if (size == 0) {
-            throw new NoSuchElementException();
-        }
         final int value = buffer[head];
-        head = (head + 1) % buffer.length;
-        size -= 1;
+        head = (head + 1) & mask;
         return value;
     }
 
     boolean isEmpty() {
-        return size == 0;
-    }
-
-    int size() {
-        return size;
+        return head == tail;
     }
 
     void clear() {
         head = 0;
         tail = 0;
-        size = 0;
-    }
-
-    private void grow() {
-        final int[] next = new int[buffer.length * 2];
-        if (head < tail) {
-            System.arraycopy(buffer, head, next, 0, size);
-        } else {
-            final int tailLen = buffer.length - head;
-            System.arraycopy(buffer, head, next, 0, tailLen);
-            System.arraycopy(buffer, 0, next, tailLen, tail);
-        }
-        head = 0;
-        tail = size;
-        buffer = next;
     }
 }
