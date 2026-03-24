@@ -1,36 +1,44 @@
 package think.common;
 
+import java.util.Arrays;
 import think.domain.model.Feature;
+import think.domain.model.Puzzle;
 
 /**
-    Answers the question "How far is this cell from all other cells?" efficiently. A distance of -1
-    indicates that cell is unreachable from the source. Blocked cells are unreachable. If the
-    source is blocked, all cells are unreachable.
+    Calculates distance from every vertex to a given source, or UNREACHABLE if the vertex and
+    source are disconnected. Blocked vertices are unreachable. If the source is blocked, all
+    vertices are unreachable. Not thread-safe.
  */
 public final class DistanceFinder {
 
-    private static final int UNREACHABLE = -1;
+    public static final int UNREACHABLE = -1;
+    private final int numRows;
+    private final int numCols;
+    private final int size;
+    private final IntDeque frontier;
+    private final int[] distances;
 
-    private DistanceFinder() {}
+    public DistanceFinder(final Puzzle puzzle) {
+        this.numRows = puzzle.getNumRows();
+        this.numCols = puzzle.getNumCols();
+        this.size = numRows * numCols;
+        this.frontier = new IntDeque(size);
+        this.distances = new int[size];
+    }
 
-    public static int[] find(
-        final Feature[] features,
-        final int numRows,
-        final int numCols,
-        final int source
-    ) {
-        final boolean sourceInBounds = source >= 0 && source < features.length;
-        final boolean dimensionsOkay = features.length == numRows * numCols && numCols > 0;
-        if (!sourceInBounds || !dimensionsOkay) {
+    public int[] find(final Feature[] features, final int source) {
+        if (!(source >= 0 && source < features.length) || !(features.length == size)) {
             throw new IllegalArgumentException();
         }
-        final int[] distances = IntArrays.ofConstant(UNREACHABLE, features.length);
+
+        Arrays.fill(distances, UNREACHABLE);
         if (features[source].isBlocked()) {
-            return distances;
+            return distances.clone();
         }
-        final IntDeque frontier = new IntDeque(distances.length);
+        frontier.clear();
         distances[source] = 0;
         frontier.addLast(source);
+
         while (!frontier.isEmpty()) {
             final int current = frontier.removeFirst();
 
@@ -69,6 +77,6 @@ public final class DistanceFinder {
                 distances[nextLeft] = nextDistance;
             }
         }
-        return distances;
+        return distances.clone();
     }
 }
