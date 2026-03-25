@@ -7,7 +7,8 @@ public enum SolverKind {
     BASELINE,
     RANDOM,
     CLIMBV1,
-    CLIMBV2;
+    CLIMBV2,
+    CLIMBV3;
 
     public static final class NoSuchSolverException extends Exception {}
 
