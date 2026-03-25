@@ -8,6 +8,11 @@
 !*.md
 !*.mapcode
 
+# Scratch files.
+/*.md
+!/AGENTS.md
+!/README.md
+
 # Mystery files, build artifacts.
 .*
 bin/
