@@ -10,10 +10,12 @@ import think.solvers.Solver;
 
 public final class ClimbSolver extends Solver {
 
+    private final StandardEvaluator evaluator;
     private final int[] initiallyBlankCells;
 
     public ClimbSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
+        this.evaluator = new StandardEvaluator(puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
     }
 
@@ -28,7 +30,7 @@ public final class ClimbSolver extends Solver {
     private Feature[] hillClimb() throws KilledException {
         final Feature[] features = getPuzzle().getFeatures();
         final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
-        final int[] scoreBox = new int[] { StandardEvaluator.evaluate(getPuzzle(), features) };
+        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
 
         for (;;) {
             checkAlive();
@@ -53,7 +55,7 @@ public final class ClimbSolver extends Solver {
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
             features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
-            if (StandardEvaluator.evaluate(getPuzzle(), features) < 0) {
+            if (evaluator.evaluate(features) < 0) {
                 features[initiallyBlankCells[placement]] = Feature.BLANK;
                 return placement;
             }
@@ -73,7 +75,7 @@ public final class ClimbSolver extends Solver {
         for (final int blankCell : blankCells) {
             checkAlive();
             features[blankCell] = Feature.PLAYER_WALL;
-            final int newScore = StandardEvaluator.evaluate(getPuzzle(), features);
+            final int newScore = evaluator.evaluate(features);
             if (newScore > scoreBox[0]) {
                 scoreBox[0] = newScore;
                 budgetBox[0] -= 1;
@@ -99,7 +101,7 @@ public final class ClimbSolver extends Solver {
                 features[playerCell] = Feature.BLANK;
                 blankCells[blankIndex] = playerCell;
                 playerCells[playerIndex] = blankCell;
-                final int newScore = StandardEvaluator.evaluate(getPuzzle(), features);
+                final int newScore = evaluator.evaluate(features);
                 if (newScore > scoreBox[0]) {
                     scoreBox[0] = newScore;
                     return true;

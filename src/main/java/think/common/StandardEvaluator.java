@@ -28,11 +28,6 @@ public final class StandardEvaluator {
         this.checkpoints = puzzle.getCheckpoints();
     }
 
-    @Deprecated
-    public static int evaluate(final Puzzle puzzle, final Feature[] features) {
-        return new StandardEvaluator(puzzle).evaluate(features);
-    }
-
     public int evaluate(final Feature[] features) {
         if (features.length != size) {
             throw new IllegalArgumentException();

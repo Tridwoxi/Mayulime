@@ -16,7 +16,7 @@ public final class Proposal {
         this.submitter = submitter;
         this.puzzle = puzzle;
         this.features = features.clone();
-        this.score = StandardEvaluator.evaluate(puzzle, features);
+        this.score = new StandardEvaluator(puzzle).evaluate(features);
         this.createdAtMs = System.currentTimeMillis();
         if (!puzzle.isValid(features)) {
             throw new IllegalArgumentException();
