@@ -3,9 +3,9 @@ package think.solvers;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
-import think.solvers.local.ClimbV1Solver;
-import think.solvers.local.ClimbV2Solver;
-import think.solvers.local.ClimbV3Solver;
+import think.solvers.local.ClimbSolver;
+import think.solvers.local.IdentitySolver;
+import think.solvers.local.WalkSolver;
 import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
 
@@ -23,9 +23,9 @@ public final class SolverCatalog {
         return switch (solverKind) {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
-            case CLIMBV1 -> new ClimbV1Solver(listener, puzzle);
-            case CLIMBV2 -> new ClimbV2Solver(listener, puzzle);
-            case CLIMBV3 -> new ClimbV3Solver(listener, puzzle);
+            case CLIMB -> new ClimbSolver(listener, puzzle);
+            case IDENTITY -> new IdentitySolver(listener, puzzle);
+            case WALK -> new WalkSolver(listener, puzzle);
         };
     }
 }

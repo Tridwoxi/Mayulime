@@ -8,13 +8,15 @@ import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.Solver;
 
-public final class ClimbV1Solver extends Solver {
+public final class IdentitySolver extends Solver {
 
     private final int[] initiallyBlankCells;
+    private final int[] checkpoints;
 
-    public ClimbV1Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public IdentitySolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
+        this.checkpoints = getPuzzle().getCheckpoints();
     }
 
     @Override
@@ -111,6 +113,15 @@ public final class ClimbV1Solver extends Solver {
             }
         }
         return false;
+    }
+
+    private int[] getCellsOnShortestPath(final Feature[] features) {
+        final boolean[] candidates = new boolean[features.length];
+        for (int index = 0; index < features.length; index += 1) {
+            candidates[index] = features[index].isPassable();
+        }
+        // TODO: dp, pointer list?
+        return IntArrays.ofRangeWhere(0, candidates.length, index -> candidates[index]);
     }
 
     private static int[] getCellsWhere(final Feature[] features, final Feature feature) {

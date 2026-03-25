@@ -8,13 +8,13 @@ import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.Solver;
 
-public final class ClimbV3Solver extends Solver {
+public final class WalkSolver extends Solver {
 
     private static final int WALK_CYCLES = 3;
     private final StandardEvaluator evaluator;
     private final int[] initiallyBlankCells;
 
-    public ClimbV3Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public WalkSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
