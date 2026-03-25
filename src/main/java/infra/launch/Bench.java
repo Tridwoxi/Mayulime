@@ -81,6 +81,10 @@ public final class Bench implements Runnable {
     }
 
     public static void main(final String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((_, exception) -> {
+            exception.printStackTrace();
+            System.exit(1);
+        });
         System.exit(
             new CommandLine(new Bench()).setCaseInsensitiveEnumValuesAllowed(true).execute(args)
         );
