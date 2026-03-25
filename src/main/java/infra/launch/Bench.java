@@ -1,6 +1,6 @@
 package infra.launch;
 
-import infra.bench.Accuracy;
+import infra.bench.Agreement;
 import infra.bench.Score;
 import infra.bench.Throughput;
 import java.nio.file.Files;
@@ -73,7 +73,7 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(parallelism)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case ACCURACY -> new Accuracy(params).run();
+            case AGREEMENT -> new Agreement(params).run();
             case SCORE -> new Score(params).run();
             case THROUGHPUT -> new Throughput(params).run();
             default -> throw new AssertionError();
@@ -91,7 +91,7 @@ public final class Bench implements Runnable {
     }
 
     private enum BenchKind {
-        ACCURACY,
+        AGREEMENT,
         SCORE,
         THROUGHPUT,
     }

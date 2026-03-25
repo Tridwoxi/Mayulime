@@ -5,7 +5,7 @@ import infra.output.Logging;
 import think.manager.Manager;
 import think.manager.Proposal;
 
-public final class Accuracy implements Runnable {
+public final class Agreement implements Runnable {
 
     private static final int UNSCORED = -2;
     private final Params params;
@@ -14,7 +14,7 @@ public final class Accuracy implements Runnable {
     private volatile long numBest;
     private volatile int topScore;
 
-    public Accuracy(final Params params) {
+    public Agreement(final Params params) {
         this.params = params;
         this.startTimeMs = 0L;
         this.numProposals = 0L;
