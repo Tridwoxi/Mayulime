@@ -44,4 +44,52 @@ record UiState(
             false
         );
     }
+
+    UiState withStatusMessage(final String message) {
+        return new UiState(
+            phase,
+            puzzleEpoch,
+            puzzleName,
+            rows,
+            cols,
+            wallBudget,
+            bestUpdate,
+            spentWalls,
+            updateCount,
+            cellSizePx,
+            canRestart,
+            canCopyMapCode,
+            message,
+            bestScoreText,
+            submitterText,
+            puzzleStartedAtNanos,
+            lastUpdateAtNanos,
+            timersFrozenAtNanos,
+            recenterPending
+        );
+    }
+
+    UiState withCellSize(final double newCellSizePx) {
+        return new UiState(
+            phase,
+            puzzleEpoch,
+            puzzleName,
+            rows,
+            cols,
+            wallBudget,
+            bestUpdate,
+            spentWalls,
+            updateCount,
+            newCellSizePx,
+            canRestart,
+            canCopyMapCode,
+            statusMessage,
+            bestScoreText,
+            submitterText,
+            puzzleStartedAtNanos,
+            lastUpdateAtNanos,
+            timersFrozenAtNanos,
+            false
+        );
+    }
 }

@@ -179,7 +179,7 @@ final class UiController {
 
     private void rejectMapCode(final String message) {
         this.pendingSubmittedMapCode = Optional.empty();
-        this.reportMapInputError(message);
+        this.reportStatusMessage(message);
     }
 
     private void flushPendingUpdate() {
@@ -247,14 +247,16 @@ final class UiController {
     private void requestCopyMapCode() {
         final Optional<String> mapCode = this.currentMapCode();
         if (mapCode.isEmpty()) {
-            this.reportMapInputError("No puzzle is loaded.");
+            this.reportStatusMessage("No puzzle is loaded.");
             return;
         }
 
-        final String message = this.mapCodeInputHandler.copyMapCode(mapCode.orElseThrow())
-            ? "Copied current board state as MapCode."
-            : "Couldn't copy MapCode to clipboard.";
-        this.reportMapInputError(message);
+        final boolean copied = this.mapCodeInputHandler.copyMapCode(mapCode.orElseThrow());
+        this.reportStatusMessage(
+            copied
+                ? "Copied current board state as MapCode."
+                : "Couldn't copy MapCode to clipboard."
+        );
     }
 
     private void handleDroppedFiles(final List<File> files) {
@@ -262,36 +264,16 @@ final class UiController {
     }
 
     private void handleMapCodeInput(final InputHandler.Result result) {
-        if (result instanceof InputHandler.AcceptedMapCode acceptedMapCode) {
-            this.submitMapCode(acceptedMapCode.mapCode());
-            return;
+        switch (result) {
+            case InputHandler.AcceptedMapCode accepted -> this.submitMapCode(accepted.mapCode());
+            case InputHandler.RejectedMapCode rejected -> this.reportStatusMessage(
+                rejected.message()
+            );
         }
-        final InputHandler.RejectedMapCode rejectedMapCode = (InputHandler.RejectedMapCode) result;
-        this.reportMapInputError(rejectedMapCode.message());
     }
 
-    private void reportMapInputError(final String message) {
-        this.state = new UiState(
-            this.state.phase(),
-            this.state.puzzleEpoch(),
-            this.state.puzzleName(),
-            this.state.rows(),
-            this.state.cols(),
-            this.state.wallBudget(),
-            this.state.bestUpdate(),
-            this.state.spentWalls(),
-            this.state.updateCount(),
-            this.state.cellSizePx(),
-            this.state.canRestart(),
-            this.state.canCopyMapCode(),
-            message,
-            this.state.bestScoreText(),
-            this.state.submitterText(),
-            this.state.puzzleStartedAtNanos(),
-            this.state.lastUpdateAtNanos(),
-            this.state.timersFrozenAtNanos(),
-            this.state.recenterPending()
-        );
+    private void reportStatusMessage(final String message) {
+        this.state = this.state.withStatusMessage(message);
         this.renderState(System.nanoTime());
     }
 

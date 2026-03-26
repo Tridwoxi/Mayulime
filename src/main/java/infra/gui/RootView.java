@@ -11,14 +11,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Window;
 
@@ -142,31 +135,10 @@ final class RootView {
 
     public void applyPalette(final UiPalette paletteToApply) {
         this.palette = paletteToApply;
-        this.root.setBackground(
-            new Background(
-                new BackgroundFill(this.palette.background(), CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-        this.boardViewportContent.setBackground(
-            new Background(
-                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-        this.viewportCard.setBackground(
-            new Background(
-                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-        this.viewportCard.setBorder(
-            new Border(
-                new BorderStroke(
-                    this.palette.outline(),
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    BorderWidths.DEFAULT
-                )
-            )
-        );
+        this.root.setBackground(UiPalette.fill(this.palette.background()));
+        this.boardViewportContent.setBackground(UiPalette.fill(this.palette.surface()));
+        this.viewportCard.setBackground(UiPalette.fill(this.palette.surface()));
+        this.viewportCard.setBorder(UiPalette.stroke(this.palette.outline()));
         this.viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, this.palette.shadow()));
         this.sidebar.applyPalette(this.palette);
         this.board.applyPalette(this.palette);
@@ -203,7 +175,6 @@ final class RootView {
     private void configureSidebar() {
         final StackPane sidebarWrap = new StackPane(this.sidebar);
         sidebarWrap.setAlignment(Pos.CENTER_LEFT);
-        sidebarWrap.setPadding(new Insets(0.0));
         BorderPane.setMargin(sidebarWrap, new Insets(0.0, 0.0, 0.0, ROOT_SPACING_PX));
         this.root.setRight(sidebarWrap);
     }

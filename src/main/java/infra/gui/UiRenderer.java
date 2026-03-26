@@ -45,27 +45,7 @@ final class UiRenderer {
             return state;
         }
 
-        return new UiState(
-            state.phase(),
-            state.puzzleEpoch(),
-            state.puzzleName(),
-            state.rows(),
-            state.cols(),
-            state.wallBudget(),
-            state.bestUpdate(),
-            state.spentWalls(),
-            state.updateCount(),
-            cellSize,
-            state.canRestart(),
-            state.canCopyMapCode(),
-            state.statusMessage(),
-            state.bestScoreText(),
-            state.submitterText(),
-            state.puzzleStartedAtNanos(),
-            state.lastUpdateAtNanos(),
-            state.timersFrozenAtNanos(),
-            false
-        );
+        return state.withCellSize(cellSize);
     }
 
     private boolean shouldRenderBoard(

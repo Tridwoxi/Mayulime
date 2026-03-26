@@ -3,13 +3,6 @@ package infra.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -220,21 +213,8 @@ final class SidebarView extends VBox {
     }
 
     private void applyCardStyle(final VBox card) {
-        card.setBackground(
-            new Background(
-                new BackgroundFill(this.palette.surface(), CornerRadii.EMPTY, Insets.EMPTY)
-            )
-        );
-        card.setBorder(
-            new Border(
-                new BorderStroke(
-                    this.palette.outline(),
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    BorderWidths.DEFAULT
-                )
-            )
-        );
+        card.setBackground(UiPalette.fill(this.palette.surface()));
+        card.setBorder(UiPalette.stroke(this.palette.outline()));
     }
 
     private static void styleActionButton(final Button button, final UiPalette palette) {
@@ -264,18 +244,7 @@ final class SidebarView extends VBox {
         button.setTextFill(textColor);
         button.setFont(Font.font(Gui.FONT_NAME, 13.0));
         button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
-        button.setBackground(
-            new Background(new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY))
-        );
-        button.setBorder(
-            new Border(
-                new BorderStroke(
-                    palette.outline(),
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    BorderWidths.DEFAULT
-                )
-            )
-        );
+        button.setBackground(UiPalette.fill(backgroundColor));
+        button.setBorder(UiPalette.stroke(palette.outline()));
     }
 }
