@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Generate random parser-compatible Pathery MapCodes."""
 
 from __future__ import annotations
@@ -7,12 +8,10 @@ import random
 import re
 import sys
 from collections import deque
-from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import cast
 
-# pyright: strict, reportAny=false
-# ruff: noqa: D103 T201 INP001 S311 TC003 D101
+# basedpyright: strict
+# ruff: noqa: D103 T201 S311 D101 ERA001
 
 type Position = tuple[int, int]
 
@@ -182,47 +181,17 @@ def generate_problem(
     raise CantGenerateError
 
 
-def require_int(value: object, field_name: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        message = f"{field_name} must be an integer."
-        raise InvalidInputError(message)
-    return value
-
-
-def require_float(value: object, field_name: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        message = f"{field_name} must be a number."
-        raise InvalidInputError(message)
-    return float(value)
-
-
-def require_str(value: object, field_name: str) -> str:
-    if not isinstance(value, str):
-        message = f"{field_name} must be a string."
-        raise InvalidInputError(message)
-    return value
-
-
-def optional_int(value: object, field_name: str) -> int | None:
-    if value is None:
-        return None
-    return require_int(value, field_name)
-
-
-def parse_config(argv: Sequence[str] | None = None) -> GeneratorConfig:
-    raw_values = cast("dict[str, object]", vars(build_parser().parse_args(argv)))
+def parse_config(argv: list[str] | None = None) -> GeneratorConfig:
+    args = build_parser().parse_args(argv)
     config = GeneratorConfig(
-        height=require_int(raw_values["height"], "height"),
-        width=require_int(raw_values["width"], "width"),
-        system_wall_probability=require_float(
-            raw_values["system_wall_probability"],
-            "system-wall-probability",
-        ),
-        checkpoints=require_int(raw_values["checkpoints"], "checkpoints"),
-        player_walls=require_int(raw_values["player_walls"], "player-walls"),
-        name=require_str(raw_values["name"], "name"),
-        max_attempts=require_int(raw_values["max_attempts"], "max-attempts"),
-        seed=optional_int(raw_values["seed"], "seed"),
+        height=args.height,  # pyright: ignore[reportAny]
+        width=args.width,  # pyright: ignore[reportAny]
+        system_wall_probability=args.system_wall_probability,  # pyright: ignore[reportAny]
+        checkpoints=args.checkpoints,  # pyright: ignore[reportAny]
+        player_walls=args.player_walls,  # pyright: ignore[reportAny]
+        name=args.name,  # pyright: ignore[reportAny]
+        max_attempts=args.max_attempts,  # pyright: ignore[reportAny]
+        seed=args.seed,  # pyright: ignore[reportAny]
     )
     validate_config(config)
     return config
