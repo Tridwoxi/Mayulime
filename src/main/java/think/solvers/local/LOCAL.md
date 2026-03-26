@@ -21,7 +21,7 @@ Instant on small, effective for medium to large.
 If a vertex is not on a shortest path, blocking it cannot increase score. A vertex $v$ is on a
 shortest path iff $d(s, v) + d(v, f) = d(s, f)$.
 
-Profile is ~92% StandardEvaluator. Speedup comes from using less of it.
+Speedup comes from evaluating fewer candidates.
 
 **Walk builds on Climb**
 
@@ -36,10 +36,9 @@ A chokepoint is a cell that is the only cell at its distance layer on a shortest
 shortest path must pass through it, so blocking it is guaranteed to increase path length or
 disconnect.
 
-Profile is ~72% StandardEvaluator in rearrangeWalls, ~15% DistanceFinder in getChokepoints. The
-smaller candidate set helps a lot but is only effective against open regions.
+The smaller candidate set helps a lot but is only effective against open regions.
 
-## Benchmarks
+## Benchmarks and profiles
 
 **Throughput (1 thread, 1 second, 1 sample)**
 
@@ -58,3 +57,12 @@ smaller candidate set helps a lot but is only effective against open regions.
 | Identity   | 345   |
 | Walk       | 97    |
 | Chokepoint | 374   |
+
+**Profile (async-profiler, 5 seconds CPU mode)**
+
+| Solver     | huge1                                           |
+| ---------- | ----------------------------------------------- |
+| Climb      | ~99% rearrangeWalls                             |
+| Identity   | ~97% rearrangeWalls, ~2% getCellsOnShortestPath |
+| Walk       | ?                                               |
+| Chokepoint | ~97% rearrangeWalls, ~2% getChokepoints         |
