@@ -1,6 +1,7 @@
 package think.solvers.local;
 
 import java.util.function.Consumer;
+import think.common.DistanceFinder;
 import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.model.Feature;
@@ -11,14 +12,16 @@ import think.solvers.Solver;
 public final class IdentitySolver extends Solver {
 
     private final StandardEvaluator evaluator;
+    private final DistanceFinder distances;
     private final int[] initiallyBlankCells;
     private final int[] checkpoints;
 
     public IdentitySolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
+        this.distances = new DistanceFinder(puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
-        this.checkpoints = getPuzzle().getCheckpoints();
+        this.checkpoints = puzzle.getCheckpoints();
     }
 
     @Override
@@ -36,7 +39,7 @@ public final class IdentitySolver extends Solver {
 
         for (;;) {
             checkAlive();
-            final int[] blankCells = getCellsWhere(features, Feature.BLANK);
+            final int[] blankCells = getCellsOnShortestPath(features);
             final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
             IntArrays.shuffleInPlace(playerCells);
@@ -118,12 +121,26 @@ public final class IdentitySolver extends Solver {
     }
 
     private int[] getCellsOnShortestPath(final Feature[] features) {
-        final boolean[] candidates = new boolean[features.length];
-        for (int index = 0; index < features.length; index += 1) {
-            candidates[index] = features[index].isPassable();
+        final boolean[] onPath = new boolean[features.length];
+        int[] fromCurrent = distances.find(features, checkpoints[0]);
+        for (int segment = 0; segment < checkpoints.length - 1; segment += 1) {
+            final int[] fromNext = distances.find(features, checkpoints[segment + 1]);
+            final int totalDistance = fromCurrent[checkpoints[segment + 1]];
+            if (totalDistance == DistanceFinder.UNREACHABLE) {
+                return IntArrays.EMPTY;
+            }
+            for (int cell = 0; cell < features.length; cell += 1) {
+                if (
+                    fromCurrent[cell] != DistanceFinder.UNREACHABLE &&
+                    fromNext[cell] != DistanceFinder.UNREACHABLE &&
+                    fromCurrent[cell] + fromNext[cell] == totalDistance
+                ) {
+                    onPath[cell] = true;
+                }
+            }
+            fromCurrent = fromNext;
         }
-        // TODO: dp, pointer list?
-        return IntArrays.ofRangeWhere(0, candidates.length, index -> candidates[index]);
+        return IntArrays.filteredCopy(getCellsWhere(features, Feature.BLANK), cell -> onPath[cell]);
     }
 
     private static int[] getCellsWhere(final Feature[] features, final Feature feature) {

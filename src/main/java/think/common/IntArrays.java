@@ -6,6 +6,8 @@ import java.util.function.IntPredicate;
 
 public final class IntArrays {
 
+    public static final int[] EMPTY = new int[0];
+
     private IntArrays() {}
 
     public static int[] ofConstant(final int value, final int length) {

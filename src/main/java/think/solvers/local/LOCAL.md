@@ -1,9 +1,7 @@
 # Local search
 
-This package is home to the local state space search solvers. Since I don't know what I'm doing,
-this package looks more like a big experiment with lots of solvers that differ from each other
-rather than a set of distinct ones. One should copy and paste solvers instead of using inheritance
-because solvers need to evolve independently. A little bit of code duplication isn't fatal.
+This package is home to the local state space search solver family. Copy and paste solvers instead
+of using inheritance because solvers need to evolve independently. Record experimental results.
 
 ## Solver lineage
 
@@ -24,7 +22,8 @@ Instant on small, effective for medium to large.
 If a vertex is not on a shortest path, blocking it cannot increase score. A vertex $v$ is on a
 shortest path iff $d(s, v) + d(v, f) = d(s, f)$.
 
-TODO: Impl
+Throughput ~4900 on small1, ~10 on huge1. Profile is ~92% StandardEvaluator. Speedup comes from
+using less of it.
 
 **Walk builds on Climb**
 
