@@ -11,9 +11,9 @@ Gradle wrapper or jar is missing, stop and ask the human to create it. If Checks
 complains during the build, evaluate if fixing the violations would improve or harm the design.
 Then either fix it or suppress the warning.
 
-If you need to benchmark performance, the typical routine is `./gradlew bench` on both
-`examples/small1.mapcode` and `examples/huge1.mapcode` for 1 second. When asked to benchmark score,
-many samples of shorter duration is more reliable.
+If you need to benchmark a solver's performance, use `./gradlew bench` with similar settings to
+other solvers unless told otherwise. When asked to benchmark score, many samples of shorter
+duration is more reliable.
 
 If you need to profile, use `scripts/profile.sh` when on Unix or Linux. If you cannot do so because
 async-profiler is missing, ask the human to install it. Remember profiling is only a diagnostic,
@@ -38,8 +38,8 @@ Application packages are in `src/main/java/`:
 
 Test packages are in `src/test/java/`:
 
-`e2e` - End-to-end and integration tests.
-`unit` - Unit tests grouped by package. Only public objects are tested.
+`e2e` - End-to-end and integration tests.\
+`unit` - Unit tests grouped by package. Only public objects are tested.\
 
 JMH is at `src/jmh/java/bench`, but not really used yet.
 
