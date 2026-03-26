@@ -28,7 +28,7 @@ Speedup comes from evaluating fewer candidates.
 Before the expensive O(n^3) exhaustive rearrange step, let's run the same thing many times but also
 accept neutral moves.
 
-Not promising. Throughput on huge1 is weirdly high relative to small1. I don't know why.
+Not promising. Throughput on huge1 is weirdly high relative to ClimbSolver. I don't know why.
 
 **Chokepoint builds on Identity**
 
@@ -44,10 +44,10 @@ The smaller candidate set helps a lot but is only effective against open regions
 
 | Solver     | small1 | huge1 |
 | ---------- | ------ | ----- |
-| Climb      | ~3800  | ~7    |
-| Identity   | ~4800  | ~9    |
-| Walk       | ~2500  | ~22   |
-| Chokepoint | ~14700 | ~54   |
+| Climb      | ~3900  | ~5    |
+| Identity   | ~5000  | ~8    |
+| Walk       | ~4400  | ~22   |
+| Chokepoint | ~14900 | ~53   |
 
 **Median score (1 thread, 300 miliseconds, 10 samples)**
 
@@ -55,7 +55,7 @@ The smaller candidate set helps a lot but is only effective against open regions
 | ---------- | ----- |
 | Climb      | 319   |
 | Identity   | 345   |
-| Walk       | 97    |
+| Walk       | 113   |
 | Chokepoint | 374   |
 
 **Profile (async-profiler, 5 seconds CPU mode)**

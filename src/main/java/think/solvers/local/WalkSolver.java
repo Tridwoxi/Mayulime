@@ -33,7 +33,7 @@ public final class WalkSolver extends Solver {
         final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
         final int[] scoreBox = new int[] { evaluator.evaluate(features) };
 
-        for (;;) {
+        outer: for (;;) {
             checkAlive();
             final int[] blankCells = getCellsWhere(features, Feature.BLANK);
             final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
@@ -44,7 +44,7 @@ public final class WalkSolver extends Solver {
             }
             for (int attempt = 0; attempt < WALK_CYCLES; attempt += 1) {
                 if (rearrangeWalls(features, blankCells, playerCells, scoreBox, true)) {
-                    continue;
+                    continue outer;
                 }
             }
             if (rearrangeWalls(features, blankCells, playerCells, scoreBox, false)) {
