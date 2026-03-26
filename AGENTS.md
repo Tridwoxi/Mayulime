@@ -4,36 +4,37 @@ The game "Pathery" is an exercise in creating the longest shortest path on a maz
 of walls. The full problem statement is in the README. This repository contains an automated Pathery
 solver.
 
-## Testing
+## Testing, benchmarking, and profiling
 
 If you edit code, execute `./gradlew build` to compile and test. If you cannot do so because the
-Gradle wrapper or jar is missing, ask the human to create it.
+Gradle wrapper or jar is missing, stop and ask the human to create it. If Checkstyle or Spotbugs
+complains during the build, evaluate if fixing the violations would improve or harm the design.
+Then either fix it or suppress the warning.
 
-If Checkstyle or Spotbugs complains during the build, evaluate if fixing the violations would
-improve or harm the design. Then either fix it or suppress the warning.
+If you need to benchmark performance, the typical routine is `./gradlew bench` on both
+`examples/small1.mapcode` and `examples/huge1.mapcode` for 1 second. When asked to benchmark score,
+many samples of shorter duration is more reliable.
 
-## Benchmarks
-
-When asked to benchmark performance, the typical routine is `./gradlew bench` on both small1 and
-huge1 for 1 second. When asked to benchmark score, many samples of shorter duration is more
-reliable.
+If you need to profile, use `scripts/profile.sh` when on Unix or Linux. If you cannot do so because
+async-profiler is missing, ask the human to install it. Remember profiling is only a diagnostic,
+and a slow method is not always an indication it needs to be made a constant factor faster.
 
 ## Package structure
 
-Some packages contain a markdown document inside them. These documents are usually worth reading
-when editing that package.
+Some packages contain a markdown document inside them. These documents are required reading when
+editing that package, but unnecessary otherwise.
 
 Application packages are in `src/main/java/`:
 
-`infra.bench` - Benchmarks.
-`infra.gui` - JavaFX GUI.
-`infra.launch` - Launch points.
-`infra.output` - Logging.
+`infra.bench` - Benchmarks.\
+`infra.gui` - JavaFX GUI.\
+`infra.launch` - Launch points.\
+`infra.output` - Logging.\
 
-`think.common` - Shared backend classes.
-`think.domain` - Problem model and codec.
-`think.manager` - Solver orchestration and integration.
-`think.solvers` - Solver implementations.
+`think.common` - Shared backend classes.\
+`think.domain` - Problem model and codec.\
+`think.manager` - Solver orchestration and integration.\
+`think.solvers` - Solver implementations.\
 
 Test packages are in `src/test/java/`:
 
