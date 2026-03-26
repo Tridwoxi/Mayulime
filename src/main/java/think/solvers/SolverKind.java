@@ -45,4 +45,8 @@ public enum SolverKind {
     public static List<SolverKind> asList() {
         return Arrays.asList(values());
     }
+
+    public static SolverKind getBest() {
+        return CHOKEPOINT;
+    }
 }
