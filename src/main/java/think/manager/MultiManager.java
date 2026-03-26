@@ -14,7 +14,6 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
-import think.solvers.SolverCatalog;
 import think.solvers.SolverKind;
 
 /**
@@ -55,8 +54,10 @@ final class MultiManager {
     void solve(final Puzzle puzzle) {
         stop();
         this.current = puzzle;
-        final SolverCatalog catalog = new SolverCatalog(this::consider, puzzle);
-        for (final Solver solver : solverKinds.stream().map(catalog::create).toList()) {
+        for (final Solver solver : solverKinds
+            .stream()
+            .map(kind -> kind.create(this::consider, puzzle))
+            .toList()) {
             solvers.add(solver);
             // Must use execute instead of submit or any other method because exceptions must be
             // propagated all the way up.

@@ -9,7 +9,6 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
-import think.solvers.SolverCatalog;
 import think.solvers.SolverKind;
 
 /**
@@ -36,7 +35,7 @@ final class SingleManager {
     void solve(final Puzzle puzzle) {
         stop();
         current = puzzle;
-        solvers.add(new SolverCatalog(this::consider, puzzle).create(solverKind));
+        solvers.add(solverKind.create(this::consider, puzzle));
         executor.execute(solvers.get(0));
     }
 
