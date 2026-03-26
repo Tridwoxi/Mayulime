@@ -5,6 +5,7 @@
 # Project source, scripts, docs, examples.
 !*.java
 !*.py
+!*.sh
 !*.md
 !*.mapcode
 
