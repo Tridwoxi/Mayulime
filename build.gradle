@@ -3,7 +3,6 @@ plugins {
     id 'eclipse'
     id 'application'
     id 'checkstyle'
-    id 'me.champeau.jmh' version '0.7.3'
     id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'com.github.spotbugs' version '6.4.8'
 }
@@ -54,16 +53,6 @@ tasks.register('bench', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'infra.launch.Bench'
     jvmArgs '-ea'
-}
-
-tasks.named('jmh') {
-    dependsOn 'checkstyleMain', 'spotbugsMain', 'checkstyleJmh', 'spotbugsJmh'
-    final String javaToolOptions = System.getenv('JAVA_TOOL_OPTIONS')
-    final String unsafeAllowFlag = '--sun-misc-unsafe-memory-access=allow'
-    environment.put(
-        'JAVA_TOOL_OPTIONS',
-        javaToolOptions == null ? unsafeAllowFlag : javaToolOptions + ' ' + unsafeAllowFlag
-    )
 }
 
 tasks.withType(Test).configureEach {

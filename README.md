@@ -11,8 +11,8 @@ Install [JDK](https://jdk.java.net) 25 or later and [Gradle](https://gradle.org)
 the repository root, execute `gradle run`. Gradle will install the dependencies
 [JavaFX](https://openjfx.io), [LMAX Disruptor](https://lmax-exchange.github.io/disruptor/), and
 [picocli](https://picocli.info). It may also configure [Spotbugs](https://spotbugs.github.io),
-[Checkstyle](https://checkstyle.org), [JUnit](https://junit.org), and
-[JMH](https://openjdk.org/projects/code-tools/jmh/). If it doesn't work, message me.
+[Checkstyle](https://checkstyle.org), and [JUnit](https://junit.org). If it doesn't work, message
+me.
 
 When run, the project launches a GUI. Follow the on-screen instructions to upload a Pathery
 [MapCode](https://www.pathery.com/mapeditor), and wait for solutions. Supported examples are in

@@ -41,8 +41,6 @@ Test packages are in `src/test/java/`:
 `e2e` - End-to-end and integration tests.\
 `unit` - Unit tests grouped by package. Only public objects are tested.\
 
-JMH is at `src/jmh/java/bench`, but not really used yet.
-
 ## Style
 
 Use descriptive variable names. Abbreviation is acceptable when meaning is clear. Avoid one letter
