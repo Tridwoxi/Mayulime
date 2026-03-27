@@ -3,6 +3,7 @@ package infra.launch;
 import infra.bench.Agreement;
 import infra.bench.Score;
 import infra.bench.Throughput;
+import infra.bench.Timeline;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -76,6 +77,7 @@ public final class Bench implements Runnable {
             case AGREEMENT -> new Agreement(params).run();
             case SCORE -> new Score(params).run();
             case THROUGHPUT -> new Throughput(params).run();
+            case TIMELINE -> new Timeline(params).run();
             default -> throw new AssertionError();
         }
     }
@@ -94,6 +96,7 @@ public final class Bench implements Runnable {
         AGREEMENT,
         SCORE,
         THROUGHPUT,
+        TIMELINE,
     }
 
     private static final class StringToPuzzle implements ITypeConverter<Puzzle> {
