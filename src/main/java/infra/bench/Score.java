@@ -1,52 +1,39 @@
 package infra.bench;
 
-import infra.launch.Bench.Params;
 import infra.output.Logging;
 import think.domain.codec.Serializer;
-import think.manager.Manager;
 import think.manager.Proposal;
 
 public final class Score implements Runnable {
 
     private final Params params;
-    private volatile Proposal best;
-    private volatile long startTimeMs;
+    private Proposal best;
+    private long bestElapsedMs;
 
     public Score(final Params params) {
         this.params = params;
-        this.best = null;
-        this.startTimeMs = 0L;
     }
 
     @Override
     public void run() {
-        try (Manager manager = new Manager(this::process, params.buildSolverKinds())) {
-            startTimeMs = System.currentTimeMillis();
-            manager.solve(params.puzzle());
-            try {
-                Thread.sleep(params.durationMs());
-            } catch (InterruptedException exception) {
-                Logging.warning("%s", exception.toString());
-            }
-            manager.stop();
-        }
+        params.execute(this::accept, this::report);
+    }
 
-        if (best != null) {
-            final String mapCode = Serializer.serialize(params.puzzle(), best.getFeatures());
-            final long elapsed = best.getCreatedAtMs() - startTimeMs;
-            Logging.results("Solution: %s", mapCode);
-            Logging.results("Score: %d", best.getScore());
-            Logging.results("Found after: %d ms", elapsed);
-        } else {
-            Logging.results("Nothing found.");
+    private void accept(final Proposal proposal, final long elapsedMs) {
+        if (best == null || proposal.getScore() > best.getScore()) {
+            best = proposal;
+            bestElapsedMs = elapsedMs;
         }
     }
 
-    private void process(final Proposal proposal) {
-        final boolean preferred = best == null || proposal.getScore() > best.getScore();
-        final boolean legal = proposal.getCreatedAtMs() - startTimeMs < params.durationMs();
-        if (preferred && legal) {
-            best = proposal;
+    private void report() {
+        if (best != null) {
+            final String mapCode = Serializer.serialize(params.puzzle(), best.getFeatures());
+            Logging.results("Solution: %s", mapCode);
+            Logging.results("Score: %d", best.getScore());
+            Logging.results("Found after: %d ms", bestElapsedMs);
+        } else {
+            Logging.results("Nothing found.");
         }
     }
 }

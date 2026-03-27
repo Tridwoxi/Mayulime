@@ -1,13 +1,12 @@
 package infra.launch;
 
 import infra.bench.Agreement;
+import infra.bench.Params;
 import infra.bench.Score;
 import infra.bench.Throughput;
 import infra.bench.Timeline;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -23,12 +22,6 @@ import think.solvers.SolverKind;
  */
 @Command(name = "bench", version = "Mayulime 0.1.0", mixinStandardHelpOptions = true)
 public final class Bench implements Runnable {
-
-    public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs, int parallelism) {
-        public List<SolverKind> buildSolverKinds() {
-            return Collections.nCopies(parallelism, solverKind);
-        }
-    }
 
     @Parameters(
         paramLabel = "<benchKind>",
