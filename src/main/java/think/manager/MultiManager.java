@@ -99,7 +99,7 @@ final class MultiManager {
         }
         // If a solver works on a puzzle, then solving is stopped, then solving starts again on
         // the same puzzle, then the solver submits a puzzle, it will be accepted. This is
-        // technically correct when you want solutions, albeit awkward for benchmarking.
+        // technically correct when you want proposals, albeit awkward for benchmarking.
         buffer.publishEvent((event, _) -> event.proposal = proposal);
         inFlight.decrement();
     }

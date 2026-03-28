@@ -16,7 +16,7 @@ final class MetricsView extends GridPane {
         this.setHgap(16.0);
         this.setVgap(8.0);
 
-        this.addRow(0, "Grid");
+        this.addRow(0, "Maze");
         this.addRow(1, "Walls");
         this.addRow(2, "Best score");
         this.addRow(3, "Submitter");
@@ -32,7 +32,7 @@ final class MetricsView extends GridPane {
             : "-";
         final String updates = puzzleKnown ? String.valueOf(state.updateCount()) : "-";
 
-        this.values[0].setText(UiMath.grid(state.rows(), state.cols()));
+        this.values[0].setText(UiMath.maze(state.rows(), state.cols()));
         this.values[1].setText(walls);
         this.values[2].setText(state.bestScoreText());
         this.values[3].setText(state.submitterText());

@@ -22,13 +22,13 @@ public final class Repr {
     @Test
     public void puzzleFaithfulToMapCode() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(SMALL1_MAPCODE);
-        final Feature[] grid = puzzle.getFeatures();
+        final Feature[] maze = puzzle.getFeatures();
 
         int blankCount = 0;
         int systemWallCount = 0;
         int checkpointCount = 0;
         int playerWallCount = 0;
-        for (final Feature feature : grid) {
+        for (final Feature feature : maze) {
             switch (feature) {
                 case BLANK -> blankCount += 1;
                 case SYSTEM_WALL -> systemWallCount += 1;
@@ -42,7 +42,7 @@ public final class Repr {
         Assertions.assertEquals(6, puzzle.getNumRows());
         Assertions.assertEquals(13, puzzle.getNumCols());
         Assertions.assertEquals(7, puzzle.getBlockingBudget());
-        Assertions.assertEquals(78, grid.length);
+        Assertions.assertEquals(78, maze.length);
         Assertions.assertEquals(60, blankCount);
         Assertions.assertEquals(15, systemWallCount);
         Assertions.assertEquals(3, checkpointCount);
@@ -51,9 +51,9 @@ public final class Repr {
         final int[] checkpoints = puzzle.getCheckpoints();
         Assertions.assertEquals(3, checkpoints.length);
         Assertions.assertEquals(5 * 13 + 3, checkpoints[1]);
-        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[0]]);
-        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[1]]);
-        Assertions.assertEquals(Feature.CHECKPOINT, grid[checkpoints[2]]);
+        Assertions.assertEquals(Feature.CHECKPOINT, maze[checkpoints[0]]);
+        Assertions.assertEquals(Feature.CHECKPOINT, maze[checkpoints[1]]);
+        Assertions.assertEquals(Feature.CHECKPOINT, maze[checkpoints[2]]);
     }
 
     @Test
@@ -65,12 +65,12 @@ public final class Repr {
     @Test
     public void playerWallsAreLockedAndSpent() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(PARTIAL_FILL_MAPCODE);
-        final Feature[] grid = puzzle.getFeatures();
-        final int system = (int) Arrays.stream(grid).filter(Feature.SYSTEM_WALL::equals).count();
-        final int player = (int) Arrays.stream(grid).filter(Feature.PLAYER_WALL::equals).count();
+        final Feature[] maze = puzzle.getFeatures();
+        final int system = (int) Arrays.stream(maze).filter(Feature.SYSTEM_WALL::equals).count();
+        final int player = (int) Arrays.stream(maze).filter(Feature.PLAYER_WALL::equals).count();
         Assertions.assertEquals(1, system);
         Assertions.assertEquals(0, player);
-        Assertions.assertEquals(Feature.SYSTEM_WALL, grid[1]);
+        Assertions.assertEquals(Feature.SYSTEM_WALL, maze[1]);
         Assertions.assertEquals(1, puzzle.getBlockingBudget());
     }
 }

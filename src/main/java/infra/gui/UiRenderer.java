@@ -26,8 +26,8 @@ final class UiRenderer {
         final String elapsed = UiMath.elapsed(state.puzzleStartedAtNanos(), timerNow);
         final String sinceUpdate = UiMath.elapsed(state.lastUpdateAtNanos(), timerNow);
 
-        if (this.shouldRenderBoard(display, state.rows(), state.cols(), cellSize, state)) {
-            this.rootView.renderBoard(
+        if (this.shouldRenderMaze(display, state.rows(), state.cols(), cellSize, state)) {
+            this.rootView.renderMaze(
                 display,
                 state.rows(),
                 state.cols(),
@@ -48,7 +48,7 @@ final class UiRenderer {
         return state.withCellSize(cellSize);
     }
 
-    private boolean shouldRenderBoard(
+    private boolean shouldRenderMaze(
         final Submission display,
         final int rows,
         final int cols,

@@ -8,8 +8,8 @@ once another solver builds on it.
 
 **Climb**
 
-Random restart hill climber. Seed the board with a varying number of walls. Improve score by
-placing or moving a single wall.
+Random restart hill climber. Seed the maze with a varying number of walls. Improve score by placing
+or moving a single wall.
 
 Given the neighbor set "place one wall (subject to budget)" and "move one wall", all proposals are
 locally optimal by brute force check.
@@ -18,10 +18,10 @@ Instant on small, effective for medium to large.
 
 **Identity builds on Climb**
 
-If a vertex is not on a shortest path, blocking it cannot increase score. A vertex $v$ is on a
+If a cell is not on a shortest path, blocking it cannot increase score. A cell $v$ is on a
 shortest path iff $d(s, v) + d(v, f) = d(s, f)$.
 
-Speedup comes from evaluating fewer candidates.
+Speedup comes from evaluating fewer states.
 
 **Walk builds on Climb**
 
@@ -36,7 +36,7 @@ A chokepoint is a cell that is the only cell at its distance layer on a shortest
 shortest path must pass through it, so blocking it is guaranteed to increase path length or
 disconnect.
 
-The smaller candidate set helps a lot but is only effective against open regions.
+The smaller state set helps a lot but is only effective against open regions.
 
 ## Benchmarks and profiles
 
@@ -49,7 +49,7 @@ The smaller candidate set helps a lot but is only effective against open regions
 | Walk       | ~4400  | ~22   |
 | Chokepoint | ~14900 | ~53   |
 
-**Median score (1 thread, 300 miliseconds, 10 samples)**
+**Median score (1 thread, 300 milliseconds, 10 samples)**
 
 | Solver     | huge1 |
 | ---------- | ----- |

@@ -8,7 +8,7 @@ import think.domain.model.Puzzle;
 import think.manager.Proposal;
 
 /**
-    Find board configurations to solve Pathery puzzles. This abstract class provides useful getters
+    Find maze configurations to solve Pathery puzzles. This abstract class provides useful getters
     and a framework to integrate its concrete subclasses with the rest of the system.
  */
 public abstract class Solver implements Runnable {
@@ -53,7 +53,7 @@ public abstract class Solver implements Runnable {
     /**
         Concrete subclasses should do all non-trivial work in this method, as opposed to the
         constructor. Implementations must call {@link #checkAlive} at least once every 500
-        miliseconds or so when presented a map smaller than 20 by 20 with 10 checkpoints.
+        milliseconds or so when presented a map smaller than 20 by 20 with 10 checkpoints.
      */
     protected abstract void solve() throws KilledException;
 

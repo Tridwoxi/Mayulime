@@ -33,9 +33,9 @@ final class RootView {
     private UiPalette palette;
     private final BorderPane root;
     private final SidebarView sidebar;
-    private final BoardView board;
+    private final MazeView mazeView;
     private final ScrollPane viewport;
-    private final StackPane boardViewportContent;
+    private final StackPane mazeViewportContent;
     private final StackPane viewportCard;
 
     private Intents intents;
@@ -50,9 +50,9 @@ final class RootView {
         this.palette = UiPalette.fromColorScheme(Platform.getPreferences().getColorScheme());
         this.root = new BorderPane();
         this.sidebar = new SidebarView(this.palette);
-        this.board = new BoardView(this.palette);
-        this.boardViewportContent = new StackPane(this.board);
-        this.viewport = new ScrollPane(this.boardViewportContent);
+        this.mazeView = new MazeView(this.palette);
+        this.mazeViewportContent = new StackPane(this.mazeView);
+        this.viewport = new ScrollPane(this.mazeViewportContent);
         this.viewportCard = new StackPane(this.viewport);
 
         this.intents = null;
@@ -82,7 +82,7 @@ final class RootView {
 
     public void onViewportChanged(final Runnable listener) {
         this.viewport.viewportBoundsProperty().addListener((_, _, _) -> {
-            this.resizeBoardViewportContent(
+            this.resizeMazeViewportContent(
                 this.currentRows,
                 this.currentCols,
                 this.currentCellSizePx
@@ -110,7 +110,7 @@ final class RootView {
         this.sidebar.render(state, sinceUpdate, elapsed);
     }
 
-    public void renderBoard(
+    public void renderMaze(
         final Submission display,
         final int rows,
         final int cols,
@@ -122,12 +122,12 @@ final class RootView {
         this.currentCellSizePx = cellSizePx;
 
         if (display == null) {
-            this.board.clear();
+            this.mazeView.clear();
         } else {
-            this.board.render(display, cellSizePx);
+            this.mazeView.render(display, cellSizePx);
         }
 
-        this.resizeBoardViewportContent(rows, cols, cellSizePx);
+        this.resizeMazeViewportContent(rows, cols, cellSizePx);
         if (recenter) {
             this.centerViewport();
         }
@@ -136,12 +136,12 @@ final class RootView {
     public void applyPalette(final UiPalette paletteToApply) {
         this.palette = paletteToApply;
         this.root.setBackground(UiPalette.fill(this.palette.background()));
-        this.boardViewportContent.setBackground(UiPalette.fill(this.palette.surface()));
+        this.mazeViewportContent.setBackground(UiPalette.fill(this.palette.surface()));
         this.viewportCard.setBackground(UiPalette.fill(this.palette.surface()));
         this.viewportCard.setBorder(UiPalette.stroke(this.palette.outline()));
         this.viewportCard.setEffect(new DropShadow(12.0, 0.0, 3.0, this.palette.shadow()));
         this.sidebar.applyPalette(this.palette);
-        this.board.applyPalette(this.palette);
+        this.mazeView.applyPalette(this.palette);
     }
 
     private void configureShell() {
@@ -162,9 +162,9 @@ final class RootView {
                 "-fx-control-inner-background: transparent;"
         );
 
-        this.boardViewportContent.setMinSize(1.0, 1.0);
-        this.boardViewportContent.setPrefSize(1.0, 1.0);
-        this.boardViewportContent.setAlignment(Pos.CENTER);
+        this.mazeViewportContent.setMinSize(1.0, 1.0);
+        this.mazeViewportContent.setPrefSize(1.0, 1.0);
+        this.mazeViewportContent.setAlignment(Pos.CENTER);
 
         this.viewportCard.setPadding(new Insets(16.0));
 
@@ -202,8 +202,8 @@ final class RootView {
     }
 
     private void panByPixels(final double deltaX, final double deltaY) {
-        final double contentWidth = this.boardViewportContent.getWidth();
-        final double contentHeight = this.boardViewportContent.getHeight();
+        final double contentWidth = this.mazeViewportContent.getWidth();
+        final double contentHeight = this.mazeViewportContent.getHeight();
         final double viewportWidth = this.viewport.getViewportBounds().getWidth();
         final double viewportHeight = this.viewport.getViewportBounds().getHeight();
 
@@ -239,7 +239,7 @@ final class RootView {
         event.consume();
     }
 
-    private void resizeBoardViewportContent(
+    private void resizeMazeViewportContent(
         final int rows,
         final int cols,
         final double cellSizePx
@@ -248,15 +248,15 @@ final class RootView {
             return;
         }
 
-        final double boardWidth = cols * cellSizePx;
-        final double boardHeight = rows * cellSizePx;
+        final double mazeWidth = cols * cellSizePx;
+        final double mazeHeight = rows * cellSizePx;
         final double viewportWidth = Math.max(1.0, this.viewport.getViewportBounds().getWidth());
         final double viewportHeight = Math.max(1.0, this.viewport.getViewportBounds().getHeight());
 
-        final double containerWidth = Math.max(boardWidth, viewportWidth);
-        final double containerHeight = Math.max(boardHeight, viewportHeight);
-        this.boardViewportContent.setMinSize(containerWidth, containerHeight);
-        this.boardViewportContent.setPrefSize(containerWidth, containerHeight);
+        final double containerWidth = Math.max(mazeWidth, viewportWidth);
+        final double containerHeight = Math.max(mazeHeight, viewportHeight);
+        this.mazeViewportContent.setMinSize(containerWidth, containerHeight);
+        this.mazeViewportContent.setPrefSize(containerWidth, containerHeight);
     }
 
     private void centerViewport() {

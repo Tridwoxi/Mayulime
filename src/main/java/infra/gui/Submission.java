@@ -12,7 +12,7 @@ public final class Submission {
     private static final int NOT_A_CHECKPOINT = -1;
 
     private final String submitter;
-    private final Feature[] grid;
+    private final Feature[] maze;
     private final int[] checkpointOrderByIndex;
     private final int numRows;
     private final int numCols;
@@ -26,12 +26,12 @@ public final class Submission {
         final int score
     ) {
         this.submitter = submitter;
-        this.grid = features.clone();
+        this.maze = features.clone();
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.score = score;
         this.blockingBudget = puzzle.getBlockingBudget();
-        this.checkpointOrderByIndex = buildCheckpointOrderByIndex(puzzle, this.grid.length);
+        this.checkpointOrderByIndex = buildCheckpointOrderByIndex(puzzle, this.maze.length);
     }
 
     public String getSubmitter() {
@@ -47,11 +47,11 @@ public final class Submission {
     }
 
     public Feature[] getFeatures() {
-        return grid.clone();
+        return maze.clone();
     }
 
     public Feature getFeature(final int row, final int col) {
-        return grid[row * numCols + col];
+        return maze[row * numCols + col];
     }
 
     public int getCheckpointOrder(final int row, final int col) {

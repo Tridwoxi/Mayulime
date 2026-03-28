@@ -63,8 +63,8 @@ public final class Parser {
         final int numCells = ParserSafety.multiply(numRows, numCols);
         final String[] tokens = TOKEN_DELIM_RE.split(rawMaze, -1);
 
-        final Feature[] grid = new Feature[numCells];
-        Arrays.fill(grid, Feature.BLANK);
+        final Feature[] maze = new Feature[numCells];
+        Arrays.fill(maze, Feature.BLANK);
         final ParserCheckpoints checkpoints = new ParserCheckpoints();
 
         int consumedBudget = 0;
@@ -77,9 +77,9 @@ public final class Parser {
             switch (token.kind()) {
                 case WALL -> {
                     if (SYSTEM_WALL_ORDERS.contains(token.order())) {
-                        grid[featureIndex] = Feature.SYSTEM_WALL;
+                        maze[featureIndex] = Feature.SYSTEM_WALL;
                     } else if (PLAYER_WALL_ORDERS.contains(token.order())) {
-                        grid[featureIndex] = Feature.SYSTEM_WALL;
+                        maze[featureIndex] = Feature.SYSTEM_WALL;
                         consumedBudget += 1;
                     } else {
                         throw new BadMapCodeException();
@@ -87,15 +87,15 @@ public final class Parser {
                 }
                 case START -> {
                     checkpoints.observeStart(featureIndex, token.order());
-                    grid[featureIndex] = Feature.CHECKPOINT;
+                    maze[featureIndex] = Feature.CHECKPOINT;
                 }
                 case FINISH -> {
                     checkpoints.observeFinish(featureIndex, token.order());
-                    grid[featureIndex] = Feature.CHECKPOINT;
+                    maze[featureIndex] = Feature.CHECKPOINT;
                 }
                 case CHECKPOINT -> {
                     checkpoints.observeCheckpoint(featureIndex, token.order());
-                    grid[featureIndex] = Feature.CHECKPOINT;
+                    maze[featureIndex] = Feature.CHECKPOINT;
                 }
                 default -> throw new AssertionError();
             }
@@ -105,11 +105,11 @@ public final class Parser {
         final int[] orderedCheckpoints = checkpoints.toOrderedArray();
 
         int numBlankCells = 0;
-        for (final Feature feature : grid) {
+        for (final Feature feature : maze) {
             if (feature == Feature.BLANK) {
                 numBlankCells += 1;
             }
         }
-        return new MazeData(grid, orderedCheckpoints, numBlankCells, consumedBudget);
+        return new MazeData(maze, orderedCheckpoints, numBlankCells, consumedBudget);
     }
 }

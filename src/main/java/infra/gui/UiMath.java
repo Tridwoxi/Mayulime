@@ -37,7 +37,7 @@ final class UiMath {
         return count;
     }
 
-    static String grid(final int numRows, final int numCols) {
+    static String maze(final int numRows, final int numCols) {
         if (numRows <= 0 || numCols <= 0) {
             return "-";
         }
@@ -86,9 +86,11 @@ final class UiMath {
     }
 
     private static double relativeLuminance(final Color color) {
-        return 0.2126 * channelLuminance(color.getRed())
-            + 0.7152 * channelLuminance(color.getGreen())
-            + 0.0722 * channelLuminance(color.getBlue());
+        return (
+            0.2126 * channelLuminance(color.getRed()) +
+            0.7152 * channelLuminance(color.getGreen()) +
+            0.0722 * channelLuminance(color.getBlue())
+        );
     }
 
     private static double channelLuminance(final double channel) {

@@ -5,9 +5,9 @@ import think.domain.model.Feature;
 import think.domain.model.Puzzle;
 
 /**
-    Calculates distance from every vertex to a given source, or UNREACHABLE if the vertex and
-    source are disconnected. Blocked vertices are unreachable. If the source is blocked, all
-    vertices are unreachable. Not thread-safe.
+    Calculates distance from every cell to a given source, or UNREACHABLE if the cell and source
+    are disconnected. Blocked cells are unreachable. If the source is blocked, all cells are
+    unreachable. Not thread-safe.
  */
 public final class DistanceFinder {
 

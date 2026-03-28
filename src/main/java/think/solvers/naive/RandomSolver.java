@@ -26,20 +26,20 @@ public final class RandomSolver extends Solver {
     protected void solve() throws KilledException {
         while (true) {
             checkAlive();
-            propose(generateRandomSolution());
+            propose(generateRandomProposal());
         }
     }
 
-    private Feature[] generateRandomSolution() {
-        final Feature[] grid = getPuzzle().getFeatures();
+    private Feature[] generateRandomProposal() {
+        final Feature[] maze = getPuzzle().getFeatures();
         IntArrays.shuffleInPlace(blankCellIndices);
 
         final int numWalls = wallDistribution.sample();
         for (int placement = 0; placement < numWalls; placement += 1) {
             final int cell = blankCellIndices[placement];
-            grid[cell] = Feature.PLAYER_WALL;
+            maze[cell] = Feature.PLAYER_WALL;
         }
-        return grid;
+        return maze;
     }
 
     private static int[] getBlankCellIndices(final Feature[] features) {

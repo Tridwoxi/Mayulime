@@ -5,7 +5,7 @@ is not be stupid; unfortunately, the algorithms in this package are all stupid.
 
 ## BaselineSolver
 
-BaselineSolver asks "is the best solution doing nothing?" and terminates. That is an interesting
+BaselineSolver asks "is the best state doing nothing?" and terminates. That is an interesting
 approach philosophically, but mostly it's useful because the Manager uses it to send the first
 status update.
 
@@ -23,4 +23,4 @@ $$
 On a Pathery Simple, $N \approx 60$ and $S \approx 7$, so $W \approx 4 \times 10^8$. RandomSolver
 and StandardEvaluator can guess around $1.3 \times 10^7$ times per second on 10 threads on my
 computer, so it can solve the hardest of Simples in about 30 seconds. Usually, it will take less
-time because Simples often have multiple optimal solutions. More difficult puzzles are out of reach.
+time because Simples often have multiple optimal states. More difficult puzzles are out of reach.

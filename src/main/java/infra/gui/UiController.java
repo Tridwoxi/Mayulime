@@ -253,9 +253,7 @@ final class UiController {
 
         final boolean copied = this.mapCodeInputHandler.copyMapCode(mapCode.orElseThrow());
         this.reportStatusMessage(
-            copied
-                ? "Copied current board state as MapCode."
-                : "Couldn't copy MapCode to clipboard."
+            copied ? "Copied current maze state as MapCode." : "Couldn't copy MapCode to clipboard."
         );
     }
 

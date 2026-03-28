@@ -4,7 +4,7 @@ import infra.output.Logging;
 import java.util.HashSet;
 
 /**
-    Pathery puzzle metadata and immutable initial grid.
+    Pathery puzzle metadata and immutable initial maze.
  */
 public final class Puzzle {
 
@@ -61,16 +61,16 @@ public final class Puzzle {
         return blockingBudget;
     }
 
-    public boolean isValid(final Feature[] solution) {
-        if (features.length != solution.length) {
-            Logging.warning("Wrong dimension: %d vs %d", features.length, solution.length);
+    public boolean isValid(final Feature[] proposal) {
+        if (features.length != proposal.length) {
+            Logging.warning("Wrong dimension: %d vs %d", features.length, proposal.length);
             return false;
         }
         int numWalls = 0;
         for (int index = 0; index < features.length; index += 1) {
-            final boolean unchanged = features[index] == solution[index];
+            final boolean unchanged = features[index] == proposal[index];
             final boolean wallPlaced =
-                features[index] == Feature.BLANK && solution[index] == Feature.PLAYER_WALL;
+                features[index] == Feature.BLANK && proposal[index] == Feature.PLAYER_WALL;
             if (wallPlaced) {
                 numWalls += 1;
             }

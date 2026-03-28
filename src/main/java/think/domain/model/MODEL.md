@@ -1,12 +1,12 @@
 # Model: Puzzle and state representation
 
-Representation is split between long-lived metadata in `Puzzle`, and candiate states as `Feature[]`.
+Representation is split between long-lived metadata in `Puzzle`, and states as `Feature[]`.
+
 Solvers, particularly local search algorithms, tend to generate and modify many states but only
 ever see one puzzle.
 
-Semantically, values like checkpoint order are properties of the puzzle, not of an individual
-candidate states, so the puzzle stores them. The split also improves performance since since
-metadata is rarely duplicated.
+Semantically, values like checkpoint order are properties of the puzzle, not of individual states,
+so the puzzle stores them. The split also improves performance since metadata is rarely duplicated.
 
 Earlier implementations tried a richer model with cell record-based indexing or sets. The cells
 were probably fine, but the sets were terrible since the workload is performance-bottlenecked.
@@ -22,6 +22,6 @@ make mistakes with, but it's perfect once you memorize it works on raw arrays an
 anything else.
 
 Most correctness checking is done by the parser since it already knows so much about MapCodes. The
-puzzle happens to do validation too but it's probably a waste of effort. Correctness is valdiated
-again later upon submission to the manager because Solvers can generate arbitrary states. Ideally,
+puzzle happens to do validation too, but it's probably a waste of effort. Correctness is validated
+again later upon proposal to the manager because solvers can generate arbitrary states. Ideally,
 we'd catch bad states when they are created, but the rich model described above has other failings.

@@ -8,13 +8,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import think.domain.model.Feature;
 
-final class BoardView extends Canvas {
+final class MazeView extends Canvas {
 
     private UiPalette palette;
     private Submission display;
     private double cellSizePx;
 
-    BoardView(final UiPalette initialPalette) {
+    MazeView(final UiPalette initialPalette) {
         this.palette = initialPalette;
         this.display = null;
         this.cellSizePx = 0.0;

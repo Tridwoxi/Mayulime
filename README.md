@@ -5,7 +5,7 @@ a maze by placing a set of walls. The system in this repository proposes solutio
 subset of Pathery problems, so it may be helpful as an assistant or checker. This repository is not
 affiliated with Pathery.
 
-## Usage / development
+## Usage and development
 
 Install [JDK](https://jdk.java.net) 25 or later and [Gradle](https://gradle.org) 9.1 or later. In
 the repository root, execute `gradle run`. Gradle will install the dependencies
@@ -18,16 +18,20 @@ When run, the project launches a GUI. Follow the on-screen instructions to uploa
 [MapCode](https://www.pathery.com/mapeditor), and wait for solutions. Supported examples are in
 `examples/`.
 
-## Problem statement
+## Problem statement and terminology
 
 > For ease of programming, this project uses a simplified variant of the complete Pathery rules.
 > Teleports are not supported, but there are plans for them. No other features are planned.
 
-The world is a grid graph with some vertices missing. Of the remaining vertices, some are
-checkpoints, and the rest are empty. Checkpoints are well-ordered and unique. The player has a
-budget to remove empty vertices by placing walls. When the player is done removing vertices, their
-score is the sum of pairwise shortest path lengths between checkpoints. If there is no shortest
-path between checkpoints, the player loses.
+A puzzle is a maze in the form of a grid graph with 4-connectivity. The maze is composed of cells,
+on which lie features. Features are either blanks, system walls, player walls, or checkpoints.
+Checkpoints are well-ordered and unique. The player has a blocking budget to convert some blanks
+into player walls. Paths do not include cells with walls on them. When the player is finished, his
+or her score is the sum of pairwise shortest path lengths between checkpoints. If there is no path
+between checkpoints, the player loses.
+
+In this repository, a set of features is a state. A state sent for evaluation is a proposal, except
+in the GUI, where it is a submission.
 
 ## Related work
 

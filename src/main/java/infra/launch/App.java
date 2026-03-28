@@ -69,7 +69,7 @@ public final class App extends Application {
     public void start(final Stage primaryStage) {
         Logging.announcement("Launch point: Application");
 
-        this.manager = new Manager(this::receiveSolution, SOLVER_KINDS);
+        this.manager = new Manager(this::receiveProposal, SOLVER_KINDS);
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
 
         primaryStage.setScene(gui);
@@ -82,7 +82,7 @@ public final class App extends Application {
 
     // == Connectors. ==
 
-    private synchronized void receiveSolution(final Proposal proposal) {
+    private synchronized void receiveProposal(final Proposal proposal) {
         if (gui == null || manager == null) {
             throw new IllegalStateException();
         }
