@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.global.NoveltySolver;
+import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
 import think.solvers.local.IdentitySolver;
@@ -14,25 +15,27 @@ import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
 
 public enum SolverKind {
+    ANNEAL,
     BASELINE,
-    RANDOM,
+    CHOKEPOINT,
     CLIMB,
     IDENTITY,
-    WALK,
-    CHOKEPOINT,
-    NOVELTY;
+    NOVELTY,
+    RANDOM,
+    WALK;
 
     public static final class NoSuchSolverException extends Exception {}
 
     public Solver create(final Consumer<Proposal> listener, final Puzzle puzzle) {
         return switch (this) {
+            case ANNEAL -> new AnnealSolver(listener, puzzle);
             case BASELINE -> new BaselineSolver(listener, puzzle);
-            case RANDOM -> new RandomSolver(listener, puzzle);
+            case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case CLIMB -> new ClimbSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);
-            case WALK -> new WalkSolver(listener, puzzle);
-            case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case NOVELTY -> new NoveltySolver(listener, puzzle);
+            case RANDOM -> new RandomSolver(listener, puzzle);
+            case WALK -> new WalkSolver(listener, puzzle);
         };
     }
 

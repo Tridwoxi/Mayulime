@@ -38,6 +38,11 @@ disconnect.
 
 The smaller state set helps a lot but is only effective against open regions.
 
+**Anneal**
+
+Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
+ones.
+
 ## Benchmarks and profiles
 
 **Throughput (1 thread, 1 second, 1 sample)**
