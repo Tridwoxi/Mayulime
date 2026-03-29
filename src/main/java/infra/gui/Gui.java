@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import think.domain.model.Puzzle;
 
 public final class Gui extends Scene {
@@ -11,6 +12,11 @@ public final class Gui extends Scene {
     static final String FONT_NAME = "Helvetica";
     static final double MIN_CELL_SIZE_PX = 10.0;
     static final double MAX_CELL_SIZE_PX = 50.0;
+
+    private static final double MIN_WIDTH_PX = 480.0;
+    private static final double MIN_HEIGHT_PX = 320.0;
+    private static final double DEFAULT_WIDTH_PX = 1280.0;
+    private static final double DEFAULT_HEIGHT_PX = 720.0;
 
     private final UiController controller;
     private ColorScheme activeColorScheme;
@@ -48,6 +54,14 @@ public final class Gui extends Scene {
 
     public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
         controller.enqueueSolverUpdate(update, puzzleEpoch);
+    }
+
+    public static void configureStage(final Stage stage) {
+        stage.setMinWidth(MIN_WIDTH_PX);
+        stage.setMinHeight(MIN_HEIGHT_PX);
+        stage.setWidth(DEFAULT_WIDTH_PX);
+        stage.setHeight(DEFAULT_HEIGHT_PX);
+        stage.show();
     }
 
     private void applyColorScheme(final ColorScheme colorScheme) {

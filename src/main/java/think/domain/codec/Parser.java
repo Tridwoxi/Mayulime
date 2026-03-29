@@ -14,13 +14,7 @@ public final class Parser {
 
     public static final class BadMapCodeException extends Exception {}
 
-    private record MazeData(
-        Feature[] features,
-        int[] checkpoints,
-        int numBlankCells,
-        int consumedBudget
-    ) {}
-
+    public static final String UNNAMED_PUZZLE_NAME = "Unnamed Puzzle";
     private static final Pattern REGION_DELIM_RE = Pattern.compile(":");
     private static final Pattern TOKEN_DELIM_RE = Pattern.compile("\\.");
     private static final int EXPECTED_REGIONS_SIZE = 2;
@@ -40,7 +34,8 @@ public final class Parser {
         final int numCols = ParserSafety.stringToInt(metadata[0]);
         final int numRows = ParserSafety.stringToInt(metadata[1]);
         final int blockingBudget = ParserSafety.stringToNonNegativeInt(metadata[2]);
-        final String puzzleName = ParserSafety.cleanName(metadata[3]);
+        final String cleanedName = ParserSafety.cleanName(metadata[3]);
+        final String puzzleName = cleanedName.isBlank() ? UNNAMED_PUZZLE_NAME : cleanedName;
         ParserSafety.multiply(numRows, numCols);
 
         final MazeData mazeData = parseMaze(regions[1], numRows, numCols);
@@ -111,4 +106,11 @@ public final class Parser {
         }
         return new MazeData(maze, orderedCheckpoints, numBlankCells, consumedBudget);
     }
+
+    private record MazeData(
+        Feature[] features,
+        int[] checkpoints,
+        int numBlankCells,
+        int consumedBudget
+    ) {}
 }
