@@ -12,7 +12,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 final class SidebarView extends VBox {
 
     private static final double PANEL_SPACING_PX = 12.0;

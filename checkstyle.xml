@@ -24,10 +24,7 @@
         <module name="AvoidNoArgumentSuperConstructorCall" />
         <module name="AvoidStarImport" />
         <module name="AvoidStaticImport" />
-        <module name="BooleanExpressionComplexity" />
         <module name="CatchParameterName" />
-        <module name="ClassDataAbstractionCoupling" />
-        <module name="ClassFanOutComplexity" />
         <module name="ClassTypeParameterName" />
         <module name="CommentsIndentation" />
         <module name="ConstantName" />
@@ -101,52 +98,4 @@
         <module name="ExplicitInitialization" />
         <module name="SuppressWarnings" />
     </module>
-    <!--
-        == Javadoc ==
-        <module name="JavadocBlockTagLocation" />
-        <module name="JavadocContentLocation" />
-        <module name="JavadocLeadingAsteriskAlign" />
-        <module name="JavadocMethod" />
-        <module name="JavadocMissingLeadingAsterisk" />
-        <module name="JavadocMissingWhitespaceAfterAsterisk" />
-        <module name="JavadocParagraph" />
-        <module name="JavadocStyle" />
-        <module name="JavadocTagContinuationIndentation" />
-        <module name="JavadocType" />
-        <module name="JavadocVariable" />
-        <module name="MissingJavadocMethod" />
-        <module name="MissingJavadocPackage" />
-        <module name="MissingJavadocType" />
-        <module name="JavadocPackage" />
-
-        == Formatting ==
-        <module name="AnnotationOnSameLine" />
-        <module name="LeftCurly" />
-        <module name="LineLength" />
-        <module name="UnnecessaryParentheses" />
-        <module name="EmptyLineSeparator" />
-        <module name="Indentation" />
-        <module name="SeparatorWrap" />
-
-        == Other ignored ==
-        <module name="AbstractClassName" />
-        <module name="AvoidInlineConditionals" />
-        <module name="ClassMemberImpliedModifier" />
-        <module name="CyclomaticComplexity" />
-        <module name="EmptyBlock" />
-        <module name="ExecutableStatementCount" />
-        <module name="HiddenField" />
-        <module name="IllegalToken" />
-        <module name="IllegalType" />
-        <module name="ImportControl" />
-        <module name="LambdaBodyLength" />
-        <module name="MagicNumber" />
-        <module name="MissingCtor" />
-        <module name="MissingNullCaseInSwitch" />
-        <module name="OuterTypeNumber" />
-        <module name="ReturnCount" />
-        <module name="TodoComment" />
-        <module name="TrailingComment" />
-        <module name="UncommentedMain" />
-    -->
 </module>

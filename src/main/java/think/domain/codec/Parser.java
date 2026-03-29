@@ -57,7 +57,6 @@ public final class Parser {
         );
     }
 
-    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:ExecutableStatementCount" })
     private static MazeData parseMaze(final String rawMaze, final int numRows, final int numCols)
         throws BadMapCodeException {
         final int numCells = ParserSafety.multiply(numRows, numCols);

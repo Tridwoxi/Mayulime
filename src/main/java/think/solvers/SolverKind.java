@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
+import think.solvers.global.NoveltySolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
 import think.solvers.local.IdentitySolver;
@@ -18,7 +19,8 @@ public enum SolverKind {
     CLIMB,
     IDENTITY,
     WALK,
-    CHOKEPOINT;
+    CHOKEPOINT,
+    NOVELTY;
 
     public static final class NoSuchSolverException extends Exception {}
 
@@ -30,6 +32,7 @@ public enum SolverKind {
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case WALK -> new WalkSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
+            case NOVELTY -> new NoveltySolver(listener, puzzle);
         };
     }
 

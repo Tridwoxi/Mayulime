@@ -16,7 +16,6 @@ import javafx.util.Duration;
 import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
 
-@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 final class UiController {
 
     private record PendingUpdate(Submission update, int epoch) {}
