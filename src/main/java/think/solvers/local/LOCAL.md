@@ -68,6 +68,9 @@ Extensive testing shows if you don't wrap around edges, the difference is noise.
 Kinda like the hill climb of hill climbs (so is not a pure RRHC: througput not comparable, and not
 independent of time). Very effective. Possible improvement is to maintain a frontier of bests.
 
+Ruin sometimes does 350000 on medium1 for an unknown reason, and sometimes makes bad choices that
+causes it to underperform.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -78,29 +81,29 @@ ones.
 <!-- For consistency, whole benchmark suite must come from same run, so updates should replace
 everything. This doesn't apply to profiles unless drastic changes to environment happen. -->
 
-**Throughput (1 thread, 1 second, 1 sample)**
+**Mean throughput (1 thread, 1 second, 3 samples)**
 
-| Solver     | small1 | huge1 |
-| ---------- | ------ | ----- |
-| Climb      | ~3800  | ~4    |
-| Identity   | ~5000  | ~11   |
-| Walk       | ~1200  | ~1    |
-| Chokepoint | ~14800 | ~51   |
-| Uncover    | ~10900 | ~68   |
-| Intersect  | ~12900 | ~80   |
-| Ruin       | ~21000 | ~108  |
+| Solver     | small1 | medium1 | large1 | huge1 |
+| ---------- | ------ | ------- | ------ | ----- |
+| Climb      | ~3900  | ~840    | ~130   | ~5    |
+| Identity   | ~5000  | ~1600   | ~200   | ~10   |
+| Walk       | ~1200  | ~190    | ~39    | ~1    |
+| Chokepoint | ~15100 | ~5200   | ~930   | ~56   |
+| Uncover    | ~11000 | ~4100   | ~850   | ~73   |
+| Intersect  | ~13000 | ~4600   | ~1100  | ~82   |
+| Ruin       | ~21100 | ~5500   | ~1200  | ~97   |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
-| Solver         | huge1 |
-| -------------- | ----- |
-| Climb          | ~286  |
-| Identity       | ~336  |
-| Walk (1000 ms) | ~393  |
-| Chokepoint     | ~385  |
-| Uncover        | ~384  |
-| Intersect      | ~395  |
-| Ruin           | ~411  |
+| Solver         | small1 | medium1 | large1 | huge1 |
+| -------------- | ------ | ------- | ------ | ----- |
+| Climb          | =43    | =84     | ~167   | ~283  |
+| Identity       | =43    | =84     | ~170   | ~342  |
+| Walk (1000 ms) | =43    | =84     | ~185   | ~387  |
+| Chokepoint     | =43    | =84     | ~178   | ~371  |
+| Uncover        | =43    | =84     | ~175   | ~388  |
+| Intersect      | =43    | =84     | ~179   | ~397  |
+| Ruin           | =43    | ~84     | ~185   | ~403  |
 
 **Profile (async-profiler, 3 seconds CPU mode)**
 
