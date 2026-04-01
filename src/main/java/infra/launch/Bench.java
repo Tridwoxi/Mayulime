@@ -2,6 +2,7 @@ package infra.launch;
 
 import infra.bench.Agreement;
 import infra.bench.Latency;
+import infra.bench.Optimality;
 import infra.bench.Params;
 import infra.bench.Score;
 import infra.bench.Throughput;
@@ -70,6 +71,7 @@ public final class Bench implements Runnable {
         switch (Objects.requireNonNull(benchKind)) {
             case AGREEMENT -> new Agreement(params).run();
             case LATENCY -> new Latency(params).run();
+            case OPTIMALITY -> new Optimality(params).run();
             case SCORE -> new Score(params).run();
             case THROUGHPUT -> new Throughput(params).run();
             case TIMELINE -> new Timeline(params).run();
@@ -90,6 +92,7 @@ public final class Bench implements Runnable {
     private enum BenchKind {
         AGREEMENT,
         LATENCY,
+        OPTIMALITY,
         SCORE,
         THROUGHPUT,
         TIMELINE,
