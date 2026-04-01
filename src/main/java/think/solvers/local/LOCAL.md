@@ -38,6 +38,14 @@ disconnect.
 
 The smaller state set helps a lot but is only effective against open regions.
 
+**Uncover builds on Chokepoint**
+
+A similar move set to Chokepoint is to remove a player wall first then compute chokepoints. If it
+is possible to increase score, then it must be done by placing that wall back down onto a newly
+uncovered chokepoint.
+
+No meaningful difference.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -45,29 +53,34 @@ ones.
 
 ## Benchmarks and profiles
 
+<!-- For consistency, whole suite must come from same run, so updates should replace all. -->
+
 **Throughput (1 thread, 1 second, 1 sample)**
 
 | Solver     | small1 | huge1 |
 | ---------- | ------ | ----- |
-| Climb      | ~3900  | ~5    |
-| Identity   | ~5000  | ~8    |
-| Walk       | ~4400  | ~22   |
-| Chokepoint | ~14900 | ~53   |
+| Climb      | ~3800  | ~4    |
+| Identity   | ~5000  | ~11   |
+| Walk       | ~4500  | ~45   |
+| Chokepoint | ~14800 | ~51   |
+| Uncover    | ~10900 | ~68   |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
 | Solver     | huge1 |
 | ---------- | ----- |
-| Climb      | 319   |
-| Identity   | 345   |
-| Walk       | 113   |
-| Chokepoint | 374   |
+| Climb      | 286   |
+| Identity   | 336   |
+| Walk       | 124   |
+| Chokepoint | 385   |
+| Uncover    | 384   |
 
 **Profile (async-profiler, 5 seconds CPU mode)**
 
 | Solver     | huge1                                           |
 | ---------- | ----------------------------------------------- |
 | Climb      | ~99% rearrangeWalls                             |
-| Identity   | ~97% rearrangeWalls, ~2% getCellsOnShortestPath |
-| Walk       | ?                                               |
-| Chokepoint | ~97% rearrangeWalls, ~2% getChokepoints         |
+| Identity   | ~98% rearrangeWalls, ~1% getCellsOnShortestPath |
+| Walk       | ~99% rearrangeWalls                             |
+| Chokepoint | ~95% rearrangeWalls, ~4% getChokepoints         |
+| Uncover    | ~85% rearrangeWalls, ~15% getChokepoints        |

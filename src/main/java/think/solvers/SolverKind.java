@@ -10,6 +10,7 @@ import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
 import think.solvers.local.IdentitySolver;
+import think.solvers.local.UncoverSolver;
 import think.solvers.local.WalkSolver;
 import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
@@ -22,6 +23,7 @@ public enum SolverKind {
     IDENTITY,
     NOVELTY,
     RANDOM,
+    UNCOVER,
     WALK;
 
     public static final class NoSuchSolverException extends Exception {}
@@ -35,6 +37,7 @@ public enum SolverKind {
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case NOVELTY -> new NoveltySolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
+            case UNCOVER -> new UncoverSolver(listener, puzzle);
             case WALK -> new WalkSolver(listener, puzzle);
         };
     }
