@@ -1,8 +1,8 @@
 # Local search
 
 This package is home to the local state space search solver family. Please copy and paste solvers
-instead of using inheritance because solvers need to evolve independently. Do not edit a solver
-once another solver builds on it.
+instead of using inheritance because solvers need to evolve independently; write with deletion
+(instead of extension) in mind. Do not edit a solver once another solver builds on it.
 
 ## Lineage
 
@@ -47,6 +47,17 @@ uncovered chokepoint.
 
 No meaningful difference.
 
+**Intersect builds on Chokepoint, Uncover**
+
+The exact move set necessary to confirm a local optimum, methinks, is the intersection of what
+Chokepoint and Uncover says it is. Both of those are locally optimal, so their symmetric difference
+is wasted compute.
+
+Solid improvement over predecessors on big maps.
+
+Future work in the pure 1-opt hill climbing sphere should attempt heuristic pruning strategies and
+getting rearrangeWalls to run in O(n^2), omg I want this so bad.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -54,7 +65,8 @@ ones.
 
 ## Benchmarks and profiles
 
-<!-- For consistency, whole suite must come from same run, so updates should replace all. -->
+<!-- For consistency, whole benchmark suite must come from same run, so updates should replace
+everything. This doesn't apply to profiles unless drastic changes to environment happen. -->
 
 **Throughput (1 thread, 1 second, 1 sample)**
 
@@ -65,6 +77,7 @@ ones.
 | Walk       | ~1200  | ~1    |
 | Chokepoint | ~14800 | ~51   |
 | Uncover    | ~10900 | ~68   |
+| Intersect  | ~12900 | ~80   |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
@@ -75,6 +88,7 @@ ones.
 | Walk (1000 ms) | ~393  |
 | Chokepoint     | ~385  |
 | Uncover        | ~384  |
+| Intersect      | ~395  |
 
 **Profile (async-profiler, 3 seconds CPU mode)**
 
@@ -85,3 +99,4 @@ ones.
 | Walk       | ~99% rearrangeWalls                             |
 | Chokepoint | ~95% rearrangeWalls, ~4% getChokepoints         |
 | Uncover    | ~85% rearrangeWalls, ~15% getChokepoints        |
+| Intersect  | ~96% rearrangeWalls, ~4% getChokepoints         |
