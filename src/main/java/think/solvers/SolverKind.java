@@ -11,6 +11,7 @@ import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
 import think.solvers.local.IdentitySolver;
 import think.solvers.local.IntersectSolver;
+import think.solvers.local.RuinSolver;
 import think.solvers.local.UncoverSolver;
 import think.solvers.local.WalkSolver;
 import think.solvers.naive.BaselineSolver;
@@ -25,6 +26,7 @@ public enum SolverKind {
     INTERSECT,
     NOVELTY,
     RANDOM,
+    RUIN,
     UNCOVER,
     WALK;
 
@@ -40,6 +42,7 @@ public enum SolverKind {
             case INTERSECT -> new IntersectSolver(listener, puzzle);
             case NOVELTY -> new NoveltySolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
+            case RUIN -> new RuinSolver(listener, puzzle);
             case UNCOVER -> new UncoverSolver(listener, puzzle);
             case WALK -> new WalkSolver(listener, puzzle);
         };
@@ -59,6 +62,6 @@ public enum SolverKind {
     }
 
     public static SolverKind getBest() {
-        return INTERSECT;
+        return RUIN;
     }
 }

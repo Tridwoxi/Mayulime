@@ -58,6 +58,16 @@ Solid improvement over predecessors on big maps.
 Future work in the pure 1-opt hill climbing sphere should attempt heuristic pruning strategies and
 getting rearrangeWalls to run in O(n^2), omg I want this so bad.
 
+**Ruin builds on Intersect**
+
+Rather than restart, clear a random rectangle from the maze. Let width, height, top, and left be
+chosen uniformly from the full maze such that it can wrap around edges.
+
+Extensive testing shows if you don't wrap around edges, the difference is noise.
+
+Kinda like the hill climb of hill climbs (so is not a pure RRHC: througput not comparable, and not
+independent of time). Very effective. Possible improvement is to maintain a frontier of bests.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -78,6 +88,7 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Chokepoint | ~14800 | ~51   |
 | Uncover    | ~10900 | ~68   |
 | Intersect  | ~12900 | ~80   |
+| Ruin       | ~21000 | ~108  |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
@@ -89,6 +100,7 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Chokepoint     | ~385  |
 | Uncover        | ~384  |
 | Intersect      | ~395  |
+| Ruin           | ~411  |
 
 **Profile (async-profiler, 3 seconds CPU mode)**
 
@@ -100,3 +112,4 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Chokepoint | ~95% rearrangeWalls, ~4% getChokepoints         |
 | Uncover    | ~85% rearrangeWalls, ~15% getChokepoints        |
 | Intersect  | ~96% rearrangeWalls, ~4% getChokepoints         |
+| Ruin       | ~97% rearrangeWalls, ~3% getChokepoints         |
