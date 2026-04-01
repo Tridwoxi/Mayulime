@@ -65,11 +65,13 @@ chosen uniformly from the full maze such that it can wrap around edges.
 
 Extensive testing shows if you don't wrap around edges, the difference is noise.
 
-Kinda like the hill climb of hill climbs (so is not a pure RRHC: througput not comparable, and not
-independent of time). Very effective. Possible improvement is to maintain a frontier of bests.
+I imagine Ruin to be the hill climber of hill climbers (so is not a pure RRHC: througput not
+comparable, and not independent of time). Very effective. Possible improvement is to maintain a
+frontier of bests.
 
-Ruin sometimes does 350000 on medium1 for an unknown reason, and sometimes makes bad choices that
-causes it to underperform.
+Ruin sometimes does 150000 or 350000 throughput on medium1. In these cases, it finds a poor local
+optimum and cannot 1-opt its way out. Since no seed happens, it is never able to improve score once
+it gets stuck. Hence, unlike its predecessors, sometimes chokes on medium1.
 
 **Anneal**
 
