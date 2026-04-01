@@ -100,9 +100,9 @@ public final class WalkSolver extends Solver {
         final boolean isWalkAcceptable
     ) throws KilledException {
         for (int blankIndex = 0; blankIndex < blankCells.length; blankIndex += 1) {
-            final int blankCell = blankCells[blankIndex];
             for (int playerIndex = 0; playerIndex < playerCells.length; playerIndex += 1) {
                 checkAlive();
+                final int blankCell = blankCells[blankIndex];
                 final int playerCell = playerCells[playerIndex];
                 features[blankCell] = Feature.PLAYER_WALL;
                 features[playerCell] = Feature.BLANK;

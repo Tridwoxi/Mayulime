@@ -28,7 +28,8 @@ Speedup comes from evaluating fewer states.
 Before the expensive O(n^3) exhaustive rearrange step, let's run the same thing many times but also
 accept neutral moves.
 
-Not promising. Throughput on huge1 is weirdly high relative to ClimbSolver. I don't know why.
+Weirdly good (on par with Chokepoint!) after a bugfix; can be used as a desparation measure to
+fiddle with local optima.
 
 **Chokepoint builds on Identity**
 
@@ -61,21 +62,21 @@ ones.
 | ---------- | ------ | ----- |
 | Climb      | ~3800  | ~4    |
 | Identity   | ~5000  | ~11   |
-| Walk       | ~4500  | ~45   |
+| Walk       | ~1200  | ~1    |
 | Chokepoint | ~14800 | ~51   |
 | Uncover    | ~10900 | ~68   |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
-| Solver     | huge1 |
-| ---------- | ----- |
-| Climb      | 286   |
-| Identity   | 336   |
-| Walk       | 124   |
-| Chokepoint | 385   |
-| Uncover    | 384   |
+| Solver         | huge1 |
+| -------------- | ----- |
+| Climb          | ~286  |
+| Identity       | ~336  |
+| Walk (1000 ms) | ~393  |
+| Chokepoint     | ~385  |
+| Uncover        | ~384  |
 
-**Profile (async-profiler, 5 seconds CPU mode)**
+**Profile (async-profiler, 3 seconds CPU mode)**
 
 | Solver     | huge1                                           |
 | ---------- | ----------------------------------------------- |
