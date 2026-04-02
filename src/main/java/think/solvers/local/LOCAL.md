@@ -73,6 +73,12 @@ Ruin sometimes does 150000 or 350000 throughput on medium1. In these cases, it f
 optimum and cannot 1-opt its way out. Since no seed happens, it is never able to improve score once
 it gets stuck. Hence, unlike its predecessors, sometimes chokes on medium1.
 
+**Overfill builds on Ruin**
+
+For rearrangeWalls, place the destination wall first even though this exceeds capacity by one, then
+run distance fields once per checkpoint segment. Unblocking any existing wall is now a single-cell
+sensitivity query, so the whole rearrange step is O(n^2) when checkpoint count is constant.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -94,6 +100,7 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Uncover    | ~11000 | ~4100   | ~850   | ~73   |
 | Intersect  | ~13000 | ~4600   | ~1100  | ~82   |
 | Ruin       | ~21100 | ~5500   | ~1200  | ~97   |
+| Overfill   | ~40400 | ~16100  | ~4800  | ~711  |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
@@ -106,15 +113,17 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Uncover        | =43    | =84     | ~175   | ~388  |
 | Intersect      | =43    | =84     | ~179   | ~397  |
 | Ruin           | =43    | ~84     | ~185   | ~403  |
+| Overfill       | =43    | ~84     | ~185   | ~442  |
 
 **Profile (async-profiler, 3 seconds CPU mode)**
 
-| Solver     | huge1                                           |
-| ---------- | ----------------------------------------------- |
-| Climb      | ~99% rearrangeWalls                             |
-| Identity   | ~98% rearrangeWalls, ~1% getCellsOnShortestPath |
-| Walk       | ~99% rearrangeWalls                             |
-| Chokepoint | ~95% rearrangeWalls, ~4% getChokepoints         |
-| Uncover    | ~85% rearrangeWalls, ~15% getChokepoints        |
-| Intersect  | ~96% rearrangeWalls, ~4% getChokepoints         |
-| Ruin       | ~97% rearrangeWalls, ~3% getChokepoints         |
+| Solver     | huge1                                                         |
+| ---------- | ------------------------------------------------------------- |
+| Climb      | ~99% rearrangeWalls                                           |
+| Identity   | ~98% rearrangeWalls, ~1% getCellsOnShortestPath               |
+| Walk       | ~99% rearrangeWalls                                           |
+| Chokepoint | ~95% rearrangeWalls, ~4% getChokepoints                       |
+| Uncover    | ~85% rearrangeWalls, ~15% getChokepoints                      |
+| Intersect  | ~96% rearrangeWalls, ~4% getChokepoints                       |
+| Ruin       | ~97% rearrangeWalls, ~3% getChokepoints                       |
+| Overfill   | ~71% rearrangeWalls, ~17% getChokepoints, ~11% placeMoreWalls |
