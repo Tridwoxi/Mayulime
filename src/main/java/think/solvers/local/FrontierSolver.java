@@ -354,7 +354,7 @@ public final class FrontierSolver extends Solver {
                     return false;
                 }
             }
-            if (candidate.score() > entries.get(worstIndex).score()) {
+            if (candidate.score() >= entries.get(worstIndex).score()) {
                 entries.set(worstIndex, candidate);
                 return true;
             }

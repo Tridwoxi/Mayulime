@@ -9,11 +9,13 @@ if ! command -v asprof &>/dev/null; then
     exit 1
 fi
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <bench args...>" >&2
-    echo "Example: $0 THROUGHPUT CLIMB examples/huge1.mapcode 999999 1" >&2
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <solver>" >&2
+    echo "Example: $0 CLIMB" >&2
     exit 1
 fi
+
+SOLVER="$1"
 
 cleanup() {
     [ -n "${BENCH_PID:-}" ] && kill "$BENCH_PID" 2>/dev/null
@@ -23,7 +25,7 @@ trap cleanup EXIT
 
 ./gradlew build -q 2>/dev/null
 
-./gradlew bench --args="$*" --console=plain -q 2>/dev/null &
+./gradlew bench --args="THROUGHPUT $SOLVER examples/huge1.mapcode 999999 1" --console=plain -q 2>/dev/null &
 GRADLE_PID=$!
 
 while true; do
