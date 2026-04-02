@@ -43,11 +43,9 @@ Rendering should be event-driven where possible. Solver updates, puzzle lifecycl
 changes, and viewport changes should trigger real maze renders, while timer text can refresh on a
 separate coarse cadence. The GUI should not rely on a continuous high-frequency repaint loop.
 
+Colors are chosen to be simple and colorblind-accessible.
+
 ## Future direction
-
-The color scheme is bad, but we might just be doomed to live with it.
-
-It's weird that GUI thinking bleeds into the Application launch point.
 
 It'd be nice if the user knew how many threads of theirs we were using, since that's a good
 indicator of the impact we're having on their machine.

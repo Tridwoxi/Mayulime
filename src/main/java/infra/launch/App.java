@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
+import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Proposal;
@@ -93,6 +94,11 @@ public final class App extends Application {
             update.getScore(),
             this.currentPuzzleName,
             update.getSubmitter()
+        );
+        Logging.info(
+            "MapCode for score %d: %s",
+            update.getScore(),
+            Serializer.serialize(proposal.getPuzzle(), proposal.getFeatures())
         );
         this.topScore = update.getScore();
         this.gui.enqueueSolverUpdate(update, epoch);
