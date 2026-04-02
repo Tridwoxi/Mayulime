@@ -13,6 +13,7 @@ import think.solvers.local.IdentitySolver;
 import think.solvers.local.IntersectSolver;
 import think.solvers.local.OverfillSolver;
 import think.solvers.local.RuinSolver;
+import think.solvers.local.ScrambleSolver;
 import think.solvers.local.UncoverSolver;
 import think.solvers.local.WalkSolver;
 import think.solvers.naive.BaselineSolver;
@@ -29,6 +30,7 @@ public enum SolverKind {
     OVERFILL,
     RANDOM,
     RUIN,
+    SCRAMBLE,
     UNCOVER,
     WALK;
 
@@ -46,6 +48,7 @@ public enum SolverKind {
             case OVERFILL -> new OverfillSolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
             case RUIN -> new RuinSolver(listener, puzzle);
+            case SCRAMBLE -> new ScrambleSolver(listener, puzzle);
             case UNCOVER -> new UncoverSolver(listener, puzzle);
             case WALK -> new WalkSolver(listener, puzzle);
         };
@@ -65,6 +68,6 @@ public enum SolverKind {
     }
 
     public static SolverKind getBest() {
-        return OVERFILL;
+        return SCRAMBLE;
     }
 }

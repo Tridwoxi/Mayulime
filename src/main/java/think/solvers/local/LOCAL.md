@@ -79,6 +79,10 @@ For rearrangeWalls, place the destination wall first even though this exceeds ca
 run distance fields once per checkpoint segment. Unblocking any existing wall is now a single-cell
 sensitivity query, so the whole rearrange step is O(n^2) when checkpoint count is constant.
 
+**Scramble builds on Overfill**
+
+After ruining a rectangle, re-seed it. This fixes Ruin's regression on medium1.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -101,6 +105,7 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Intersect  | ~13000 | ~4600   | ~1100  | ~82   |
 | Ruin       | ~21100 | ~5500   | ~1200  | ~97   |
 | Overfill   | ~40400 | ~16100  | ~4800  | ~711  |
+| Scramble   | ~36900 | ~12400  | ~4200  | ~646  |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
@@ -114,8 +119,9 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Intersect      | =43    | =84     | ~179   | ~397  |
 | Ruin           | =43    | ~84     | ~185   | ~403  |
 | Overfill       | =43    | ~84     | ~185   | ~442  |
+| Scramble       | =43    | =84     | ~185   | ~443  |
 
-**Profile (async-profiler, 3 seconds CPU mode)**
+**Profile (async-profiler, 5 seconds CPU mode)**
 
 | Solver     | huge1                                                         |
 | ---------- | ------------------------------------------------------------- |
@@ -127,3 +133,4 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Intersect  | ~96% rearrangeWalls, ~4% getChokepoints                       |
 | Ruin       | ~97% rearrangeWalls, ~3% getChokepoints                       |
 | Overfill   | ~71% rearrangeWalls, ~17% getChokepoints, ~11% placeMoreWalls |
+| Scramble   | ~80% rearrangeWalls, ~14% getChokepoints, ~6% other           |

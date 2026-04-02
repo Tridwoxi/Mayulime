@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Profile a bench run with async-profiler showing only methods after `Solver.run`. Typically
-# completes in 10-20 seconds including build time. Results are printed to stdout.
+# completes in under 10 seconds including build time. Results are printed to stdout.
 
 if ! command -v asprof &>/dev/null; then
     echo "asprof not found. Install async-profiler first." >&2
@@ -34,7 +34,6 @@ while true; do
     sleep 0.2
 done
 
-asprof -d 5 -e cpu -o collapsed -s -I 'Solver.run' "$BENCH_PID" \
+asprof -d 3 -e cpu -o collapsed -s -I 'Solver.run' "$BENCH_PID" \
     | sed 's/.*Solver\.run;//' \
-    | sort -t' ' -k2 -rn \
-    | head -20
+    | sort -t' ' -k2 -rn
