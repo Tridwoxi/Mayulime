@@ -91,6 +91,9 @@ there, and replace elements in the frontier if they are newer, better, and diffe
 score and chokepoint set. This generalizes the single best of Overfill to a set, and patches the
 symptom (unfortunately, only the symptom) of getting stuck in local optima seen in Ruin.
 
+Significantly worse than Overfill at short durations (large effect at 1s on huge maps), but
+converges by 10s and speculatively surpasses it for longer durations.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good

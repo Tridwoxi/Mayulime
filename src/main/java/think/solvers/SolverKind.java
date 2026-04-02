@@ -71,6 +71,6 @@ public enum SolverKind {
     }
 
     public static SolverKind getBest() {
-        return OVERFILL;
+        return FRONTIER;
     }
 }
