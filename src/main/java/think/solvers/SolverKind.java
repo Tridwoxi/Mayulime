@@ -9,6 +9,7 @@ import think.solvers.global.NoveltySolver;
 import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
+import think.solvers.local.FrontierSolver;
 import think.solvers.local.IdentitySolver;
 import think.solvers.local.IntersectSolver;
 import think.solvers.local.OverfillSolver;
@@ -24,6 +25,7 @@ public enum SolverKind {
     BASELINE,
     CHOKEPOINT,
     CLIMB,
+    FRONTIER,
     IDENTITY,
     INTERSECT,
     NOVELTY,
@@ -42,6 +44,7 @@ public enum SolverKind {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case CLIMB -> new ClimbSolver(listener, puzzle);
+            case FRONTIER -> new FrontierSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case INTERSECT -> new IntersectSolver(listener, puzzle);
             case NOVELTY -> new NoveltySolver(listener, puzzle);

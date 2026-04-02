@@ -84,6 +84,13 @@ sensitivity query, so the whole rearrange step is O(n^2) when checkpoint count i
 After ruining a rectangle, re-seed it. This fixes Ruin's regression on medium1. It comes at the
 cost of not being as good. Overfill is better, but you need big sample sizes.
 
+**Frontier builds on Overfill**
+
+Fill a frontier of locally optimal states. Then, ruin a random frontier entry and continue from
+there, and replace elements in the frontier if they are newer, better, and different according to
+score and chokepoint set. This generalizes the single best of Overfill to a set, and patches the
+symptom (unfortunately, only the symptom) of getting stuck in local optima seen in Ruin.
+
 **Anneal**
 
 Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
@@ -107,6 +114,7 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Ruin       | ~21100 | ~5500   | ~1200  | ~97   |
 | Overfill   | ~40400 | ~16100  | ~4800  | ~711  |
 | Scramble   | ~36900 | ~12400  | ~4200  | ~646  |
+| Frontier   | ~35100 | ~14000  | ~4200  | ~682  |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
@@ -121,8 +129,9 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Ruin           | =43    | ~84     | ~185   | ~403  |
 | Overfill       | =43    | ~84     | ~185   | ~442  |
 | Scramble       | =43    | =84     | ~185   | ~443  |
+| Frontier       | =43    | =84     | ~185   | ~426  |
 
-**Profile (async-profiler, 5 seconds CPU mode)**
+**Profile (async-profiler, 3 seconds CPU mode)**
 
 | Solver     | huge1                                                         |
 | ---------- | ------------------------------------------------------------- |
@@ -135,3 +144,4 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Ruin       | ~97% rearrangeWalls, ~3% getChokepoints                       |
 | Overfill   | ~71% rearrangeWalls, ~17% getChokepoints, ~11% placeMoreWalls |
 | Scramble   | ~80% rearrangeWalls, ~14% getChokepoints, ~6% other           |
+| Frontier   | ~66% rearrangeWalls, ~21% getChokepoints, ~10% placeMoreWalls |
