@@ -81,7 +81,8 @@ sensitivity query, so the whole rearrange step is O(n^2) when checkpoint count i
 
 **Scramble builds on Overfill**
 
-After ruining a rectangle, re-seed it. This fixes Ruin's regression on medium1.
+After ruining a rectangle, re-seed it. This fixes Ruin's regression on medium1. It comes at the
+cost of not being as good. Overfill is better, but you need big sample sizes.
 
 **Anneal**
 

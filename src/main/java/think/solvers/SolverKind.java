@@ -68,6 +68,6 @@ public enum SolverKind {
     }
 
     public static SolverKind getBest() {
-        return SCRAMBLE;
+        return OVERFILL;
     }
 }
