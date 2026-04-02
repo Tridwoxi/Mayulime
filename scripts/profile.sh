@@ -2,7 +2,9 @@
 set -euo pipefail
 
 # Profile a bench run with async-profiler showing only methods after `Solver.run`. Typically
-# completes in under 10 seconds including build time. Results are printed to stdout.
+# completes in under 10 seconds including build time. Results are printed to stdout. Safe to run
+# while other benchmarks are in progress, but not concurrently with other profile.sh invocations,
+# or for other benchmarks to begin while this script is starting up.
 
 if ! command -v asprof &>/dev/null; then
     echo "asprof not found. Install async-profiler first." >&2
@@ -25,14 +27,22 @@ trap cleanup EXIT
 
 ./gradlew build -q 2>/dev/null
 
+EXISTING_PIDS=" $(jps -l 2>/dev/null | grep 'infra.launch.Bench' | awk '{print $1}' | tr '\n' ' ' || true) "
+
 ./gradlew bench --args="THROUGHPUT $SOLVER examples/huge1.mapcode 999999 1" --console=plain -q 2>/dev/null &
 GRADLE_PID=$!
 
 while true; do
-    BENCH_PID=$(jps -l 2>/dev/null | grep 'infra.launch.Bench' | awk '{print $1}') || true
-    if [ -n "$BENCH_PID" ]; then
-        break
+    if ! kill -0 "$GRADLE_PID" 2>/dev/null; then
+        echo "Gradle died?" >&2
+        exit 1
     fi
+    for pid in $(jps -l 2>/dev/null | grep 'infra.launch.Bench' | awk '{print $1}'); do
+        if [[ "$EXISTING_PIDS" != *" $pid "* ]]; then
+            BENCH_PID="$pid"
+            break 2
+        fi
+    done
     sleep 0.2
 done
 
