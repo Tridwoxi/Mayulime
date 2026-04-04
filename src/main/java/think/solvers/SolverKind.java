@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
+import think.solvers.exact.EnumerateSolver;
 import think.solvers.global.NoveltySolver;
 import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
@@ -25,6 +26,7 @@ public enum SolverKind {
     BASELINE,
     CHOKEPOINT,
     CLIMB,
+    ENUMERATE,
     FRONTIER,
     IDENTITY,
     INTERSECT,
@@ -44,6 +46,7 @@ public enum SolverKind {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case CLIMB -> new ClimbSolver(listener, puzzle);
+            case ENUMERATE -> new EnumerateSolver(listener, puzzle);
             case FRONTIER -> new FrontierSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case INTERSECT -> new IntersectSolver(listener, puzzle);
