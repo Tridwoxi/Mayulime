@@ -36,11 +36,20 @@ public abstract class Solver implements Runnable {
         // of "if not alive, return", but throwing exceptions is an easier way to do non-local
         // returns.
         Logging.info("Started %s", getClass().getSimpleName());
+        final long startNs = System.nanoTime();
         try {
             solve();
-            Logging.info("Terminated %s (returned normally)", getClass().getSimpleName());
+            Logging.info(
+                "Terminated %s (returned normally, %d ms)",
+                getClass().getSimpleName(),
+                (System.nanoTime() - startNs) / 1_000_000
+            );
         } catch (KilledException _) {
-            Logging.info("Terminated %s (killed)", getClass().getSimpleName());
+            Logging.info(
+                "Terminated %s (killed, %d ms)",
+                getClass().getSimpleName(),
+                (System.nanoTime() - startNs) / 1_000_000
+            );
         }
     }
 
@@ -51,7 +60,7 @@ public abstract class Solver implements Runnable {
     // == Subclass contract. ==
 
     /**
-        Concrete subclasses should do all non-trivial work in this method, as opposed to the
+        Concrete subclasses must do all non-trivial work in this method, as opposed to the
         constructor. Implementations must call {@link #checkAlive} at least once every 500
         milliseconds or so when presented a map smaller than 20 by 20 with 10 checkpoints.
      */
