@@ -19,6 +19,9 @@ If you need to profile, use `scripts/profile.sh` when on Unix or Linux. If you c
 async-profiler is missing, ask the human to install it. Remember profiling is only a diagnostic,
 and a slow method is not always an indication it needs to be made a constant factor faster.
 
+If you decide to use third-party Python packages, install them into a throwaway venv in `tmp/`,
+not directly into the human's system.
+
 ## Package structure
 
 Some packages contain a markdown document inside them. These documents are required reading when

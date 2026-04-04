@@ -19,6 +19,7 @@
 bin/
 build/
 gradle/
+tmp/
 
 # Tooling configuration.
 !build.gradle
