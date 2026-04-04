@@ -15,7 +15,7 @@ public final class PruneSolver extends Solver {
     private final StandardEvaluator evaluator;
     private final int[] blankCells;
 
-    public PruneSolver(Consumer<Proposal> listener, Puzzle puzzle) {
+    public PruneSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
         this.blankCells = getBlankCells();
@@ -23,7 +23,7 @@ public final class PruneSolver extends Solver {
 
     @Override
     protected void solve() throws KilledException {
-        // TODO: Implement
+        // TODO: Implement.
         final Feature[] maze = getPuzzle().getFeatures();
         int topScore = StandardEvaluator.NO_PATH_EXISTS;
 
