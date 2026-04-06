@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import think.manager.Proposal;
 
 public final class Timeline implements Runnable {
@@ -28,10 +28,10 @@ public final class Timeline implements Runnable {
     }
 
     private void report() {
-        Logging.results("bucket_ms,proposals");
+        Logger.results("bucket_ms,proposals");
         for (int bucket = 0; bucket < numBuckets; bucket += 1) {
             final long bucketStart = bucket * BUCKET_MS;
-            Logging.results("%d,%d", bucketStart, counts[bucket]);
+            Logger.results("%d,%d", bucketStart, counts[bucket]);
         }
     }
 }

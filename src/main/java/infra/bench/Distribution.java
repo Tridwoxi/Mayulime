@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import think.manager.Proposal;
@@ -26,9 +26,9 @@ public final class Distribution implements Runnable {
     }
 
     private void report() {
-        Logging.results("score,count");
+        Logger.results("score,count");
         for (final Entry<Integer, Long> entry : counts.entrySet()) {
-            Logging.results("%d,%d", entry.getKey(), entry.getValue());
+            Logger.results("%d,%d", entry.getKey(), entry.getValue());
         }
     }
 }

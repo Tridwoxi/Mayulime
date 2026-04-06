@@ -1,8 +1,7 @@
-package infra.output;
+package infra.logging;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.StackWalker.StackFrame;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,24 +12,25 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
-    Centralized logging. It is a design error to print directly instead of using this class. Logging
-    messages are tagged with the type of log and the declaring class like so:
+    Centralized logging. It is a design error to print directly instead of using this class. Log
+    messages are always saved to a file. Beware, the log file may be large. Log messages are tagged
+    with the type of log and the declaring class like so:
 
     <pre>
     [ANNOUNCEMENT] [infra.launch.App]: Launch point: Application
     [INFO] [think.solvers.Solver]: Started BaselineSolver
     </pre>
 
-    Everything goes to stderr, except for results, which go to stdout. Everything is also saved to
-    a log file so you can grep it later. Notice the lack of public error logging. All other classes
-    are considered critical and if they experience an error, the system should crash. However,
-    logging is not critical, so is allowed to suffer errors and only partially fail.
+    Results are always printed to stdout. If {@link #NOISY_OUTPUT_ENVVAR} is set to "true", all log
+    messages are printed to stderr as well. Notice the lack of public error logging. All other
+    classes are considered critical and if they experience an error, the system should crash.
+    However, logging is not critical, so is allowed to suffer errors and only partially fail.
  */
-public final class Logging {
+public final class Logger {
 
+    public static final String NOISY_OUTPUT_ENVVAR = "MAYULIME_NOISY_OUTPUT";
     private static final String LOG_FILE = "mayulime.log";
     private static final BufferedWriter WRITER;
-    private static final boolean ENABLED = true;
     private static final Locale LOCALE = Locale.ENGLISH;
     private static final StackWalker WALKER = StackWalker.getInstance(
         StackWalker.Option.RETAIN_CLASS_REFERENCE
@@ -51,56 +51,59 @@ public final class Logging {
         WRITER = initializedWriter;
     }
 
-    private Logging() {}
+    private Logger() {}
 
     public static void results(final String message, final Object... args) {
-        log(System.out, "RESULTS", message, args);
+        System.out.println(format(message, args));
+        log("RESULTS", message, args);
     }
 
     public static void announcement(final String message, final Object... args) {
-        log(System.err, "ANNOUNCEMENT", message, args);
+        log("ANNOUNCEMENT", message, args);
     }
 
     public static void warning(final String message, final Object... args) {
-        log(System.err, "WARNING", message, args);
+        log("WARNING", message, args);
     }
 
     public static void info(final String message, final Object... args) {
-        log(System.err, "INFO", message, args);
+        log("INFO", message, args);
     }
 
     public static void debug(final String message, final Object... args) {
-        log(System.err, "DEBUG", message, args);
+        log("DEBUG", message, args);
+    }
+
+    private static String format(final String message, final Object... args) {
+        try {
+            return String.format(message, args);
+        } catch (IllegalFormatException exception) {
+            exception.printStackTrace();
+            return "";
+        }
     }
 
     private static synchronized void log(
-        final PrintStream printStream,
         final String category,
         final String message,
         final Object... args
     ) {
-        if (!ENABLED) {
-            return;
-        }
-
         final Function<Stream<StackFrame>, String> getCaller = frames ->
             frames
-                .filter(frame -> frame.getDeclaringClass() != Logging.class)
+                .filter(frame -> frame.getDeclaringClass() != Logger.class)
                 .map(frame -> frame.getDeclaringClass().getName())
                 .findFirst()
                 .orElse("<unknown>");
         final String caller = WALKER.walk(getCaller);
 
-        String formatted = "";
-        try {
-            formatted = String.format(message, args);
-        } catch (IllegalFormatException exception) {
-            exception.printStackTrace();
-            return;
-        }
+        final String line = String.format(
+            LOCALE,
+            "[%s] [%s]: %s",
+            category,
+            caller,
+            format(message, args)
+        );
 
-        final String line = String.format(LOCALE, "[%s] [%s]: %s", category, caller, formatted);
-        printStream.println(line);
         if (WRITER != null) {
             try {
                 WRITER.write(line);
@@ -109,6 +112,11 @@ public final class Logging {
             } catch (final IOException exception) {
                 exception.printStackTrace();
             }
+        }
+
+        final String noisyOrNull = System.getenv(NOISY_OUTPUT_ENVVAR);
+        if (noisyOrNull != null && noisyOrNull.strip().equalsIgnoreCase("true")) {
+            System.err.println(line);
         }
     }
 }

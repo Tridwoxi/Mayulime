@@ -1,6 +1,6 @@
 package e2e;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +59,7 @@ public final class Smalls {
             try {
                 Thread.sleep(TIMEOUT_MS);
             } catch (InterruptedException exception) {
-                Logging.warning("%s", exception.toString());
+                Logger.warning("%s", exception.toString());
             }
             manager.stop();
         }

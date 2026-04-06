@@ -1,6 +1,6 @@
 package think.solvers.exact;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 import think.common.IntArrays;
@@ -24,7 +24,7 @@ public final class EnumerateSolver extends Solver {
     @Override
     protected void solve() throws KilledException {
         final int numBlanks = blankCellIndices.length;
-        Logging.info(
+        Logger.info(
             "Enumerating ~%.2e combinations (%d blanks, up to %d walls)",
             estimateTotalCombinations(numBlanks, getPuzzle().getBlockingBudget()),
             numBlanks,

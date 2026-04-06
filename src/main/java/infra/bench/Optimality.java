@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.codec.Serializer;
@@ -35,7 +35,7 @@ public final class Optimality implements Runnable {
             numOptimal += 1L;
         } else {
             final String mapCode = Serializer.serialize(params.puzzle(), proposal.getFeatures());
-            Logging.results(
+            Logger.results(
                 "Not locally optimal (score %d at %d ms): %s",
                 proposal.getScore(),
                 elapsedMs,
@@ -46,8 +46,8 @@ public final class Optimality implements Runnable {
 
     private void report() {
         final double fraction = numProposals == 0L ? 0.0 : (double) numOptimal / numProposals;
-        Logging.results("Locally optimal: %d of %d proposals", numOptimal, numProposals);
-        Logging.results("Fraction: %f", fraction);
+        Logger.results("Locally optimal: %d of %d proposals", numOptimal, numProposals);
+        Logger.results("Fraction: %f", fraction);
     }
 
     // == Below: ClimbSolver-like machinery. ==

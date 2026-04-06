@@ -1,6 +1,6 @@
 package think.solvers;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import think.domain.model.Feature;
@@ -35,17 +35,17 @@ public abstract class Solver implements Runnable {
         // procedure. So, the solver needs to check when to stop. We can do so with a lengthy chain
         // of "if not alive, return", but throwing exceptions is an easier way to do non-local
         // returns.
-        Logging.info("Started %s", getClass().getSimpleName());
+        Logger.info("Started %s", getClass().getSimpleName());
         final long startNs = System.nanoTime();
         try {
             solve();
-            Logging.info(
+            Logger.info(
                 "Terminated %s (returned normally, %d ms)",
                 getClass().getSimpleName(),
                 (System.nanoTime() - startNs) / 1_000_000
             );
         } catch (KilledException _) {
-            Logging.info(
+            Logger.info(
                 "Terminated %s (killed, %d ms)",
                 getClass().getSimpleName(),
                 (System.nanoTime() - startNs) / 1_000_000

@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import think.manager.Proposal;
 
 public final class Throughput implements Runnable {
@@ -23,7 +23,7 @@ public final class Throughput implements Runnable {
 
     private void report() {
         final double rate = ((double) numProposals / params.durationMs()) * 1000.0;
-        Logging.results("Saw %d proposals in %d ms", numProposals, params.durationMs());
-        Logging.results("That is %f per second", rate);
+        Logger.results("Saw %d proposals in %d ms", numProposals, params.durationMs());
+        Logger.results("That is %f per second", rate);
     }
 }

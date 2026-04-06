@@ -2,7 +2,7 @@ package infra.launch;
 
 import infra.gui.Gui;
 import infra.gui.Submission;
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +61,7 @@ public final class App extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        Logging.announcement("Launch point: Application");
+        Logger.announcement("Launch point: Application");
 
         this.manager = new Manager(this::receiveProposal, SOLVER_KINDS);
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
@@ -88,14 +88,14 @@ public final class App extends Application {
         }
         final String priorScoreText =
             this.topScore == UNSCORED ? "Unscored" : Integer.toString(this.topScore);
-        Logging.info(
+        Logger.info(
             "Score %s -> %d on %s by %s",
             priorScoreText,
             update.getScore(),
             this.currentPuzzleName,
             update.getSubmitter()
         );
-        Logging.info(
+        Logger.info(
             "MapCode for score %d: %s",
             update.getScore(),
             Serializer.serialize(proposal.getPuzzle(), proposal.getFeatures())
@@ -113,7 +113,7 @@ public final class App extends Application {
         try {
             puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException _) {
-            Logging.warning("Bad MapCode or unsupported feature; problem rejected");
+            Logger.warning("Bad MapCode or unsupported feature; problem rejected");
             gui.onMapCodeRejected(BAD_MAP_MESSAGE);
             return;
         }

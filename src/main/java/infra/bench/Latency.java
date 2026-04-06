@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +30,7 @@ public final class Latency implements Runnable {
 
     private void report() {
         if (intervals.isEmpty()) {
-            Logging.results("No intervals recorded.");
+            Logger.results("No intervals recorded.");
             return;
         }
         Collections.sort(intervals);
@@ -46,8 +46,8 @@ public final class Latency implements Runnable {
                 .sum() /
             intervals.size();
         final double stddev = Math.sqrt(variance);
-        Logging.results("Proposals: %d, intervals: %d", intervals.size() + 1, intervals.size());
-        Logging.results(
+        Logger.results("Proposals: %d, intervals: %d", intervals.size() + 1, intervals.size());
+        Logger.results(
             "Median: %d ms, min: %d ms, max: %d ms, total: %d ms, stddev: %.1f ms",
             median,
             min,

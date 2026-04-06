@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import think.manager.Proposal;
 
 public final class Agreement implements Runnable {
@@ -38,8 +38,8 @@ public final class Agreement implements Runnable {
     private void report() {
         final String topScoreText = scored ? Integer.toString(topScore) : "Unscored";
         final double fraction = numProposals == 0L ? 0.0 : (double) numBest / numProposals;
-        Logging.results("Top score %s", topScoreText);
-        Logging.results("Achieved by %d of %d proposals", numBest, numProposals);
-        Logging.results("As a fraction, that is %f", fraction);
+        Logger.results("Top score %s", topScoreText);
+        Logger.results("Achieved by %d of %d proposals", numBest, numProposals);
+        Logger.results("As a fraction, that is %f", fraction);
     }
 }

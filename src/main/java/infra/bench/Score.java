@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import think.domain.codec.Serializer;
 import think.manager.Proposal;
 
@@ -29,11 +29,11 @@ public final class Score implements Runnable {
     private void report() {
         if (best != null) {
             final String mapCode = Serializer.serialize(params.puzzle(), best.getFeatures());
-            Logging.results("Best proposal: %s", mapCode);
-            Logging.results("Score: %d", best.getScore());
-            Logging.results("Found after: %d ms", bestElapsedMs);
+            Logger.results("Best proposal: %s", mapCode);
+            Logger.results("Score: %d", best.getScore());
+            Logger.results("Found after: %d ms", bestElapsedMs);
         } else {
-            Logging.results("Nothing found.");
+            Logger.results("Nothing found.");
         }
     }
 }

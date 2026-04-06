@@ -1,6 +1,6 @@
 package infra.bench;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -32,7 +32,7 @@ public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs, int 
             try {
                 Thread.sleep(durationMs);
             } catch (InterruptedException shouldNotHappen) {
-                Logging.warning("%s", shouldNotHappen.toString());
+                Logger.warning("%s", shouldNotHappen.toString());
             }
             manager.stop();
         }

@@ -1,6 +1,6 @@
 package think.domain.model;
 
-import infra.output.Logging;
+import infra.logging.Logger;
 import java.util.HashSet;
 
 /**
@@ -63,7 +63,7 @@ public final class Puzzle {
 
     public boolean isValid(final Feature[] proposal) {
         if (features.length != proposal.length) {
-            Logging.warning("Wrong dimension: %d vs %d", features.length, proposal.length);
+            Logger.warning("Wrong dimension: %d vs %d", features.length, proposal.length);
             return false;
         }
         int numWalls = 0;
