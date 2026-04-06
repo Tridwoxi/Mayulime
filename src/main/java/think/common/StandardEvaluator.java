@@ -15,7 +15,7 @@ public final class StandardEvaluator {
     private final int numRows;
     private final int numCols;
     private final int size;
-    private final IntDeque frontier;
+    private final IntList frontier;
     private final int[] distances;
     private final int[] checkpoints;
 
@@ -23,7 +23,7 @@ public final class StandardEvaluator {
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.size = numRows * numCols;
-        this.frontier = new IntDeque(size);
+        this.frontier = new IntList(size);
         this.distances = new int[size];
         this.checkpoints = puzzle.getCheckpoints();
     }
@@ -55,10 +55,10 @@ public final class StandardEvaluator {
         Arrays.fill(distances, -1);
         distances[start] = 0;
         frontier.clear();
-        frontier.addLast(start);
+        frontier.addRight(start);
 
         while (!frontier.isEmpty()) {
-            final int current = frontier.removeFirst();
+            final int current = frontier.removeLeft();
 
             final int currentRow = current / numCols;
             final int currentCol = current % numCols;
@@ -75,7 +75,7 @@ public final class StandardEvaluator {
                 if (nextUp == finish) {
                     return nextDistance;
                 }
-                frontier.addLast(nextUp);
+                frontier.addRight(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
@@ -86,7 +86,7 @@ public final class StandardEvaluator {
                 if (nextRight == finish) {
                     return nextDistance;
                 }
-                frontier.addLast(nextRight);
+                frontier.addRight(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
@@ -97,14 +97,14 @@ public final class StandardEvaluator {
                 if (nextDown == finish) {
                     return nextDistance;
                 }
-                frontier.addLast(nextDown);
+                frontier.addRight(nextDown);
                 distances[nextDown] = nextDistance;
             }
             if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
                 if (nextLeft == finish) {
                     return nextDistance;
                 }
-                frontier.addLast(nextLeft);
+                frontier.addRight(nextLeft);
                 distances[nextLeft] = nextDistance;
             }
         }

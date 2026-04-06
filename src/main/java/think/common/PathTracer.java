@@ -16,7 +16,7 @@ public final class PathTracer {
     private final int numRows;
     private final int numCols;
     private final int size;
-    private final IntDeque frontier;
+    private final IntList frontier;
     private final int[] distances;
 
     public PathTracer(final Puzzle puzzle) {
@@ -24,7 +24,7 @@ public final class PathTracer {
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.size = numRows * numCols;
-        this.frontier = new IntDeque(size);
+        this.frontier = new IntList(size);
         this.distances = new int[size];
     }
 
@@ -89,10 +89,10 @@ public final class PathTracer {
         Arrays.fill(distances, -1);
         frontier.clear();
         distances[source] = 0;
-        frontier.addLast(source);
+        frontier.addRight(source);
 
         while (!frontier.isEmpty()) {
-            final int current = frontier.removeFirst();
+            final int current = frontier.removeLeft();
 
             final int currentRow = current / numCols;
             final int currentCol = current % numCols;
@@ -108,7 +108,7 @@ public final class PathTracer {
                     distances[nextUp] = nextDistance;
                     return;
                 }
-                frontier.addLast(nextUp);
+                frontier.addRight(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
@@ -120,7 +120,7 @@ public final class PathTracer {
                     distances[nextRight] = nextDistance;
                     return;
                 }
-                frontier.addLast(nextRight);
+                frontier.addRight(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
@@ -132,7 +132,7 @@ public final class PathTracer {
                     distances[nextDown] = nextDistance;
                     return;
                 }
-                frontier.addLast(nextDown);
+                frontier.addRight(nextDown);
                 distances[nextDown] = nextDistance;
             }
             if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
@@ -140,7 +140,7 @@ public final class PathTracer {
                     distances[nextLeft] = nextDistance;
                     return;
                 }
-                frontier.addLast(nextLeft);
+                frontier.addRight(nextLeft);
                 distances[nextLeft] = nextDistance;
             }
         }
