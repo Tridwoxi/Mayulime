@@ -78,8 +78,9 @@ public final class IntGraph {
 
     public int[] getVertexChildren(final int vertex) {
         final IntList adjacent = adjacencyList[vertex];
-        final int[] result = new int[adjacent.size() / 2];
-        for (int neighbor = 0; neighbor < adjacent.size(); neighbor += 1) {
+        final int degree = adjacent.size() / 2;
+        final int[] result = new int[degree];
+        for (int neighbor = 0; neighbor < degree; neighbor += 1) {
             result[neighbor] = adjacent.get(neighbor * 2);
         }
         return result;
@@ -87,7 +88,8 @@ public final class IntGraph {
 
     public void forEachVertexChild(final int vertex, final IntConsumer action) {
         final IntList adjacent = adjacencyList[vertex];
-        for (int neighbor = 0; neighbor < adjacent.size(); neighbor += 1) {
+        final int degree = adjacent.size() / 2;
+        for (int neighbor = 0; neighbor < degree; neighbor += 1) {
             action.accept(adjacent.get(neighbor * 2));
         }
     }
