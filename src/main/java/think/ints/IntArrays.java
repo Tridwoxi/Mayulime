@@ -1,4 +1,4 @@
-package think.common;
+package think.ints;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;

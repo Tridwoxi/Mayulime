@@ -2,7 +2,6 @@ package think.ints;
 
 import java.util.Arrays;
 import java.util.function.IntConsumer;
-import think.common.IntArrays;
 
 /**
     Array-backed list of primitive ints.

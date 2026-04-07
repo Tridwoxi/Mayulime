@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Consumer;
 import think.common.DistanceFinder;
-import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
 
@@ -266,8 +266,7 @@ public final class OverfillSolver extends Solver {
                 }
                 final int candidateDistance = startDistance + finishDistance + 2;
                 if (
-                    bestDistance == DistanceFinder.UNREACHABLE ||
-                    candidateDistance < bestDistance
+                    bestDistance == DistanceFinder.UNREACHABLE || candidateDistance < bestDistance
                 ) {
                     bestDistance = candidateDistance;
                 }

@@ -1,11 +1,11 @@
 package infra.bench;
 
 import infra.logging.Logger;
-import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.codec.Serializer;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.ints.IntArrays;
 import think.manager.Proposal;
 
 /**

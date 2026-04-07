@@ -3,10 +3,10 @@ package think.solvers.exact;
 import infra.logging.Logger;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
-import think.common.IntArrays;
 import think.common.StandardEvaluator;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
 
