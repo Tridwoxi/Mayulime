@@ -80,12 +80,30 @@ public final class IntList {
         return value;
     }
 
+    public void removeRange(final int startInclusive, final int endExclusive) {
+        if (startInclusive >= endExclusive) {
+            throw new IllegalArgumentException("" + startInclusive + " " + endExclusive);
+        }
+        requireInBounds(startInclusive);
+        requireInBounds(endExclusive - 1);
+        System.arraycopy(backing, endExclusive, backing, startInclusive, size - endExclusive);
+        size -= endExclusive - startInclusive;
+    }
+
     public void clear() {
         size = 0;
     }
 
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
     public int size() {
         return size;
+    }
+
+    public boolean contains(final int value) {
+        return indexOf(value) != NOT_FOUND;
     }
 
     public int indexOf(final int value) {
