@@ -3,6 +3,7 @@ package think.common;
 import java.util.Arrays;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.ints.IntQueue;
 
 /**
     Simple reference evaluator implementation. Calculates sum of pairwise distances between
@@ -15,7 +16,7 @@ public final class StandardEvaluator {
     private final int numRows;
     private final int numCols;
     private final int size;
-    private final IntList frontier;
+    private final IntQueue frontier;
     private final int[] distances;
     private final int[] checkpoints;
 
@@ -23,7 +24,7 @@ public final class StandardEvaluator {
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.size = numRows * numCols;
-        this.frontier = new IntList(size);
+        this.frontier = new IntQueue(size);
         this.distances = new int[size];
         this.checkpoints = puzzle.getCheckpoints();
     }
@@ -55,10 +56,10 @@ public final class StandardEvaluator {
         Arrays.fill(distances, -1);
         distances[start] = 0;
         frontier.clear();
-        frontier.addRight(start);
+        frontier.add(start);
 
         while (!frontier.isEmpty()) {
-            final int current = frontier.removeLeft();
+            final int current = frontier.remove();
 
             final int currentRow = current / numCols;
             final int currentCol = current % numCols;
@@ -75,7 +76,7 @@ public final class StandardEvaluator {
                 if (nextUp == finish) {
                     return nextDistance;
                 }
-                frontier.addRight(nextUp);
+                frontier.add(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
@@ -86,7 +87,7 @@ public final class StandardEvaluator {
                 if (nextRight == finish) {
                     return nextDistance;
                 }
-                frontier.addRight(nextRight);
+                frontier.add(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
@@ -97,14 +98,14 @@ public final class StandardEvaluator {
                 if (nextDown == finish) {
                     return nextDistance;
                 }
-                frontier.addRight(nextDown);
+                frontier.add(nextDown);
                 distances[nextDown] = nextDistance;
             }
             if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
                 if (nextLeft == finish) {
                     return nextDistance;
                 }
-                frontier.addRight(nextLeft);
+                frontier.add(nextLeft);
                 distances[nextLeft] = nextDistance;
             }
         }

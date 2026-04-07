@@ -3,6 +3,7 @@ package think.common;
 import java.util.Arrays;
 import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.ints.IntQueue;
 
 /**
     Calculates distance from every cell to a given source, or UNREACHABLE if the cell and source
@@ -15,14 +16,14 @@ public final class DistanceFinder {
     private final int numRows;
     private final int numCols;
     private final int size;
-    private final IntList frontier;
+    private final IntQueue frontier;
     private final int[] distances;
 
     public DistanceFinder(final Puzzle puzzle) {
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.size = numRows * numCols;
-        this.frontier = new IntList(size);
+        this.frontier = new IntQueue(size);
         this.distances = new int[size];
     }
 
@@ -37,10 +38,10 @@ public final class DistanceFinder {
         }
         frontier.clear();
         distances[source] = 0;
-        frontier.addRight(source);
+        frontier.add(source);
 
         while (!frontier.isEmpty()) {
-            final int current = frontier.removeLeft();
+            final int current = frontier.remove();
 
             final int currentRow = current / numCols;
             final int currentCol = current % numCols;
@@ -53,7 +54,7 @@ public final class DistanceFinder {
             final int nextDistance = currentDistance + 1;
 
             if (currentRow > 0 && features[nextUp].isPassable() && distances[nextUp] < 0) {
-                frontier.addRight(nextUp);
+                frontier.add(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
@@ -61,7 +62,7 @@ public final class DistanceFinder {
                 features[nextRight].isPassable() &&
                 distances[nextRight] < 0
             ) {
-                frontier.addRight(nextRight);
+                frontier.add(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
@@ -69,11 +70,11 @@ public final class DistanceFinder {
                 features[nextDown].isPassable() &&
                 distances[nextDown] < 0
             ) {
-                frontier.addRight(nextDown);
+                frontier.add(nextDown);
                 distances[nextDown] = nextDistance;
             }
             if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
-                frontier.addRight(nextLeft);
+                frontier.add(nextLeft);
                 distances[nextLeft] = nextDistance;
             }
         }

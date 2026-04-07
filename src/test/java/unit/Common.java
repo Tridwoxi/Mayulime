@@ -3,7 +3,6 @@ package unit;
 import java.util.BitSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import think.common.IntList;
 import think.common.PathTracer;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
@@ -34,31 +33,5 @@ public final class Common {
         expected2.set(2);
         expected2.set(3);
         Assertions.assertEquals(expected2, result2);
-    }
-
-    @Test
-    public void intList() {
-        final IntList list = new IntList(0);
-        Assertions.assertEquals(0, list.getSize());
-        Assertions.assertTrue(list.isEmpty());
-
-        list.addRight(99);
-        Assertions.assertEquals(1, list.getSize());
-        Assertions.assertFalse(list.isEmpty());
-        Assertions.assertEquals(99, list.getValue(0));
-        Assertions.assertEquals(0, list.getIndex(99));
-        Assertions.assertEquals(IntList.NOT_FOUND, list.getIndex(0));
-        final int[] total = { 0 };
-        list.forEach(element -> total[0] += element);
-        Assertions.assertEquals(99, total[0]);
-
-        list.clear();
-        for (int index = 0; index < 10; index += 1) {
-            list.addRight(index);
-            list.addRight(index);
-            list.removeIndex(0);
-            Assertions.assertEquals(index + 1, list.getSize());
-            Assertions.assertEquals(index, list.getValue(index));
-        }
     }
 }
