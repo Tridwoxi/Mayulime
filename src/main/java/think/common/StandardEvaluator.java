@@ -12,7 +12,6 @@ import think.ints.IntQueue;
 public final class StandardEvaluator {
 
     public static final int NO_PATH_EXISTS = -1;
-
     private final int numRows;
     private final int numCols;
     private final int size;

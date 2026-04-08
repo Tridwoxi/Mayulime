@@ -26,7 +26,8 @@ public final class IntQueue {
     }
 
     public void add(final int value) {
-        // PERF: async-profiler says this method is 74% of thread runtime for ClimbSolver.
+        // PERF: async-profiler says this method is 74% of thread runtime for ClimbSolver. Removing
+        // the `& mask` or inlining this class into StandardEvaluator didn't help.
         backing[tail] = value;
         tail = (tail + 1) & mask;
     }
