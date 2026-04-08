@@ -48,4 +48,5 @@ done
 
 asprof -d 3 -e cpu -o collapsed -s -I 'Solver.run' "$BENCH_PID" \
     | sed 's/.*Solver\.run;//' \
+    | awk '{a[$1]+=$2} END {for(k in a) print k,a[k]}' \
     | sort -t' ' -k2 -rn

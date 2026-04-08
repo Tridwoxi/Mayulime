@@ -7,8 +7,8 @@ package think.ints;
  */
 public final class IntQueue {
 
-    private int[] backing;
-    private int mask;
+    private final int[] backing;
+    private final int mask;
     private int head;
     private int tail;
 
@@ -26,8 +26,9 @@ public final class IntQueue {
     }
 
     public void add(final int value) {
-        // PERF: async-profiler says this method is 74% of thread runtime for ClimbSolver. Removing
-        // the `& mask` or inlining this class into StandardEvaluator didn't help.
+        // PERF: Without -XX:+DebugNonSafepoints, async-profiler thinks BFS loop time is mostly this
+        // method. It's actually only ~17% or so; time is spread pretty evenly in BFS. Also,
+        // removing `& mask` below decreases performance for some reason.
         backing[tail] = value;
         tail = (tail + 1) & mask;
     }

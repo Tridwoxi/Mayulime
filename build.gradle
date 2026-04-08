@@ -52,7 +52,7 @@ tasks.register('bench', JavaExec) {
     dependsOn 'classes', 'checkstyleMain', 'spotbugsMain'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'infra.launch.Bench'
-    jvmArgs '-ea'
+    jvmArgs '-ea', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints'
 }
 
 tasks.withType(Test).configureEach {
