@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
 import think.manager.Proposal;
+import think.solvers.compass.CompassSolver;
 import think.solvers.exact.EnumerateSolver;
 import think.solvers.exact.PruneSolver;
 import think.solvers.global.NoveltySolver;
@@ -27,6 +28,7 @@ public enum SolverKind {
     BASELINE,
     CHOKEPOINT,
     CLIMB,
+    COMPASS,
     ENUMERATE,
     FRONTIER,
     IDENTITY,
@@ -48,6 +50,7 @@ public enum SolverKind {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case CLIMB -> new ClimbSolver(listener, puzzle);
+            case COMPASS -> new CompassSolver(listener, puzzle);
             case ENUMERATE -> new EnumerateSolver(listener, puzzle);
             case FRONTIER -> new FrontierSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);
