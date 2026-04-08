@@ -32,17 +32,18 @@ Application packages are in `src/main/java/`:
 `infra.bench` - Benchmarks.\
 `infra.gui` - JavaFX GUI.\
 `infra.launch` - Launch points.\
-`infra.output` - Logging.\
+`infra.output` - Logging.
 
 `think.common` - Shared backend classes.\
 `think.domain` - Problem model and codec.\
+`think.ints` - Primitive int data structures.\
 `think.manager` - Solver orchestration and integration.\
-`think.solvers` - Solver implementations.\
+`think.solvers` - Solver implementations.
 
 Test packages are in `src/test/java/`:
 
 `e2e` - End-to-end and integration tests.\
-`unit` - Unit tests grouped by package. Only public objects are tested.\
+`unit` - Unit tests grouped by package. Only public objects are tested.
 
 ## Style
 
@@ -54,10 +55,10 @@ However, repo code must never accept, return, or let `null` escape into other re
 there is usually no need to check.
 
 If an interface already exists, accept and return that interface rather than the implementation. If
-no interface already exists, just use the implementation.
+no interface already exists, use the implementation.
 
-Extending or implementing custom classes and interfaces is permitted but discouraged beyond one
-layer deep.
+Extending or implementing custom classes and interfaces beyond one layer deep is permitted but
+discouraged.
 
 Prefer imported simple type names over fully-qualified names. For example, `List` via `import 
 java.util.List` instead of `java.util.List` inline.
