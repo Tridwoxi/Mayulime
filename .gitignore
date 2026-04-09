@@ -12,6 +12,7 @@
 # Scratch files.
 /*.md
 !/AGENTS.md
+!/PLANS.md
 !/README.md
 
 # Mystery files, build artifacts.
