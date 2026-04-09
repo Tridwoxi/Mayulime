@@ -8,7 +8,6 @@ import think.manager.Proposal;
 import think.solvers.compass.CompassSolver;
 import think.solvers.exact.EnumerateSolver;
 import think.solvers.exact.PruneSolver;
-import think.solvers.global.NoveltySolver;
 import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
@@ -33,7 +32,6 @@ public enum SolverKind {
     FRONTIER,
     IDENTITY,
     INTERSECT,
-    NOVELTY,
     OVERFILL,
     PRUNE,
     RANDOM,
@@ -55,7 +53,6 @@ public enum SolverKind {
             case FRONTIER -> new FrontierSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case INTERSECT -> new IntersectSolver(listener, puzzle);
-            case NOVELTY -> new NoveltySolver(listener, puzzle);
             case OVERFILL -> new OverfillSolver(listener, puzzle);
             case PRUNE -> new PruneSolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
