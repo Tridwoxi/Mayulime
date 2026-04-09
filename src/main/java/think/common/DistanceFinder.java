@@ -17,24 +17,30 @@ public final class DistanceFinder {
     private final int numCols;
     private final int size;
     private final IntQueue frontier;
-    private final int[] distances;
 
     public DistanceFinder(final Puzzle puzzle) {
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.size = numRows * numCols;
         this.frontier = new IntQueue(size);
-        this.distances = new int[size];
     }
 
     public int[] find(final Feature[] features, final int source) {
-        if (!(source >= 0 && source < features.length) || !(features.length == size)) {
+        final int[] buffer = new int[size];
+        find(buffer, features, source);
+        return buffer;
+    }
+
+    public void find(final int[] distances, final Feature[] features, final int source) {
+        final boolean sourceInBounds = source >= 0 && source < features.length;
+        final boolean correctArrayShape = distances.length == size && features.length == size;
+        if (!sourceInBounds || !correctArrayShape) {
             throw new IllegalArgumentException();
         }
 
         Arrays.fill(distances, UNREACHABLE);
         if (features[source].isBlocked()) {
-            return distances.clone();
+            return;
         }
         frontier.clear();
         distances[source] = 0;
@@ -78,6 +84,5 @@ public final class DistanceFinder {
                 distances[nextLeft] = nextDistance;
             }
         }
-        return distances.clone();
     }
 }
