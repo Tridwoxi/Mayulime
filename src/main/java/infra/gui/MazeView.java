@@ -61,6 +61,21 @@ final class MazeView extends Canvas {
                 }
             }
         }
+
+        final double dotDiameter = cellSizePx * 0.10;
+        final double dotOffset = (cellSizePx - dotDiameter) * 0.5;
+        graphics.setFill(this.palette.checkpoint());
+        for (int row = 0; row < display.getNumRows(); row += 1) {
+            for (int col = 0; col < display.getNumCols(); col += 1) {
+                if (
+                    display.isOnPath(row, col) && display.getFeature(row, col) != Feature.CHECKPOINT
+                ) {
+                    final double x = col * cellSizePx + dotOffset;
+                    final double y = row * cellSizePx + dotOffset;
+                    graphics.fillOval(x, y, dotDiameter, dotDiameter);
+                }
+            }
+        }
     }
 
     public void clear() {

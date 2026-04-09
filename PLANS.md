@@ -1,11 +1,5 @@
 # Plans
 
-The GUI should display the path the Pathery snake takes. A simple way to do this is to add a small
-white circle (if dark theme) to the center of each stepped-on cell. This also keeps the number of
-colors limited.
-
----
-
 The GUI should display, and perhaps even support controlling, the number of threads we are
 currently consuming on the host system. This is valuable because number of threads is related to
 impact on the host system.
