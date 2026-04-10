@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import think.domain.model.Puzzle;
 import think.solvers.SolverKind;
@@ -31,6 +32,7 @@ public final class Gui extends Scene {
         this.controller = controller;
         this.activeColorScheme = Platform.getPreferences().getColorScheme();
 
+        this.setFill(paletteBackground(this.activeColorScheme));
         this.controller.applyColorScheme(this.activeColorScheme);
         Platform.getPreferences()
             .colorSchemeProperty()
@@ -78,6 +80,11 @@ public final class Gui extends Scene {
             return;
         }
         this.activeColorScheme = colorScheme;
+        this.setFill(paletteBackground(colorScheme));
         this.controller.applyColorScheme(colorScheme);
+    }
+
+    private static Color paletteBackground(final ColorScheme colorScheme) {
+        return UiPalette.fromColorScheme(colorScheme).background();
     }
 }

@@ -49,4 +49,6 @@ Colors are chosen to be simple and colorblind-accessible.
 
 ## Future direction
 
-No planned changes.
+On a high-throughput solver on a big map, the FX thread waits for the manager to drain, and that
+can take a while (almost 1 second for 10x RandomSolver on Gargantuan). This is an edge case, but it
+is good to have a responsive UI in all cases.
