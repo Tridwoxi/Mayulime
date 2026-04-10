@@ -1,8 +1,7 @@
 # Plans
 
-The GUI should display, and perhaps even support controlling, the number of threads we are
-currently consuming on the host system. This is valuable because number of threads is related to
-impact on the host system.
+There are some concurrency or lag issues in App or perhaps the GUI more generally. Usually, it is
+not a problem.
 
 ---
 
