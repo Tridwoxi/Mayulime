@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import think.domain.model.Puzzle;
+import think.solvers.SolverKind;
 
 public final class Gui extends Scene {
 
@@ -54,6 +55,14 @@ public final class Gui extends Scene {
 
     public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
         controller.enqueueSolverUpdate(update, puzzleEpoch);
+    }
+
+    public SolverKind getSolverKind() {
+        return controller.getSolverKind();
+    }
+
+    public int getThreadCount() {
+        return controller.getThreadCount();
     }
 
     public static void configureStage(final Stage stage) {

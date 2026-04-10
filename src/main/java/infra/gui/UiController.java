@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.util.Duration;
 import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
+import think.solvers.SolverKind;
 
 final class UiController {
 
@@ -59,6 +60,14 @@ final class UiController {
 
     public Parent getRoot() {
         return this.rootView.getRoot();
+    }
+
+    public SolverKind getSolverKind() {
+        return this.rootView.getSolverKind();
+    }
+
+    public int getThreadCount() {
+        return this.rootView.getThreadCount();
     }
 
     public void applyColorScheme(final ColorScheme colorScheme) {

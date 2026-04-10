@@ -14,6 +14,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Window;
+import think.solvers.SolverKind;
 
 final class RootView {
 
@@ -103,6 +104,14 @@ final class RootView {
 
     public double getViewportHeight() {
         return Math.max(1.0, this.viewport.getViewportBounds().getHeight());
+    }
+
+    public SolverKind getSolverKind() {
+        return this.sidebar.getSolverKind();
+    }
+
+    public int getThreadCount() {
+        return this.sidebar.getThreadCount();
     }
 
     public void renderSidebar(final UiState state, final String sinceUpdate, final String elapsed) {

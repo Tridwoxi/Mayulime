@@ -26,9 +26,11 @@ maze as possible because wall effects are highly non-local. Dragging is only mea
 maze overflows, and the current fit behavior is acceptable.
 
 The sidebar is intentionally minimal. The interface should expose only a few actions and a small
-amount of text. Both file-open and paste-MapCode flows must exist because both are useful in real
-workflows. Zoom and manual theme controls should not be added. Text styling should stay restrained,
-and the legend should remain visible because the GUI colors do not match Pathery's colors.
+amount of text. A settings card allows solver and thread count selection; the solver defaults to
+`getBest()` and threads default to 10. Both file-open and paste-MapCode flows must exist because
+both are useful in real workflows. Zoom and manual theme controls should not be added. Text styling
+should stay restrained, and the legend should remain visible because the GUI colors do not match
+Pathery's colors.
 
 Button state should clearly communicate whether an action is available. The current `Stop` to
 `Restart` behavior is deliberate. The `Stop` action must exist because the solver is compute-heavy
@@ -47,5 +49,4 @@ Colors are chosen to be simple and colorblind-accessible.
 
 ## Future direction
 
-It'd be nice if the user knew how many threads of theirs we were using, since that's a good
-indicator of the impact we're having on their machine.
+No planned changes.

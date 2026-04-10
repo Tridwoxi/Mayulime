@@ -26,15 +26,6 @@ public final class App extends Application {
     private static final int UNSCORED = -2; // StandardEvaluator uses -1.
     private static final String BAD_MAP_MESSAGE =
         "Unable to parse that file as supported Pathery MapCode.";
-    private static final int NUM_BEST_SOLVERS = 10;
-    private static final List<SolverKind> SOLVER_KINDS;
-
-    static {
-        final ArrayList<SolverKind> kinds = new ArrayList<>(1 + NUM_BEST_SOLVERS);
-        kinds.add(SolverKind.BASELINE);
-        kinds.addAll(Collections.nCopies(NUM_BEST_SOLVERS, SolverKind.getBest()));
-        SOLVER_KINDS = List.copyOf(kinds);
-    }
 
     private final AtomicInteger puzzleEpoch;
     private volatile int topScore;
@@ -62,10 +53,7 @@ public final class App extends Application {
     @Override
     public void start(final Stage primaryStage) {
         Logger.announcement("Launch point: Application");
-
-        this.manager = new Manager(this::receiveProposal, SOLVER_KINDS);
         this.gui = new Gui(this::receiveMapCode, this::stopRequestedByUser);
-
         primaryStage.setScene(gui);
         Gui.configureStage(primaryStage);
     }
@@ -73,7 +61,7 @@ public final class App extends Application {
     // == Connectors. ==
 
     private synchronized void receiveProposal(final Proposal proposal) {
-        if (gui == null || manager == null) {
+        if (gui == null) {
             throw new IllegalStateException();
         }
         final Submission update = new Submission(
@@ -105,7 +93,7 @@ public final class App extends Application {
     }
 
     private void receiveMapCode(final String mapCode) {
-        if (gui == null || manager == null) {
+        if (gui == null) {
             throw new IllegalStateException();
         }
 
@@ -118,8 +106,18 @@ public final class App extends Application {
             return;
         }
 
-        manager.stop();
+        if (this.manager != null) {
+            this.manager.stop();
+            this.manager.close();
+        }
         this.topScore = UNSCORED;
+
+        final SolverKind solverKind = gui.getSolverKind();
+        final int threadCount = gui.getThreadCount();
+        final List<SolverKind> kinds = new ArrayList<>(1 + threadCount);
+        kinds.add(SolverKind.BASELINE);
+        kinds.addAll(Collections.nCopies(threadCount, solverKind));
+        this.manager = new Manager(this::receiveProposal, kinds);
 
         final int epoch = this.puzzleEpoch.incrementAndGet();
         this.currentPuzzleName = puzzle.getName();
@@ -128,10 +126,11 @@ public final class App extends Application {
     }
 
     private void stopRequestedByUser() {
-        if (gui == null || manager == null) {
-            throw new IllegalStateException();
+        if (this.manager != null) {
+            this.manager.stop();
+            this.manager.close();
+            this.manager = null;
         }
-        manager.stop();
         this.topScore = UNSCORED;
         this.currentPuzzleName = Parser.UNNAMED_PUZZLE_NAME;
         final int epoch = this.puzzleEpoch.incrementAndGet();

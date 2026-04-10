@@ -3,6 +3,9 @@ package infra.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -11,16 +14,22 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.StringConverter;
+import think.solvers.SolverKind;
 
 final class SidebarView extends VBox {
 
     private static final double PANEL_SPACING_PX = 12.0;
     private static final double PANEL_PADDING_PX = 16.0;
+    private static final int DEFAULT_THREAD_COUNT = 10;
+    private static final int MIN_THREADS = 1;
+    private static final int MAX_THREADS = 64;
 
     private UiPalette palette;
     private final Text titleText;
     private final Text statusText;
-    private final Text[] sectionTitles;
+    private final Text solverLabel;
+    private final Text threadLabel;
     private final Text[] legendTexts;
     private final Rectangle[] legendSwatches;
 
@@ -29,7 +38,11 @@ final class SidebarView extends VBox {
     private final Button pasteMapCodeButton;
     private final Button copyMapCodeButton;
 
+    private final ChoiceBox<SolverKind> solverChoice;
+    private final Spinner<Integer> threadSpinner;
+
     private final VBox headerGroup;
+    private final VBox settingsGroup;
     private final VBox detailsGroup;
     private final VBox legendGroup;
 
@@ -44,14 +57,30 @@ final class SidebarView extends VBox {
 
         this.titleText = new Text();
         this.statusText = new Text();
-        this.sectionTitles = new Text[2];
+        this.solverLabel = new Text("Solver:");
+        this.solverLabel.setFont(Font.font(Gui.FONT_NAME, 12.0));
+        this.threadLabel = new Text("Threads:");
+        this.threadLabel.setFont(Font.font(Gui.FONT_NAME, 12.0));
         this.legendTexts = new Text[4];
         this.legendSwatches = new Rectangle[4];
         this.stopOrRestartButton = new Button("Stop");
         this.uploadMapCodeButton = new Button("Upload MapCode");
         this.pasteMapCodeButton = new Button("Paste MapCode");
         this.copyMapCodeButton = new Button("Copy MapCode");
+        this.solverChoice = new ChoiceBox<>();
+        this.solverChoice.getItems().addAll(SolverKind.asList());
+        this.solverChoice.setValue(SolverKind.getBest());
+        final SpinnerValueFactory.IntegerSpinnerValueFactory threadFactory =
+            new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                MIN_THREADS,
+                MAX_THREADS,
+                DEFAULT_THREAD_COUNT
+            );
+        threadFactory.setConverter(new SafeIntConverter(DEFAULT_THREAD_COUNT));
+        this.threadSpinner = new Spinner<>(threadFactory);
+        this.threadSpinner.setEditable(true);
         this.headerGroup = this.panelCard();
+        this.settingsGroup = this.panelCard();
         this.detailsGroup = this.panelCard();
         this.legendGroup = this.panelCard();
         this.metrics = new MetricsView();
@@ -59,6 +88,7 @@ final class SidebarView extends VBox {
 
         this.configureHeader();
         this.configureButtons();
+        this.configureSettings();
         this.configurePanels();
         this.applyPalette(initialPalette);
     }
@@ -79,12 +109,19 @@ final class SidebarView extends VBox {
         this.copyMapCodeButton.setOnAction(_ -> listener.run());
     }
 
+    public SolverKind getSolverKind() {
+        return this.solverChoice.getValue();
+    }
+
+    public int getThreadCount() {
+        return this.threadSpinner.getValue();
+    }
+
     public void render(final UiState state, final String sinceUpdate, final String elapsed) {
         this.state = state;
         this.titleText.setText(state.puzzleName());
         this.statusText.setText(state.statusMessage());
-        this.renderStopOrRestartButton(state);
-
+        this.renderButtonStates(state);
         this.metrics.render(state, sinceUpdate, elapsed);
     }
 
@@ -92,9 +129,8 @@ final class SidebarView extends VBox {
         this.palette = paletteToApply;
         this.titleText.setFill(this.palette.foreground());
         this.statusText.setFill(this.palette.foreground());
-        for (final Text sectionTitle : this.sectionTitles) {
-            sectionTitle.setFill(this.palette.mutedForeground());
-        }
+        this.solverLabel.setFill(this.palette.mutedForeground());
+        this.threadLabel.setFill(this.palette.mutedForeground());
         for (final Text legendText : this.legendTexts) {
             legendText.setFill(this.palette.foreground());
         }
@@ -107,13 +143,15 @@ final class SidebarView extends VBox {
         this.legendSwatches[3].setFill(this.palette.playerWall());
 
         this.applyCardStyle(this.headerGroup);
+        this.applyCardStyle(this.settingsGroup);
         this.applyCardStyle(this.detailsGroup);
         this.applyCardStyle(this.legendGroup);
         this.metrics.applyPalette(this.palette);
-        this.renderStopOrRestartButton(this.state);
+        this.renderButtonStates(this.state);
         styleActionButton(this.uploadMapCodeButton, this.palette);
         styleActionButton(this.pasteMapCodeButton, this.palette);
         styleActionButton(this.copyMapCodeButton, this.palette);
+        this.styleFormControls();
     }
 
     private void configureHeader() {
@@ -126,20 +164,26 @@ final class SidebarView extends VBox {
         this.getChildren().add(this.headerGroup);
     }
 
-    private void configureButtons() {
-        styleActionButton(this.stopOrRestartButton, this.palette);
-        styleActionButton(this.uploadMapCodeButton, this.palette);
-        styleActionButton(this.pasteMapCodeButton, this.palette);
-        styleActionButton(this.copyMapCodeButton, this.palette);
+    private void configureSettings() {
+        this.solverChoice.setMaxWidth(Double.MAX_VALUE);
+        this.threadSpinner.setMaxWidth(Double.MAX_VALUE);
 
-        final VBox row = new VBox();
-        row.setSpacing(PANEL_SPACING_PX);
-        row.setAlignment(Pos.CENTER_LEFT);
+        final VBox solverRow = new VBox(4.0, this.solverLabel, this.solverChoice);
+        final VBox threadRow = new VBox(4.0, this.threadLabel, this.threadSpinner);
+
+        this.settingsGroup.getChildren().addAll(solverRow, threadRow);
+        this.getChildren().add(this.settingsGroup);
+    }
+
+    private void configureButtons() {
+        final VBox column = new VBox();
+        column.setSpacing(PANEL_SPACING_PX);
+        column.setAlignment(Pos.CENTER_LEFT);
         this.stopOrRestartButton.setMaxWidth(Double.MAX_VALUE);
         this.uploadMapCodeButton.setMaxWidth(Double.MAX_VALUE);
         this.pasteMapCodeButton.setMaxWidth(Double.MAX_VALUE);
         this.copyMapCodeButton.setMaxWidth(Double.MAX_VALUE);
-        row
+        column
             .getChildren()
             .addAll(
                 this.stopOrRestartButton,
@@ -147,17 +191,12 @@ final class SidebarView extends VBox {
                 this.pasteMapCodeButton,
                 this.copyMapCodeButton
             );
-
-        this.getChildren().add(row);
+        this.getChildren().add(column);
     }
 
     private void configurePanels() {
-        this.sectionTitles[0] = this.sectionTitle("Details");
-        this.sectionTitles[1] = this.sectionTitle("Legend");
-
-        this.detailsGroup.getChildren().addAll(this.sectionTitles[0], this.metrics);
-        this.legendGroup.getChildren().addAll(this.sectionTitles[1], this.legendRows());
-
+        this.detailsGroup.getChildren().add(this.metrics);
+        this.legendGroup.getChildren().add(this.legendRows());
         this.getChildren().addAll(this.detailsGroup, this.legendGroup);
     }
 
@@ -190,18 +229,63 @@ final class SidebarView extends VBox {
         return row;
     }
 
-    private Text sectionTitle(final String text) {
-        final Text title = new Text(text);
-        title.setFont(Font.font(Gui.FONT_NAME, 12.0));
-        return title;
-    }
-
-    private void renderStopOrRestartButton(final UiState state) {
+    private void renderButtonStates(final UiState state) {
         this.stopOrRestartButton.setText(state.phase() == UiPhase.SOLVING ? "Stop" : "Restart");
         this.renderActionButtonState(this.copyMapCodeButton, !state.canCopyMapCode());
 
         final boolean disabled = state.phase() != UiPhase.SOLVING && !state.canRestart();
         this.renderActionButtonState(this.stopOrRestartButton, disabled);
+    }
+
+    private void styleFormControls() {
+        final String bg = toHex(this.palette.surfaceVariant());
+        final String border = toHex(this.palette.outline());
+        final String fg = toHex(this.palette.foreground());
+
+        this.solverChoice.setStyle(
+            String.format(
+                "-fx-background-color: %s; -fx-border-color: %s; " +
+                    "-fx-background-radius: 0; -fx-background-insets: 0; " +
+                    "-fx-mark-color: %s; -fx-text-base-color: %s; " +
+                    "-fx-control-inner-background: %s; " +
+                    "-fx-font-size: 13; -fx-font-family: '%s';",
+                bg,
+                border,
+                fg,
+                fg,
+                bg,
+                Gui.FONT_NAME
+            )
+        );
+        this.threadSpinner.setStyle(
+            String.format(
+                "-fx-background-color: %s; -fx-background-radius: 0; " +
+                    "-fx-background-insets: 0; " +
+                    "-fx-color: %s; -fx-body-color: %s; " +
+                    "-fx-outer-border: transparent; -fx-inner-border: transparent; " +
+                    "-fx-shadow-highlight-color: transparent; " +
+                    "-fx-mark-color: %s; -fx-text-base-color: %s; " +
+                    "-fx-border-color: %s; " +
+                    "-fx-font-size: 13; -fx-font-family: '%s';",
+                bg,
+                bg,
+                bg,
+                fg,
+                fg,
+                border,
+                Gui.FONT_NAME
+            )
+        );
+        this.threadSpinner.getEditor().setStyle(
+            String.format(
+                "-fx-background-color: %s; -fx-background-radius: 0; " +
+                    "-fx-text-fill: %s; " +
+                    "-fx-font-size: 13; -fx-font-family: '%s';",
+                bg,
+                fg,
+                Gui.FONT_NAME
+            )
+        );
     }
 
     private VBox panelCard() {
@@ -245,5 +329,37 @@ final class SidebarView extends VBox {
         button.setPadding(new Insets(9.0, 18.0, 9.0, 18.0));
         button.setBackground(UiPalette.fill(backgroundColor));
         button.setBorder(UiPalette.stroke(palette.outline()));
+    }
+
+    private static String toHex(final Color color) {
+        return String.format(
+            "#%02x%02x%02x",
+            (int) (color.getRed() * 255),
+            (int) (color.getGreen() * 255),
+            (int) (color.getBlue() * 255)
+        );
+    }
+
+    private static final class SafeIntConverter extends StringConverter<Integer> {
+
+        private final int fallback;
+
+        SafeIntConverter(final int fallback) {
+            this.fallback = fallback;
+        }
+
+        @Override
+        public String toString(final Integer value) {
+            return value == null ? String.valueOf(fallback) : value.toString();
+        }
+
+        @Override
+        public Integer fromString(final String text) {
+            try {
+                return Integer.parseInt(text.strip());
+            } catch (NumberFormatException _) {
+                return fallback;
+            }
+        }
     }
 }
