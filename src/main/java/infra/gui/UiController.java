@@ -103,9 +103,12 @@ final class UiController {
     private void acceptPuzzle(final Puzzle puzzle, final int puzzleEpoch) {
         final long nowNanos = System.nanoTime();
         this.latestPending.set(null);
+        final Optional<String> previousMapCode = this.lastAcceptedMapCode;
         this.lastAcceptedMapCode = this.pendingSubmittedMapCode.or(() -> this.lastAcceptedMapCode);
         this.pendingSubmittedMapCode = Optional.empty();
         this.currentPuzzle = Optional.of(puzzle);
+        final boolean isRestart =
+            previousMapCode.isPresent() && previousMapCode.equals(this.lastAcceptedMapCode);
         this.state = new UiState(
             UiPhase.SOLVING,
             puzzleEpoch,
@@ -113,19 +116,19 @@ final class UiController {
             puzzle.getNumRows(),
             puzzle.getNumCols(),
             puzzle.getBlockingBudget(),
-            null,
-            0,
+            isRestart ? this.state.bestUpdate() : null,
+            isRestart ? this.state.spentWalls() : 0,
             0,
             this.state.cellSizePx(),
             this.lastAcceptedMapCode.isPresent(),
             true,
             "Solving in progress",
-            "-",
-            "-",
+            isRestart ? this.state.bestScoreText() : "-",
+            isRestart ? this.state.submitterText() : "-",
             nowNanos,
             -1L,
             -1L,
-            true
+            !isRestart
         );
         this.renderState(nowNanos);
     }
