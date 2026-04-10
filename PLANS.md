@@ -52,3 +52,7 @@ The graph usually looks like a tree in optimal solutions. There has to be inform
 Nudging a single wall can cause walls on a cross from its new (or old?) position to become useless
 and removeable. Walls surrounded on 3 sides are useless, but that is rare. More generally, a
 mechanism to extract walls would be nice.
+
+---
+
+Solvers should be able to start from a partial result with already-placed walls.
