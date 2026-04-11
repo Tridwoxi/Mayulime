@@ -6,7 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-import think.domain.model.Feature;
+import think.domain.model.Tile;
 
 final class MazeView extends Canvas {
 
@@ -43,16 +43,16 @@ final class MazeView extends Canvas {
 
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {
-                final Feature feature = display.getFeature(row, col);
+                final Tile tile = display.getTile(row, col);
                 final double x = col * cellSizePx;
                 final double y = row * cellSizePx;
-                final Color fill = this.toColor(feature);
+                final Color fill = this.toColor(tile);
                 graphics.setFill(fill);
                 graphics.fillRect(x, y, cellSizePx, cellSizePx);
                 graphics.strokeRect(x, y, cellSizePx, cellSizePx);
 
                 final String labelText = UiMath.cellLabel(
-                    cellLabel(display, row, col, feature),
+                    cellLabel(display, row, col, tile),
                     cellSizePx
                 );
                 if (!labelText.isBlank()) {
@@ -64,12 +64,10 @@ final class MazeView extends Canvas {
 
         final double dotDiameter = cellSizePx * 0.10;
         final double dotOffset = (cellSizePx - dotDiameter) * 0.5;
-        graphics.setFill(this.palette.checkpoint());
+        graphics.setFill(this.palette.waypoint());
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {
-                if (
-                    display.isOnPath(row, col) && display.getFeature(row, col) != Feature.CHECKPOINT
-                ) {
+                if (display.isOnPath(row, col) && display.getTile(row, col) != Tile.WAYPOINT) {
                     final double x = col * cellSizePx + dotOffset;
                     final double y = row * cellSizePx + dotOffset;
                     graphics.fillOval(x, y, dotDiameter, dotDiameter);
@@ -93,10 +91,10 @@ final class MazeView extends Canvas {
         }
     }
 
-    private Color toColor(final Feature feature) {
-        return switch (feature) {
+    private Color toColor(final Tile tile) {
+        return switch (tile) {
             case BLANK -> this.palette.empty();
-            case CHECKPOINT -> this.palette.checkpoint();
+            case WAYPOINT -> this.palette.waypoint();
             case SYSTEM_WALL -> this.palette.systemWall();
             case PLAYER_WALL -> this.palette.playerWall();
         };
@@ -106,15 +104,15 @@ final class MazeView extends Canvas {
         final Submission display,
         final int row,
         final int col,
-        final Feature feature
+        final Tile tile
     ) {
-        if (feature != Feature.CHECKPOINT) {
+        if (tile != Tile.WAYPOINT) {
             return "";
         }
-        final int checkpointOrder = display.getCheckpointOrder(row, col);
-        if (checkpointOrder < 0) {
-            return "c";
+        final int waypointOrder = display.getWaypointOrder(row, col);
+        if (waypointOrder < 0) {
+            return "w";
         }
-        return "c" + checkpointOrder;
+        return "w" + waypointOrder;
     }
 }

@@ -1,13 +1,13 @@
 package think.common;
 
 import java.util.Arrays;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntQueue;
 
 /**
     Simple reference evaluator implementation. Calculates sum of pairwise distances between
-    checkpoints, or NO_PATH_EXISTS if checkpoints are disconnected. Not thread-safe.
+    waypoints, or NO_PATH_EXISTS if waypoints are disconnected. Not thread-safe.
  */
 public final class StandardEvaluator {
 
@@ -17,7 +17,7 @@ public final class StandardEvaluator {
     private final int size;
     private final IntQueue frontier;
     private final int[] distances;
-    private final int[] checkpoints;
+    private final int[] waypoints;
 
     public StandardEvaluator(final Puzzle puzzle) {
         this.numRows = puzzle.getNumRows();
@@ -25,19 +25,19 @@ public final class StandardEvaluator {
         this.size = numRows * numCols;
         this.frontier = new IntQueue(size);
         this.distances = new int[size];
-        this.checkpoints = puzzle.getCheckpoints();
+        this.waypoints = puzzle.getWaypoints();
     }
 
-    public int evaluate(final Feature[] features) {
-        if (features.length != size) {
+    public int evaluate(final Tile[] state) {
+        if (state.length != size) {
             throw new IllegalArgumentException();
         }
         int score = 0;
-        for (int start = 0; start < checkpoints.length - 1; start += 1) {
+        for (int start = 0; start < waypoints.length - 1; start += 1) {
             final int segmentDistance = findSegmentDistance(
-                features,
-                checkpoints[start],
-                checkpoints[start + 1]
+                state,
+                waypoints[start],
+                waypoints[start + 1]
             );
             if (segmentDistance == NO_PATH_EXISTS) {
                 return NO_PATH_EXISTS;
@@ -47,8 +47,8 @@ public final class StandardEvaluator {
         return score;
     }
 
-    private int findSegmentDistance(final Feature[] features, final int start, final int finish) {
-        if (features[start].isBlocked() || features[finish].isBlocked()) {
+    private int findSegmentDistance(final Tile[] state, final int start, final int finish) {
+        if (state[start].isBlocked() || state[finish].isBlocked()) {
             return NO_PATH_EXISTS;
         }
 
@@ -71,7 +71,7 @@ public final class StandardEvaluator {
             final int nextDistance = currentDistance + 1;
 
             // "If passable and unseen" is 8% faster than "If unseen and passable".
-            if (currentRow > 0 && features[nextUp].isPassable() && distances[nextUp] < 0) {
+            if (currentRow > 0 && state[nextUp].isPassable() && distances[nextUp] < 0) {
                 if (nextUp == finish) {
                     return nextDistance;
                 }
@@ -80,7 +80,7 @@ public final class StandardEvaluator {
             }
             if (
                 currentCol < numCols - 1 &&
-                features[nextRight].isPassable() &&
+                state[nextRight].isPassable() &&
                 distances[nextRight] < 0
             ) {
                 if (nextRight == finish) {
@@ -90,9 +90,7 @@ public final class StandardEvaluator {
                 distances[nextRight] = nextDistance;
             }
             if (
-                currentRow < numRows - 1 &&
-                features[nextDown].isPassable() &&
-                distances[nextDown] < 0
+                currentRow < numRows - 1 && state[nextDown].isPassable() && distances[nextDown] < 0
             ) {
                 if (nextDown == finish) {
                     return nextDistance;
@@ -100,7 +98,7 @@ public final class StandardEvaluator {
                 frontier.add(nextDown);
                 distances[nextDown] = nextDistance;
             }
-            if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
+            if (currentCol > 0 && state[nextLeft].isPassable() && distances[nextLeft] < 0) {
                 if (nextLeft == finish) {
                     return nextDistance;
                 }

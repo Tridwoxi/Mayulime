@@ -8,21 +8,21 @@ from .model import PLAYER_WALL, SYSTEM_WALL, PuzzleState
 
 
 def shortest_path_distance(
-    features: list[str],
+    state: list[str],
     rows: int,
     cols: int,
     start: int,
     finish: int,
 ) -> int:
     """Return the BFS shortest-path distance, or -1 if unreachable."""
-    if features[start] in (SYSTEM_WALL, PLAYER_WALL) or features[finish] in (
+    if state[start] in (SYSTEM_WALL, PLAYER_WALL) or state[finish] in (
         SYSTEM_WALL,
         PLAYER_WALL,
     ):
         return -1
 
     queue: deque[int] = deque([start])
-    distances = [-1] * len(features)
+    distances = [-1] * len(state)
     distances[start] = 0
 
     while queue:
@@ -39,7 +39,7 @@ def shortest_path_distance(
             if not allowed:
                 continue
             if (
-                features[neighbor] in (SYSTEM_WALL, PLAYER_WALL)
+                state[neighbor] in (SYSTEM_WALL, PLAYER_WALL)
                 or distances[neighbor] >= 0
             ):
                 continue
@@ -52,11 +52,11 @@ def shortest_path_distance(
 
 
 def evaluate_score(state: PuzzleState) -> int:
-    """Sum BFS distances across checkpoint segments. Returns -1 if blocked."""
+    """Sum BFS distances across waypoint segments. Returns -1 if blocked."""
     score = 0
-    for start, finish in zip(state.checkpoints, state.checkpoints[1:], strict=False):
+    for start, finish in zip(state.waypoints, state.waypoints[1:], strict=False):
         segment_distance = shortest_path_distance(
-            state.features,
+            state.state,
             state.rows,
             state.cols,
             start,

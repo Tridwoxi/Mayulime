@@ -13,6 +13,6 @@ public final class AnnealSolver extends Solver {
 
     @Override
     protected void solve() throws KilledException {
-        propose(getPuzzle().getFeatures());
+        propose(getPuzzle().getTiles());
     }
 }

@@ -12,15 +12,15 @@ type Position = tuple[int, int]
 BLANK = "blank"
 SYSTEM_WALL = "system_wall"
 PLAYER_WALL = "player_wall"
-CHECKPOINT = "checkpoint"
+WAYPOINT = "waypoint"
 
-CURSE_MAX_CHECKPOINT_LABEL = "N"
+CURSE_MAX_WAYPOINT_LABEL = "N"
 CURSE_CELL_STRIDE = 3
 CURSE_CELL_OFFSET = 1
 MAPCODE_MYSTERY_METADATA = "..."
 MAPCODE_UNNAMED_PUZZLE = "Unnamed Puzzle"
-VALID_CURSE_CHECKPOINTS = "ABCDEFGHIJKLMN"
-VALID_CURSE_TOKENS = set("#@SX." + VALID_CURSE_CHECKPOINTS)
+VALID_CURSE_WAYPOINTS = "ABCDEFGHIJKLMN"
+VALID_CURSE_TOKENS = set("#@SX." + VALID_CURSE_WAYPOINTS)
 
 
 class ConversionError(Exception):
@@ -33,8 +33,8 @@ class PuzzleState:
     rows: int
     cols: int
     blocking_budget: int
-    features: list[str]
-    checkpoints: list[int]
+    state: list[str]
+    waypoints: list[int]
 
 
 def clean_name(name: str) -> str:

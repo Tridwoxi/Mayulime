@@ -24,14 +24,14 @@ When run, the project launches a GUI. Follow the on-screen instructions to uploa
 > Teleports are not supported, but there are plans for them. No other features are planned.
 
 A puzzle is a maze in the form of a grid graph with 4-connectivity. The maze is composed of cells,
-on which lie features. Features are either blanks, system walls, player walls, or checkpoints.
-Checkpoints are well-ordered and unique. The player has a blocking budget to convert some blanks
-into player walls. Paths do not include cells with walls on them. When the player is finished, his
-or her score is the sum of pairwise shortest path lengths between checkpoints. If there is no path
-between checkpoints, the player loses.
+on which lie tiles. Tiles are either blanks, system walls, player walls, or waypoints. Waypoints
+are well-ordered and unique. The player has a blocking budget to convert some blanks into player
+walls. Paths cannot include cells with walls on them. When the player is finished, his or her score
+is the sum of pairwise shortest path lengths between waypoints. If there is no path between
+waypoints, the player loses.
 
-In this repository, a set of features is a state. A state sent for evaluation is a proposal, except
-in the GUI, where it is a submission.
+In this repository, a configuration of tiles is a state. Solvers mutate and evaluate states. A
+state sent to the manager is a proposal, and the GUI renders that same state as a submission.
 
 ## Related work
 

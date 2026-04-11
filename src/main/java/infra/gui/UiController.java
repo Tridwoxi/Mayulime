@@ -322,7 +322,7 @@ final class UiController {
             return this.currentPuzzle.map(Serializer::serialize);
         }
         return this.currentPuzzle.map(puzzle ->
-            Serializer.serialize(puzzle, this.state.bestUpdate().getFeatures())
+            Serializer.serialize(puzzle, this.state.bestUpdate().getState())
         );
     }
 

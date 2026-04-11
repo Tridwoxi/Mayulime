@@ -7,8 +7,8 @@ import java.util.Random;
 import java.util.function.Consumer;
 import think.common.DistanceFinder;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -20,7 +20,7 @@ public final class FrontierSolver extends Solver {
     private final StandardEvaluator evaluator;
     private final DistanceFinder distances;
     private final int[] initiallyBlankCells;
-    private final int[] checkpoints;
+    private final int[] waypoints;
     private final int numRows;
     private final int numCols;
     private final int[] neighborBuffer;
@@ -30,8 +30,8 @@ public final class FrontierSolver extends Solver {
         this.random = new Random();
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
-        this.checkpoints = puzzle.getCheckpoints();
+        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
+        this.waypoints = puzzle.getWaypoints();
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.neighborBuffer = new int[4];
@@ -42,73 +42,73 @@ public final class FrontierSolver extends Solver {
     protected void solve() throws KilledException {
         for (int seedCount = 0; seedCount < frontier.getFinalCapacity(); seedCount += 1) {
             checkAlive();
-            final Feature[] seeded = hillClimbFromSeed();
+            final Tile[] seeded = hillClimbFromSeed();
             propose(seeded);
             frontier.consider(seeded);
         }
         for (;;) {
             checkAlive();
-            final Feature[] source = frontier.sample();
-            final Feature[] ruined = ruin(source);
-            final Feature[] candidate = hillClimbFromFeatures(ruined);
+            final Tile[] source = frontier.sample();
+            final Tile[] ruined = ruin(source);
+            final Tile[] candidate = hillClimbFromState(ruined);
             propose(candidate);
             frontier.consider(candidate);
         }
     }
 
-    private Feature[] hillClimbFromSeed() throws KilledException {
-        final Feature[] features = getPuzzle().getFeatures();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
-        climbLoop(features, budgetBox, scoreBox);
-        return features;
+    private Tile[] hillClimbFromSeed() throws KilledException {
+        final Tile[] state = getPuzzle().getTiles();
+        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
+        climbLoop(state, budgetBox, scoreBox);
+        return state;
     }
 
-    private Feature[] hillClimbFromFeatures(final Feature[] features) throws KilledException {
-        final int wallCount = getCellsWhere(features, Feature.PLAYER_WALL).length;
+    private Tile[] hillClimbFromState(final Tile[] state) throws KilledException {
+        final int wallCount = getCellsWhere(state, Tile.PLAYER_WALL).length;
         final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - wallCount };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
-        climbLoop(features, budgetBox, scoreBox);
-        return features;
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
+        climbLoop(state, budgetBox, scoreBox);
+        return state;
     }
 
-    private void climbLoop(final Feature[] features, final int[] budgetBox, final int[] scoreBox)
+    private void climbLoop(final Tile[] state, final int[] budgetBox, final int[] scoreBox)
         throws KilledException {
         for (;;) {
             checkAlive();
-            final int[] blankCells = getChokepoints(features);
+            final int[] blankCells = getChokepoints(state);
             if (blankCells.length == 0) {
                 break;
             }
-            final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
+            final int[] playerCells = getCellsWhere(state, Tile.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
             IntArrays.shuffleInPlace(playerCells);
-            if (placeMoreWalls(features, blankCells, budgetBox, scoreBox)) {
+            if (placeMoreWalls(state, blankCells, budgetBox, scoreBox)) {
                 continue;
             }
-            if (rearrangeWalls(features, blankCells, playerCells, scoreBox)) {
+            if (rearrangeWalls(state, blankCells, playerCells, scoreBox)) {
                 continue;
             }
             break;
         }
     }
 
-    private int seed(final Feature[] features) throws KilledException {
+    private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
-            features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
-            if (evaluator.evaluate(features) < 0) {
-                features[initiallyBlankCells[placement]] = Feature.BLANK;
+            state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;
+            if (evaluator.evaluate(state) < 0) {
+                state[initiallyBlankCells[placement]] = Tile.BLANK;
                 return placement;
             }
         }
         return budget;
     }
 
-    private Feature[] ruin(final Feature[] features) {
-        final Feature[] ruined = features.clone();
+    private Tile[] ruin(final Tile[] state) {
+        final Tile[] ruined = state.clone();
         final int width = random.nextInt(1, numCols + 1);
         final int height = random.nextInt(1, numRows + 1);
         final int top = random.nextInt(numRows);
@@ -118,8 +118,8 @@ public final class FrontierSolver extends Solver {
             for (int dx = 0; dx < width; dx += 1) {
                 final int col = (left + dx) % numCols;
                 final int cell = row * numCols + col;
-                if (ruined[cell] == Feature.PLAYER_WALL) {
-                    ruined[cell] = Feature.BLANK;
+                if (ruined[cell] == Tile.PLAYER_WALL) {
+                    ruined[cell] = Tile.BLANK;
                 }
             }
         }
@@ -127,7 +127,7 @@ public final class FrontierSolver extends Solver {
     }
 
     private boolean placeMoreWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] blankCells,
         final int[] budgetBox,
         final int[] scoreBox
@@ -137,20 +137,20 @@ public final class FrontierSolver extends Solver {
         }
         for (final int blankCell : blankCells) {
             checkAlive();
-            features[blankCell] = Feature.PLAYER_WALL;
-            final int newScore = evaluator.evaluate(features);
+            state[blankCell] = Tile.PLAYER_WALL;
+            final int newScore = evaluator.evaluate(state);
             if (newScore > scoreBox[0]) {
                 scoreBox[0] = newScore;
                 budgetBox[0] -= 1;
                 return true;
             }
-            features[blankCell] = Feature.BLANK;
+            state[blankCell] = Tile.BLANK;
         }
         return false;
     }
 
     private boolean rearrangeWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] preRemovalChokepoints,
         final int[] playerCells,
         final int[] scoreBox
@@ -159,13 +159,13 @@ public final class FrontierSolver extends Solver {
 
         for (final int preRemovalChokepoint : preRemovalChokepoints) {
             checkAlive();
-            features[preRemovalChokepoint] = Feature.PLAYER_WALL;
+            state[preRemovalChokepoint] = Tile.PLAYER_WALL;
             Arrays.fill(candidateScores, 0);
 
-            int[] fromCurrent = distances.find(features, checkpoints[0]);
-            for (int segment = 0; segment < checkpoints.length - 1; segment += 1) {
-                final int[] fromNext = distances.find(features, checkpoints[segment + 1]);
-                final int blockedDistance = fromCurrent[checkpoints[segment + 1]];
+            int[] fromCurrent = distances.find(state, waypoints[0]);
+            for (int segment = 0; segment < waypoints.length - 1; segment += 1) {
+                final int[] fromNext = distances.find(state, waypoints[segment + 1]);
+                final int blockedDistance = fromCurrent[waypoints[segment + 1]];
 
                 for (int playerIndex = 0; playerIndex < playerCells.length; playerIndex += 1) {
                     checkAlive();
@@ -193,11 +193,11 @@ public final class FrontierSolver extends Solver {
                     continue;
                 }
                 scoreBox[0] = candidateScores[playerIndex];
-                features[playerCells[playerIndex]] = Feature.BLANK;
+                state[playerCells[playerIndex]] = Tile.BLANK;
                 return true;
             }
 
-            features[preRemovalChokepoint] = Feature.BLANK;
+            state[preRemovalChokepoint] = Tile.BLANK;
         }
         return false;
     }
@@ -274,24 +274,24 @@ public final class FrontierSolver extends Solver {
         return bestDistance;
     }
 
-    private int[] getChokepoints(final Feature[] features) {
-        final boolean[] isChokepoint = new boolean[features.length];
-        final int[] layerCount = new int[features.length];
+    private int[] getChokepoints(final Tile[] state) {
+        final boolean[] isChokepoint = new boolean[state.length];
+        final int[] layerCount = new int[state.length];
 
-        int[] fromCurrent = distances.find(features, checkpoints[0]);
-        for (int segment = 0; segment < checkpoints.length - 1; segment += 1) {
-            final int[] fromNext = distances.find(features, checkpoints[segment + 1]);
-            final int totalDistance = fromCurrent[checkpoints[segment + 1]];
+        int[] fromCurrent = distances.find(state, waypoints[0]);
+        for (int segment = 0; segment < waypoints.length - 1; segment += 1) {
+            final int[] fromNext = distances.find(state, waypoints[segment + 1]);
+            final int totalDistance = fromCurrent[waypoints[segment + 1]];
             if (totalDistance == DistanceFinder.UNREACHABLE) {
                 return IntArrays.EMPTY;
             }
             Arrays.fill(layerCount, 0);
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (fromCurrent[cell] + fromNext[cell] == totalDistance) {
                     layerCount[fromCurrent[cell]] += 1;
                 }
             }
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (
                     fromCurrent[cell] + fromNext[cell] == totalDistance &&
                     layerCount[fromCurrent[cell]] == 1
@@ -303,18 +303,18 @@ public final class FrontierSolver extends Solver {
         }
         return IntArrays.ofRangeWhere(
             0,
-            features.length,
-            cell -> isChokepoint[cell] && features[cell] == Feature.BLANK
+            state.length,
+            cell -> isChokepoint[cell] && state[cell] == Tile.BLANK
         );
     }
 
-    private static int[] getCellsWhere(final Feature[] features, final Feature feature) {
-        return IntArrays.ofRangeWhere(0, features.length, index -> features[index] == feature);
+    private static int[] getCellsWhere(final Tile[] state, final Tile tile) {
+        return IntArrays.ofRangeWhere(0, state.length, index -> state[index] == tile);
     }
 
     private final class Frontier {
 
-        private record Entry(Feature[] features, int[] chokepoints, int score, long epoch) {}
+        private record Entry(Tile[] state, int[] chokepoints, int score, long epoch) {}
 
         private final int finalCapacity;
         private final List<Entry> entries;
@@ -326,11 +326,11 @@ public final class FrontierSolver extends Solver {
             this.currentEpoch = 0L;
         }
 
-        private boolean consider(final Feature[] features) {
+        private boolean consider(final Tile[] state) {
             final Entry candidate = new Entry(
-                features,
-                getChokepoints(features),
-                evaluator.evaluate(features),
+                state,
+                getChokepoints(state),
+                evaluator.evaluate(state),
                 currentEpoch++
             );
             if (entries.size() < finalCapacity) {
@@ -361,8 +361,8 @@ public final class FrontierSolver extends Solver {
             return false;
         }
 
-        private Feature[] sample() {
-            return entries.get(random.nextInt(entries.size())).features();
+        private Tile[] sample() {
+            return entries.get(random.nextInt(entries.size())).state();
         }
 
         private int getFinalCapacity() {

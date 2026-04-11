@@ -3,19 +3,19 @@ package infra.gui;
 import java.util.Arrays;
 import java.util.BitSet;
 import think.common.PathTracer;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 
 /**
     Snapshot of a solver proposal prepared for GUI rendering.
  */
 public final class Submission {
 
-    private static final int NOT_A_CHECKPOINT = -1;
+    private static final int NOT_A_WAYPOINT = -1;
 
     private final String submitter;
-    private final Feature[] maze;
-    private final int[] checkpointOrderByIndex;
+    private final Tile[] maze;
+    private final int[] waypointOrderByIndex;
     private final BitSet pathCells;
     private final int numRows;
     private final int numCols;
@@ -25,16 +25,16 @@ public final class Submission {
     public Submission(
         final String submitter,
         final Puzzle puzzle,
-        final Feature[] features,
+        final Tile[] state,
         final int score
     ) {
         this.submitter = submitter;
-        this.maze = features.clone();
+        this.maze = state.clone();
         this.numRows = puzzle.getNumRows();
         this.numCols = puzzle.getNumCols();
         this.score = score;
         this.blockingBudget = puzzle.getBlockingBudget();
-        this.checkpointOrderByIndex = buildCheckpointOrderByIndex(puzzle, this.maze.length);
+        this.waypointOrderByIndex = buildWaypointOrderByIndex(puzzle, this.maze.length);
         this.pathCells = new PathTracer(puzzle).trace(this.maze);
     }
 
@@ -50,16 +50,16 @@ public final class Submission {
         return numCols;
     }
 
-    public Feature[] getFeatures() {
+    public Tile[] getState() {
         return maze.clone();
     }
 
-    public Feature getFeature(final int row, final int col) {
+    public Tile getTile(final int row, final int col) {
         return maze[row * numCols + col];
     }
 
-    public int getCheckpointOrder(final int row, final int col) {
-        return checkpointOrderByIndex[row * numCols + col];
+    public int getWaypointOrder(final int row, final int col) {
+        return waypointOrderByIndex[row * numCols + col];
     }
 
     public int getScore() {
@@ -74,13 +74,13 @@ public final class Submission {
         return blockingBudget;
     }
 
-    private static int[] buildCheckpointOrderByIndex(final Puzzle puzzle, final int numCells) {
+    private static int[] buildWaypointOrderByIndex(final Puzzle puzzle, final int numCells) {
         final int[] orderByIndex = new int[numCells];
-        Arrays.fill(orderByIndex, NOT_A_CHECKPOINT);
+        Arrays.fill(orderByIndex, NOT_A_WAYPOINT);
 
-        final int[] checkpoints = puzzle.getCheckpoints();
-        for (int order = 0; order < checkpoints.length; order += 1) {
-            orderByIndex[checkpoints[order]] = order;
+        final int[] waypoints = puzzle.getWaypoints();
+        for (int order = 0; order < waypoints.length; order += 1) {
+            orderByIndex[waypoints[order]] = order;
         }
         return orderByIndex;
     }

@@ -4,8 +4,8 @@ import infra.logging.Logger;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -17,7 +17,7 @@ public final class EnumerateSolver extends Solver {
 
     public EnumerateSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.blankCellIndices = getBlankCellIndices(puzzle.getFeatures());
+        this.blankCellIndices = getBlankCellIndices(puzzle.getTiles());
         this.evaluator = new StandardEvaluator(puzzle);
     }
 
@@ -31,7 +31,7 @@ public final class EnumerateSolver extends Solver {
             getPuzzle().getBlockingBudget()
         );
 
-        final Feature[] maze = getPuzzle().getFeatures();
+        final Tile[] maze = getPuzzle().getTiles();
         int bestScore = StandardEvaluator.NO_PATH_EXISTS;
 
         for (int numWalls = 0; numWalls <= getPuzzle().getBlockingBudget(); numWalls += 1) {
@@ -39,7 +39,7 @@ public final class EnumerateSolver extends Solver {
             for (;;) {
                 checkAlive();
                 for (int index = 0; index < numWalls; index += 1) {
-                    maze[blankCellIndices[combination[index]]] = Feature.PLAYER_WALL;
+                    maze[blankCellIndices[combination[index]]] = Tile.PLAYER_WALL;
                 }
                 final int score = evaluator.evaluate(maze);
                 if (score > bestScore) {
@@ -47,7 +47,7 @@ public final class EnumerateSolver extends Solver {
                     propose(maze);
                 }
                 for (int index = 0; index < numWalls; index += 1) {
-                    maze[blankCellIndices[combination[index]]] = Feature.BLANK;
+                    maze[blankCellIndices[combination[index]]] = Tile.BLANK;
                 }
                 if (!nextCombination(combination, numBlanks)) {
                     break;
@@ -92,8 +92,8 @@ public final class EnumerateSolver extends Solver {
         return result;
     }
 
-    private static int[] getBlankCellIndices(final Feature[] features) {
-        final IntPredicate isBlank = index -> features[index] == Feature.BLANK;
-        return IntArrays.ofRangeWhere(0, features.length, isBlank);
+    private static int[] getBlankCellIndices(final Tile[] state) {
+        final IntPredicate isBlank = index -> state[index] == Tile.BLANK;
+        return IntArrays.ofRangeWhere(0, state.length, isBlank);
     }
 }

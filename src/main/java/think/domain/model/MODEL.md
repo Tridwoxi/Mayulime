@@ -1,11 +1,11 @@
 # Model: Puzzle and state representation
 
-Representation is split between long-lived metadata in `Puzzle`, and states as `Feature[]`.
+Representation is split between long-lived metadata in `Puzzle`, and states as `Tile[]`.
 
 Solvers, particularly local search algorithms, tend to generate and modify many states but only
 ever see one puzzle.
 
-Semantically, values like checkpoint order are properties of the puzzle, not of individual states,
+Semantically, values like waypoint order are properties of the puzzle, not of individual states,
 so the puzzle stores them. The split also improves performance since metadata is rarely duplicated.
 
 Earlier implementations tried a richer model with cell record-based indexing or sets. The cells

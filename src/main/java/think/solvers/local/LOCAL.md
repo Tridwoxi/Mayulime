@@ -76,8 +76,8 @@ it gets stuck. Hence, unlike its predecessors, sometimes chokes on medium1.
 **Overfill builds on Ruin**
 
 For rearrangeWalls, place the destination wall first even though this exceeds capacity by one, then
-run distance fields once per checkpoint segment. Unblocking any existing wall is now a single-cell
-sensitivity query, so the whole rearrange step is O(n^2) when checkpoint count is constant.
+run distance fields once per waypoint segment. Unblocking any existing wall is now a single-cell
+sensitivity query, so the whole rearrange step is O(n^2) when waypoint count is constant.
 
 **Scramble builds on Overfill**
 

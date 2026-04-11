@@ -1,8 +1,8 @@
 package think.domain.codec;
 
 import java.util.Optional;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 
 /**
     Converts {@link Puzzle}s and their states into Pathery MapCodes. Little effort is made to
@@ -17,11 +17,11 @@ public final class Serializer {
     private Serializer() {}
 
     public static String serialize(final Puzzle puzzle) {
-        return serialize(puzzle, puzzle.getFeatures());
+        return serialize(puzzle, puzzle.getTiles());
     }
 
-    public static String serialize(final Puzzle puzzle, final Feature[] features) {
-        if (!puzzle.isValid(features)) {
+    public static String serialize(final Puzzle puzzle, final Tile[] state) {
+        if (!puzzle.isValid(state)) {
             throw new IllegalArgumentException();
         }
 
@@ -36,20 +36,20 @@ public final class Serializer {
             .append(sanitizeName(puzzle.getName()))
             .append(MYSTERY_METADATA)
             .append(':');
-        appendMaze(mapCode, puzzle, features);
+        appendMaze(mapCode, puzzle, state);
         return mapCode.toString();
     }
 
     private static void appendMaze(
         final StringBuilder mapCode,
         final Puzzle puzzle,
-        final Feature[] features
+        final Tile[] state
     ) {
-        final int[] checkpoints = puzzle.getCheckpoints();
+        final int[] waypoints = puzzle.getWaypoints();
         int traversingIndex = 0;
 
-        for (int index = 0; index < features.length; index += 1) {
-            final Optional<String> token = tokenAt(index, checkpoints, features[index]);
+        for (int index = 0; index < state.length; index += 1) {
+            final Optional<String> token = tokenAt(index, waypoints, state[index]);
             if (token.isEmpty()) {
                 continue;
             }
@@ -64,26 +64,26 @@ public final class Serializer {
 
     private static Optional<String> tokenAt(
         final int index,
-        final int[] checkpoints,
-        final Feature feature
+        final int[] waypoints,
+        final Tile tile
     ) {
-        return switch (feature) {
+        return switch (tile) {
             case BLANK -> Optional.empty();
             case SYSTEM_WALL -> Optional.of("r1");
             case PLAYER_WALL -> Optional.of("r2");
-            case CHECKPOINT -> Optional.of(checkpointToken(index, checkpoints));
+            case WAYPOINT -> Optional.of(waypointToken(index, waypoints));
         };
     }
 
-    private static String checkpointToken(final int index, final int[] checkpoints) {
-        for (int order = 0; order < checkpoints.length; order += 1) {
-            if (checkpoints[order] != index) {
+    private static String waypointToken(final int index, final int[] waypoints) {
+        for (int order = 0; order < waypoints.length; order += 1) {
+            if (waypoints[order] != index) {
                 continue;
             }
             if (order == 0) {
                 return "s" + START_ORDER;
             }
-            if (order == checkpoints.length - 1) {
+            if (order == waypoints.length - 1) {
                 return "f" + FINISH_ORDER;
             }
             return "c" + order;

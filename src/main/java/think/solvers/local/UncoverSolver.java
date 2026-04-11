@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import think.common.DistanceFinder;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -15,14 +15,14 @@ public final class UncoverSolver extends Solver {
     private final StandardEvaluator evaluator;
     private final DistanceFinder distances;
     private final int[] initiallyBlankCells;
-    private final int[] checkpoints;
+    private final int[] waypoints;
 
     public UncoverSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
-        this.checkpoints = puzzle.getCheckpoints();
+        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
+        this.waypoints = puzzle.getWaypoints();
     }
 
     @Override
@@ -33,39 +33,39 @@ public final class UncoverSolver extends Solver {
         }
     }
 
-    private Feature[] hillClimb() throws KilledException {
-        final Feature[] features = getPuzzle().getFeatures();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
+    private Tile[] hillClimb() throws KilledException {
+        final Tile[] state = getPuzzle().getTiles();
+        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
 
         for (;;) {
             checkAlive();
-            final int[] blankCells = getChokepoints(features);
+            final int[] blankCells = getChokepoints(state);
             if (blankCells.length == 0) {
                 break;
             }
-            final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
+            final int[] playerCells = getCellsWhere(state, Tile.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
             IntArrays.shuffleInPlace(playerCells);
-            if (placeMoreWalls(features, blankCells, budgetBox, scoreBox)) {
+            if (placeMoreWalls(state, blankCells, budgetBox, scoreBox)) {
                 continue;
             }
-            if (rearrangeWalls(features, playerCells, scoreBox)) {
+            if (rearrangeWalls(state, playerCells, scoreBox)) {
                 continue;
             }
             break;
         }
-        return features;
+        return state;
     }
 
-    private int seed(final Feature[] features) throws KilledException {
+    private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
-            features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
-            if (evaluator.evaluate(features) < 0) {
-                features[initiallyBlankCells[placement]] = Feature.BLANK;
+            state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;
+            if (evaluator.evaluate(state) < 0) {
+                state[initiallyBlankCells[placement]] = Tile.BLANK;
                 return placement;
             }
         }
@@ -73,7 +73,7 @@ public final class UncoverSolver extends Solver {
     }
 
     private boolean placeMoreWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] blankCells,
         final int[] budgetBox,
         final int[] scoreBox
@@ -83,27 +83,27 @@ public final class UncoverSolver extends Solver {
         }
         for (final int blankCell : blankCells) {
             checkAlive();
-            features[blankCell] = Feature.PLAYER_WALL;
-            final int newScore = evaluator.evaluate(features);
+            state[blankCell] = Tile.PLAYER_WALL;
+            final int newScore = evaluator.evaluate(state);
             if (newScore > scoreBox[0]) {
                 scoreBox[0] = newScore;
                 budgetBox[0] -= 1;
                 return true;
             }
-            features[blankCell] = Feature.BLANK;
+            state[blankCell] = Tile.BLANK;
         }
         return false;
     }
 
     private boolean rearrangeWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] playerCells,
         final int[] scoreBox
     ) throws KilledException {
         for (final int playerCell : playerCells) {
             checkAlive();
-            features[playerCell] = Feature.BLANK;
-            final int[] blankCells = getChokepoints(features);
+            state[playerCell] = Tile.BLANK;
+            final int[] blankCells = getChokepoints(state);
             IntArrays.shuffleInPlace(blankCells);
 
             for (final int blankCell : blankCells) {
@@ -111,37 +111,37 @@ public final class UncoverSolver extends Solver {
                 if (blankCell == playerCell) {
                     continue;
                 }
-                features[blankCell] = Feature.PLAYER_WALL;
-                final int newScore = evaluator.evaluate(features);
+                state[blankCell] = Tile.PLAYER_WALL;
+                final int newScore = evaluator.evaluate(state);
                 if (newScore > scoreBox[0]) {
                     scoreBox[0] = newScore;
                     return true;
                 }
-                features[blankCell] = Feature.BLANK;
+                state[blankCell] = Tile.BLANK;
             }
-            features[playerCell] = Feature.PLAYER_WALL;
+            state[playerCell] = Tile.PLAYER_WALL;
         }
         return false;
     }
 
-    private int[] getChokepoints(final Feature[] features) {
-        final boolean[] isChokepoint = new boolean[features.length];
-        final int[] layerCount = new int[features.length];
+    private int[] getChokepoints(final Tile[] state) {
+        final boolean[] isChokepoint = new boolean[state.length];
+        final int[] layerCount = new int[state.length];
 
-        int[] fromCurrent = distances.find(features, checkpoints[0]);
-        for (int segment = 0; segment < checkpoints.length - 1; segment += 1) {
-            final int[] fromNext = distances.find(features, checkpoints[segment + 1]);
-            final int totalDistance = fromCurrent[checkpoints[segment + 1]];
+        int[] fromCurrent = distances.find(state, waypoints[0]);
+        for (int segment = 0; segment < waypoints.length - 1; segment += 1) {
+            final int[] fromNext = distances.find(state, waypoints[segment + 1]);
+            final int totalDistance = fromCurrent[waypoints[segment + 1]];
             if (totalDistance == DistanceFinder.UNREACHABLE) {
                 return IntArrays.EMPTY;
             }
             Arrays.fill(layerCount, 0);
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (fromCurrent[cell] + fromNext[cell] == totalDistance) {
                     layerCount[fromCurrent[cell]] += 1;
                 }
             }
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (
                     fromCurrent[cell] + fromNext[cell] == totalDistance &&
                     layerCount[fromCurrent[cell]] == 1
@@ -153,12 +153,12 @@ public final class UncoverSolver extends Solver {
         }
         return IntArrays.ofRangeWhere(
             0,
-            features.length,
-            cell -> isChokepoint[cell] && features[cell] == Feature.BLANK
+            state.length,
+            cell -> isChokepoint[cell] && state[cell] == Tile.BLANK
         );
     }
 
-    private static int[] getCellsWhere(final Feature[] features, final Feature feature) {
-        return IntArrays.ofRangeWhere(0, features.length, index -> features[index] == feature);
+    private static int[] getCellsWhere(final Tile[] state, final Tile tile) {
+        return IntArrays.ofRangeWhere(0, state.length, index -> state[index] == tile);
     }
 }

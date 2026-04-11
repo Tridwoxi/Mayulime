@@ -1,14 +1,14 @@
 package think.common;
 
 import java.util.Arrays;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntQueue;
 
 /**
     Calculates distance from every cell to a given source, or UNREACHABLE if the cell and source
     are disconnected. Blocked cells are unreachable. If the source is blocked, all cells are
-    unreachable. Not thread-safe.
+    unreachable.
  */
 public final class DistanceFinder {
 
@@ -25,21 +25,21 @@ public final class DistanceFinder {
         this.frontier = new IntQueue(size);
     }
 
-    public int[] find(final Feature[] features, final int source) {
+    public int[] find(final Tile[] state, final int source) {
         final int[] buffer = new int[size];
-        find(buffer, features, source);
+        find(buffer, state, source);
         return buffer;
     }
 
-    public void find(final int[] distances, final Feature[] features, final int source) {
-        final boolean sourceInBounds = source >= 0 && source < features.length;
-        final boolean correctArrayShape = distances.length == size && features.length == size;
+    public void find(final int[] distances, final Tile[] state, final int source) {
+        final boolean sourceInBounds = source >= 0 && source < state.length;
+        final boolean correctArrayShape = distances.length == size && state.length == size;
         if (!sourceInBounds || !correctArrayShape) {
             throw new IllegalArgumentException();
         }
 
         Arrays.fill(distances, UNREACHABLE);
-        if (features[source].isBlocked()) {
+        if (state[source].isBlocked()) {
             return;
         }
         frontier.clear();
@@ -59,27 +59,25 @@ public final class DistanceFinder {
             final int nextLeft = current - 1;
             final int nextDistance = currentDistance + 1;
 
-            if (currentRow > 0 && features[nextUp].isPassable() && distances[nextUp] < 0) {
+            if (currentRow > 0 && state[nextUp].isPassable() && distances[nextUp] < 0) {
                 frontier.add(nextUp);
                 distances[nextUp] = nextDistance;
             }
             if (
                 currentCol < numCols - 1 &&
-                features[nextRight].isPassable() &&
+                state[nextRight].isPassable() &&
                 distances[nextRight] < 0
             ) {
                 frontier.add(nextRight);
                 distances[nextRight] = nextDistance;
             }
             if (
-                currentRow < numRows - 1 &&
-                features[nextDown].isPassable() &&
-                distances[nextDown] < 0
+                currentRow < numRows - 1 && state[nextDown].isPassable() && distances[nextDown] < 0
             ) {
                 frontier.add(nextDown);
                 distances[nextDown] = nextDistance;
             }
-            if (currentCol > 0 && features[nextLeft].isPassable() && distances[nextLeft] < 0) {
+            if (currentCol > 0 && state[nextLeft].isPassable() && distances[nextLeft] < 0) {
                 frontier.add(nextLeft);
                 distances[nextLeft] = nextDistance;
             }

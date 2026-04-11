@@ -3,7 +3,7 @@ package infra.gui;
 import java.io.File;
 import java.util.Locale;
 import javafx.scene.paint.Color;
-import think.domain.model.Feature;
+import think.domain.model.Tile;
 
 final class UiMath {
 
@@ -29,7 +29,7 @@ final class UiMath {
         int count = 0;
         for (int row = 0; row < display.getNumRows(); row += 1) {
             for (int col = 0; col < display.getNumCols(); col += 1) {
-                if (display.getFeature(row, col) == Feature.PLAYER_WALL) {
+                if (display.getTile(row, col) == Tile.PLAYER_WALL) {
                     count += 1;
                 }
             }

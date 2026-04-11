@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
 
     score = evaluate_score(state)
 
-    walls = sum(1 for feature in state.features if feature == PLAYER_WALL)
+    walls = sum(1 for tile in state.state if tile == PLAYER_WALL)
 
     print(f"puzzle : {state.name}")
     print(f"size   : {state.cols}x{state.rows}")

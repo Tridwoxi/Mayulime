@@ -4,8 +4,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -24,7 +24,7 @@ public final class PruneSolver extends Solver {
     @Override
     protected void solve() throws KilledException {
         // TODO: Implement.
-        final Feature[] maze = getPuzzle().getFeatures();
+        final Tile[] maze = getPuzzle().getTiles();
         int topScore = StandardEvaluator.NO_PATH_EXISTS;
 
         final Deque<StackFrame> stack = new ArrayDeque<>(blankCells.length);
@@ -37,7 +37,7 @@ public final class PruneSolver extends Solver {
             }
 
             if (frame.placedThisFrameIndex() != StackFrame.NO_PLACEMENT) {
-                maze[frame.placedThisFrameIndex()] = Feature.PLAYER_WALL;
+                maze[frame.placedThisFrameIndex()] = Tile.PLAYER_WALL;
                 final int score = evaluator.evaluate(maze);
                 if (score > topScore) {
                     topScore = score;
@@ -48,8 +48,8 @@ public final class PruneSolver extends Solver {
     }
 
     private int[] getBlankCells() {
-        final Feature[] maze = getPuzzle().getFeatures();
-        return IntArrays.ofRangeWhere(0, maze.length, index -> maze[index] == Feature.BLANK);
+        final Tile[] maze = getPuzzle().getTiles();
+        return IntArrays.ofRangeWhere(0, maze.length, index -> maze[index] == Tile.BLANK);
     }
 
     private record StackFrame(int numPlacedSoFar, int placedThisFrameIndex, int nextBlankIndex) {

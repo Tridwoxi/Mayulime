@@ -5,8 +5,8 @@ import java.util.Random;
 import java.util.function.Consumer;
 import think.common.DistanceFinder;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -17,27 +17,27 @@ public final class RuinSolver extends Solver {
     private final StandardEvaluator evaluator;
     private final DistanceFinder distances;
     private final int[] initiallyBlankCells;
-    private final int[] checkpoints;
+    private final int[] waypoints;
 
     public RuinSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.random = new Random();
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
-        this.checkpoints = puzzle.getCheckpoints();
+        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
+        this.waypoints = puzzle.getWaypoints();
     }
 
     @Override
     protected void solve() throws KilledException {
-        Feature[] best = hillClimbFromSeed();
+        Tile[] best = hillClimbFromSeed();
         int bestScore = evaluator.evaluate(best);
         propose(best);
 
         for (;;) {
             checkAlive();
-            final Feature[] ruined = ruin(best);
-            final Feature[] candidate = hillClimbFromFeatures(ruined);
+            final Tile[] ruined = ruin(best);
+            final Tile[] candidate = hillClimbFromState(ruined);
             final int candidateScore = evaluator.evaluate(candidate);
             propose(candidate);
             if (candidateScore >= bestScore) {
@@ -47,59 +47,59 @@ public final class RuinSolver extends Solver {
         }
     }
 
-    private Feature[] hillClimbFromSeed() throws KilledException {
-        final Feature[] features = getPuzzle().getFeatures();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
-        climbLoop(features, budgetBox, scoreBox);
-        return features;
+    private Tile[] hillClimbFromSeed() throws KilledException {
+        final Tile[] state = getPuzzle().getTiles();
+        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
+        climbLoop(state, budgetBox, scoreBox);
+        return state;
     }
 
-    private Feature[] hillClimbFromFeatures(final Feature[] features) throws KilledException {
-        final int wallCount = getCellsWhere(features, Feature.PLAYER_WALL).length;
+    private Tile[] hillClimbFromState(final Tile[] state) throws KilledException {
+        final int wallCount = getCellsWhere(state, Tile.PLAYER_WALL).length;
         final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - wallCount };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
-        climbLoop(features, budgetBox, scoreBox);
-        return features;
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
+        climbLoop(state, budgetBox, scoreBox);
+        return state;
     }
 
-    private void climbLoop(final Feature[] features, final int[] budgetBox, final int[] scoreBox)
+    private void climbLoop(final Tile[] state, final int[] budgetBox, final int[] scoreBox)
         throws KilledException {
         for (;;) {
             checkAlive();
-            final int[] blankCells = getChokepoints(features);
+            final int[] blankCells = getChokepoints(state);
             if (blankCells.length == 0) {
                 break;
             }
-            final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
+            final int[] playerCells = getCellsWhere(state, Tile.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
             IntArrays.shuffleInPlace(playerCells);
-            if (placeMoreWalls(features, blankCells, budgetBox, scoreBox)) {
+            if (placeMoreWalls(state, blankCells, budgetBox, scoreBox)) {
                 continue;
             }
-            if (rearrangeWalls(features, blankCells, playerCells, scoreBox)) {
+            if (rearrangeWalls(state, blankCells, playerCells, scoreBox)) {
                 continue;
             }
             break;
         }
     }
 
-    private int seed(final Feature[] features) throws KilledException {
+    private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
-            features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
-            if (evaluator.evaluate(features) < 0) {
-                features[initiallyBlankCells[placement]] = Feature.BLANK;
+            state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;
+            if (evaluator.evaluate(state) < 0) {
+                state[initiallyBlankCells[placement]] = Tile.BLANK;
                 return placement;
             }
         }
         return budget;
     }
 
-    private Feature[] ruin(final Feature[] features) {
-        final Feature[] ruined = features.clone();
+    private Tile[] ruin(final Tile[] state) {
+        final Tile[] ruined = state.clone();
         final int numRows = getPuzzle().getNumRows();
         final int numCols = getPuzzle().getNumCols();
         final int width = random.nextInt(1, numCols + 1);
@@ -111,8 +111,8 @@ public final class RuinSolver extends Solver {
             for (int dx = 0; dx < width; dx += 1) {
                 final int col = (left + dx) % numCols;
                 final int cell = row * numCols + col;
-                if (ruined[cell] == Feature.PLAYER_WALL) {
-                    ruined[cell] = Feature.BLANK;
+                if (ruined[cell] == Tile.PLAYER_WALL) {
+                    ruined[cell] = Tile.BLANK;
                 }
             }
         }
@@ -120,7 +120,7 @@ public final class RuinSolver extends Solver {
     }
 
     private boolean placeMoreWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] blankCells,
         final int[] budgetBox,
         final int[] scoreBox
@@ -130,69 +130,69 @@ public final class RuinSolver extends Solver {
         }
         for (final int blankCell : blankCells) {
             checkAlive();
-            features[blankCell] = Feature.PLAYER_WALL;
-            final int newScore = evaluator.evaluate(features);
+            state[blankCell] = Tile.PLAYER_WALL;
+            final int newScore = evaluator.evaluate(state);
             if (newScore > scoreBox[0]) {
                 scoreBox[0] = newScore;
                 budgetBox[0] -= 1;
                 return true;
             }
-            features[blankCell] = Feature.BLANK;
+            state[blankCell] = Tile.BLANK;
         }
         return false;
     }
 
     private boolean rearrangeWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] preRemovalChokepoints,
         final int[] playerCells,
         final int[] scoreBox
     ) throws KilledException {
-        final boolean[] isPreRemovalChokepoint = new boolean[features.length];
+        final boolean[] isPreRemovalChokepoint = new boolean[state.length];
         for (final int preRemovalChokepoint : preRemovalChokepoints) {
             isPreRemovalChokepoint[preRemovalChokepoint] = true;
         }
         for (final int playerCell : playerCells) {
             checkAlive();
-            features[playerCell] = Feature.BLANK;
-            final int[] postRemovalChokepoints = getChokepoints(features);
+            state[playerCell] = Tile.BLANK;
+            final int[] postRemovalChokepoints = getChokepoints(state);
             IntArrays.shuffleInPlace(postRemovalChokepoints);
             for (final int postRemovalChokepoint : postRemovalChokepoints) {
                 checkAlive();
                 if (!isPreRemovalChokepoint[postRemovalChokepoint]) {
                     continue;
                 }
-                features[postRemovalChokepoint] = Feature.PLAYER_WALL;
-                final int newScore = evaluator.evaluate(features);
+                state[postRemovalChokepoint] = Tile.PLAYER_WALL;
+                final int newScore = evaluator.evaluate(state);
                 if (newScore > scoreBox[0]) {
                     scoreBox[0] = newScore;
                     return true;
                 }
-                features[postRemovalChokepoint] = Feature.BLANK;
+                state[postRemovalChokepoint] = Tile.BLANK;
             }
-            features[playerCell] = Feature.PLAYER_WALL;
+            state[playerCell] = Tile.PLAYER_WALL;
         }
         return false;
     }
 
-    private int[] getChokepoints(final Feature[] features) {
-        final boolean[] isChokepoint = new boolean[features.length];
-        final int[] layerCount = new int[features.length];
+    private int[] getChokepoints(final Tile[] state) {
+        final boolean[] isChokepoint = new boolean[state.length];
+        final int[] layerCount = new int[state.length];
 
-        int[] fromCurrent = distances.find(features, checkpoints[0]);
-        for (int segment = 0; segment < checkpoints.length - 1; segment += 1) {
-            final int[] fromNext = distances.find(features, checkpoints[segment + 1]);
-            final int totalDistance = fromCurrent[checkpoints[segment + 1]];
+        int[] fromCurrent = distances.find(state, waypoints[0]);
+        for (int segment = 0; segment < waypoints.length - 1; segment += 1) {
+            final int[] fromNext = distances.find(state, waypoints[segment + 1]);
+            final int totalDistance = fromCurrent[waypoints[segment + 1]];
             if (totalDistance == DistanceFinder.UNREACHABLE) {
                 return IntArrays.EMPTY;
             }
             Arrays.fill(layerCount, 0);
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (fromCurrent[cell] + fromNext[cell] == totalDistance) {
                     layerCount[fromCurrent[cell]] += 1;
                 }
             }
-            for (int cell = 0; cell < features.length; cell += 1) {
+            for (int cell = 0; cell < state.length; cell += 1) {
                 if (
                     fromCurrent[cell] + fromNext[cell] == totalDistance &&
                     layerCount[fromCurrent[cell]] == 1
@@ -204,12 +204,12 @@ public final class RuinSolver extends Solver {
         }
         return IntArrays.ofRangeWhere(
             0,
-            features.length,
-            cell -> isChokepoint[cell] && features[cell] == Feature.BLANK
+            state.length,
+            cell -> isChokepoint[cell] && state[cell] == Tile.BLANK
         );
     }
 
-    private static int[] getCellsWhere(final Feature[] features, final Feature feature) {
-        return IntArrays.ofRangeWhere(0, features.length, index -> features[index] == feature);
+    private static int[] getCellsWhere(final Tile[] state, final Tile tile) {
+        return IntArrays.ofRangeWhere(0, state.length, index -> state[index] == tile);
     }
 }

@@ -67,7 +67,7 @@ public final class App extends Application {
         final Submission update = new Submission(
             proposal.getSubmitter(),
             proposal.getPuzzle(),
-            proposal.getFeatures(),
+            proposal.getState(),
             proposal.getScore()
         );
         final int epoch = this.puzzleEpoch.get();
@@ -86,7 +86,7 @@ public final class App extends Application {
         Logger.info(
             "MapCode for score %d: %s",
             update.getScore(),
-            Serializer.serialize(proposal.getPuzzle(), proposal.getFeatures())
+            Serializer.serialize(proposal.getPuzzle(), proposal.getState())
         );
         this.topScore = update.getScore();
         this.gui.enqueueSolverUpdate(update, epoch);
@@ -101,7 +101,7 @@ public final class App extends Application {
         try {
             puzzle = Parser.parse(mapCode);
         } catch (BadMapCodeException _) {
-            Logger.warning("Bad MapCode or unsupported feature; problem rejected");
+            Logger.warning("Bad MapCode or unsupported tile; problem rejected");
             gui.onMapCodeRejected(BAD_MAP_MESSAGE);
             return;
         }

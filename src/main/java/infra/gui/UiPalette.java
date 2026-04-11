@@ -24,7 +24,7 @@ record UiPalette(
     Color empty,
     Color systemWall,
     Color playerWall,
-    Color checkpoint,
+    Color waypoint,
     Color shadow
 ) {
     private static final UiPalette LIGHT = new UiPalette(

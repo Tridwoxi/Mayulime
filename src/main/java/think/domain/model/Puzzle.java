@@ -9,31 +9,31 @@ import java.util.HashSet;
 public final class Puzzle {
 
     private final String name;
-    private final Feature[] features;
+    private final Tile[] tiles;
     private final int numRows;
     private final int numCols;
-    private final int[] checkpoints;
+    private final int[] waypoints;
     private final int blockingBudget;
 
     public Puzzle(
         final String name,
-        final Feature[] features,
+        final Tile[] tiles,
         final int numRows,
         final int numCols,
-        final int[] checkpoints,
+        final int[] waypoints,
         final int blockingBudget
     ) {
-        final HashSet<Integer> seen = new HashSet<>(checkpoints.length);
-        for (final int checkpoint : checkpoints) {
-            if (checkpoint < 0 || checkpoint >= numRows * numCols || !seen.add(checkpoint)) {
+        final HashSet<Integer> seen = new HashSet<>(waypoints.length);
+        for (final int waypoint : waypoints) {
+            if (waypoint < 0 || waypoint >= numRows * numCols || !seen.add(waypoint)) {
                 throw new IllegalArgumentException();
             }
         }
         this.name = name;
-        this.features = features.clone();
+        this.tiles = tiles.clone();
         this.numRows = numRows;
         this.numCols = numCols;
-        this.checkpoints = checkpoints.clone();
+        this.waypoints = waypoints.clone();
         this.blockingBudget = blockingBudget;
     }
 
@@ -41,8 +41,8 @@ public final class Puzzle {
         return name;
     }
 
-    public Feature[] getFeatures() {
-        return features.clone();
+    public Tile[] getTiles() {
+        return tiles.clone();
     }
 
     public int getNumRows() {
@@ -53,24 +53,24 @@ public final class Puzzle {
         return numCols;
     }
 
-    public int[] getCheckpoints() {
-        return checkpoints.clone();
+    public int[] getWaypoints() {
+        return waypoints.clone();
     }
 
     public int getBlockingBudget() {
         return blockingBudget;
     }
 
-    public boolean isValid(final Feature[] proposal) {
-        if (features.length != proposal.length) {
-            Logger.warning("Wrong dimension: %d vs %d", features.length, proposal.length);
+    public boolean isValid(final Tile[] proposal) {
+        if (tiles.length != proposal.length) {
+            Logger.warning("Wrong dimension: %d vs %d", tiles.length, proposal.length);
             return false;
         }
         int numWalls = 0;
-        for (int index = 0; index < features.length; index += 1) {
-            final boolean unchanged = features[index] == proposal[index];
+        for (int index = 0; index < tiles.length; index += 1) {
+            final boolean unchanged = tiles[index] == proposal[index];
             final boolean wallPlaced =
-                features[index] == Feature.BLANK && proposal[index] == Feature.PLAYER_WALL;
+                tiles[index] == Tile.BLANK && proposal[index] == Tile.PLAYER_WALL;
             if (wallPlaced) {
                 numWalls += 1;
             }

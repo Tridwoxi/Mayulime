@@ -3,12 +3,12 @@ package think.domain.codec;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 
 /**
     Construct a {@link Puzzle} from a string, or throw a {@link BadMapCodeException} if we are
-    unable (either because the input is malformed or contains unsupported features).
+    unable (either because the input is malformed or contains unsupported tiles).
  */
 public final class Parser {
 
@@ -44,10 +44,10 @@ public final class Parser {
         ParserSafety.require(clampedBudget >= 0);
         return new Puzzle(
             puzzleName,
-            mazeData.features(),
+            mazeData.tiles(),
             numRows,
             numCols,
-            mazeData.checkpoints(),
+            mazeData.waypoints(),
             clampedBudget
         );
     }
@@ -57,59 +57,59 @@ public final class Parser {
         final int numCells = ParserSafety.multiply(numRows, numCols);
         final String[] tokens = TOKEN_DELIM_RE.split(rawMaze, -1);
 
-        final Feature[] maze = new Feature[numCells];
-        Arrays.fill(maze, Feature.BLANK);
-        final ParserCheckpoints checkpoints = new ParserCheckpoints();
+        final Tile[] maze = new Tile[numCells];
+        Arrays.fill(maze, Tile.BLANK);
+        final ParserWaypoints waypoints = new ParserWaypoints();
 
         int consumedBudget = 0;
         int traversingIndex = 0;
         for (int index = 0; index < tokens.length - 1; index += 1) {
             final ParserToken token = ParserToken.parse(tokens[index]);
-            final int featureIndex = ParserSafety.sum(traversingIndex, token.numSkips());
-            ParserSafety.require(featureIndex < numCells);
+            final int tileIndex = ParserSafety.sum(traversingIndex, token.numSkips());
+            ParserSafety.require(tileIndex < numCells);
 
             switch (token.kind()) {
                 case WALL -> {
                     if (SYSTEM_WALL_ORDERS.contains(token.order())) {
-                        maze[featureIndex] = Feature.SYSTEM_WALL;
+                        maze[tileIndex] = Tile.SYSTEM_WALL;
                     } else if (PLAYER_WALL_ORDERS.contains(token.order())) {
-                        maze[featureIndex] = Feature.SYSTEM_WALL;
+                        maze[tileIndex] = Tile.SYSTEM_WALL;
                         consumedBudget += 1;
                     } else {
                         throw new BadMapCodeException();
                     }
                 }
                 case START -> {
-                    checkpoints.observeStart(featureIndex, token.order());
-                    maze[featureIndex] = Feature.CHECKPOINT;
+                    waypoints.observeStart(tileIndex, token.order());
+                    maze[tileIndex] = Tile.WAYPOINT;
                 }
                 case FINISH -> {
-                    checkpoints.observeFinish(featureIndex, token.order());
-                    maze[featureIndex] = Feature.CHECKPOINT;
+                    waypoints.observeFinish(tileIndex, token.order());
+                    maze[tileIndex] = Tile.WAYPOINT;
                 }
-                case CHECKPOINT -> {
-                    checkpoints.observeCheckpoint(featureIndex, token.order());
-                    maze[featureIndex] = Feature.CHECKPOINT;
+                case WAYPOINT -> {
+                    waypoints.observeWaypoint(tileIndex, token.order());
+                    maze[tileIndex] = Tile.WAYPOINT;
                 }
                 default -> throw new AssertionError();
             }
-            traversingIndex = ParserSafety.sum(featureIndex, 1);
+            traversingIndex = ParserSafety.sum(tileIndex, 1);
         }
 
-        final int[] orderedCheckpoints = checkpoints.toOrderedArray();
+        final int[] orderedWaypoints = waypoints.toOrderedArray();
 
         int numBlankCells = 0;
-        for (final Feature feature : maze) {
-            if (feature == Feature.BLANK) {
+        for (final Tile tile : maze) {
+            if (tile == Tile.BLANK) {
                 numBlankCells += 1;
             }
         }
-        return new MazeData(maze, orderedCheckpoints, numBlankCells, consumedBudget);
+        return new MazeData(maze, orderedWaypoints, numBlankCells, consumedBudget);
     }
 
     private record MazeData(
-        Feature[] features,
-        int[] checkpoints,
+        Tile[] tiles,
+        int[] waypoints,
         int numBlankCells,
         int consumedBudget
     ) {}

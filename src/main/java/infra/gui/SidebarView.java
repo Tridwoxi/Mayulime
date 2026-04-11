@@ -138,7 +138,7 @@ final class SidebarView extends VBox {
             this.legendSwatches[index].setStroke(this.palette.outline());
         }
         this.legendSwatches[0].setFill(this.palette.empty());
-        this.legendSwatches[1].setFill(this.palette.checkpoint());
+        this.legendSwatches[1].setFill(this.palette.waypoint());
         this.legendSwatches[2].setFill(this.palette.systemWall());
         this.legendSwatches[3].setFill(this.palette.playerWall());
 
@@ -207,7 +207,7 @@ final class SidebarView extends VBox {
             .getChildren()
             .addAll(
                 this.legendRow(0, "Empty"),
-                this.legendRow(1, "Checkpoint"),
+                this.legendRow(1, "Waypoint"),
                 this.legendRow(2, "System wall"),
                 this.legendRow(3, "Player wall")
             );

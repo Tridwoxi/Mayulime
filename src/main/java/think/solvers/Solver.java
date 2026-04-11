@@ -3,8 +3,8 @@ package think.solvers;
 import infra.logging.Logger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.manager.Proposal;
 
 /**
@@ -62,7 +62,7 @@ public abstract class Solver implements Runnable {
     /**
         Concrete subclasses must do all non-trivial work in this method, as opposed to the
         constructor. Implementations must call {@link #checkAlive} at least once every 500
-        milliseconds or so when presented a map smaller than 20 by 20 with 10 checkpoints.
+        milliseconds or so when presented a map smaller than 20 by 20 with 10 waypoints.
      */
     protected abstract void solve() throws KilledException;
 
@@ -80,7 +80,7 @@ public abstract class Solver implements Runnable {
         return puzzle;
     }
 
-    protected final void propose(final Feature[] features) {
-        listener.accept(new Proposal(name, puzzle, features));
+    protected final void propose(final Tile[] state) {
+        listener.accept(new Proposal(name, puzzle, state));
     }
 }

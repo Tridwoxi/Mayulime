@@ -8,15 +8,15 @@ from pathlib import Path
 
 from .model import (
     BLANK,
-    CHECKPOINT,
     CURSE_CELL_OFFSET,
     CURSE_CELL_STRIDE,
-    CURSE_MAX_CHECKPOINT_LABEL,
+    CURSE_MAX_WAYPOINT_LABEL,
     MAPCODE_MYSTERY_METADATA,
     PLAYER_WALL,
     SYSTEM_WALL,
-    VALID_CURSE_CHECKPOINTS,
     VALID_CURSE_TOKENS,
+    VALID_CURSE_WAYPOINTS,
+    WAYPOINT,
     ConversionError,
     PuzzleState,
     clean_name,
@@ -48,9 +48,9 @@ def parse_mapcode(raw_text: str, fallback_name: str) -> PuzzleState:
             "Mapcode rows/cols must be positive and budget must be non-negative.",
         )
 
-    features = [BLANK] * (rows * cols)
+    state = [BLANK] * (rows * cols)
     consumed_budget = 0
-    checkpoints_by_order: dict[int, int] = {}
+    waypoints_by_order: dict[int, int] = {}
     start_index: int | None = None
     finish_index: int | None = None
 
@@ -66,9 +66,9 @@ def parse_mapcode(raw_text: str, fallback_name: str) -> PuzzleState:
         if skip < 0:
             raise ConversionError("Mapcode skips cannot be negative.")
 
-        feature_index = traversing_index + skip
-        if feature_index >= len(features):
-            raise ConversionError("Mapcode feature index is out of bounds.")
+        tile_index = traversing_index + skip
+        if tile_index >= len(state):
+            raise ConversionError("Mapcode tile index is out of bounds.")
 
         kind = kind_order[:1]
         order_text = kind_order[1:]
@@ -79,43 +79,43 @@ def parse_mapcode(raw_text: str, fallback_name: str) -> PuzzleState:
 
         if kind == "r":
             if order in (1, 3):
-                features[feature_index] = SYSTEM_WALL
+                state[tile_index] = SYSTEM_WALL
             elif order == 2:
-                features[feature_index] = PLAYER_WALL
+                state[tile_index] = PLAYER_WALL
                 consumed_budget += 1
             else:
                 raise ConversionError(f"Unsupported wall order: r{order}.")
         elif kind == "s":
             if order != 1 or start_index is not None:
                 raise ConversionError("Curse conversion supports exactly one start.")
-            start_index = feature_index
-            features[feature_index] = CHECKPOINT
+            start_index = tile_index
+            state[tile_index] = WAYPOINT
         elif kind == "f":
             if order != 1 or finish_index is not None:
                 raise ConversionError("Curse conversion supports exactly one finish.")
-            finish_index = feature_index
-            features[feature_index] = CHECKPOINT
+            finish_index = tile_index
+            state[tile_index] = WAYPOINT
         elif kind == "c":
-            if order <= 0 or order in checkpoints_by_order:
+            if order <= 0 or order in waypoints_by_order:
                 raise ConversionError(
-                    "Checkpoint orders must be unique positive integers.",
+                    "Waypoint orders must be unique positive integers.",
                 )
-            checkpoints_by_order[order] = feature_index
-            features[feature_index] = CHECKPOINT
+            waypoints_by_order[order] = tile_index
+            state[tile_index] = WAYPOINT
         else:
             raise ConversionError(f"Unsupported mapcode token kind: {kind!r}")
 
-        traversing_index = feature_index + 1
+        traversing_index = tile_index + 1
 
     if start_index is None or finish_index is None:
         raise ConversionError("Mapcode must contain exactly one start and one finish.")
 
-    ordered_checkpoint_indexes = [start_index]
-    for order in range(1, len(checkpoints_by_order) + 1):
-        if order not in checkpoints_by_order:
-            raise ConversionError("Checkpoint orders must be contiguous from c1.")
-        ordered_checkpoint_indexes.append(checkpoints_by_order[order])
-    ordered_checkpoint_indexes.append(finish_index)
+    ordered_waypoint_indexes = [start_index]
+    for order in range(1, len(waypoints_by_order) + 1):
+        if order not in waypoints_by_order:
+            raise ConversionError("Waypoint orders must be contiguous from c1.")
+        ordered_waypoint_indexes.append(waypoints_by_order[order])
+    ordered_waypoint_indexes.append(finish_index)
 
     remaining_budget = blocking_budget - consumed_budget
     if remaining_budget < 0:
@@ -127,8 +127,8 @@ def parse_mapcode(raw_text: str, fallback_name: str) -> PuzzleState:
         rows=rows,
         cols=cols,
         blocking_budget=remaining_budget + consumed_budget,
-        features=features,
-        checkpoints=ordered_checkpoint_indexes,
+        state=state,
+        waypoints=ordered_waypoint_indexes,
     )
 
 
@@ -157,10 +157,10 @@ def parse_curse(
     if cols <= 0:
         raise ConversionError("Curse input must have at least one column.")
 
-    features = [BLANK] * (rows * cols)
+    state = [BLANK] * (rows * cols)
     start_index: int | None = None
     finish_index: int | None = None
-    checkpoint_indexes: dict[int, int] = {}
+    waypoint_indexes: dict[int, int] = {}
     player_wall_count = 0
 
     for row, line in enumerate(lines):
@@ -189,64 +189,64 @@ def parse_curse(
                     "Curse token lies outside the configured column count.",
                 )
 
-            feature_index = row * cols + col
+            tile_index = row * cols + col
             if char == "#":
-                features[feature_index] = SYSTEM_WALL
+                state[tile_index] = SYSTEM_WALL
             elif char == "@":
-                features[feature_index] = PLAYER_WALL
+                state[tile_index] = PLAYER_WALL
                 player_wall_count += 1
             elif char == "S":
                 if start_index is not None:
                     raise ConversionError("Curse input may contain only one S.")
-                start_index = feature_index
-                features[feature_index] = CHECKPOINT
+                start_index = tile_index
+                state[tile_index] = WAYPOINT
             elif char == "X":
                 if finish_index is not None:
                     raise ConversionError("Curse input may contain only one X.")
-                finish_index = feature_index
-                features[feature_index] = CHECKPOINT
-            elif char in VALID_CURSE_CHECKPOINTS:
-                checkpoint_order = ord(char) - ord("A") + 1
-                if checkpoint_order in checkpoint_indexes:
-                    raise ConversionError(f"Duplicate checkpoint label {char}.")
-                checkpoint_indexes[checkpoint_order] = feature_index
-                features[feature_index] = CHECKPOINT
+                finish_index = tile_index
+                state[tile_index] = WAYPOINT
+            elif char in VALID_CURSE_WAYPOINTS:
+                waypoint_order = ord(char) - ord("A") + 1
+                if waypoint_order in waypoint_indexes:
+                    raise ConversionError(f"Duplicate waypoint label {char}.")
+                waypoint_indexes[waypoint_order] = tile_index
+                state[tile_index] = WAYPOINT
             else:
                 raise AssertionError(char)
 
     if start_index is None or finish_index is None:
         raise ConversionError("Curse input must contain one S and one X.")
 
-    for checkpoint_order in range(1, len(checkpoint_indexes) + 1):
-        if checkpoint_order not in checkpoint_indexes:
-            raise ConversionError("Curse checkpoints must be contiguous from A.")
+    for waypoint_order in range(1, len(waypoint_indexes) + 1):
+        if waypoint_order not in waypoint_indexes:
+            raise ConversionError("Curse waypoints must be contiguous from A.")
 
     puzzle_name = clean_name(name_override or fallback_name)
     blocking_budget = (
         budget_override if budget_override is not None else player_wall_count
     )
-    checkpoints = [start_index]
-    checkpoints.extend(
-        checkpoint_indexes[index] for index in range(1, len(checkpoint_indexes) + 1)
+    waypoints = [start_index]
+    waypoints.extend(
+        waypoint_indexes[index] for index in range(1, len(waypoint_indexes) + 1)
     )
-    checkpoints.append(finish_index)
+    waypoints.append(finish_index)
     return PuzzleState(
         name=puzzle_name,
         rows=rows,
         cols=cols,
         blocking_budget=blocking_budget,
-        features=features,
-        checkpoints=checkpoints,
+        state=state,
+        waypoints=waypoints,
     )
 
 
-def _checkpoint_token(index: int, checkpoints: list[int]) -> str:
-    checkpoint_position = checkpoints.index(index)
-    if checkpoint_position == 0:
+def _waypoint_token(index: int, waypoints: list[int]) -> str:
+    waypoint_position = waypoints.index(index)
+    if waypoint_position == 0:
         return "s1"
-    if checkpoint_position == len(checkpoints) - 1:
+    if waypoint_position == len(waypoints) - 1:
         return "f1"
-    return f"c{checkpoint_position}"
+    return f"c{waypoint_position}"
 
 
 def encode_mapcode(state: PuzzleState) -> str:
@@ -257,18 +257,18 @@ def encode_mapcode(state: PuzzleState) -> str:
     )
     tokens: list[str] = []
     traversing_index = 0
-    for index, feature in enumerate(state.features):
+    for index, tile in enumerate(state.state):
         token: str | None
-        if feature == BLANK:
+        if tile == BLANK:
             token = None
-        elif feature == SYSTEM_WALL:
+        elif tile == SYSTEM_WALL:
             token = "r1"
-        elif feature == PLAYER_WALL:
+        elif tile == PLAYER_WALL:
             token = "r2"
-        elif feature == CHECKPOINT:
-            token = _checkpoint_token(index, state.checkpoints)
+        elif tile == WAYPOINT:
+            token = _waypoint_token(index, state.waypoints)
         else:
-            raise AssertionError(feature)
+            raise AssertionError(tile)
 
         if token is None:
             continue
@@ -279,30 +279,30 @@ def encode_mapcode(state: PuzzleState) -> str:
     return f"{metadata}:{'.'.join(tokens)}."
 
 
-def _checkpoint_label(checkpoint_position: int) -> str:
-    if checkpoint_position == 0:
+def _waypoint_label(waypoint_position: int) -> str:
+    if waypoint_position == 0:
         return "S"
-    if checkpoint_position == -1:
+    if waypoint_position == -1:
         return "X"
-    if checkpoint_position <= len(VALID_CURSE_CHECKPOINTS):
-        return VALID_CURSE_CHECKPOINTS[checkpoint_position - 1]
+    if waypoint_position <= len(VALID_CURSE_WAYPOINTS):
+        return VALID_CURSE_WAYPOINTS[waypoint_position - 1]
     raise ConversionError(
         "Curse format supports at most "
-        + f"{CURSE_MAX_CHECKPOINT_LABEL} as the last intermediate checkpoint.",
+        + f"{CURSE_MAX_WAYPOINT_LABEL} as the last intermediate waypint.",
     )
 
 
 def encode_curse(state: PuzzleState, blank_char: str) -> str:
     """Encode a PuzzleState into a curse or cursep string."""
-    checkpoint_labels = {
-        state.checkpoints[0]: "S",
-        state.checkpoints[-1]: "X",
+    waypoint_labels = {
+        state.waypoints[0]: "S",
+        state.waypoints[-1]: "X",
     }
-    for checkpoint_position, checkpoint_index in enumerate(
-        state.checkpoints[1:-1],
+    for waypoint_position, waypoint_index in enumerate(
+        state.waypoints[1:-1],
         start=1,
     ):
-        checkpoint_labels[checkpoint_index] = _checkpoint_label(checkpoint_position)
+        waypoint_labels[waypoint_index] = _waypoint_label(waypoint_position)
 
     row_width = state.cols * CURSE_CELL_STRIDE - 1
     lines: list[str] = []
@@ -316,17 +316,17 @@ def encode_curse(state: PuzzleState, blank_char: str) -> str:
         for col in range(state.cols):
             index = row * state.cols + col
             char_index = col * CURSE_CELL_STRIDE + CURSE_CELL_OFFSET
-            feature = state.features[index]
-            if feature == BLANK:
+            tile = state.state[index]
+            if tile == BLANK:
                 chars[char_index] = blank_char
-            elif feature == SYSTEM_WALL:
+            elif tile == SYSTEM_WALL:
                 chars[char_index] = "#"
-            elif feature == PLAYER_WALL:
+            elif tile == PLAYER_WALL:
                 chars[char_index] = "@"
-            elif feature == CHECKPOINT:
-                chars[char_index] = checkpoint_labels[index]
+            elif tile == WAYPOINT:
+                chars[char_index] = waypoint_labels[index]
             else:
-                raise AssertionError(feature)
+                raise AssertionError(tile)
         lines.append("".join(chars))
     return "\n".join(lines) + "\n"
 

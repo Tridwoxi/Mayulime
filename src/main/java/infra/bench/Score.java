@@ -28,7 +28,7 @@ public final class Score implements Runnable {
 
     private void report() {
         if (best != null) {
-            final String mapCode = Serializer.serialize(params.puzzle(), best.getFeatures());
+            final String mapCode = Serializer.serialize(params.puzzle(), best.getState());
             Logger.results("Best proposal: %s", mapCode);
             Logger.results("Score: %d", best.getScore());
             Logger.results("Found after: %d ms", bestElapsedMs);

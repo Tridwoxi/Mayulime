@@ -2,8 +2,8 @@ package think.solvers.local;
 
 import java.util.function.Consumer;
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.ints.IntArrays;
 import think.manager.Proposal;
 import think.solvers.Solver;
@@ -16,7 +16,7 @@ public final class ClimbSolver extends Solver {
     public ClimbSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getFeatures(), Feature.BLANK);
+        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
     }
 
     @Override
@@ -27,36 +27,36 @@ public final class ClimbSolver extends Solver {
         }
     }
 
-    private Feature[] hillClimb() throws KilledException {
-        final Feature[] features = getPuzzle().getFeatures();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(features) };
-        final int[] scoreBox = new int[] { evaluator.evaluate(features) };
+    private Tile[] hillClimb() throws KilledException {
+        final Tile[] state = getPuzzle().getTiles();
+        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final int[] scoreBox = new int[] { evaluator.evaluate(state) };
 
         for (;;) {
             checkAlive();
-            final int[] blankCells = getCellsWhere(features, Feature.BLANK);
-            final int[] playerCells = getCellsWhere(features, Feature.PLAYER_WALL);
+            final int[] blankCells = getCellsWhere(state, Tile.BLANK);
+            final int[] playerCells = getCellsWhere(state, Tile.PLAYER_WALL);
             IntArrays.shuffleInPlace(blankCells);
             IntArrays.shuffleInPlace(playerCells);
-            if (placeMoreWalls(features, blankCells, budgetBox, scoreBox)) {
+            if (placeMoreWalls(state, blankCells, budgetBox, scoreBox)) {
                 continue;
             }
-            if (rearrangeWalls(features, blankCells, playerCells, scoreBox)) {
+            if (rearrangeWalls(state, blankCells, playerCells, scoreBox)) {
                 continue;
             }
             break;
         }
-        return features;
+        return state;
     }
 
-    private int seed(final Feature[] features) throws KilledException {
+    private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
         final int budget = getPuzzle().getBlockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
-            features[initiallyBlankCells[placement]] = Feature.PLAYER_WALL;
-            if (evaluator.evaluate(features) < 0) {
-                features[initiallyBlankCells[placement]] = Feature.BLANK;
+            state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;
+            if (evaluator.evaluate(state) < 0) {
+                state[initiallyBlankCells[placement]] = Tile.BLANK;
                 return placement;
             }
         }
@@ -64,7 +64,7 @@ public final class ClimbSolver extends Solver {
     }
 
     private boolean placeMoreWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] blankCells,
         final int[] budgetBox,
         final int[] scoreBox
@@ -74,20 +74,20 @@ public final class ClimbSolver extends Solver {
         }
         for (final int blankCell : blankCells) {
             checkAlive();
-            features[blankCell] = Feature.PLAYER_WALL;
-            final int newScore = evaluator.evaluate(features);
+            state[blankCell] = Tile.PLAYER_WALL;
+            final int newScore = evaluator.evaluate(state);
             if (newScore > scoreBox[0]) {
                 scoreBox[0] = newScore;
                 budgetBox[0] -= 1;
                 return true;
             }
-            features[blankCell] = Feature.BLANK;
+            state[blankCell] = Tile.BLANK;
         }
         return false;
     }
 
     private boolean rearrangeWalls(
-        final Feature[] features,
+        final Tile[] state,
         final int[] blankCells,
         final int[] playerCells,
         final int[] scoreBox
@@ -97,17 +97,17 @@ public final class ClimbSolver extends Solver {
             for (int playerIndex = 0; playerIndex < playerCells.length; playerIndex += 1) {
                 checkAlive();
                 final int playerCell = playerCells[playerIndex];
-                features[blankCell] = Feature.PLAYER_WALL;
-                features[playerCell] = Feature.BLANK;
+                state[blankCell] = Tile.PLAYER_WALL;
+                state[playerCell] = Tile.BLANK;
                 blankCells[blankIndex] = playerCell;
                 playerCells[playerIndex] = blankCell;
-                final int newScore = evaluator.evaluate(features);
+                final int newScore = evaluator.evaluate(state);
                 if (newScore > scoreBox[0]) {
                     scoreBox[0] = newScore;
                     return true;
                 }
-                features[blankCell] = Feature.BLANK;
-                features[playerCell] = Feature.PLAYER_WALL;
+                state[blankCell] = Tile.BLANK;
+                state[playerCell] = Tile.PLAYER_WALL;
                 blankCells[blankIndex] = blankCell;
                 playerCells[playerIndex] = playerCell;
             }
@@ -115,7 +115,7 @@ public final class ClimbSolver extends Solver {
         return false;
     }
 
-    private static int[] getCellsWhere(final Feature[] features, final Feature feature) {
-        return IntArrays.ofRangeWhere(0, features.length, index -> features[index] == feature);
+    private static int[] getCellsWhere(final Tile[] state, final Tile tile) {
+        return IntArrays.ofRangeWhere(0, state.length, index -> state[index] == tile);
     }
 }

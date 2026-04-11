@@ -22,9 +22,8 @@ be 0. Strings are alphanumeric and may contain spaces or be empty. {@code |} is 
 representing alternation. There are Kinds beyond those defined here, but they are not supported.
 The trailing Metadata strings are not understood.
 
-Puzzles in this system also need to be semantically correct: features stay within bounds,
-checkpoints must have unique orders, and blocking budget cannot exceed blank cells. Pathery
-supports variants with multiple starts / finishes / checkpoints, but we do not yet. Player walls
-are silently converted to system walls and deducted from the blocking budget. Doing so enables the
-user to copy a partially solved puzzle and send it back to this system but with walls locked in
-place.
+Puzzles in this system also need to be semantically correct: tiles stay within bounds, waypoints
+must have unique orders, and blocking budget cannot exceed blank cells. Pathery supports variants
+with multiple starts / finishes / waypoints, but we do not yet. Player walls are silently converted
+to system walls and deducted from the blocking budget. Doing so enables the user to copy a
+partially solved puzzle and send it back to this system but with walls locked in place.

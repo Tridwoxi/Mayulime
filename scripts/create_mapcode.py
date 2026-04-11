@@ -12,10 +12,10 @@ import sys
 from collections import deque
 from dataclasses import dataclass
 
-from mapcode import BLANK, CHECKPOINT, SYSTEM_WALL, PuzzleState, encode_mapcode
+from mapcode import BLANK, SYSTEM_WALL, WAYPOINT, PuzzleState, encode_mapcode
 
 MAX_NAME_LENGTH = 100
-MIN_CHECKPOINTS = 2
+MIN_WAYPOINTS = 2
 
 type Position = tuple[int, int]
 
@@ -36,7 +36,7 @@ class GeneratorConfig:
     width: int
     player_walls: int
     system_wall_probability: float
-    checkpoints: int
+    waypoints: int
     name: str
     max_attempts: int
     seed: int | None
@@ -84,19 +84,19 @@ def reachable_from_start(
     return visited
 
 
-def all_checkpoints_reachable(
+def all_waypoints_reachable(
     height: int,
     width: int,
     wall_indexes: set[int],
-    checkpoint_positions: list[Position],
+    waypoint_positions: list[Position],
 ) -> bool:
     reachable = reachable_from_start(
         height=height,
         width=width,
         wall_indexes=wall_indexes,
-        start=checkpoint_positions[0],
+        start=waypoint_positions[0],
     )
-    return all(position in reachable for position in checkpoint_positions)
+    return all(position in reachable for position in waypoint_positions)
 
 
 def generate_problem(
@@ -107,47 +107,46 @@ def generate_problem(
     cell_indexes = list(range(num_cells))
 
     for _ in range(config.max_attempts):
-        checkpoint_indexes = rng.sample(cell_indexes, config.checkpoints)
-        checkpoint_set = set(checkpoint_indexes)
+        waypoint_indexes = rng.sample(cell_indexes, config.waypoints)
+        waypoint_set = set(waypoint_indexes)
         wall_indexes = {
             index
             for index in cell_indexes
-            if index not in checkpoint_set
+            if index not in waypoint_set
             and rng.random() < config.system_wall_probability
         }
-        checkpoint_positions = [
-            (index // config.width, index % config.width)
-            for index in checkpoint_indexes
+        waypoint_positions = [
+            (index // config.width, index % config.width) for index in waypoint_indexes
         ]
-        if all_checkpoints_reachable(
+        if all_waypoints_reachable(
             height=config.height,
             width=config.width,
             wall_indexes=wall_indexes,
-            checkpoint_positions=checkpoint_positions,
+            waypoint_positions=waypoint_positions,
         ):
-            return checkpoint_indexes, wall_indexes
+            return waypoint_indexes, wall_indexes
     raise CantGenerateError
 
 
 def build_puzzle_state(
     config: GeneratorConfig,
-    checkpoint_indexes: list[int],
+    waypoint_indexes: list[int],
     wall_indexes: set[int],
 ) -> PuzzleState:
     """Convert generator output into a PuzzleState for encoding."""
     num_cells = config.height * config.width
-    features = [BLANK] * num_cells
+    state = [BLANK] * num_cells
     for index in wall_indexes:
-        features[index] = SYSTEM_WALL
-    for index in checkpoint_indexes:
-        features[index] = CHECKPOINT
+        state[index] = SYSTEM_WALL
+    for index in waypoint_indexes:
+        state[index] = WAYPOINT
     return PuzzleState(
         name=clean_generator_name(config.name),
         rows=config.height,
         cols=config.width,
         blocking_budget=config.player_walls,
-        features=features,
-        checkpoints=checkpoint_indexes,
+        state=state,
+        waypoints=waypoint_indexes,
     )
 
 
@@ -175,13 +174,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--system-wall-probability",
         type=float,
         default=0.1,
-        help="Probability each non-checkpoint cell is a wall.",
+        help="Probability each non-waypoint cell is a wall.",
     )
     _ = parser.add_argument(
-        "--checkpoints",
+        "--waypoints",
         type=int,
         default=3,
-        help="Total checkpoint count (including start and finish).",
+        help="Total waypoint count (including start and finish).",
     )
     _ = parser.add_argument(
         "--name",
@@ -219,8 +218,8 @@ def validate_config(config: GeneratorConfig) -> None:
         raise InvalidInputError(msg)
 
     total_cells = config.height * config.width
-    if not MIN_CHECKPOINTS <= config.checkpoints < total_cells:
-        msg = "checkpoints must be at least 2 and less than height*width."
+    if not MIN_WAYPOINTS <= config.waypoints < total_cells:
+        msg = "waypoints must be at least 2 and less than height*width."
         raise InvalidInputError(msg)
 
 
@@ -231,7 +230,7 @@ def parse_config(argv: list[str] | None = None) -> GeneratorConfig:
         width=args.width,  # pyright: ignore[reportAny]
         player_walls=args.player_walls,  # pyright: ignore[reportAny]
         system_wall_probability=args.system_wall_probability,  # pyright: ignore[reportAny]
-        checkpoints=args.checkpoints,  # pyright: ignore[reportAny]
+        waypoints=args.waypoints,  # pyright: ignore[reportAny]
         name=args.name,  # pyright: ignore[reportAny]
         max_attempts=args.max_attempts,  # pyright: ignore[reportAny]
         seed=args.seed,  # pyright: ignore[reportAny]
@@ -244,10 +243,11 @@ def main() -> int:
     try:
         config = parse_config()
         rng = random.Random(config.seed)
-        checkpoint_indexes, wall_indexes = generate_problem(
-            config=config, rng=rng,
+        waypoint_indexes, wall_indexes = generate_problem(
+            config=config,
+            rng=rng,
         )
-        state = build_puzzle_state(config, checkpoint_indexes, wall_indexes)
+        state = build_puzzle_state(config, waypoint_indexes, wall_indexes)
         mapcode = encode_mapcode(state)
     except CantGenerateError:
         print(

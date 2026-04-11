@@ -1,24 +1,24 @@
 package think.manager;
 
 import think.common.StandardEvaluator;
-import think.domain.model.Feature;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 
 public final class Proposal {
 
     private final String submitter;
     private final Puzzle puzzle;
-    private final Feature[] features;
+    private final Tile[] state;
     private final int score;
     private final long createdAtMs;
 
-    public Proposal(final String submitter, final Puzzle puzzle, final Feature[] features) {
+    public Proposal(final String submitter, final Puzzle puzzle, final Tile[] state) {
         this.submitter = submitter;
         this.puzzle = puzzle;
-        this.features = features.clone();
-        this.score = new StandardEvaluator(puzzle).evaluate(features);
+        this.state = state.clone();
+        this.score = new StandardEvaluator(puzzle).evaluate(state);
         this.createdAtMs = System.currentTimeMillis();
-        if (!puzzle.isValid(features)) {
+        if (!puzzle.isValid(state)) {
             throw new IllegalArgumentException();
         }
     }
@@ -31,8 +31,8 @@ public final class Proposal {
         return puzzle;
     }
 
-    public Feature[] getFeatures() {
-        return features.clone();
+    public Tile[] getState() {
+        return state.clone();
     }
 
     public int getScore() {

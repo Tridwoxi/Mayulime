@@ -11,9 +11,9 @@ from .codec import (
 )
 from .model import (
     BLANK,
-    CHECKPOINT,
     PLAYER_WALL,
     SYSTEM_WALL,
+    WAYPOINT,
     ConversionError,
     PuzzleState,
 )
@@ -24,9 +24,9 @@ from .pathfinding import (
 
 __all__ = [
     "BLANK",
-    "CHECKPOINT",
     "PLAYER_WALL",
     "SYSTEM_WALL",
+    "WAYPOINT",
     "ConversionError",
     "PuzzleState",
     "encode_curse",
