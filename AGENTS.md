@@ -32,7 +32,7 @@ Application packages are in `src/main/java/`:
 `infra.bench` - Benchmarks.\
 `infra.gui` - JavaFX GUI.\
 `infra.launch` - Launch points.\
-`infra.output` - Logging.
+`infra.logging` - Logging.
 
 `think.common` - Shared backend classes.\
 `think.domain` - Problem model and codec.\
