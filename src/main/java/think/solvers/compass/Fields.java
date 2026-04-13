@@ -9,7 +9,7 @@ import think.ints.IntArrays;
 // TODO: this is the wrong abstraction.
 class Fields {
 
-    final int NOT_ON_SHORTEST_PATH = 0;
+    static final int NOT_ON_SHORTEST_PATH = 0;
     private final DistanceFinder finder;
     private final int puzzleSize;
     private final int[] waypoints;
