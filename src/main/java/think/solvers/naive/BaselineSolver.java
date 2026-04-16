@@ -13,6 +13,6 @@ public final class BaselineSolver extends Solver {
 
     @Override
     protected void solve() throws KilledException {
-        propose(getPuzzle().getTiles());
+        propose(getPuzzle().tiles());
     }
 }

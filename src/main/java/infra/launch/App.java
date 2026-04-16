@@ -121,7 +121,7 @@ public final class App extends Application {
         this.manager = new Manager(kinds);
 
         final int epoch = this.puzzleEpoch.incrementAndGet();
-        this.currentPuzzleName = puzzle.getName();
+        this.currentPuzzleName = puzzle.name();
         gui.onPuzzleAccepted(puzzle, epoch);
         manager.solve(puzzle);
         startPolling(manager, epoch);

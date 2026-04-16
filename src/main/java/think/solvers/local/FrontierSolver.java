@@ -30,10 +30,10 @@ public final class FrontierSolver extends Solver {
         this.random = new Random();
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
-        this.waypoints = puzzle.getWaypoints();
-        this.numRows = puzzle.getNumRows();
-        this.numCols = puzzle.getNumCols();
+        this.initiallyBlankCells = getCellsWhere(puzzle.tiles(), Tile.BLANK);
+        this.waypoints = puzzle.waypoints();
+        this.numRows = puzzle.numRows();
+        this.numCols = puzzle.numCols();
         this.neighborBuffer = new int[4];
         this.frontier = new Frontier((int) Math.ceil(Math.sqrt((double) numRows * numCols)));
     }
@@ -57,8 +57,8 @@ public final class FrontierSolver extends Solver {
     }
 
     private Tile[] hillClimbFromSeed() throws KilledException {
-        final Tile[] state = getPuzzle().getTiles();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final Tile[] state = getPuzzle().tiles();
+        final int[] budgetBox = new int[] { getPuzzle().blockingBudget() - seed(state) };
         final int[] scoreBox = new int[] { evaluator.evaluate(state) };
         climbLoop(state, budgetBox, scoreBox);
         return state;
@@ -66,7 +66,7 @@ public final class FrontierSolver extends Solver {
 
     private Tile[] hillClimbFromState(final Tile[] state) throws KilledException {
         final int wallCount = getCellsWhere(state, Tile.PLAYER_WALL).length;
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - wallCount };
+        final int[] budgetBox = new int[] { getPuzzle().blockingBudget() - wallCount };
         final int[] scoreBox = new int[] { evaluator.evaluate(state) };
         climbLoop(state, budgetBox, scoreBox);
         return state;
@@ -95,7 +95,7 @@ public final class FrontierSolver extends Solver {
 
     private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
-        final int budget = getPuzzle().getBlockingBudget();
+        final int budget = getPuzzle().blockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
             state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;

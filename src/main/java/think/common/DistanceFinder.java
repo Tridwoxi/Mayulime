@@ -19,8 +19,8 @@ public final class DistanceFinder {
     private final IntQueue frontier;
 
     public DistanceFinder(final Puzzle puzzle) {
-        this.numRows = puzzle.getNumRows();
-        this.numCols = puzzle.getNumCols();
+        this.numRows = puzzle.numRows();
+        this.numCols = puzzle.numCols();
         this.size = numRows * numCols;
         this.frontier = new IntQueue(size);
     }

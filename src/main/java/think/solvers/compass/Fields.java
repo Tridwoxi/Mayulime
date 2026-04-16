@@ -19,9 +19,9 @@ class Fields {
     private final int[] buffer;
 
     Fields(final Puzzle puzzle) {
-        this.puzzleSize = puzzle.getNumRows() * puzzle.getNumCols();
+        this.puzzleSize = puzzle.numRows() * puzzle.numCols();
         this.finder = new DistanceFinder(puzzle);
-        this.waypoints = puzzle.getWaypoints();
+        this.waypoints = puzzle.waypoints();
         this.fieldsFromSourcesByWaypoint = new int[waypoints.length][puzzleSize];
         this.fieldsBetweenSourcesByWaypoint = new int[waypoints.length - 1][puzzleSize];
         this.layerWidthsByWaypoint = new int[waypoints.length - 1][puzzleSize];

@@ -17,7 +17,7 @@ public final class Serializer {
     private Serializer() {}
 
     public static String serialize(final Puzzle puzzle) {
-        return serialize(puzzle, puzzle.getTiles());
+        return serialize(puzzle, puzzle.tiles());
     }
 
     public static String serialize(final Puzzle puzzle, final Tile[] state) {
@@ -27,13 +27,13 @@ public final class Serializer {
 
         final StringBuilder mapCode = new StringBuilder();
         mapCode
-            .append(puzzle.getNumCols())
+            .append(puzzle.numCols())
             .append('.')
-            .append(puzzle.getNumRows())
+            .append(puzzle.numRows())
             .append('.')
-            .append(puzzle.getBlockingBudget())
+            .append(puzzle.blockingBudget())
             .append('.')
-            .append(sanitizeName(puzzle.getName()))
+            .append(sanitizeName(puzzle.name()))
             .append(MYSTERY_METADATA)
             .append(':');
         appendMaze(mapCode, puzzle, state);
@@ -45,7 +45,7 @@ public final class Serializer {
         final Puzzle puzzle,
         final Tile[] state
     ) {
-        final int[] waypoints = puzzle.getWaypoints();
+        final int[] waypoints = puzzle.waypoints();
         int traversingIndex = 0;
 
         for (int index = 0; index < state.length; index += 1) {

@@ -60,7 +60,7 @@ public final class Optimality implements Runnable {
 
         final int[] blankCells = cellsWhere(state, Tile.BLANK);
         final int[] playerCells = cellsWhere(state, Tile.PLAYER_WALL);
-        final int remainingBudget = puzzle.getBlockingBudget() - countPlaced(puzzle, state);
+        final int remainingBudget = puzzle.blockingBudget() - countPlaced(puzzle, state);
 
         if (remainingBudget > 0 && canPlaceImproving(evaluator, state, blankCells, score)) {
             return false;
@@ -108,7 +108,7 @@ public final class Optimality implements Runnable {
     }
 
     private static int countPlaced(final Puzzle puzzle, final Tile[] state) {
-        final Tile[] initial = puzzle.getTiles();
+        final Tile[] initial = puzzle.tiles();
         int count = 0;
         for (int index = 0; index < state.length; index += 1) {
             if (initial[index] == Tile.BLANK && state[index] == Tile.PLAYER_WALL) {

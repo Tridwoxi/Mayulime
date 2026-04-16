@@ -17,7 +17,7 @@ public final class WalkSolver extends Solver {
     public WalkSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
+        this.initiallyBlankCells = getCellsWhere(puzzle.tiles(), Tile.BLANK);
     }
 
     @Override
@@ -29,8 +29,8 @@ public final class WalkSolver extends Solver {
     }
 
     private Tile[] hillClimb() throws KilledException {
-        final Tile[] state = getPuzzle().getTiles();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final Tile[] state = getPuzzle().tiles();
+        final int[] budgetBox = new int[] { getPuzzle().blockingBudget() - seed(state) };
         final int[] scoreBox = new int[] { evaluator.evaluate(state) };
 
         outer: for (;;) {
@@ -57,7 +57,7 @@ public final class WalkSolver extends Solver {
 
     private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
-        final int budget = getPuzzle().getBlockingBudget();
+        final int budget = getPuzzle().blockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
             state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;

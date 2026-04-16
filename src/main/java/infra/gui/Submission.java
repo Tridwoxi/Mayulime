@@ -30,10 +30,10 @@ public final class Submission {
     ) {
         this.submitter = submitter;
         this.maze = state.clone();
-        this.numRows = puzzle.getNumRows();
-        this.numCols = puzzle.getNumCols();
+        this.numRows = puzzle.numRows();
+        this.numCols = puzzle.numCols();
         this.score = score;
-        this.blockingBudget = puzzle.getBlockingBudget();
+        this.blockingBudget = puzzle.blockingBudget();
         this.waypointOrderByIndex = buildWaypointOrderByIndex(puzzle, this.maze.length);
         this.pathCells = new PathTracer(puzzle).trace(this.maze);
     }
@@ -78,7 +78,7 @@ public final class Submission {
         final int[] orderByIndex = new int[numCells];
         Arrays.fill(orderByIndex, NOT_A_WAYPOINT);
 
-        final int[] waypoints = puzzle.getWaypoints();
+        final int[] waypoints = puzzle.waypoints();
         for (int order = 0; order < waypoints.length; order += 1) {
             orderByIndex[waypoints[order]] = order;
         }

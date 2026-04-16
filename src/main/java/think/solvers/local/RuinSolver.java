@@ -24,8 +24,8 @@ public final class RuinSolver extends Solver {
         this.random = new Random();
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);
-        this.initiallyBlankCells = getCellsWhere(puzzle.getTiles(), Tile.BLANK);
-        this.waypoints = puzzle.getWaypoints();
+        this.initiallyBlankCells = getCellsWhere(puzzle.tiles(), Tile.BLANK);
+        this.waypoints = puzzle.waypoints();
     }
 
     @Override
@@ -48,8 +48,8 @@ public final class RuinSolver extends Solver {
     }
 
     private Tile[] hillClimbFromSeed() throws KilledException {
-        final Tile[] state = getPuzzle().getTiles();
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - seed(state) };
+        final Tile[] state = getPuzzle().tiles();
+        final int[] budgetBox = new int[] { getPuzzle().blockingBudget() - seed(state) };
         final int[] scoreBox = new int[] { evaluator.evaluate(state) };
         climbLoop(state, budgetBox, scoreBox);
         return state;
@@ -57,7 +57,7 @@ public final class RuinSolver extends Solver {
 
     private Tile[] hillClimbFromState(final Tile[] state) throws KilledException {
         final int wallCount = getCellsWhere(state, Tile.PLAYER_WALL).length;
-        final int[] budgetBox = new int[] { getPuzzle().getBlockingBudget() - wallCount };
+        final int[] budgetBox = new int[] { getPuzzle().blockingBudget() - wallCount };
         final int[] scoreBox = new int[] { evaluator.evaluate(state) };
         climbLoop(state, budgetBox, scoreBox);
         return state;
@@ -86,7 +86,7 @@ public final class RuinSolver extends Solver {
 
     private int seed(final Tile[] state) throws KilledException {
         IntArrays.shuffleInPlace(initiallyBlankCells);
-        final int budget = getPuzzle().getBlockingBudget();
+        final int budget = getPuzzle().blockingBudget();
         for (int placement = 0; placement < budget; placement += 1) {
             checkAlive();
             state[initiallyBlankCells[placement]] = Tile.PLAYER_WALL;
@@ -100,8 +100,8 @@ public final class RuinSolver extends Solver {
 
     private Tile[] ruin(final Tile[] state) {
         final Tile[] ruined = state.clone();
-        final int numRows = getPuzzle().getNumRows();
-        final int numCols = getPuzzle().getNumCols();
+        final int numRows = getPuzzle().numRows();
+        final int numCols = getPuzzle().numCols();
         final int width = random.nextInt(1, numCols + 1);
         final int height = random.nextInt(1, numRows + 1);
         final int top = random.nextInt(numRows);

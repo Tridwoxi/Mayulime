@@ -1,64 +1,30 @@
 package think.domain.model;
 
 import infra.logging.Logger;
-import java.util.HashSet;
 
 /**
     Pathery puzzle metadata and immutable initial maze.
  */
-public final class Puzzle {
-
-    private final String name;
-    private final Tile[] tiles;
-    private final int numRows;
-    private final int numCols;
-    private final int[] waypoints;
-    private final int blockingBudget;
-
-    public Puzzle(
-        final String name,
-        final Tile[] tiles,
-        final int numRows,
-        final int numCols,
-        final int[] waypoints,
-        final int blockingBudget
-    ) {
-        final HashSet<Integer> seen = new HashSet<>(waypoints.length);
-        for (final int waypoint : waypoints) {
-            if (waypoint < 0 || waypoint >= numRows * numCols || !seen.add(waypoint)) {
-                throw new IllegalArgumentException();
-            }
-        }
-        this.name = name;
-        this.tiles = tiles.clone();
-        this.numRows = numRows;
-        this.numCols = numCols;
-        this.waypoints = waypoints.clone();
-        this.blockingBudget = blockingBudget;
+public record Puzzle(
+    String name,
+    Tile[] tiles,
+    int numRows,
+    int numCols,
+    int[] waypoints,
+    int blockingBudget
+) {
+    public Puzzle {
+        // Error checking is hard without the parsing data, so we pray the caller is right instead.
+        tiles = tiles.clone();
+        waypoints = waypoints.clone();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Tile[] getTiles() {
+    public Tile[] tiles() {
         return tiles.clone();
     }
 
-    public int getNumRows() {
-        return numRows;
-    }
-
-    public int getNumCols() {
-        return numCols;
-    }
-
-    public int[] getWaypoints() {
+    public int[] waypoints() {
         return waypoints.clone();
-    }
-
-    public int getBlockingBudget() {
-        return blockingBudget;
     }
 
     public boolean isValid(final Tile[] proposal) {

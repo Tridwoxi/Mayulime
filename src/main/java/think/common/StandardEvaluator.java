@@ -20,12 +20,12 @@ public final class StandardEvaluator {
     private final int[] waypoints;
 
     public StandardEvaluator(final Puzzle puzzle) {
-        this.numRows = puzzle.getNumRows();
-        this.numCols = puzzle.getNumCols();
+        this.numRows = puzzle.numRows();
+        this.numCols = puzzle.numCols();
         this.size = numRows * numCols;
         this.frontier = new IntQueue(size);
         this.distances = new int[size];
-        this.waypoints = puzzle.getWaypoints();
+        this.waypoints = puzzle.waypoints();
     }
 
     public int evaluate(final Tile[] state) {

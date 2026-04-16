@@ -15,10 +15,10 @@ public final class RandomSolver extends Solver {
 
     public RandomSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.blankCellIndices = getBlankCellIndices(puzzle.getTiles());
+        this.blankCellIndices = getBlankCellIndices(puzzle.tiles());
         this.wallDistribution = new RestrictedBinomial(
             blankCellIndices.length,
-            puzzle.getBlockingBudget()
+            puzzle.blockingBudget()
         );
     }
 
@@ -31,7 +31,7 @@ public final class RandomSolver extends Solver {
     }
 
     private Tile[] generateRandomProposal() {
-        final Tile[] maze = getPuzzle().getTiles();
+        final Tile[] maze = getPuzzle().tiles();
         IntArrays.shuffleInPlace(blankCellIndices);
 
         final int numWalls = wallDistribution.sample();

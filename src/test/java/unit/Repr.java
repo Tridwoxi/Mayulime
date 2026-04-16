@@ -22,7 +22,7 @@ public final class Repr {
     @Test
     public void puzzleFaithfulToMapCode() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(SMALL1_MAPCODE);
-        final Tile[] maze = puzzle.getTiles();
+        final Tile[] maze = puzzle.tiles();
 
         int blankCount = 0;
         int systemWallCount = 0;
@@ -38,17 +38,17 @@ public final class Repr {
             }
         }
 
-        Assertions.assertEquals("Small1", puzzle.getName());
-        Assertions.assertEquals(6, puzzle.getNumRows());
-        Assertions.assertEquals(13, puzzle.getNumCols());
-        Assertions.assertEquals(7, puzzle.getBlockingBudget());
+        Assertions.assertEquals("Small1", puzzle.name());
+        Assertions.assertEquals(6, puzzle.numRows());
+        Assertions.assertEquals(13, puzzle.numCols());
+        Assertions.assertEquals(7, puzzle.blockingBudget());
         Assertions.assertEquals(78, maze.length);
         Assertions.assertEquals(60, blankCount);
         Assertions.assertEquals(15, systemWallCount);
         Assertions.assertEquals(3, waypointCount);
         Assertions.assertEquals(0, playerWallCount);
 
-        final int[] waypoints = puzzle.getWaypoints();
+        final int[] waypoints = puzzle.waypoints();
         Assertions.assertEquals(3, waypoints.length);
         Assertions.assertEquals(5 * 13 + 3, waypoints[1]);
         Assertions.assertEquals(Tile.WAYPOINT, maze[waypoints[0]]);
@@ -59,18 +59,18 @@ public final class Repr {
     @Test
     public void manyWalls() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(MANY_WALLS_MAPCODE);
-        Assertions.assertEquals(7, puzzle.getBlockingBudget());
+        Assertions.assertEquals(7, puzzle.blockingBudget());
     }
 
     @Test
     public void playerWallsAreLockedAndSpent() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(PARTIAL_FILL_MAPCODE);
-        final Tile[] maze = puzzle.getTiles();
+        final Tile[] maze = puzzle.tiles();
         final int system = (int) Arrays.stream(maze).filter(Tile.SYSTEM_WALL::equals).count();
         final int player = (int) Arrays.stream(maze).filter(Tile.PLAYER_WALL::equals).count();
         Assertions.assertEquals(1, system);
         Assertions.assertEquals(0, player);
         Assertions.assertEquals(Tile.SYSTEM_WALL, maze[1]);
-        Assertions.assertEquals(1, puzzle.getBlockingBudget());
+        Assertions.assertEquals(1, puzzle.blockingBudget());
     }
 }

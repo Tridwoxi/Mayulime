@@ -50,18 +50,18 @@ public final class Codec {
         final String serialized = Serializer.serialize(puzzle);
         final Puzzle reparsed = Parser.parse(serialized);
 
-        Assertions.assertEquals(puzzle.getName(), reparsed.getName());
-        Assertions.assertEquals(puzzle.getNumRows(), reparsed.getNumRows());
-        Assertions.assertEquals(puzzle.getNumCols(), reparsed.getNumCols());
-        Assertions.assertEquals(puzzle.getBlockingBudget(), reparsed.getBlockingBudget());
-        Assertions.assertArrayEquals(puzzle.getWaypoints(), reparsed.getWaypoints());
-        Assertions.assertArrayEquals(puzzle.getTiles(), reparsed.getTiles());
+        Assertions.assertEquals(puzzle.name(), reparsed.name());
+        Assertions.assertEquals(puzzle.numRows(), reparsed.numRows());
+        Assertions.assertEquals(puzzle.numCols(), reparsed.numCols());
+        Assertions.assertEquals(puzzle.blockingBudget(), reparsed.blockingBudget());
+        Assertions.assertArrayEquals(puzzle.waypoints(), reparsed.waypoints());
+        Assertions.assertArrayEquals(puzzle.tiles(), reparsed.tiles());
     }
 
     @Test
     public void serializerIncludesPlayerWalls() throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse("3.3.2.Copy state...:,s1.,f1.");
-        final Tile[] state = puzzle.getTiles();
+        final Tile[] state = puzzle.tiles();
         state[2] = Tile.PLAYER_WALL;
         state[7] = Tile.PLAYER_WALL;
 

@@ -21,9 +21,9 @@ public final class PathTracer {
     private final int[] distances;
 
     public PathTracer(final Puzzle puzzle) {
-        this.waypoints = puzzle.getWaypoints();
-        this.numRows = puzzle.getNumRows();
-        this.numCols = puzzle.getNumCols();
+        this.waypoints = puzzle.waypoints();
+        this.numRows = puzzle.numRows();
+        this.numCols = puzzle.numCols();
         this.size = numRows * numCols;
         this.frontier = new IntQueue(size);
         this.distances = new int[size];
@@ -125,9 +125,7 @@ public final class PathTracer {
                 distances[nextRight] = nextDistance;
             }
             if (
-                currentRow < numRows - 1 &&
-                state[nextDown].isPassable() &&
-                distances[nextDown] < 0
+                currentRow < numRows - 1 && state[nextDown].isPassable() && distances[nextDown] < 0
             ) {
                 if (nextDown == target) {
                     distances[nextDown] = nextDistance;

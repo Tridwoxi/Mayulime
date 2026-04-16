@@ -18,7 +18,7 @@ public final class Common {
     public void snakePreferenceOrder() throws BadMapCodeException {
         final Puzzle puzzle1 = Parser.parse("2.2.0.BottomLeft->TopRight...:1,f1.,s1.");
         final PathTracer tracer1 = new PathTracer(puzzle1);
-        final BitSet result1 = tracer1.trace(puzzle1.getTiles());
+        final BitSet result1 = tracer1.trace(puzzle1.tiles());
         final BitSet expected1 = new BitSet(4);
         expected1.set(0);
         expected1.set(1);
@@ -27,7 +27,7 @@ public final class Common {
 
         final Puzzle puzzle2 = Parser.parse("2.2.0.TopRight->BottomLeft...:1,s1.,f1.");
         final PathTracer tracer2 = new PathTracer(puzzle2);
-        final BitSet result2 = tracer2.trace(puzzle2.getTiles());
+        final BitSet result2 = tracer2.trace(puzzle2.tiles());
         final BitSet expected2 = new BitSet(4);
         expected2.set(1);
         expected2.set(2);

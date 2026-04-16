@@ -17,7 +17,7 @@ public final class EnumerateSolver extends Solver {
 
     public EnumerateSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         super(listener, puzzle);
-        this.blankCellIndices = getBlankCellIndices(puzzle.getTiles());
+        this.blankCellIndices = getBlankCellIndices(puzzle.tiles());
         this.evaluator = new StandardEvaluator(puzzle);
     }
 
@@ -26,15 +26,15 @@ public final class EnumerateSolver extends Solver {
         final int numBlanks = blankCellIndices.length;
         Logger.info(
             "Enumerating ~%.2e combinations (%d blanks, up to %d walls)",
-            estimateTotalCombinations(numBlanks, getPuzzle().getBlockingBudget()),
+            estimateTotalCombinations(numBlanks, getPuzzle().blockingBudget()),
             numBlanks,
-            getPuzzle().getBlockingBudget()
+            getPuzzle().blockingBudget()
         );
 
-        final Tile[] maze = getPuzzle().getTiles();
+        final Tile[] maze = getPuzzle().tiles();
         int bestScore = StandardEvaluator.NO_PATH_EXISTS;
 
-        for (int numWalls = 0; numWalls <= getPuzzle().getBlockingBudget(); numWalls += 1) {
+        for (int numWalls = 0; numWalls <= getPuzzle().blockingBudget(); numWalls += 1) {
             final int[] combination = IntArrays.ofRange(0, numWalls);
             for (;;) {
                 checkAlive();
