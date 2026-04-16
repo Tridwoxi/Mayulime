@@ -15,10 +15,11 @@ public record Params(SolverKind solverKind, Puzzle puzzle, long durationMillis, 
     public void execute(final ObjLongConsumer<Proposal> uponProposal, final Runnable report) {
         try (Manager manager = new Manager(Collections.nCopies(parallelism, solverKind))) {
             manager.solve(puzzle);
-            final long startTimeMillis = System.currentTimeMillis();
-            final long endTimeMillis = startTimeMillis + durationMillis;
-            while (System.currentTimeMillis() < endTimeMillis) {
-                final long batchElapsedTimeMillis = System.currentTimeMillis() - startTimeMillis;
+            final long startTimeNanos = System.nanoTime();
+            final long endTimeNanos = startTimeNanos + durationMillis * 1_000_000L;
+            while (System.nanoTime() < endTimeNanos) {
+                final long batchElapsedTimeMillis =
+                    (System.nanoTime() - startTimeNanos) / 1_000_000L;
                 final List<Proposal> batch = manager.consumeNow();
                 batch.forEach(proposal -> uponProposal.accept(proposal, batchElapsedTimeMillis));
             }

@@ -10,7 +10,7 @@ public final class Latency implements Runnable {
 
     private final Params params;
     private final List<Long> intervals = new ArrayList<>();
-    private long lastMs = -1L;
+    private long lastMillis = -1L;
 
     public Latency(final Params params) {
         this.params = params;
@@ -21,11 +21,11 @@ public final class Latency implements Runnable {
         params.execute(this::accept, this::report);
     }
 
-    private void accept(final Proposal proposal, final long elapsedMs) {
-        if (lastMs >= 0L) {
-            intervals.add(elapsedMs - lastMs);
+    private void accept(final Proposal proposal, final long elapsedMillis) {
+        if (lastMillis >= 0L) {
+            intervals.add(elapsedMillis - lastMillis);
         }
-        lastMs = elapsedMs;
+        lastMillis = elapsedMillis;
     }
 
     private void report() {

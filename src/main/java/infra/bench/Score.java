@@ -8,7 +8,7 @@ public final class Score implements Runnable {
 
     private final Params params;
     private Proposal best;
-    private long bestElapsedMs;
+    private long bestElapsedMillis;
 
     public Score(final Params params) {
         this.params = params;
@@ -22,7 +22,7 @@ public final class Score implements Runnable {
     private void accept(final Proposal proposal, final long elapsedMillis) {
         if (best == null || proposal.getScore() > best.getScore()) {
             best = proposal;
-            bestElapsedMs = elapsedMillis;
+            bestElapsedMillis = elapsedMillis;
         }
     }
 
@@ -31,7 +31,7 @@ public final class Score implements Runnable {
             final String mapCode = Serializer.serialize(params.puzzle(), best.getState());
             Logger.results("Best proposal: %s", mapCode);
             Logger.results("Score: %d", best.getScore());
-            Logger.results("Found after: %d ms", bestElapsedMs);
+            Logger.results("Found after: %d ms", bestElapsedMillis);
         } else {
             Logger.results("Nothing found.");
         }

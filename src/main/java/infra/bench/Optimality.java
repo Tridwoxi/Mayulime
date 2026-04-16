@@ -28,7 +28,7 @@ public final class Optimality implements Runnable {
         params.execute(this::accept, this::report);
     }
 
-    private void accept(final Proposal proposal, final long elapsedMs) {
+    private void accept(final Proposal proposal, final long elapsedMillis) {
         numProposals += 1L;
         // Testing needs to happen during run because it is slow and can be used to throttle.
         if (isLocallyOptimal(proposal)) {
@@ -38,7 +38,7 @@ public final class Optimality implements Runnable {
             Logger.results(
                 "Not locally optimal (score %d at %d ms): %s",
                 proposal.getScore(),
-                elapsedMs,
+                elapsedMillis,
                 mapCode
             );
         }

@@ -20,7 +20,7 @@ public final class Distribution implements Runnable {
         params.execute(this::accept, this::report);
     }
 
-    private void accept(final Proposal proposal, final long elapsedMs) {
+    private void accept(final Proposal proposal, final long elapsedMillis) {
         final int score = proposal.getScore();
         counts.merge(score, 1L, Long::sum);
     }

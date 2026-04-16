@@ -46,11 +46,11 @@ public final class Bench implements Runnable {
     private Puzzle mapCodeFile;
 
     @Parameters(
-        paramLabel = "<durationMs>",
+        paramLabel = "<durationMillis>",
         description = "How long to run benchmark for.",
         converter = StringToPositiveLong.class
     )
-    private Long durationMs;
+    private Long durationMillis;
 
     @Parameters(
         paramLabel = "<parallelism>",
@@ -66,7 +66,7 @@ public final class Bench implements Runnable {
         final Params params = new Params(
             Objects.requireNonNull(solverKind),
             Objects.requireNonNull(mapCodeFile),
-            Objects.requireNonNull(durationMs),
+            Objects.requireNonNull(durationMillis),
             Objects.requireNonNull(parallelism)
         );
         switch (Objects.requireNonNull(benchKind)) {

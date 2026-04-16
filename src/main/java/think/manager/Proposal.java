@@ -10,14 +10,14 @@ public final class Proposal {
     private final Puzzle puzzle;
     private final Tile[] state;
     private final int score;
-    private final long createdAtMs;
+    private final long createdAtMillis;
 
     public Proposal(final String submitter, final Puzzle puzzle, final Tile[] state) {
         this.submitter = submitter;
         this.puzzle = puzzle;
         this.state = state.clone();
         this.score = new StandardEvaluator(puzzle).evaluate(state);
-        this.createdAtMs = System.currentTimeMillis();
+        this.createdAtMillis = System.currentTimeMillis();
         if (!puzzle.isValid(state)) {
             throw new IllegalArgumentException();
         }
@@ -39,7 +39,7 @@ public final class Proposal {
         return score;
     }
 
-    public long getCreatedAtMs() {
-        return createdAtMs;
+    public long getCreatedAtMillis() {
+        return createdAtMillis;
     }
 }

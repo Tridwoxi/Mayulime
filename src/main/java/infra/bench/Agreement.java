@@ -24,7 +24,7 @@ public final class Agreement implements Runnable {
         params.execute(this::accept, this::report);
     }
 
-    private void accept(final Proposal proposal, final long elapsedMs) {
+    private void accept(final Proposal proposal, final long elapsedMillis) {
         numProposals += 1L;
         if (!scored || proposal.getScore() > topScore) {
             topScore = proposal.getScore();
