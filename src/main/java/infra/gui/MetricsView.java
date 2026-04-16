@@ -1,12 +1,15 @@
 package infra.gui;
 
+import javafx.geometry.VPos;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 final class MetricsView extends GridPane {
 
     private static final int ROW_COUNT = 6;
+    private static final double ROW_HEIGHT_PX = 18.0;
     private final Text[] labels;
     private final Text[] values;
 
@@ -15,6 +18,15 @@ final class MetricsView extends GridPane {
         this.values = new Text[ROW_COUNT];
         this.setHgap(16.0);
         this.setVgap(8.0);
+
+        for (int rowIndex = 0; rowIndex < ROW_COUNT; rowIndex += 1) {
+            final RowConstraints constraints = new RowConstraints();
+            constraints.setMinHeight(ROW_HEIGHT_PX);
+            constraints.setPrefHeight(ROW_HEIGHT_PX);
+            constraints.setMaxHeight(ROW_HEIGHT_PX);
+            constraints.setValignment(VPos.CENTER);
+            this.getRowConstraints().add(constraints);
+        }
 
         this.addRow(0, "Maze");
         this.addRow(1, "Walls");
