@@ -24,6 +24,7 @@ import think.solvers.SolverKind;
 public final class App extends Application {
 
     private static final int UNSCORED = -2; // StandardEvaluator uses -1.
+    private static final long POLL_TIMEOUT_MS = 50L;
     private static final String BAD_MAP_MESSAGE =
         "Unable to parse that file as supported Pathery MapCode.";
 
@@ -32,6 +33,8 @@ public final class App extends Application {
     private volatile String currentPuzzleName;
 
     private Manager manager;
+    private Thread pollThread;
+    private volatile boolean polling;
     private Gui gui;
 
     public App() {
@@ -39,6 +42,8 @@ public final class App extends Application {
         this.topScore = UNSCORED;
         this.currentPuzzleName = Parser.UNNAMED_PUZZLE_NAME;
         this.manager = null;
+        this.pollThread = null;
+        this.polling = false;
         this.gui = null;
     }
 
@@ -60,9 +65,12 @@ public final class App extends Application {
 
     // == Connectors. ==
 
-    private synchronized void receiveProposal(final Proposal proposal) {
+    private void receiveProposal(final Proposal proposal, final int epoch) {
         if (gui == null) {
             throw new IllegalStateException();
+        }
+        if (proposal.getScore() <= this.topScore) {
+            return;
         }
         final Submission update = new Submission(
             proposal.getSubmitter(),
@@ -70,10 +78,6 @@ public final class App extends Application {
             proposal.getState(),
             proposal.getScore()
         );
-        final int epoch = this.puzzleEpoch.get();
-        if (update.getScore() <= this.topScore) {
-            return;
-        }
         final String priorScoreText =
             this.topScore == UNSCORED ? "Unscored" : Integer.toString(this.topScore);
         Logger.info(
@@ -106,10 +110,7 @@ public final class App extends Application {
             return;
         }
 
-        if (this.manager != null) {
-            this.manager.stop();
-            this.manager.close();
-        }
+        tearDownManager();
         this.topScore = UNSCORED;
 
         final SolverKind solverKind = gui.getSolverKind();
@@ -117,23 +118,51 @@ public final class App extends Application {
         final List<SolverKind> kinds = new ArrayList<>(1 + threadCount);
         kinds.add(SolverKind.BASELINE);
         kinds.addAll(Collections.nCopies(threadCount, solverKind));
-        this.manager = new Manager(this::receiveProposal, kinds);
+        this.manager = new Manager(kinds);
 
         final int epoch = this.puzzleEpoch.incrementAndGet();
         this.currentPuzzleName = puzzle.getName();
         gui.onPuzzleAccepted(puzzle, epoch);
         manager.solve(puzzle);
+        startPolling(manager, epoch);
     }
 
     private void stopRequestedByUser() {
-        if (this.manager != null) {
-            this.manager.stop();
-            this.manager.close();
-            this.manager = null;
-        }
+        tearDownManager();
         this.topScore = UNSCORED;
         this.currentPuzzleName = Parser.UNNAMED_PUZZLE_NAME;
         final int epoch = this.puzzleEpoch.incrementAndGet();
         gui.onPuzzleStopped(epoch, "Solving stopped");
+    }
+
+    private void startPolling(final Manager target, final int epoch) {
+        this.polling = true;
+        this.pollThread = new Thread(() -> pollLoop(target, epoch), "app-poll");
+        this.pollThread.setDaemon(true);
+        this.pollThread.start();
+    }
+
+    private void pollLoop(final Manager target, final int epoch) {
+        while (polling) {
+            final List<Proposal> batch = target.consumeUntil(POLL_TIMEOUT_MS);
+            for (final Proposal proposal : batch) {
+                receiveProposal(proposal, epoch);
+            }
+        }
+    }
+
+    private void tearDownManager() {
+        if (manager == null) {
+            return;
+        }
+        polling = false;
+        try {
+            pollThread.join();
+        } catch (InterruptedException exception) {
+            throw new AssertionError(exception);
+        }
+        manager.close();
+        this.manager = null;
+        this.pollThread = null;
     }
 }

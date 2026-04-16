@@ -17,13 +17,13 @@ public final class Throughput implements Runnable {
         params.execute(this::accept, this::report);
     }
 
-    private void accept(final Proposal proposal, final long elapsedMs) {
+    private void accept(final Proposal proposal, final long elapsedMillis) {
         numProposals += 1L;
     }
 
     private void report() {
-        final double rate = ((double) numProposals / params.durationMs()) * 1000.0;
-        Logger.results("Saw %d proposals in %d ms", numProposals, params.durationMs());
+        final double rate = ((double) numProposals / params.durationMillis()) * 1000.0;
+        Logger.results("Saw %d proposals in %d ms", numProposals, params.durationMillis());
         Logger.results("That is %f per second", rate);
     }
 }

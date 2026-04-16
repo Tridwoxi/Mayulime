@@ -1,6 +1,7 @@
 package think.solvers;
 
 import infra.logging.Logger;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import think.domain.model.Puzzle;
@@ -8,8 +9,8 @@ import think.domain.model.Tile;
 import think.manager.Proposal;
 
 /**
-    Find maze configurations to solve Pathery puzzles. This abstract class provides useful getters
-    and a framework to integrate its concrete subclasses with the rest of the system.
+    Find maze configurations to solve Pathery puzzles. This abstract class provides getters and a
+    framework to integrate its concrete subclasses with the rest of the system.
  */
 public abstract class Solver implements Runnable {
 
@@ -17,12 +18,16 @@ public abstract class Solver implements Runnable {
     private final String name;
     private final Consumer<Proposal> listener;
     private final Puzzle puzzle;
+    private final CountDownLatch latch;
+    private volatile Thread runner;
     private volatile boolean alive;
 
     public Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
         this.name = getClass().getSimpleName() + "~" + ID.getAndIncrement();
         this.listener = listener;
         this.puzzle = puzzle;
+        this.latch = new CountDownLatch(1);
+        this.runner = null;
         this.alive = true;
     }
 
@@ -36,20 +41,23 @@ public abstract class Solver implements Runnable {
         // of "if not alive, return", but throwing exceptions is an easier way to do non-local
         // returns.
         Logger.info("Started %s", getClass().getSimpleName());
-        final long startNs = System.nanoTime();
+        final long startNanos = System.nanoTime();
+        runner = Thread.currentThread();
         try {
             solve();
             Logger.info(
                 "Terminated %s (returned normally, %d ms)",
                 getClass().getSimpleName(),
-                (System.nanoTime() - startNs) / 1_000_000
+                (System.nanoTime() - startNanos) / 1_000_000
             );
         } catch (KilledException _) {
             Logger.info(
                 "Terminated %s (killed, %d ms)",
                 getClass().getSimpleName(),
-                (System.nanoTime() - startNs) / 1_000_000
+                (System.nanoTime() - startNanos) / 1_000_000
             );
+        } finally {
+            latch.countDown();
         }
     }
 
@@ -57,12 +65,23 @@ public abstract class Solver implements Runnable {
         this.alive = false;
     }
 
+    public final void awaitTermination() {
+        requestTermination();
+        if (runner == Thread.currentThread()) {
+            throw new IllegalCallerException();
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
     // == Subclass contract. ==
 
     /**
-        Concrete subclasses must do all non-trivial work in this method, as opposed to the
-        constructor. Implementations must call {@link #checkAlive} at least once every 500
-        milliseconds or so when presented a map smaller than 20 by 20 with 10 waypoints.
+        Concrete subclasses must do all non-trivial work in this method instead of the constructor.
+        Implementations must call {@link #checkAlive} very often.
      */
     protected abstract void solve() throws KilledException;
 
@@ -80,7 +99,8 @@ public abstract class Solver implements Runnable {
         return puzzle;
     }
 
-    protected final void propose(final Tile[] state) {
+    protected final void propose(final Tile[] state) throws KilledException {
+        checkAlive();
         listener.accept(new Proposal(name, puzzle, state));
     }
 }

@@ -1,8 +1,6 @@
 package e2e;
 
-import infra.logging.Logger;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.codec.Parser;
@@ -33,36 +31,28 @@ public final class Smalls {
     private static final int SMALL3_SCORE = 17; // Min score: 14; Max score: 40.
 
     @Test
-    public void small1() throws BadMapCodeException, InterruptedException {
+    public void small1() throws BadMapCodeException {
         Assertions.assertTrue(solve(SMALL1_MAPCODE, SMALL1_SCORE));
     }
 
     @Test
-    public void small2() throws BadMapCodeException, InterruptedException {
+    public void small2() throws BadMapCodeException {
         Assertions.assertTrue(solve(SMALL2_MAPCODE, SMALL2_SCORE));
     }
 
     @Test
-    public void small3() throws BadMapCodeException, InterruptedException {
+    public void small3() throws BadMapCodeException {
         Assertions.assertTrue(solve(SMALL3_MAPCODE, SMALL3_SCORE));
     }
 
     private boolean solve(final String mapCode, final int minimumRequiredScore)
         throws BadMapCodeException {
         final Puzzle puzzle = Parser.parse(mapCode);
-        final AtomicInteger topScore = new AtomicInteger(0);
-        final Consumer<Proposal> listener = proposal -> {
-            topScore.accumulateAndGet(proposal.getScore(), Math::max);
-        };
-        try (Manager manager = new Manager(listener, SolverKind.asList())) {
+        try (Manager manager = new Manager(SolverKind.asList())) {
             manager.solve(puzzle);
-            try {
-                Thread.sleep(TIMEOUT_MS);
-            } catch (InterruptedException exception) {
-                Logger.warning("%s", exception.toString());
-            }
-            manager.stop();
+            final List<Proposal> result = manager.consumeUntil(TIMEOUT_MS);
+            final int topScore = result.stream().mapToInt(Proposal::getScore).max().orElseThrow();
+            return topScore >= minimumRequiredScore;
         }
-        return topScore.get() >= minimumRequiredScore;
     }
 }

@@ -7,7 +7,6 @@ import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.compass.CompassSolver;
 import think.solvers.exact.EnumerateSolver;
-import think.solvers.exact.PruneSolver;
 import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
@@ -33,7 +32,6 @@ public enum SolverKind {
     IDENTITY,
     INTERSECT,
     OVERFILL,
-    PRUNE,
     RANDOM,
     RUIN,
     SCRAMBLE,
@@ -54,7 +52,6 @@ public enum SolverKind {
             case IDENTITY -> new IdentitySolver(listener, puzzle);
             case INTERSECT -> new IntersectSolver(listener, puzzle);
             case OVERFILL -> new OverfillSolver(listener, puzzle);
-            case PRUNE -> new PruneSolver(listener, puzzle);
             case RANDOM -> new RandomSolver(listener, puzzle);
             case RUIN -> new RuinSolver(listener, puzzle);
             case SCRAMBLE -> new ScrambleSolver(listener, puzzle);

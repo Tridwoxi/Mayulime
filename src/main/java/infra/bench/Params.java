@@ -1,9 +1,7 @@
 package infra.bench;
 
-import infra.logging.Logger;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.ObjLongConsumer;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
@@ -12,29 +10,18 @@ import think.solvers.SolverKind;
 
 /**
     Benchmark configuration and shared lifecycle.
-
-    {@link #execute} handles Manager creation, timing, and filtering out proposals that arrive
-    outside the benchmark window. Callers supply what to track and what to log.
  */
-public record Params(SolverKind solverKind, Puzzle puzzle, long durationMs, int parallelism) {
-    public void execute(final ObjLongConsumer<Proposal> accept, final Runnable report) {
-        final long[] startTimeMs = new long[1];
-        final Consumer<Proposal> listener = proposal -> {
-            final long elapsed = proposal.getCreatedAtMs() - startTimeMs[0];
-            if (elapsed >= 0 && elapsed < durationMs) {
-                accept.accept(proposal, elapsed);
-            }
-        };
-        final List<SolverKind> solverKinds = Collections.nCopies(parallelism, solverKind);
-        try (Manager manager = new Manager(listener, solverKinds)) {
-            startTimeMs[0] = System.currentTimeMillis();
+public record Params(SolverKind solverKind, Puzzle puzzle, long durationMillis, int parallelism) {
+    public void execute(final ObjLongConsumer<Proposal> uponProposal, final Runnable report) {
+        try (Manager manager = new Manager(Collections.nCopies(parallelism, solverKind))) {
             manager.solve(puzzle);
-            try {
-                Thread.sleep(durationMs);
-            } catch (InterruptedException shouldNotHappen) {
-                Logger.warning("%s", shouldNotHappen.toString());
+            final long startTimeMillis = System.currentTimeMillis();
+            final long endTimeMillis = startTimeMillis + durationMillis;
+            while (System.currentTimeMillis() < endTimeMillis) {
+                final long batchElapsedTimeMillis = System.currentTimeMillis() - startTimeMillis;
+                final List<Proposal> batch = manager.consumeNow();
+                batch.forEach(proposal -> uponProposal.accept(proposal, batchElapsedTimeMillis));
             }
-            manager.stop();
         }
         report.run();
     }
