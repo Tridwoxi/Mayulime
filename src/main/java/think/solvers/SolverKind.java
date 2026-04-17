@@ -7,9 +7,9 @@ import think.domain.model.Puzzle;
 import think.manager.Proposal;
 import think.solvers.compass.CompassSolver;
 import think.solvers.exact.EnumerateSolver;
-import think.solvers.local.AnnealSolver;
 import think.solvers.local.ChokepointSolver;
 import think.solvers.local.ClimbSolver;
+import think.solvers.local.DumpSolver;
 import think.solvers.local.FrontierSolver;
 import think.solvers.local.IdentitySolver;
 import think.solvers.local.IntersectSolver;
@@ -22,11 +22,11 @@ import think.solvers.naive.BaselineSolver;
 import think.solvers.naive.RandomSolver;
 
 public enum SolverKind {
-    ANNEAL,
     BASELINE,
     CHOKEPOINT,
     CLIMB,
     COMPASS,
+    DUMP,
     ENUMERATE,
     FRONTIER,
     IDENTITY,
@@ -42,11 +42,11 @@ public enum SolverKind {
 
     public Solver create(final Consumer<Proposal> listener, final Puzzle puzzle) {
         return switch (this) {
-            case ANNEAL -> new AnnealSolver(listener, puzzle);
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);
             case CLIMB -> new ClimbSolver(listener, puzzle);
             case COMPASS -> new CompassSolver(listener, puzzle);
+            case DUMP -> new DumpSolver(listener, puzzle);
             case ENUMERATE -> new EnumerateSolver(listener, puzzle);
             case FRONTIER -> new FrontierSolver(listener, puzzle);
             case IDENTITY -> new IdentitySolver(listener, puzzle);

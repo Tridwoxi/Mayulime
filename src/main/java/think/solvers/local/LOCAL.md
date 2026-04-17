@@ -94,10 +94,14 @@ symptom (unfortunately, only the symptom) of getting stuck in local optima seen 
 Significantly worse than Overfill at short durations (large effect at 1s on huge maps), but
 converges by 10s and speculatively surpasses it for longer durations.
 
-**Anneal**
+**Dump builds on Overfill**
 
-Simulated annealing, but temperature never decreases. Make random moves then tend to accept good
-ones.
+In case of placeMoreWalls and rearrangeWalls failure yet additional walls remaining, dump them onto
+the shortest path. This ensures all walls are spent even when no chokepoints exists, and may create
+new chokepoints. Placing a wall is always safe because it never lies on a chokepoint so cannot
+disconnect, and placing walls without disconnecting cannot decrease score.
+
+Better performance than Scramble on Adversarial; about the same on typical maps as Overfill.
 
 ## Benchmarks and profiles
 
@@ -108,31 +112,33 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 
 | Solver     | small1 | medium1 | large1 | huge1 |
 | ---------- | ------ | ------- | ------ | ----- |
-| Climb      | ~3900  | ~840    | ~130   | ~5    |
-| Identity   | ~5000  | ~1600   | ~200   | ~10   |
-| Walk       | ~1200  | ~190    | ~39    | ~1    |
-| Chokepoint | ~15100 | ~5200   | ~930   | ~56   |
-| Uncover    | ~11000 | ~4100   | ~850   | ~73   |
-| Intersect  | ~13000 | ~4600   | ~1100  | ~82   |
-| Ruin       | ~21100 | ~5500   | ~1200  | ~97   |
-| Overfill   | ~40400 | ~16100  | ~4800  | ~711  |
-| Scramble   | ~36900 | ~12400  | ~4200  | ~646  |
-| Frontier   | ~35100 | ~14000  | ~4200  | ~682  |
+| Climb      | ~3500  | ~760    | ~120   | ~4    |
+| Identity   | ~4400  | ~1450   | ~180   | ~10   |
+| Walk       | ~1100  | ~170    | ~35    | ~1    |
+| Chokepoint | ~13100 | ~4700   | ~850   | ~51   |
+| Uncover    | ~9800  | ~3700   | ~790   | ~65   |
+| Intersect  | ~11600 | ~4250   | ~1000  | ~75   |
+| Ruin       | ~19000 | ~5300   | ~1180  | ~86   |
+| Overfill   | ~35000 | ~13800  | ~4180  | ~625  |
+| Scramble   | ~31300 | ~10800  | ~3680  | ~587  |
+| Frontier   | ~33300 | ~13450  | ~4110  | ~645  |
+| Dump       | ~34400 | ~11300  | ~3680  | ~537  |
 
 **Median score (1 thread, 300 milliseconds, 10 samples)**
 
 | Solver         | small1 | medium1 | large1 | huge1 |
 | -------------- | ------ | ------- | ------ | ----- |
-| Climb          | =43    | =84     | ~167   | ~283  |
-| Identity       | =43    | =84     | ~170   | ~342  |
-| Walk (1000 ms) | =43    | =84     | ~185   | ~387  |
-| Chokepoint     | =43    | =84     | ~178   | ~371  |
-| Uncover        | =43    | =84     | ~175   | ~388  |
-| Intersect      | =43    | =84     | ~179   | ~397  |
-| Ruin           | =43    | ~84     | ~185   | ~403  |
-| Overfill       | =43    | ~84     | ~185   | ~442  |
-| Scramble       | =43    | =84     | ~185   | ~443  |
-| Frontier       | =43    | =84     | ~185   | ~426  |
+| Climb          | =43    | ~84     | ~170   | ~268  |
+| Identity       | =43    | =84     | ~172   | ~339  |
+| Walk (1000 ms) | =43    | =84     | ~181   | ~424  |
+| Chokepoint     | =43    | =84     | ~173   | ~374  |
+| Uncover        | =43    | =84     | ~178   | ~392  |
+| Intersect      | =43    | =84     | ~178   | ~386  |
+| Ruin           | =43    | ~84     | ~185   | ~410  |
+| Overfill       | =43    | ~84     | =185   | ~436  |
+| Scramble       | =43    | =84     | ~185   | ~436  |
+| Frontier       | =43    | =84     | ~185   | ~421  |
+| Dump           | =43    | =84     | ~185   | ~443  |
 
 **Profile (async-profiler, 3 seconds CPU mode)**
 
@@ -148,3 +154,4 @@ everything. This doesn't apply to profiles unless drastic changes to environment
 | Overfill   | ~71% rearrangeWalls, ~17% getChokepoints, ~11% placeMoreWalls |
 | Scramble   | ~80% rearrangeWalls, ~14% getChokepoints, ~6% other           |
 | Frontier   | ~66% rearrangeWalls, ~21% getChokepoints, ~10% placeMoreWalls |
+| Dump       | ~73% rearrangeWalls, ~15% getChokepoints, ~9% placeMoreWalls  |
