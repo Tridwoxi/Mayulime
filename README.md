@@ -1,18 +1,14 @@
 # Mayulime
 
-The game [Pathery](https://www.pathery.com) is an exercise in creating the longest shortest path on
-a maze by placing a set of walls. The system in this repository proposes solutions to a proper
-subset of Pathery problems, so it may be helpful as an assistant or checker. This repository is not
-affiliated with Pathery.
+The game [Pathery](https://www.pathery.com) is of network interdiction. The system in this
+repository proposes solutions to a proper subset of Pathery problems, so it may be helpful as an
+assistant or checker. This repository is not affiliated with Pathery.
 
 ## Usage and development
 
 Install [JDK](https://jdk.java.net) 25 or later and [Gradle](https://gradle.org) 9.1 or later. In
-the repository root, execute `gradle run`. Gradle will install the dependencies
-[JavaFX](https://openjfx.io), [LMAX Disruptor](https://lmax-exchange.github.io/disruptor/), and
-[picocli](https://picocli.info). It may also configure [Spotbugs](https://spotbugs.github.io),
-[Checkstyle](https://checkstyle.org), and [JUnit](https://junit.org). If it doesn't work, message
-me.
+the repository root, execute `gradle run`. Gradle will install the dependencies declared in
+`build.gradle`. If it doesn't work, message me.
 
 When run, the project launches a GUI. Follow the on-screen instructions to upload a Pathery
 [MapCode](https://www.pathery.com/mapeditor), and wait for solutions. Supported examples are in
@@ -20,8 +16,7 @@ When run, the project launches a GUI. Follow the on-screen instructions to uploa
 
 ## Problem statement and terminology
 
-> For ease of programming, this project uses a simplified variant of the complete Pathery rules.
-> Teleports are not supported, but there are plans for them. No other features are planned.
+For ease of programming, this project uses a simplified variant of the complete Pathery rules.
 
 A puzzle is a maze in the form of a grid graph with 4-connectivity. The maze is composed of cells,
 on which lie tiles. Tiles are either blanks, system walls, player walls, or waypoints. Waypoints
@@ -31,7 +26,7 @@ is the sum of pairwise shortest path lengths between waypoints. If there is no p
 waypoints, the player loses.
 
 In this repository, a configuration of tiles is a state. Solvers mutate and evaluate states. A
-state sent to the manager is a proposal, and the GUI renders that same state as a submission.
+state sent to the manager is a proposal, except in the GUI, where it is a submission.
 
 ## Related work
 
