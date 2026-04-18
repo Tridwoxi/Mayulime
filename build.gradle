@@ -48,7 +48,7 @@ tasks.named('run') {
 
 tasks.register('bench', JavaExec) {
     group = 'application'
-    dependsOn 'classes', 'checkstyleMain', 'spotbugsMain'
+    dependsOn 'classes'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'infra.launch.Bench'
     jvmArgs '-ea', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints'
