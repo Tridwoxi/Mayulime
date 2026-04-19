@@ -41,6 +41,15 @@ spotbugs {
     excludeFilter = file('spotbugs-exclude.xml')
 }
 
+configurations.spotbugs {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.ow2.asm') {
+            details.useVersion '9.9.1'
+            details.because 'ASM 9.9 (bundled with SpotBugs 4.9.8) rejects Java 25 class files'
+        }
+    }
+}
+
 tasks.named('run') {
     dependsOn 'checkstyleMain', 'spotbugsMain'
     jvmArgs '-ea', '--enable-native-access=javafx.graphics'
