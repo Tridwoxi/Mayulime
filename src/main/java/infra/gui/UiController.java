@@ -3,14 +3,11 @@ package infra.gui;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.ColorScheme;
-import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.util.Duration;
 import think.domain.codec.Serializer;
@@ -18,8 +15,6 @@ import think.domain.model.Puzzle;
 import think.solvers.SolverKind;
 
 final class UiController {
-
-    private record PendingUpdate(Submission update, int epoch) {}
 
     private static final Duration TIMER_TICK = Duration.seconds(1.0);
 
@@ -29,8 +24,6 @@ final class UiController {
     private final Consumer<String> mapCodeConsumer;
     private final Runnable stopConsumer;
     private final Timeline timerTicker;
-    private final AtomicReference<PendingUpdate> latestPending;
-    private final AtomicBoolean updateFlushScheduled;
 
     private UiState state;
     private Optional<Puzzle> currentPuzzle;
@@ -44,8 +37,6 @@ final class UiController {
         this.mapCodeConsumer = mapCodeConsumer;
         this.stopConsumer = stopConsumer;
         this.timerTicker = new Timeline(new KeyFrame(TIMER_TICK, _ -> this.refreshTimers()));
-        this.latestPending = new AtomicReference<>(null);
-        this.updateFlushScheduled = new AtomicBoolean(false);
         this.state = UiState.initial();
         this.currentPuzzle = Optional.empty();
         this.pendingSubmittedMapCode = Optional.empty();
@@ -71,38 +62,12 @@ final class UiController {
     }
 
     public void applyColorScheme(final ColorScheme colorScheme) {
-        runOnFxThread(() -> {
-            this.rootView.applyPalette(UiPalette.fromColorScheme(colorScheme));
-            this.renderState(System.nanoTime());
-        });
+        this.rootView.applyPalette(UiPalette.fromColorScheme(colorScheme));
+        this.renderState(System.nanoTime());
     }
 
-    public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {
-        runOnFxThread(() -> this.acceptPuzzle(puzzle, puzzleEpoch));
-    }
-
-    public void onPuzzleRejected(final int puzzleEpoch, final String message) {
-        runOnFxThread(() -> this.rejectPuzzle(puzzleEpoch, message));
-    }
-
-    public void onMapCodeRejected(final String message) {
-        runOnFxThread(() -> this.rejectMapCode(message));
-    }
-
-    public void onPuzzleStopped(final int puzzleEpoch, final String message) {
-        runOnFxThread(() -> this.stopPuzzle(puzzleEpoch, message));
-    }
-
-    public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
-        this.latestPending.set(new PendingUpdate(update, puzzleEpoch));
-        if (this.updateFlushScheduled.compareAndSet(false, true)) {
-            Platform.runLater(this::flushPendingUpdate);
-        }
-    }
-
-    private void acceptPuzzle(final Puzzle puzzle, final int puzzleEpoch) {
+    public void onPuzzleAccepted(final Puzzle puzzle) {
         final long nowNanos = System.nanoTime();
-        this.latestPending.set(null);
         final Optional<String> previousMapCode = this.lastAcceptedMapCode;
         this.lastAcceptedMapCode = this.pendingSubmittedMapCode.or(() -> this.lastAcceptedMapCode);
         this.pendingSubmittedMapCode = Optional.empty();
@@ -111,7 +76,6 @@ final class UiController {
             previousMapCode.isPresent() && previousMapCode.equals(this.lastAcceptedMapCode);
         this.state = new UiState(
             UiPhase.SOLVING,
-            puzzleEpoch,
             puzzle.name(),
             puzzle.numRows(),
             puzzle.numCols(),
@@ -133,40 +97,15 @@ final class UiController {
         this.renderState(nowNanos);
     }
 
-    private void rejectPuzzle(final int puzzleEpoch, final String message) {
-        this.latestPending.set(null);
+    public void onMapCodeRejected(final String message) {
         this.pendingSubmittedMapCode = Optional.empty();
-        this.currentPuzzle = Optional.empty();
-        this.state = new UiState(
-            UiPhase.REJECTED,
-            puzzleEpoch,
-            "Rejected puzzle",
-            0,
-            0,
-            0,
-            null,
-            0,
-            0,
-            this.state.cellSizePx(),
-            this.lastAcceptedMapCode.isPresent(),
-            false,
-            message,
-            "-",
-            "-",
-            -1L,
-            -1L,
-            -1L,
-            false
-        );
-        this.renderState(System.nanoTime());
+        this.reportStatusMessage(message);
     }
 
-    private void stopPuzzle(final int puzzleEpoch, final String message) {
-        this.latestPending.set(null);
+    public void onPuzzleStopped(final String message) {
         final long freezeAtNanos = System.nanoTime();
         this.state = new UiState(
             UiPhase.STOPPED,
-            puzzleEpoch,
             this.state.puzzleName(),
             this.state.rows(),
             this.state.cols(),
@@ -188,50 +127,32 @@ final class UiController {
         this.renderState(freezeAtNanos);
     }
 
-    private void rejectMapCode(final String message) {
-        this.pendingSubmittedMapCode = Optional.empty();
-        this.reportStatusMessage(message);
-    }
-
-    private void flushPendingUpdate() {
-        this.updateFlushScheduled.set(false);
-        final PendingUpdate pending = this.latestPending.getAndSet(null);
-        if (
-            pending != null &&
-            pending.epoch() == this.state.puzzleEpoch() &&
-            this.state.phase() == UiPhase.SOLVING
-        ) {
-            final Submission update = pending.update();
-            final long nowNanos = System.nanoTime();
-            this.state = new UiState(
-                this.state.phase(),
-                this.state.puzzleEpoch(),
-                this.state.puzzleName(),
-                update.getNumRows(),
-                update.getNumCols(),
-                update.getBlockingBudget(),
-                update,
-                UiMath.countPlayerWalls(update),
-                this.state.updateCount() + 1,
-                this.state.cellSizePx(),
-                this.state.canRestart(),
-                this.state.canCopyMapCode(),
-                "Solving in progress",
-                String.valueOf(update.getScore()),
-                update.getSubmitter(),
-                this.state.puzzleStartedAtNanos(),
-                nowNanos,
-                this.state.timersFrozenAtNanos(),
-                this.state.recenterPending()
-            );
-            this.renderState(nowNanos);
+    public void onSolverUpdate(final Submission update) {
+        if (this.state.phase() != UiPhase.SOLVING) {
+            return;
         }
-
-        if (
-            this.latestPending.get() != null && this.updateFlushScheduled.compareAndSet(false, true)
-        ) {
-            Platform.runLater(this::flushPendingUpdate);
-        }
+        final long nowNanos = System.nanoTime();
+        this.state = new UiState(
+            this.state.phase(),
+            this.state.puzzleName(),
+            update.getNumRows(),
+            update.getNumCols(),
+            update.getBlockingBudget(),
+            update,
+            UiMath.countPlayerWalls(update),
+            this.state.updateCount() + 1,
+            this.state.cellSizePx(),
+            this.state.canRestart(),
+            this.state.canCopyMapCode(),
+            "Solving in progress",
+            String.valueOf(update.getScore()),
+            update.getSubmitter(),
+            this.state.puzzleStartedAtNanos(),
+            nowNanos,
+            this.state.timersFrozenAtNanos(),
+            this.state.recenterPending()
+        );
+        this.renderState(nowNanos);
     }
 
     private void submitMapCode(final String mapCode) {
@@ -307,14 +228,6 @@ final class UiController {
             return;
         }
         this.timerTicker.stop();
-    }
-
-    private static void runOnFxThread(final Runnable action) {
-        if (Platform.isFxApplicationThread()) {
-            action.run();
-            return;
-        }
-        Platform.runLater(action);
     }
 
     private Optional<String> currentMapCode() {

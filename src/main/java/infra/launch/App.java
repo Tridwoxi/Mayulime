@@ -6,10 +6,13 @@ import infra.logging.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import think.domain.codec.Parser;
 import think.domain.codec.Parser.BadMapCodeException;
 import think.domain.codec.Serializer;
@@ -20,30 +23,35 @@ import think.solvers.SolverKind;
 
 /**
     Normal application launch point. Connects Gui (frontend) to Manager (backend).
+
+    Everything runs on the JavaFX application thread. A Timeline drains the manager's proposal
+    buffer periodically and pushes at most one render per tick into the Gui. Because no work
+    crosses threads, there is no need for atomic state, update coalescing buffers, or epoch
+    guards against stale FX events.
+
+    Known limitation: if solvers collectively produce proposals faster than the buffer drains
+    per tick, they block on {@code buffer.put}. This is accepted because it does not matter in
+    practice — either the puzzle is easy and a bit of throttling still solves it quickly, or
+    the puzzle is hard and per-solver throughput is low enough that the buffer never fills.
  */
 public final class App extends Application {
 
     private static final int UNSCORED = -2; // StandardEvaluator uses -1.
-    private static final long POLL_TIMEOUT_MS = 50L;
+    private static final Duration POLL_PERIOD = Duration.millis(33.0);
     private static final String BAD_MAP_MESSAGE =
         "Unable to parse that file as supported Pathery MapCode.";
-
-    private final AtomicInteger puzzleEpoch;
-    private volatile int topScore;
-    private volatile String currentPuzzleName;
-
+    private final Timeline pollTicker;
+    private int topScore;
+    private String currentPuzzleName;
     private Manager manager;
-    private Thread pollThread;
-    private volatile boolean polling;
     private Gui gui;
 
     public App() {
-        this.puzzleEpoch = new AtomicInteger(0);
+        this.pollTicker = new Timeline(new KeyFrame(POLL_PERIOD, _ -> drainManager()));
+        this.pollTicker.setCycleCount(Animation.INDEFINITE);
         this.topScore = UNSCORED;
         this.currentPuzzleName = Parser.UNNAMED_PUZZLE_NAME;
         this.manager = null;
-        this.pollThread = null;
-        this.polling = false;
         this.gui = null;
     }
 
@@ -65,35 +73,46 @@ public final class App extends Application {
 
     // == Connectors. ==
 
-    private void receiveProposal(final Proposal proposal, final int epoch) {
-        if (gui == null) {
-            throw new IllegalStateException();
-        }
-        if (proposal.getScore() <= this.topScore) {
+    private void drainManager() {
+        if (manager == null) {
             return;
         }
-        final Submission update = new Submission(
-            proposal.getSubmitter(),
-            proposal.getPuzzle(),
-            proposal.getState(),
-            proposal.getScore()
-        );
+        Proposal best = null;
+        for (final Proposal proposal : manager.consumeNow()) {
+            if (proposal.getScore() <= this.topScore) {
+                continue;
+            }
+            logScoreImprovement(proposal);
+            this.topScore = proposal.getScore();
+            best = proposal;
+        }
+        if (best != null) {
+            this.gui.onSolverUpdate(
+                new Submission(
+                    best.getSubmitter(),
+                    best.getPuzzle(),
+                    best.getState(),
+                    best.getScore()
+                )
+            );
+        }
+    }
+
+    private void logScoreImprovement(final Proposal proposal) {
         final String priorScoreText =
             this.topScore == UNSCORED ? "Unscored" : Integer.toString(this.topScore);
         Logger.info(
             "Score %s -> %d on %s by %s",
             priorScoreText,
-            update.getScore(),
+            proposal.getScore(),
             this.currentPuzzleName,
-            update.getSubmitter()
+            proposal.getSubmitter()
         );
         Logger.info(
             "MapCode for score %d: %s",
-            update.getScore(),
+            proposal.getScore(),
             Serializer.serialize(proposal.getPuzzle(), proposal.getState())
         );
-        this.topScore = update.getScore();
-        this.gui.enqueueSolverUpdate(update, epoch);
     }
 
     private void receiveMapCode(final String mapCode) {
@@ -120,49 +139,25 @@ public final class App extends Application {
         kinds.addAll(Collections.nCopies(threadCount, solverKind));
         this.manager = new Manager(kinds);
 
-        final int epoch = this.puzzleEpoch.incrementAndGet();
         this.currentPuzzleName = puzzle.name();
-        gui.onPuzzleAccepted(puzzle, epoch);
+        gui.onPuzzleAccepted(puzzle);
         manager.solve(puzzle);
-        startPolling(manager, epoch);
+        this.pollTicker.play();
     }
 
     private void stopRequestedByUser() {
         tearDownManager();
         this.topScore = UNSCORED;
         this.currentPuzzleName = Parser.UNNAMED_PUZZLE_NAME;
-        final int epoch = this.puzzleEpoch.incrementAndGet();
-        gui.onPuzzleStopped(epoch, "Solving stopped");
-    }
-
-    private void startPolling(final Manager target, final int epoch) {
-        this.polling = true;
-        this.pollThread = new Thread(() -> pollLoop(target, epoch), "app-poll");
-        this.pollThread.setDaemon(true);
-        this.pollThread.start();
-    }
-
-    private void pollLoop(final Manager target, final int epoch) {
-        while (polling) {
-            final List<Proposal> batch = target.consumeUntil(POLL_TIMEOUT_MS);
-            for (final Proposal proposal : batch) {
-                receiveProposal(proposal, epoch);
-            }
-        }
+        gui.onPuzzleStopped("Solving stopped");
     }
 
     private void tearDownManager() {
         if (manager == null) {
             return;
         }
-        polling = false;
-        try {
-            pollThread.join();
-        } catch (InterruptedException exception) {
-            throw new AssertionError(exception);
-        }
+        this.pollTicker.stop();
         manager.close();
         this.manager = null;
-        this.pollThread = null;
     }
 }

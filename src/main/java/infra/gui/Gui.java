@@ -39,24 +39,20 @@ public final class Gui extends Scene {
             .addListener((_, _, newValue) -> this.applyColorScheme(newValue));
     }
 
-    public void onPuzzleAccepted(final Puzzle puzzle, final int puzzleEpoch) {
-        controller.onPuzzleAccepted(puzzle, puzzleEpoch);
-    }
-
-    public void onPuzzleRejected(final int puzzleEpoch, final String message) {
-        controller.onPuzzleRejected(puzzleEpoch, message);
+    public void onPuzzleAccepted(final Puzzle puzzle) {
+        controller.onPuzzleAccepted(puzzle);
     }
 
     public void onMapCodeRejected(final String message) {
         controller.onMapCodeRejected(message);
     }
 
-    public void onPuzzleStopped(final int puzzleEpoch, final String message) {
-        controller.onPuzzleStopped(puzzleEpoch, message);
+    public void onPuzzleStopped(final String message) {
+        controller.onPuzzleStopped(message);
     }
 
-    public void enqueueSolverUpdate(final Submission update, final int puzzleEpoch) {
-        controller.enqueueSolverUpdate(update, puzzleEpoch);
+    public void onSolverUpdate(final Submission update) {
+        controller.onSolverUpdate(update);
     }
 
     public SolverKind getSolverKind() {

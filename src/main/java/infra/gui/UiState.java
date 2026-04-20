@@ -2,7 +2,6 @@ package infra.gui;
 
 record UiState(
     UiPhase phase,
-    int puzzleEpoch,
     String puzzleName,
     int rows,
     int cols,
@@ -24,7 +23,6 @@ record UiState(
     static UiState initial() {
         return new UiState(
             UiPhase.IDLE,
-            0,
             "Mayulime",
             0,
             0,
@@ -48,7 +46,6 @@ record UiState(
     UiState withStatusMessage(final String message) {
         return new UiState(
             phase,
-            puzzleEpoch,
             puzzleName,
             rows,
             cols,
@@ -72,7 +69,6 @@ record UiState(
     UiState withCellSize(final double newCellSizePx) {
         return new UiState(
             phase,
-            puzzleEpoch,
             puzzleName,
             rows,
             cols,
