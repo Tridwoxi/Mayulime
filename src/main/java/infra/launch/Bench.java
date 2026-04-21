@@ -28,12 +28,14 @@ import think.solvers.SolverKind;
 public final class Bench implements Runnable {
 
     @Parameters(
+        index = "0",
         paramLabel = "<benchKind>",
         description = "Name of benchmark to run, one of ${COMPLETION-CANDIDATES}."
     )
     private BenchKind benchKind;
 
     @Parameters(
+        index = "1",
         paramLabel = "<mapCodeFile>",
         description = "Path to the Pathery MapCode file.",
         converter = StringToPuzzle.class
@@ -41,6 +43,7 @@ public final class Bench implements Runnable {
     private Puzzle mapCodeFile;
 
     @Parameters(
+        index = "2",
         paramLabel = "<durationMillis>",
         description = "How long to run benchmark for.",
         converter = StringToPositiveLong.class
@@ -48,6 +51,7 @@ public final class Bench implements Runnable {
     private Long durationMillis;
 
     @Parameters(
+        index = "3",
         paramLabel = "<trials>",
         description = "How many times to run the benchmark.",
         converter = StringToPositiveInt.class
@@ -55,8 +59,10 @@ public final class Bench implements Runnable {
     private Integer trials;
 
     @Parameters(
+        index = "4..*",
         paramLabel = "<solverKinds>",
         description = "Comma-separated list of solvers, each one of ${COMPLETION-CANDIDATES}",
+        arity = "1..*",
         split = ","
     )
     private List<SolverKind> solverKinds;
@@ -132,7 +138,7 @@ public final class Bench implements Runnable {
         public Integer convert(final String value) throws Exception {
             final int result = Integer.parseInt(value);
             if (result <= 0) {
-                throw new TypeConversionException("Parallelism must be strictly positive");
+                throw new TypeConversionException("Trials must be strictly positive");
             }
             return result;
         }

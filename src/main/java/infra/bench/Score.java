@@ -2,6 +2,7 @@ package infra.bench;
 
 import java.util.Comparator;
 import java.util.List;
+import think.domain.codec.Serializer;
 import think.manager.Proposal;
 
 public final class Score {
@@ -22,7 +23,7 @@ public final class Score {
             .max(Comparator.comparingInt(Proposal::getScore))
             .orElseThrow();
         final Report report = new Report(
-            best.getSubmitter(),
+            Serializer.serialize(best.getPuzzle(), best.getState()),
             best.getScore(),
             (best.getCreatedAtNanos() - startTimeNanos) / 1_000_000L
         );

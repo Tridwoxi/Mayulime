@@ -1,6 +1,7 @@
 package infra.bench;
 
 import java.util.List;
+import think.common.StandardEvaluator;
 import think.manager.Proposal;
 
 public final class Agreement {
@@ -13,7 +14,7 @@ public final class Agreement {
         final long startTimeNanos,
         final List<Proposal> proposals
     ) {
-        int topScore = 0;
+        int topScore = StandardEvaluator.NO_PATH_EXISTS;
         int achievedBy = 0;
         int totalProposals = 0;
         for (final Proposal proposal : proposals) {

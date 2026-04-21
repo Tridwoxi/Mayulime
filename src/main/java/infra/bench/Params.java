@@ -13,15 +13,15 @@ import think.manager.Proposal;
 import think.solvers.SolverKind;
 
 /**
-    Run many trials of a benchmark for a set of solvers. Print output as CSV.
+    Run many trials of a benchmark for a set of solvers. Output as tsv.
  */
 public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
     @FunctionalInterface
-    public interface ReportFactory<R extends Record> {
+    public interface ReportsCreator<R extends Record> {
         List<R> createReports(long startTimeNanos, List<Proposal> proposals);
     }
 
-    private static final String SEPARATOR = ",";
+    private static final String SEPARATOR = "\t";
 
     public Params {
         if (solverKinds.isEmpty() || durationMillis <= 0 || trials <= 0) {
@@ -32,7 +32,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
 
     public <R extends Record> void execute(
         final Class<R> reportClass,
-        final ReportFactory<R> createReports
+        final ReportsCreator<R> createReports
     ) {
         final Map<SolverKind, List<TrialResult<R>>> reportsByKind = HashMap.newHashMap(
             solverKinds.size()
@@ -66,7 +66,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
             header.append(SEPARATOR);
             header.append(component.getName());
         }
-        Logger.results(header.toString());
+        Logger.results("%s", header);
 
         for (final SolverKind solver : solverKinds) {
             final String solverName = solver.name().toLowerCase();

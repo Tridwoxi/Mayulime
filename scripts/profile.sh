@@ -29,7 +29,7 @@ trap cleanup EXIT
 
 EXISTING_PIDS=" $(jps -l 2>/dev/null | grep 'infra.launch.Bench' | awk '{print $1}' | tr '\n' ' ' || true) "
 
-./gradlew bench --args="THROUGHPUT $SOLVER examples/huge1.mapcode 999999 1" --console=plain -q 2>/dev/null &
+./gradlew bench --args="THROUGHPUT examples/huge1.mapcode 999999 1 $SOLVER" --console=plain -q 2>/dev/null &
 GRADLE_PID=$!
 
 while true; do
