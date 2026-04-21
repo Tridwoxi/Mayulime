@@ -11,7 +11,7 @@ public final class Score {
     private Score() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         if (proposals.isEmpty()) {
@@ -24,7 +24,7 @@ public final class Score {
         final Report report = new Report(
             best.getSubmitter(),
             best.getScore(),
-            best.getCreatedAtMillis() - startTimeMillis
+            (best.getCreatedAtNanos() - startTimeNanos) / 1_000_000L
         );
         return List.of(report);
     }

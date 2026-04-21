@@ -10,7 +10,7 @@ public final class Throughput {
     private Throughput() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         return List.of(new Report(proposals.size()));

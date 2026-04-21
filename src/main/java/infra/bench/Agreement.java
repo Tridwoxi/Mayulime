@@ -10,7 +10,7 @@ public final class Agreement {
     private Agreement() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         int topScore = 0;

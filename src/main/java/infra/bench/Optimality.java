@@ -19,7 +19,7 @@ public final class Optimality {
     private Optimality() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         long numOptimal = 0L;

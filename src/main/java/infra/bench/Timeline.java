@@ -13,7 +13,7 @@ public final class Timeline {
     private Timeline() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         if (proposals.isEmpty()) {
@@ -21,7 +21,7 @@ public final class Timeline {
         }
         long maxElapsedMillis = 0L;
         for (final Proposal proposal : proposals) {
-            final long elapsed = proposal.getCreatedAtMillis() - startTimeMillis;
+            final long elapsed = (proposal.getCreatedAtNanos() - startTimeNanos) / 1_000_000L;
             if (elapsed > maxElapsedMillis) {
                 maxElapsedMillis = elapsed;
             }
@@ -29,7 +29,7 @@ public final class Timeline {
         final int numBuckets = (int) (maxElapsedMillis / BUCKET_MILLIS) + 1;
         final int[] counts = new int[numBuckets];
         for (final Proposal proposal : proposals) {
-            final long elapsed = proposal.getCreatedAtMillis() - startTimeMillis;
+            final long elapsed = (proposal.getCreatedAtNanos() - startTimeNanos) / 1_000_000L;
             final int bucket = (int) (elapsed / BUCKET_MILLIS);
             counts[bucket] += 1;
         }

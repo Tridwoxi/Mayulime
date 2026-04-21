@@ -15,11 +15,10 @@ import think.solvers.SolverKind;
 /**
     Run many trials of a benchmark for a set of solvers. Print output as CSV.
  */
-// TODO: use nanoTime instead of currentTimeMillis
 public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
     @FunctionalInterface
     public interface ReportFactory<R extends Record> {
-        List<R> createReports(long startTimeMillis, List<Proposal> proposals);
+        List<R> createReports(long startTimeNanos, List<Proposal> proposals);
     }
 
     private static final String SEPARATOR = ",";
@@ -46,10 +45,10 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         for (int trial = 0; trial < trials; trial += 1) {
             for (final SolverKind solver : solverKinds) {
                 try (Manager manager = new Manager(List.of(solver))) {
-                    final long startTimeMillis = System.currentTimeMillis();
+                    final long startTimeNanos = System.nanoTime();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
-                    final List<R> reports = createReports.createReports(startTimeMillis, proposals);
+                    final List<R> reports = createReports.createReports(startTimeNanos, proposals);
                     for (final R report : reports) {
                         reportsByKind.get(solver).add(new TrialResult<>(trial, report));
                     }

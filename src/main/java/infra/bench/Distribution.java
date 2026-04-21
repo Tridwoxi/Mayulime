@@ -11,7 +11,7 @@ public final class Distribution {
     private Distribution() {}
 
     public static List<Report> createReports(
-        final long startTimeMillis,
+        final long startTimeNanos,
         final List<Proposal> proposals
     ) {
         final TreeMap<Integer, Integer> counts = new TreeMap<>();
