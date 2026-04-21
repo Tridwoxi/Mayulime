@@ -34,13 +34,6 @@ public final class Bench implements Runnable {
     private BenchKind benchKind;
 
     @Parameters(
-        paramLabel = "<solverKinds>",
-        description = "Comma-separated list of solvers, each one of ${COMPLETION-CANDIDATES}",
-        split = ","
-    )
-    private List<SolverKind> solverKinds;
-
-    @Parameters(
         paramLabel = "<mapCodeFile>",
         description = "Path to the Pathery MapCode file.",
         converter = StringToPuzzle.class
@@ -60,6 +53,13 @@ public final class Bench implements Runnable {
         converter = StringToPositiveInt.class
     )
     private Integer trials;
+
+    @Parameters(
+        paramLabel = "<solverKinds>",
+        description = "Comma-separated list of solvers, each one of ${COMPLETION-CANDIDATES}",
+        split = ","
+    )
+    private List<SolverKind> solverKinds;
 
     private Bench() {}
 
