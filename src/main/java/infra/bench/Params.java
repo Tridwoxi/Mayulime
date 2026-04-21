@@ -61,6 +61,8 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
 
         final StringBuilder header = new StringBuilder();
         header.append("solver");
+        header.append(SEPARATOR);
+        header.append("trial");
         for (final RecordComponent component : components) {
             header.append(SEPARATOR);
             header.append(component.getName());
@@ -73,11 +75,11 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
                 final StringBuilder row = new StringBuilder();
                 row.append(solverName);
                 row.append(SEPARATOR);
-                row.append(result.trial);
+                row.append(result.trial());
                 for (final RecordComponent component : components) {
                     row.append(SEPARATOR);
                     try {
-                        row.append(component.getAccessor().invoke(result));
+                        row.append(component.getAccessor().invoke(result.report()));
                     } catch (IllegalAccessException | InvocationTargetException oops) {
                         throw new AssertionError("this always works when same module", oops);
                     }
@@ -87,5 +89,5 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         }
     }
 
-    private record TrialResult<R extends Record>(int trial, R result) {}
+    private record TrialResult<R extends Record>(int trial, R report) {}
 }
