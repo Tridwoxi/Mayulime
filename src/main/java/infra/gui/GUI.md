@@ -47,8 +47,13 @@ separate coarse cadence. The GUI should not rely on a continuous high-frequency 
 
 Colors are chosen to be simple and colorblind-accessible.
 
+## Known bugs
+
+Valid (according to parser) but extremely wide or tall maps can exceed JavaFX's maximum
+render-target texture size, which causes a rendering failure. A potential fix is to wrap in
+try-catch. No fix is applied because this bug doesn't really matter and most unreasonably large
+maps like Gargantuan work just fine.
+
 ## Future direction
 
-On a high-throughput solver on a big map, the FX thread waits for the manager to drain, and that
-can take a while (almost 1 second for 10x RandomSolver on Gargantuan). This is an edge case, but it
-is good to have a responsive UI in all cases.
+Nothing planned.
