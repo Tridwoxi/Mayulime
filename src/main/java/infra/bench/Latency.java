@@ -1,59 +1,57 @@
 package infra.bench;
 
-import infra.logging.Logger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import think.manager.Proposal;
 
-public final class Latency implements Runnable {
+public final class Latency {
 
-    private final Params params;
-    private final List<Long> intervals = new ArrayList<>();
-    private long lastMillis = -1L;
+    /**
+       An inclusive [lowerMillis, upperMillis] bucket. Buckets are log2-scaled: {0}, {1}, [2,3],
+       [4,7], [8,15], ... to keep the count manageable across the zero-to-minutes range.
+     */
+    public record Report(long lowerMillis, long upperMillis, int count) {}
 
-    public Latency(final Params params) {
-        this.params = params;
-    }
+    private Latency() {}
 
-    @Override
-    public void run() {
-        params.execute(this::accept, this::report);
-    }
-
-    private void accept(final Proposal proposal, final long elapsedMillis) {
-        if (lastMillis >= 0L) {
-            intervals.add(elapsedMillis - lastMillis);
+    public static List<Report> createReports(
+        final long startTimeMillis,
+        final List<Proposal> proposals
+    ) {
+        if (proposals.size() < 2) {
+            return List.of();
         }
-        lastMillis = elapsedMillis;
+        int maxBucket = 0;
+        final int[] counts = new int[Long.SIZE + 1];
+        long lastMillis = proposals.getFirst().getCreatedAtMillis();
+        for (int index = 1; index < proposals.size(); index += 1) {
+            final long createdAtMillis = proposals.get(index).getCreatedAtMillis();
+            final int bucket = bucketIndex(createdAtMillis - lastMillis);
+            counts[bucket] += 1;
+            if (bucket > maxBucket) {
+                maxBucket = bucket;
+            }
+            lastMillis = createdAtMillis;
+        }
+        final List<Report> reports = new ArrayList<>(maxBucket + 1);
+        for (int bucket = 0; bucket <= maxBucket; bucket += 1) {
+            reports.add(new Report(bucketLower(bucket), bucketUpper(bucket), counts[bucket]));
+        }
+        return reports;
     }
 
-    private void report() {
-        if (intervals.isEmpty()) {
-            Logger.results("No intervals recorded.");
-            return;
+    private static int bucketIndex(final long intervalMillis) {
+        if (intervalMillis <= 0L) {
+            return 0;
         }
-        Collections.sort(intervals);
-        final long median = intervals.get(intervals.size() / 2);
-        final long min = intervals.getFirst();
-        final long max = intervals.getLast();
-        final long sum = intervals.stream().mapToLong(Long::longValue).sum();
-        final double mean = (double) sum / intervals.size();
-        final double variance =
-            intervals
-                .stream()
-                .mapToDouble(interval -> (interval - mean) * (interval - mean))
-                .sum() /
-            intervals.size();
-        final double stddev = Math.sqrt(variance);
-        Logger.results("Proposals: %d, intervals: %d", intervals.size() + 1, intervals.size());
-        Logger.results(
-            "Median: %d ms, min: %d ms, max: %d ms, total: %d ms, stddev: %.1f ms",
-            median,
-            min,
-            max,
-            sum,
-            stddev
-        );
+        return Long.SIZE - Long.numberOfLeadingZeros(intervalMillis);
+    }
+
+    private static long bucketLower(final int bucket) {
+        return bucket == 0 ? 0L : 1L << (bucket - 1);
+    }
+
+    private static long bucketUpper(final int bucket) {
+        return bucket == 0 ? 0L : (1L << bucket) - 1L;
     }
 }

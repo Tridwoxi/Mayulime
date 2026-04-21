@@ -8,6 +8,8 @@ public final class Score {
 
     public record Report(String bestProposal, int score, long elapsedMillis) {}
 
+    private Score() {}
+
     public static List<Report> createReports(
         final long startTimeMillis,
         final List<Proposal> proposals

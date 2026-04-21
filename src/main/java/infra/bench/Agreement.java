@@ -7,6 +7,8 @@ public final class Agreement {
 
     public record Report(int topScore, int achievedBy, int totalProposals, double fraction) {}
 
+    private Agreement() {}
+
     public static List<Report> createReports(
         final long startTimeMillis,
         final List<Proposal> proposals

@@ -1,8 +1,7 @@
 package infra.bench;
 
-import infra.logging.Logger;
+import java.util.List;
 import think.common.StandardEvaluator;
-import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
@@ -13,46 +12,30 @@ import think.manager.Proposal;
    placements and moves. Multiple maps may be necessary for testing. Small1 is a good candidate
    since the baseline is not locally optimal.
 */
-public final class Optimality implements Runnable {
+public final class Optimality {
 
-    private final Params params;
-    private long numProposals;
-    private long numOptimal;
+    public record Report(long numProposals, long numOptimal, double fraction) {}
 
-    public Optimality(final Params params) {
-        this.params = params;
-    }
+    private Optimality() {}
 
-    @Override
-    public void run() {
-        params.execute(this::accept, this::report);
-    }
-
-    private void accept(final Proposal proposal, final long elapsedMillis) {
-        numProposals += 1L;
-        // Testing needs to happen during run because it is slow and can be used to throttle.
-        if (isLocallyOptimal(proposal)) {
-            numOptimal += 1L;
-        } else {
-            final String mapCode = Serializer.serialize(params.puzzle(), proposal.getState());
-            Logger.results(
-                "Not locally optimal (score %d at %d ms): %s",
-                proposal.getScore(),
-                elapsedMillis,
-                mapCode
-            );
+    public static List<Report> createReports(
+        final long startTimeMillis,
+        final List<Proposal> proposals
+    ) {
+        long numOptimal = 0L;
+        for (final Proposal proposal : proposals) {
+            if (isLocallyOptimal(proposal)) {
+                numOptimal += 1L;
+            }
         }
-    }
-
-    private void report() {
+        final long numProposals = proposals.size();
         final double fraction = numProposals == 0L ? 0.0 : (double) numOptimal / numProposals;
-        Logger.results("Locally optimal: %d of %d proposals", numOptimal, numProposals);
-        Logger.results("Fraction: %f", fraction);
+        return List.of(new Report(numProposals, numOptimal, fraction));
     }
 
     // == Below: ClimbSolver-like machinery. ==
 
-    private boolean isLocallyOptimal(final Proposal proposal) {
+    private static boolean isLocallyOptimal(final Proposal proposal) {
         final Puzzle puzzle = proposal.getPuzzle();
         final Tile[] state = proposal.getState();
         final int score = proposal.getScore();

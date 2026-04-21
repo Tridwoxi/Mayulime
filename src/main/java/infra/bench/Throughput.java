@@ -1,29 +1,18 @@
 package infra.bench;
 
-import infra.logging.Logger;
+import java.util.List;
 import think.manager.Proposal;
 
-public final class Throughput implements Runnable {
+public final class Throughput {
 
-    private final Params params;
-    private long numProposals;
+    public record Report(long numProposals) {}
 
-    public Throughput(final Params params) {
-        this.params = params;
-    }
+    private Throughput() {}
 
-    @Override
-    public void run() {
-        params.execute(this::accept, this::report);
-    }
-
-    private void accept(final Proposal proposal, final long elapsedMillis) {
-        numProposals += 1L;
-    }
-
-    private void report() {
-        final double rate = ((double) numProposals / params.durationMillis()) * 1000.0;
-        Logger.results("Saw %d proposals in %d ms", numProposals, params.durationMillis());
-        Logger.results("That is %f per second", rate);
+    public static List<Report> createReports(
+        final long startTimeMillis,
+        final List<Proposal> proposals
+    ) {
+        return List.of(new Report(proposals.size()));
     }
 }

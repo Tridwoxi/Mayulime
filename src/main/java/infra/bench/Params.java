@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import think.domain.model.Puzzle;
 import think.manager.Manager;
 import think.manager.Proposal;
@@ -18,20 +17,23 @@ import think.solvers.SolverKind;
  */
 // TODO: use nanoTime instead of currentTimeMillis
 public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
+    @FunctionalInterface
+    public interface ReportFactory<R extends Record> {
+        List<R> createReports(long startTimeMillis, List<Proposal> proposals);
+    }
+
     private static final String SEPARATOR = ",";
 
     public Params {
         if (solverKinds.isEmpty() || durationMillis <= 0 || trials <= 0) {
             throw new IllegalArgumentException();
         }
+        solverKinds = List.copyOf(solverKinds);
     }
 
-    /**
-        {@code createReports(startTimeMillis, proposals) -> reportRecords}
-     */
     public <R extends Record> void execute(
         final Class<R> reportClass,
-        final BiFunction<Long, List<Proposal>, List<R>> createReports
+        final ReportFactory<R> createReports
     ) {
         final Map<SolverKind, List<TrialResult<R>>> reportsByKind = HashMap.newHashMap(
             solverKinds.size()
@@ -47,7 +49,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
                     final long startTimeMillis = System.currentTimeMillis();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
-                    final List<R> reports = createReports.apply(startTimeMillis, proposals);
+                    final List<R> reports = createReports.createReports(startTimeMillis, proposals);
                     for (final R report : reports) {
                         reportsByKind.get(solver).add(new TrialResult<>(trial, report));
                     }

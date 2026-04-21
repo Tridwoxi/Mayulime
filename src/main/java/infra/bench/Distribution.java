@@ -8,6 +8,8 @@ public final class Distribution {
 
     public record Report(int score, int count) {}
 
+    private Distribution() {}
+
     public static List<Report> createReports(
         final long startTimeMillis,
         final List<Proposal> proposals
