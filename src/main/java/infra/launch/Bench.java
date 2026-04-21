@@ -76,7 +76,7 @@ public final class Bench implements Runnable {
             case DISTRIBUTION -> new Distribution(params).run();
             case LATENCY -> new Latency(params).run();
             case OPTIMALITY -> new Optimality(params).run();
-            case SCORE -> params.execute(Score::createReport);
+            case SCORE -> params.execute(Score.Report.class, Score::createReports);
             case THROUGHPUT -> new Throughput(params).run();
             case TIMELINE -> new Timeline(params).run();
             default -> throw new AssertionError();

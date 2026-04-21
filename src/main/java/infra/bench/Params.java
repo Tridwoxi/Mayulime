@@ -14,7 +14,7 @@ import think.manager.Proposal;
 import think.solvers.SolverKind;
 
 /**
-    Run many trials of a benchmark for a set of solvers, and print output as csv.
+    Run many trials of a benchmark for a set of solvers. Print output as CSV.
  */
 // TODO: use nanoTime instead of currentTimeMillis
 public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
@@ -26,8 +26,13 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         }
     }
 
-    // createReport: BiFunction<trialStartTimeMillis, proposalsProducedThisTrial, reportRecord>
-    public <R extends Record> void execute(final BiFunction<Long, List<Proposal>, R> createReport) {
+    /**
+        {@code createReports(startTimeMillis, proposals) -> reportRecords}
+     */
+    public <R extends Record> void execute(
+        final Class<R> reportClass,
+        final BiFunction<Long, List<Proposal>, List<R>> createReports
+    ) {
         final Map<SolverKind, List<R>> resultsByKind = new HashMap<>(solverKinds.size());
         for (final SolverKind kind : solverKinds) {
             resultsByKind.put(kind, new ArrayList<>(trials));
@@ -40,17 +45,13 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
                     final long startTimeMillis = System.currentTimeMillis();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
-                    final R result = createReport.apply(startTimeMillis, proposals);
-                    resultsByKind.get(kind).add(result);
+                    final List<R> result = createReports.apply(startTimeMillis, proposals);
+                    resultsByKind.get(kind).addAll(result);
                 }
             }
         }
 
-        final RecordComponent[] components = resultsByKind
-            .get(solverKinds.getFirst())
-            .getFirst()
-            .getClass()
-            .getRecordComponents();
+        final RecordComponent[] components = reportClass.getRecordComponents();
 
         final StringBuilder header = new StringBuilder();
         header.append("solver");
@@ -61,9 +62,9 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         Logger.results(header.toString());
 
         for (final SolverKind kind : solverKinds) {
+            final String solverName = kind.name().toLowerCase();
             for (final R result : resultsByKind.get(kind)) {
                 final StringBuilder row = new StringBuilder();
-                final String solverName = kind.name().toLowerCase();
                 row.append(solverName);
                 for (final RecordComponent component : components) {
                     row.append(SEPARATOR);
