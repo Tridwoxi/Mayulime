@@ -1,34 +1,26 @@
 package infra.bench;
 
-import infra.logging.Logger;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.TreeMap;
 import think.manager.Proposal;
 
-public final class Distribution implements Runnable {
+public final class Distribution {
 
-    private final Params params;
-    private final TreeMap<Integer, Long> counts;
+    public record Report(int score, int count) {}
 
-    public Distribution(final Params params) {
-        this.params = params;
-        this.counts = new TreeMap<>();
-    }
-
-    @Override
-    public void run() {
-        params.execute(this::accept, this::report);
-    }
-
-    private void accept(final Proposal proposal, final long elapsedMillis) {
-        final int score = proposal.getScore();
-        counts.merge(score, 1L, Long::sum);
-    }
-
-    private void report() {
-        Logger.results("score,count");
-        for (final Entry<Integer, Long> entry : counts.entrySet()) {
-            Logger.results("%d,%d", entry.getKey(), entry.getValue());
+    public static List<Report> createReports(
+        final long startTimeMillis,
+        final List<Proposal> proposals
+    ) {
+        final TreeMap<Integer, Integer> counts = new TreeMap<>();
+        for (final Proposal proposal : proposals) {
+            final int score = proposal.getScore();
+            counts.merge(score, 1, Integer::sum);
         }
+        return counts
+            .entrySet()
+            .stream()
+            .map(entry -> new Report(entry.getKey(), entry.getValue()))
+            .toList();
     }
 }

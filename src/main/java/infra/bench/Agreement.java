@@ -1,45 +1,34 @@
 package infra.bench;
 
-import infra.logging.Logger;
+import java.util.List;
 import think.manager.Proposal;
 
-public final class Agreement implements Runnable {
+public final class Agreement {
 
-    private final Params params;
-    private long numProposals;
-    private long numBest;
-    private int topScore;
-    private boolean scored;
+    public record Report(int topScore, int achievedBy, int totalProposals, double fraction) {}
 
-    public Agreement(final Params params) {
-        this.params = params;
-        this.numProposals = 0L;
-        this.numBest = 0L;
-        this.topScore = 0;
-        this.scored = false;
-    }
-
-    @Override
-    public void run() {
-        params.execute(this::accept, this::report);
-    }
-
-    private void accept(final Proposal proposal, final long elapsedMillis) {
-        numProposals += 1L;
-        if (!scored || proposal.getScore() > topScore) {
-            topScore = proposal.getScore();
-            numBest = 1L;
-            scored = true;
-        } else if (proposal.getScore() == topScore) {
-            numBest += 1L;
+    public static List<Report> createReports(
+        final long startTimeMillis,
+        final List<Proposal> proposals
+    ) {
+        int topScore = 0;
+        int achievedBy = 0;
+        int totalProposals = 0;
+        for (final Proposal proposal : proposals) {
+            if (proposal.getScore() > topScore) {
+                topScore = proposal.getScore();
+                achievedBy = 1;
+            } else if (proposal.getScore() == topScore) {
+                achievedBy += 1;
+            }
+            totalProposals += 1;
         }
-    }
-
-    private void report() {
-        final String topScoreText = scored ? Integer.toString(topScore) : "Unscored";
-        final double fraction = numProposals == 0L ? 0.0 : (double) numBest / numProposals;
-        Logger.results("Top score %s", topScoreText);
-        Logger.results("Achieved by %d of %d proposals", numBest, numProposals);
-        Logger.results("As a fraction, that is %f", fraction);
+        final Report report = new Report(
+            topScore,
+            achievedBy,
+            totalProposals,
+            totalProposals == 0 ? 0.0 : (double) achievedBy / totalProposals
+        );
+        return List.of(report);
     }
 }

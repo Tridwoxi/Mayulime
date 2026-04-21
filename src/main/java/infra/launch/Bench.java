@@ -72,8 +72,11 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case AGREEMENT -> new Agreement(params).run();
-            case DISTRIBUTION -> new Distribution(params).run();
+            case AGREEMENT -> params.execute(Agreement.Report.class, Agreement::createReports);
+            case DISTRIBUTION -> params.execute(
+                Distribution.Report.class,
+                Distribution::createReports
+            );
             case LATENCY -> new Latency(params).run();
             case OPTIMALITY -> new Optimality(params).run();
             case SCORE -> params.execute(Score.Report.class, Score::createReports);

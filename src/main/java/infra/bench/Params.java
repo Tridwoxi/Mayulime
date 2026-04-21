@@ -33,20 +33,24 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         final Class<R> reportClass,
         final BiFunction<Long, List<Proposal>, List<R>> createReports
     ) {
-        final Map<SolverKind, List<R>> resultsByKind = new HashMap<>(solverKinds.size());
+        final Map<SolverKind, List<TrialResult<R>>> reportsByKind = HashMap.newHashMap(
+            solverKinds.size()
+        );
         for (final SolverKind kind : solverKinds) {
-            resultsByKind.put(kind, new ArrayList<>(trials));
+            reportsByKind.put(kind, new ArrayList<>());
         }
         // Run in trial-major order (instead of solver-major order) to slightly reduce environment
         // and JIT effects. But it shouldn't matter much and we're not even bothering with JMH.
         for (int trial = 0; trial < trials; trial += 1) {
-            for (final SolverKind kind : solverKinds) {
-                try (Manager manager = new Manager(List.of(kind))) {
+            for (final SolverKind solver : solverKinds) {
+                try (Manager manager = new Manager(List.of(solver))) {
                     final long startTimeMillis = System.currentTimeMillis();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
-                    final List<R> result = createReports.apply(startTimeMillis, proposals);
-                    resultsByKind.get(kind).addAll(result);
+                    final List<R> reports = createReports.apply(startTimeMillis, proposals);
+                    for (final R report : reports) {
+                        reportsByKind.get(solver).add(new TrialResult<>(trial, report));
+                    }
                 }
             }
         }
@@ -61,11 +65,13 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         }
         Logger.results(header.toString());
 
-        for (final SolverKind kind : solverKinds) {
-            final String solverName = kind.name().toLowerCase();
-            for (final R result : resultsByKind.get(kind)) {
+        for (final SolverKind solver : solverKinds) {
+            final String solverName = solver.name().toLowerCase();
+            for (final TrialResult<R> result : reportsByKind.get(solver)) {
                 final StringBuilder row = new StringBuilder();
                 row.append(solverName);
+                row.append(SEPARATOR);
+                row.append(result.trial);
                 for (final RecordComponent component : components) {
                     row.append(SEPARATOR);
                     try {
@@ -78,4 +84,6 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
             }
         }
     }
+
+    private record TrialResult<R extends Record>(int trial, R result) {}
 }
