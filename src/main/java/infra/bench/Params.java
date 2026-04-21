@@ -13,7 +13,7 @@ import think.manager.Proposal;
 import think.solvers.SolverKind;
 
 /**
-    Run many trials of a benchmark for a set of solvers. Output as tsv.
+    Run many trials of a benchmark for a set of solvers. Output tsv.
  */
 public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
     @FunctionalInterface
@@ -21,6 +21,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         List<R> createReports(long startTimeNanos, List<Proposal> proposals);
     }
 
+    // It is easier to use tsv than it is to do csv escaping logic (both here and downstream).
     private static final String SEPARATOR = "\t";
 
     public Params {
@@ -46,6 +47,12 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
             for (final SolverKind solver : solverKinds) {
                 try (Manager manager = new Manager(List.of(solver))) {
                     final long startTimeNanos = System.nanoTime();
+                    // High-throughput solvers with long runtimes (e.g. RandomSolver + 10 seconds)
+                    // can OOM. The following gc call is to ensure more consistent enviornments,
+                    // not to fix the OOM problem, which is inherent to consumeUntil and will not
+                    // go away unless replaced with a stream-like or incremental API. This
+                    // limitation can be left as-is: it is usually not a problem.
+                    System.gc();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
                     final List<R> reports = createReports.createReports(startTimeNanos, proposals);
