@@ -10,6 +10,7 @@ import infra.bench.Throughput;
 import infra.bench.Timeline;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -33,10 +34,11 @@ public final class Bench implements Runnable {
     private BenchKind benchKind;
 
     @Parameters(
-        paramLabel = "<solverKind>",
-        description = "Name of solver to use, one of ${COMPLETION-CANDIDATES}"
+        paramLabel = "<solverKinds>",
+        description = "Comma-separated list of solvers, each one of ${COMPLETION-CANDIDATES}",
+        split = ","
     )
-    private SolverKind solverKind;
+    private List<SolverKind> solverKinds;
 
     @Parameters(
         paramLabel = "<mapCodeFile>",
@@ -53,28 +55,28 @@ public final class Bench implements Runnable {
     private Long durationMillis;
 
     @Parameters(
-        paramLabel = "<parallelism>",
-        description = "How many identical workers to run.",
+        paramLabel = "<trials>",
+        description = "How many times to run the benchmark.",
         converter = StringToPositiveInt.class
     )
-    private Integer parallelism;
+    private Integer trials;
 
     private Bench() {}
 
     @Override
     public void run() {
         final Params params = new Params(
-            Objects.requireNonNull(solverKind),
+            Objects.requireNonNull(solverKinds),
             Objects.requireNonNull(mapCodeFile),
             Objects.requireNonNull(durationMillis),
-            Objects.requireNonNull(parallelism)
+            Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
             case AGREEMENT -> new Agreement(params).run();
             case DISTRIBUTION -> new Distribution(params).run();
             case LATENCY -> new Latency(params).run();
             case OPTIMALITY -> new Optimality(params).run();
-            case SCORE -> new Score(params).run();
+            case SCORE -> params.execute(Score::createReport);
             case THROUGHPUT -> new Throughput(params).run();
             case TIMELINE -> new Timeline(params).run();
             default -> throw new AssertionError();
