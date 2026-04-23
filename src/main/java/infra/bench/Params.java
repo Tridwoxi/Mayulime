@@ -46,13 +46,13 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
         for (int trial = 0; trial < trials; trial += 1) {
             for (final SolverKind solver : solverKinds) {
                 try (Manager manager = new Manager(List.of(solver))) {
-                    final long startTimeNanos = System.nanoTime();
                     // High-throughput solvers with long runtimes (e.g. RandomSolver + 10 seconds)
                     // can OOM. The following gc call is to ensure more consistent enviornments,
                     // not to fix the OOM problem, which is inherent to consumeUntil and will not
                     // go away unless replaced with a stream-like or incremental API. This
                     // limitation can be left as-is: it is usually not a problem.
                     System.gc();
+                    final long startTimeNanos = System.nanoTime();
                     manager.solve(puzzle);
                     final List<Proposal> proposals = manager.consumeUntil(durationMillis);
                     final List<R> reports = createReports.createReports(startTimeNanos, proposals);
