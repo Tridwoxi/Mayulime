@@ -13,15 +13,34 @@ import think.solvers.SolverKind;
 
 /**
     Concurrent solver orchestration and lifecycle management.
+
+    The {@link #consumeNow()} and {@link #consumeUntil(long)} methods may be called at any time
+    before the Manager is closed. If they return proposals, that implies the manager was running.
+
+    {@snippet lang=mermaid :
+    stateDiagram
+        [*] --> Idle: new Manager(List<SolverKind>)
+
+        Idle --> Idle: stop()
+        Idle --> Running: solve(Puzzle)
+        Idle --> [*]: close()
+
+        Running --> Idle: stop()
+        Running --> Running: solve(Puzzle)
+        Running --> [*]: close()
+    }
  */
 public final class Manager implements AutoCloseable {
 
+    // An implementation with LMAX Disruptor was also sufficient (see commit history). Manager
+    // overhead is real when using many RandomSolvers on small maps, but we deprioritize that niche
+    // case for ArrayBlockingQueue's ability to avoid having the caller deal with synchronization.
     private static final ThreadFactory HELL = runnable -> {
         final Thread thread = new Thread(runnable);
         thread.setDaemon(true);
         return thread;
     };
-    private static final int CONSUME_POLL_INTERVAL_NANOS = 100_000;
+    private static final int CONSUME_PAUSE_NANOS = 100_000;
     private static final int MIN_BUFFER_SIZE = 1000;
     private final int bufferCapacity;
     private final List<SolverKind> solverKinds;
@@ -39,14 +58,14 @@ public final class Manager implements AutoCloseable {
 
     public synchronized void solve(final Puzzle puzzle) {
         stop();
-        buffer.clear();
         solverKinds.forEach(kind -> solvers.add(kind.create(this::insertOrBlock, puzzle)));
         solvers.forEach(solver -> executor.execute(solver::run));
     }
 
     public List<Proposal> consumeNow() {
         requireExecutorAlive();
-        final List<Proposal> proposals = new ArrayList<>(buffer.size());
+        final int approximateSize = buffer.size();
+        final List<Proposal> proposals = new ArrayList<>(approximateSize);
         buffer.drainTo(proposals);
         return proposals;
     }
@@ -59,31 +78,36 @@ public final class Manager implements AutoCloseable {
             final int numDrained = buffer.drainTo(proposals);
             if (numDrained == 0) {
                 try {
-                    Thread.sleep(0L, CONSUME_POLL_INTERVAL_NANOS);
+                    final long difference = (endTimeNanos - System.nanoTime());
+                    final long sleepNanos = Math.max(0, Math.min(difference, CONSUME_PAUSE_NANOS));
+                    Thread.sleep(0L, (int) sleepNanos);
                 } catch (InterruptedException exception) {
                     throw new AssertionError(exception);
                 }
             }
         }
+        buffer.drainTo(proposals);
         return proposals;
     }
 
     public synchronized void stop() {
         requireExecutorAlive();
         final long startTimeNanos = System.nanoTime();
-        // Buffer needs to be cleared before awaiting termination so solvers blocked on it can
-        // continue and eventually die. This trick only works if the buffer size has more elements
-        // than the number of solvers, since in the worst case each solver can sneak in 1 element.
+        // Buffer needs to be cleared before awaitTermination so solvers blocked on it can proceed
+        // and eventually die. This trick only works if the buffer size has more elements than the
+        // number of solver threads, since in the worst case each solver can sneak in 1 (we depend
+        // on each solver running on a single thread) element after termination requested.
         solvers.forEach(Solver::requestTermination);
         buffer.clear();
         solvers.forEach(Solver::awaitTermination);
+        buffer.clear();
         solvers.clear();
         final long endTimeNanos = System.nanoTime();
         Logger.debug("stop() in %d ms", (endTimeNanos - startTimeNanos) / 1_000_000);
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         stop();
         executor.shutdown();
     }
