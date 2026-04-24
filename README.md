@@ -6,7 +6,7 @@ assistant or checker. This repository is not affiliated with Pathery.
 
 ## Usage and development
 
-Install [JDK](https://jdk.java.net) 25 or later and [Gradle](https://gradle.org) 9.1 or later. In
+Install [JDK](https://jdk.java.net) 25 exactly and [Gradle](https://gradle.org) 9.1 or later. In
 the repository root, execute `gradle run`. Gradle will install the dependencies declared in
 `build.gradle`. If it doesn't work, message me.
 
