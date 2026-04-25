@@ -78,16 +78,22 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case AGREEMENT -> params.execute(Agreement.Report.class, Agreement::createReports);
-            case DISTRIBUTION -> params.execute(
+            case AGREEMENT -> params.runAsBatch(Agreement.Report.class, Agreement::createReports);
+            case DISTRIBUTION -> params.runAsBatch(
                 Distribution.Report.class,
                 Distribution::createReports
             );
-            case LATENCY -> params.execute(Latency.Report.class, Latency::createReports);
-            case OPTIMALITY -> params.execute(Optimality.Report.class, Optimality::createReports);
-            case SCORE -> params.execute(Score.Report.class, Score::createReports);
-            case THROUGHPUT -> params.execute(Throughput.Report.class, Throughput::createReports);
-            case TIMELINE -> params.execute(Timeline.Report.class, Timeline::createReports);
+            case LATENCY -> params.runAsBatch(Latency.Report.class, Latency::createReports);
+            case OPTIMALITY -> params.runAsBatch(
+                Optimality.Report.class,
+                Optimality::createReports
+            );
+            case SCORE -> params.runAsBatch(Score.Report.class, Score::createReports);
+            case THROUGHPUT -> params.runAsBatch(
+                Throughput.Report.class,
+                Throughput::createReports
+            );
+            case TIMELINE -> params.runAsBatch(Timeline.Report.class, Timeline::createReports);
             default -> throw new AssertionError();
         }
     }
