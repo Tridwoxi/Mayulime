@@ -1,7 +1,9 @@
 package infra.bench;
 
+import infra.logging.Logger;
 import java.util.List;
 import think.common.StandardEvaluator;
+import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
@@ -16,21 +18,35 @@ public final class Optimality {
 
     public record Report(long numProposals, long numOptimal, double fraction) {}
 
+    public static final class Context {
+
+        private long numProposals = 0L;
+        private long numOptimal = 0L;
+    }
+
     private Optimality() {}
 
-    public static List<Report> createReports(
-        final long startTimeNanos,
-        final List<Proposal> proposals
-    ) {
-        long numOptimal = 0L;
-        for (final Proposal proposal : proposals) {
-            if (isLocallyOptimal(proposal)) {
-                numOptimal += 1L;
-            }
+    public static Context initialContext() {
+        return new Context();
+    }
+
+    public static Context reduce(final Context context, final Proposal proposal) {
+        context.numProposals += 1L;
+        if (isLocallyOptimal(proposal)) {
+            context.numOptimal += 1L;
+        } else {
+            Logger.info(
+                "Suboptimal: %s",
+                Serializer.serialize(proposal.getPuzzle(), proposal.getState())
+            );
         }
-        final long numProposals = proposals.size();
-        final double fraction = numProposals == 0L ? 0.0 : (double) numOptimal / numProposals;
-        return List.of(new Report(numProposals, numOptimal, fraction));
+        return context;
+    }
+
+    public static List<Report> createReports(final Context context) {
+        final double fraction =
+            context.numProposals == 0L ? 0.0 : (double) context.numOptimal / context.numProposals;
+        return List.of(new Report(context.numProposals, context.numOptimal, fraction));
     }
 
     // == Below: ClimbSolver-like machinery. ==

@@ -78,22 +78,48 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case AGREEMENT -> params.runAsBatch(Agreement.Report.class, Agreement::createReports);
-            case DISTRIBUTION -> params.runAsBatch(
+            case AGREEMENT -> params.runAsStream(
+                Agreement.Report.class,
+                Agreement::initialContext,
+                Agreement::reduce,
+                Agreement::createReports
+            );
+            case DISTRIBUTION -> params.runAsStream(
                 Distribution.Report.class,
+                Distribution::initialContext,
+                Distribution::reduce,
                 Distribution::createReports
             );
-            case LATENCY -> params.runAsBatch(Latency.Report.class, Latency::createReports);
-            case OPTIMALITY -> params.runAsBatch(
+            case LATENCY -> params.runAsStream(
+                Latency.Report.class,
+                Latency::initialContext,
+                Latency::reduce,
+                Latency::createReports
+            );
+            case OPTIMALITY -> params.runAsStream(
                 Optimality.Report.class,
+                Optimality::initialContext,
+                Optimality::reduce,
                 Optimality::createReports
             );
-            case SCORE -> params.runAsBatch(Score.Report.class, Score::createReports);
-            case THROUGHPUT -> params.runAsBatch(
+            case SCORE -> params.runAsStream(
+                Score.Report.class,
+                Score::initialContext,
+                Score::reduce,
+                Score::createReports
+            );
+            case THROUGHPUT -> params.runAsStream(
                 Throughput.Report.class,
+                Throughput::initialContext,
+                Throughput::reduce,
                 Throughput::createReports
             );
-            case TIMELINE -> params.runAsBatch(Timeline.Report.class, Timeline::createReports);
+            case TIMELINE -> params.runAsStream(
+                Timeline.Report.class,
+                Timeline::initialContext,
+                Timeline::reduce,
+                Timeline::createReports
+            );
             default -> throw new AssertionError();
         }
     }

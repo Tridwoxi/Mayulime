@@ -7,12 +7,23 @@ public final class Throughput {
 
     public record Report(long numProposals) {}
 
+    public static final class Context {
+
+        private long count;
+    }
+
     private Throughput() {}
 
-    public static List<Report> createReports(
-        final long startTimeNanos,
-        final List<Proposal> proposals
-    ) {
-        return List.of(new Report(proposals.size()));
+    public static Context initialContext() {
+        return new Context();
+    }
+
+    public static Context reduce(final Context context, final Proposal proposal) {
+        context.count += 1L;
+        return context;
+    }
+
+    public static List<Report> createReports(final Context context) {
+        return List.of(new Report(context.count));
     }
 }

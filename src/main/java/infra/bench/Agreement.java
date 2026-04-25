@@ -8,30 +8,38 @@ public final class Agreement {
 
     public record Report(int topScore, int achievedBy, int totalProposals, double fraction) {}
 
+    public static final class Context {
+
+        private int topScore = StandardEvaluator.NO_PATH_EXISTS;
+        private int achievedBy;
+        private int totalProposals;
+    }
+
     private Agreement() {}
 
-    public static List<Report> createReports(
-        final long startTimeNanos,
-        final List<Proposal> proposals
-    ) {
-        int topScore = StandardEvaluator.NO_PATH_EXISTS;
-        int achievedBy = 0;
-        int totalProposals = 0;
-        for (final Proposal proposal : proposals) {
-            if (proposal.getScore() > topScore) {
-                topScore = proposal.getScore();
-                achievedBy = 1;
-            } else if (proposal.getScore() == topScore) {
-                achievedBy += 1;
-            }
-            totalProposals += 1;
+    public static Context initialContext() {
+        return new Context();
+    }
+
+    public static Context reduce(final Context context, final Proposal proposal) {
+        final int score = proposal.getScore();
+        if (score > context.topScore) {
+            context.topScore = score;
+            context.achievedBy = 1;
+        } else if (score == context.topScore) {
+            context.achievedBy += 1;
         }
-        final Report report = new Report(
-            topScore,
-            achievedBy,
-            totalProposals,
-            totalProposals == 0 ? 0.0 : (double) achievedBy / totalProposals
+        context.totalProposals += 1;
+        return context;
+    }
+
+    public static List<Report> createReports(final Context context) {
+        final double fraction =
+            context.totalProposals == 0
+                ? 0.0
+                : (double) context.achievedBy / context.totalProposals;
+        return List.of(
+            new Report(context.topScore, context.achievedBy, context.totalProposals, fraction)
         );
-        return List.of(report);
     }
 }

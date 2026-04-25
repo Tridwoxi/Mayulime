@@ -8,18 +8,24 @@ public final class Distribution {
 
     public record Report(int score, int count) {}
 
+    public static final class Context {
+
+        private final TreeMap<Integer, Integer> counts = new TreeMap<>();
+    }
+
     private Distribution() {}
 
-    public static List<Report> createReports(
-        final long startTimeNanos,
-        final List<Proposal> proposals
-    ) {
-        final TreeMap<Integer, Integer> counts = new TreeMap<>();
-        for (final Proposal proposal : proposals) {
-            final int score = proposal.getScore();
-            counts.merge(score, 1, Integer::sum);
-        }
-        return counts
+    public static Context initialContext() {
+        return new Context();
+    }
+
+    public static Context reduce(final Context context, final Proposal proposal) {
+        context.counts.merge(proposal.getScore(), 1, Integer::sum);
+        return context;
+    }
+
+    public static List<Report> createReports(final Context context) {
+        return context.counts
             .entrySet()
             .stream()
             .map(entry -> new Report(entry.getKey(), entry.getValue()))

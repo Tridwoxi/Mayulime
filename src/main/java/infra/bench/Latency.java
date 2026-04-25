@@ -12,30 +12,43 @@ public final class Latency {
      */
     public record Report(long lowerNanos, long upperNanos, int count) {}
 
+    public static final class Context {
+
+        private long lastNanos;
+        private int proposalsSeen;
+        private int maxBucket;
+        private final int[] counts = new int[Long.SIZE + 1];
+    }
+
     private Latency() {}
 
-    public static List<Report> createReports(
-        final long startTimeNanos,
-        final List<Proposal> proposals
-    ) {
-        if (proposals.size() < 2) {
+    public static Context initialContext() {
+        return new Context();
+    }
+
+    public static Context reduce(final Context context, final Proposal proposal) {
+        final long createdAtNanos = proposal.getCreatedAtNanos();
+        if (context.proposalsSeen >= 1) {
+            final int bucket = bucketIndex(createdAtNanos - context.lastNanos);
+            context.counts[bucket] += 1;
+            if (bucket > context.maxBucket) {
+                context.maxBucket = bucket;
+            }
+        }
+        context.lastNanos = createdAtNanos;
+        context.proposalsSeen += 1;
+        return context;
+    }
+
+    public static List<Report> createReports(final Context context) {
+        if (context.proposalsSeen < 2) {
             return List.of();
         }
-        int maxBucket = 0;
-        final int[] counts = new int[Long.SIZE + 1];
-        long lastNanos = proposals.getFirst().getCreatedAtNanos();
-        for (int index = 1; index < proposals.size(); index += 1) {
-            final long createdAtNanos = proposals.get(index).getCreatedAtNanos();
-            final int bucket = bucketIndex(createdAtNanos - lastNanos);
-            counts[bucket] += 1;
-            if (bucket > maxBucket) {
-                maxBucket = bucket;
-            }
-            lastNanos = createdAtNanos;
-        }
-        final List<Report> reports = new ArrayList<>(maxBucket + 1);
-        for (int bucket = 0; bucket <= maxBucket; bucket += 1) {
-            reports.add(new Report(bucketLower(bucket), bucketUpper(bucket), counts[bucket]));
+        final List<Report> reports = new ArrayList<>(context.maxBucket + 1);
+        for (int bucket = 0; bucket <= context.maxBucket; bucket += 1) {
+            reports.add(
+                new Report(bucketLower(bucket), bucketUpper(bucket), context.counts[bucket])
+            );
         }
         return reports;
     }

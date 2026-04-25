@@ -53,7 +53,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
     public <C, R extends Record> void runAsStream(
         final Class<R> reportClass,
         final Supplier<C> initializeContext,
-        final BiFunction<C, Proposal, C> reduceProposal,
+        final BiFunction<C, Proposal, C> reduce,
         final Function<C, List<R>> createReports
     ) {
         final Map<SolverKind, List<TrialResult<R>>> reportsByKind = HashMap.newHashMap(
@@ -83,7 +83,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
                             }
                         }
                         for (final Proposal proposal : proposals) {
-                            context = reduceProposal.apply(context, proposal);
+                            context = reduce.apply(context, proposal);
                         }
                     }
                     final List<R> reports = createReports.apply(context);

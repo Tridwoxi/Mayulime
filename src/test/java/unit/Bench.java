@@ -2,7 +2,6 @@ package unit;
 
 import infra.bench.Agreement;
 import infra.bench.Score;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.model.Puzzle;
@@ -28,7 +27,10 @@ public final class Bench {
             new Tile[] { Tile.WAYPOINT, Tile.PLAYER_WALL, Tile.WAYPOINT }
         );
 
-        final Agreement.Report report = Agreement.createReports(0L, List.of(blocked, blocked)).getFirst();
+        final Agreement.Context context = Agreement.initialContext();
+        Agreement.reduce(context, blocked);
+        Agreement.reduce(context, blocked);
+        final Agreement.Report report = Agreement.createReports(context).getFirst();
 
         Assertions.assertEquals(-1, report.topScore());
         Assertions.assertEquals(2, report.achievedBy());
@@ -45,7 +47,10 @@ public final class Bench {
         );
         final Proposal passable = new Proposal("passable", LINE, LINE.tiles());
 
-        final Score.Report report = Score.createReports(0L, List.of(blocked, passable)).getFirst();
+        final Score.Context context = Score.initialContext();
+        Score.reduce(context, blocked);
+        Score.reduce(context, passable);
+        final Score.Report report = Score.createReports(context).getFirst();
 
         Assertions.assertEquals("3.1.1.Line...:,s1.1,f1.", report.bestProposal());
         Assertions.assertEquals(2, report.score());
