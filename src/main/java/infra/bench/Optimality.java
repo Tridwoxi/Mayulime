@@ -2,6 +2,7 @@ package infra.bench;
 
 import infra.logging.Logger;
 import java.util.List;
+import java.util.stream.Stream;
 import think.common.StandardEvaluator;
 import think.domain.codec.Serializer;
 import think.domain.model.Puzzle;
@@ -18,35 +19,25 @@ public final class Optimality {
 
     public record Report(long numProposals, long numOptimal, double fraction) {}
 
-    public static final class Context {
-
-        private long numProposals = 0L;
-        private long numOptimal = 0L;
-    }
-
     private Optimality() {}
 
-    public static Context initialContext() {
-        return new Context();
-    }
-
-    public static Context reduce(final Context context, final Proposal proposal) {
-        context.numProposals += 1L;
-        if (isLocallyOptimal(proposal)) {
-            context.numOptimal += 1L;
-        } else {
-            Logger.info(
-                "Suboptimal: %s",
-                Serializer.serialize(proposal.getPuzzle(), proposal.getState())
-            );
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
+        long numProposals = 0L;
+        long numOptimal = 0L;
+        for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
+            numProposals += 1L;
+            if (isLocallyOptimal(proposal)) {
+                numOptimal += 1L;
+            } else {
+                Logger.info(
+                    "Suboptimal: %s",
+                    Serializer.serialize(proposal.getPuzzle(), proposal.getState())
+                );
+            }
         }
-        return context;
-    }
 
-    public static List<Report> createReports(final Context context) {
-        final double fraction =
-            context.numProposals == 0L ? 0.0 : (double) context.numOptimal / context.numProposals;
-        return List.of(new Report(context.numProposals, context.numOptimal, fraction));
+        final double fraction = numProposals == 0L ? 0.0 : (double) numOptimal / numProposals;
+        return List.of(new Report(numProposals, numOptimal, fraction));
     }
 
     // == Below: ClimbSolver-like machinery. ==

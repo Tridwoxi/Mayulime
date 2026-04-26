@@ -14,7 +14,6 @@
         <module name="AbbreviationAsWordInName" />
         <module name="AnnotationLocation" />
         <module name="AnnotationUseStyle" />
-        <module name="AnonInnerLength" />
         <module name="ArrayTrailingComma" />
         <module name="ArrayTypeStyle" />
         <module name="AtclauseOrder" />

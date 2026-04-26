@@ -2,6 +2,7 @@ package infra.bench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import think.ints.IntList;
 import think.manager.Proposal;
 
@@ -11,36 +12,26 @@ public final class Timeline {
 
     public record Report(long bucketMillis, int count) {}
 
-    public static final class Context {
-
-        private final long startTimeNanos = System.nanoTime();
-        private final IntList counts = new IntList(0);
-    }
-
     private Timeline() {}
 
-    public static Context initialContext() {
-        return new Context();
-    }
-
-    public static Context reduce(final Context context, final Proposal proposal) {
-        final long elapsedMillis =
-            (proposal.getCreatedAtNanos() - context.startTimeNanos) / 1_000_000L;
-        final int bucket = (int) (elapsedMillis / BUCKET_MILLIS);
-        while (context.counts.size() <= bucket) {
-            context.counts.add(0);
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
+        final long startTimeNanos = System.nanoTime();
+        final IntList counts = new IntList(0);
+        for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
+            final long elapsedMillis = (proposal.getCreatedAtNanos() - startTimeNanos) / 1_000_000L;
+            final int bucket = (int) (elapsedMillis / BUCKET_MILLIS);
+            while (counts.size() <= bucket) {
+                counts.add(0);
+            }
+            counts.set(bucket, counts.get(bucket) + 1);
         }
-        context.counts.set(bucket, context.counts.get(bucket) + 1);
-        return context;
-    }
 
-    public static List<Report> createReports(final Context context) {
-        if (context.counts.isEmpty()) {
+        if (counts.isEmpty()) {
             return List.of();
         }
-        final List<Report> reports = new ArrayList<>(context.counts.size());
-        for (int bucket = 0; bucket < context.counts.size(); bucket += 1) {
-            reports.add(new Report(bucket * BUCKET_MILLIS, context.counts.get(bucket)));
+        final List<Report> reports = new ArrayList<>(counts.size());
+        for (int bucket = 0; bucket < counts.size(); bucket += 1) {
+            reports.add(new Report(bucket * BUCKET_MILLIS, counts.get(bucket)));
         }
         return reports;
     }

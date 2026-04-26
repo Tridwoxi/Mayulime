@@ -78,48 +78,13 @@ public final class Bench implements Runnable {
             Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
-            case AGREEMENT -> params.runAsStream(
-                Agreement.Report.class,
-                Agreement::initialContext,
-                Agreement::reduce,
-                Agreement::createReports
-            );
-            case DISTRIBUTION -> params.runAsStream(
-                Distribution.Report.class,
-                Distribution::initialContext,
-                Distribution::reduce,
-                Distribution::createReports
-            );
-            case LATENCY -> params.runAsStream(
-                Latency.Report.class,
-                Latency::initialContext,
-                Latency::reduce,
-                Latency::createReports
-            );
-            case OPTIMALITY -> params.runAsStream(
-                Optimality.Report.class,
-                Optimality::initialContext,
-                Optimality::reduce,
-                Optimality::createReports
-            );
-            case SCORE -> params.runAsStream(
-                Score.Report.class,
-                Score::initialContext,
-                Score::reduce,
-                Score::createReports
-            );
-            case THROUGHPUT -> params.runAsStream(
-                Throughput.Report.class,
-                Throughput::initialContext,
-                Throughput::reduce,
-                Throughput::createReports
-            );
-            case TIMELINE -> params.runAsStream(
-                Timeline.Report.class,
-                Timeline::initialContext,
-                Timeline::reduce,
-                Timeline::createReports
-            );
+            case AGREEMENT -> params.run(Agreement.Report.class, Agreement::createReports);
+            case DISTRIBUTION -> params.run(Distribution.Report.class, Distribution::createReports);
+            case LATENCY -> params.run(Latency.Report.class, Latency::createReports);
+            case OPTIMALITY -> params.run(Optimality.Report.class, Optimality::createReports);
+            case SCORE -> params.run(Score.Report.class, Score::createReports);
+            case THROUGHPUT -> params.run(Throughput.Report.class, Throughput::createReports);
+            case TIMELINE -> params.run(Timeline.Report.class, Timeline::createReports);
             default -> throw new AssertionError();
         }
     }

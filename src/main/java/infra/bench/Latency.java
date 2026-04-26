@@ -2,6 +2,7 @@ package infra.bench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import think.manager.Proposal;
 
 public final class Latency {
@@ -12,43 +13,33 @@ public final class Latency {
      */
     public record Report(long lowerNanos, long upperNanos, int count) {}
 
-    public static final class Context {
-
-        private long lastNanos;
-        private int proposalsSeen;
-        private int maxBucket;
-        private final int[] counts = new int[Long.SIZE + 1];
-    }
-
     private Latency() {}
 
-    public static Context initialContext() {
-        return new Context();
-    }
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
+        long lastNanos = 0L;
+        int proposalsSeen = 0;
+        int maxBucket = 0;
+        final int[] counts = new int[Long.SIZE + 1];
 
-    public static Context reduce(final Context context, final Proposal proposal) {
-        final long createdAtNanos = proposal.getCreatedAtNanos();
-        if (context.proposalsSeen >= 1) {
-            final int bucket = bucketIndex(createdAtNanos - context.lastNanos);
-            context.counts[bucket] += 1;
-            if (bucket > context.maxBucket) {
-                context.maxBucket = bucket;
+        for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
+            final long createdAtNanos = proposal.getCreatedAtNanos();
+            if (proposalsSeen >= 1) {
+                final int bucket = bucketIndex(createdAtNanos - lastNanos);
+                counts[bucket] += 1;
+                if (bucket > maxBucket) {
+                    maxBucket = bucket;
+                }
             }
+            lastNanos = createdAtNanos;
+            proposalsSeen += 1;
         }
-        context.lastNanos = createdAtNanos;
-        context.proposalsSeen += 1;
-        return context;
-    }
 
-    public static List<Report> createReports(final Context context) {
-        if (context.proposalsSeen < 2) {
+        if (proposalsSeen < 2) {
             return List.of();
         }
-        final List<Report> reports = new ArrayList<>(context.maxBucket + 1);
-        for (int bucket = 0; bucket <= context.maxBucket; bucket += 1) {
-            reports.add(
-                new Report(bucketLower(bucket), bucketUpper(bucket), context.counts[bucket])
-            );
+        final List<Report> reports = new ArrayList<>(maxBucket + 1);
+        for (int bucket = 0; bucket <= maxBucket; bucket += 1) {
+            reports.add(new Report(bucketLower(bucket), bucketUpper(bucket), counts[bucket]));
         }
         return reports;
     }

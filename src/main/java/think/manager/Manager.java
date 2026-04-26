@@ -1,21 +1,26 @@
 package think.manager;
 
 import infra.logging.Logger;
+import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators.AbstractSpliterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import think.domain.model.Puzzle;
 import think.solvers.Solver;
 import think.solvers.SolverKind;
 
 /**
     Concurrent solver orchestration and lifecycle management.
-
-    The {@link #consumeNow()} and {@link #consumeUntil(long)} methods may be called at any time
-    before the Manager is closed. If they return proposals, that implies the manager was running.
 
     {@snippet lang=mermaid :
     stateDiagram
@@ -40,7 +45,6 @@ public final class Manager implements AutoCloseable {
         thread.setDaemon(true);
         return thread;
     };
-    private static final int CONSUME_PAUSE_NANOS = 100_000;
     private static final int MIN_BUFFER_SIZE = 1000;
     private final int bufferCapacity;
     private final List<SolverKind> solverKinds;
@@ -70,24 +74,39 @@ public final class Manager implements AutoCloseable {
         return proposals;
     }
 
-    public List<Proposal> consumeUntil(final long timeoutMillis) {
+    public Stream<Proposal> streamFor(final Duration duration) {
         requireExecutorAlive();
-        final long endTimeNanos = System.nanoTime() + timeoutMillis * 1_000_000;
-        final List<Proposal> proposals = new ArrayList<>();
-        while (System.nanoTime() < endTimeNanos) {
-            final int numDrained = buffer.drainTo(proposals);
-            if (numDrained == 0) {
+        final long deadline = System.nanoTime() + duration.toNanos();
+        final ArrayDeque<Proposal> backlog = new ArrayDeque<>();
+        final AbstractSpliterator<Proposal> spliterator = new AbstractSpliterator<Proposal>(
+            Long.MAX_VALUE,
+            Spliterator.ORDERED | Spliterator.NONNULL
+        ) {
+            @Override
+            public boolean tryAdvance(final Consumer<? super Proposal> action) {
+                if (!backlog.isEmpty()) {
+                    action.accept(backlog.removeFirst());
+                    return true;
+                }
+                final long remainingTime = deadline - System.nanoTime();
+                if (remainingTime < 0) {
+                    return false;
+                }
                 try {
-                    final long difference = (endTimeNanos - System.nanoTime());
-                    final long sleepNanos = Math.max(0, Math.min(difference, CONSUME_PAUSE_NANOS));
-                    Thread.sleep(0L, (int) sleepNanos);
-                } catch (InterruptedException exception) {
-                    throw new AssertionError(exception);
+                    final Proposal proposal = buffer.poll(remainingTime, TimeUnit.NANOSECONDS);
+                    if (proposal == null) {
+                        return false;
+                    }
+                    buffer.drainTo(backlog);
+                    action.accept(proposal);
+                    return true;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new AssertionError();
                 }
             }
-        }
-        buffer.drainTo(proposals);
-        return proposals;
+        };
+        return StreamSupport.stream(spliterator, false);
     }
 
     public synchronized void stop() {

@@ -1,6 +1,6 @@
 package e2e;
 
-import java.util.List;
+import java.time.Duration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import think.domain.codec.Parser;
@@ -16,7 +16,7 @@ import think.solvers.SolverKind;
  */
 public final class Smalls {
 
-    private static final long TIMEOUT_MS = 100; // Requires about 5 MS on my machine.
+    private static final Duration TIMEOUT = Duration.ofMillis(100L); // Requires minimum 5 ms.
 
     private static final String SMALL1_MAPCODE = """
         13.6.7.Small1...:,r3.11,r3.,r3.2,r1.8,r3.,r3.8,r1.2,f1.,s1.11,r3.,r3.2,r1.,r1.4,r1.2,r3.,r3.2,c1.8,r3.""";
@@ -50,8 +50,11 @@ public final class Smalls {
         final Puzzle puzzle = Parser.parse(mapCode);
         try (Manager manager = new Manager(SolverKind.asList())) {
             manager.solve(puzzle);
-            final List<Proposal> result = manager.consumeUntil(TIMEOUT_MS);
-            final int topScore = result.stream().mapToInt(Proposal::getScore).max().orElseThrow();
+            final int topScore = manager
+                .streamFor(TIMEOUT)
+                .mapToInt(Proposal::getScore)
+                .max()
+                .orElseThrow(AssertionError::new);
             return topScore >= minimumRequiredScore;
         }
     }

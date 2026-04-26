@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <FindBugsFilter>
     <Match>
-        <Bug pattern="VO_VOLATILE_INCREMENT" />
+        <Class name="infra.bench.Params" />
+        <Bug pattern="DM_GC" />
     </Match>
 </FindBugsFilter>
