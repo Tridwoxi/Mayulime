@@ -1,6 +1,7 @@
 package infra.launch;
 
 import infra.bench.Agreement;
+import infra.bench.Cluster;
 import infra.bench.Distribution;
 import infra.bench.Diversity;
 import infra.bench.First;
@@ -82,6 +83,7 @@ public final class Bench implements Runnable {
         );
         switch (Objects.requireNonNull(benchKind)) {
             case AGREEMENT -> params.run(Agreement.Report.class, Agreement::createReports);
+            case CLUSTER -> params.run(Cluster.Report.class, Cluster::createReports);
             case DISTRIBUTION -> params.run(Distribution.Report.class, Distribution::createReports);
             case DIVERSITY -> params.run(Diversity.Report.class, Diversity::createReports);
             case FIRST -> params.run(First.Report.class, First::createReports);
@@ -106,6 +108,7 @@ public final class Bench implements Runnable {
 
     private enum BenchKind {
         AGREEMENT,
+        CLUSTER,
         DISTRIBUTION,
         DIVERSITY,
         FIRST,
