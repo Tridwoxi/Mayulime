@@ -12,7 +12,14 @@ import think.manager.Proposal;
 // Might be nice to output a PCA instead?
 public final class Cluster {
 
-    public record Report(String representativeProposal, boolean meanInCluster) {}
+    public record Report(
+        String representativeProposal,
+        int representativeScore,
+        String bestProposal,
+        int bestScore,
+        int clusterSize,
+        boolean meanInCluster
+    ) {}
 
     private Cluster() {}
 
@@ -24,6 +31,7 @@ public final class Cluster {
 
         final Puzzle puzzle = list.getFirst().getPuzzle();
         final List<Tile[]> states = list.stream().map(Proposal::getState).toList();
+        final List<Integer> scores = list.stream().map(Proposal::getScore).toList();
         final DisjointSets clusters = findClusters(states);
 
         final TreeMap<Integer, List<Integer>> indicesByCluster = new TreeMap<>();
@@ -36,7 +44,7 @@ public final class Cluster {
         return indicesByCluster
             .values()
             .stream()
-            .map(indices -> createReport(puzzle, states, indices))
+            .map(indices -> createReport(puzzle, states, scores, indices))
             .toList();
     }
 
@@ -73,14 +81,33 @@ public final class Cluster {
     private static Report createReport(
         final Puzzle puzzle,
         final List<Tile[]> states,
+        final List<Integer> scores,
         final List<Integer> indices
     ) {
         final int[] wallCounts = wallCounts(states, indices);
         final int representative = representative(states, indices, wallCounts);
+        final int best = best(scores, indices);
         return new Report(
             Serializer.serialize(puzzle, states.get(representative)),
+            scores.get(representative),
+            Serializer.serialize(puzzle, states.get(best)),
+            scores.get(best),
+            indices.size(),
             meanInCluster(puzzle, states, indices, wallCounts)
         );
+    }
+
+    private static int best(final List<Integer> scores, final List<Integer> indices) {
+        int bestIndex = indices.getFirst();
+        int bestScore = scores.get(bestIndex);
+        for (final int stateIndex : indices) {
+            final int score = scores.get(stateIndex);
+            if (score > bestScore) {
+                bestIndex = stateIndex;
+                bestScore = score;
+            }
+        }
+        return bestIndex;
     }
 
     private static int[] wallCounts(final List<Tile[]> states, final List<Integer> indices) {
