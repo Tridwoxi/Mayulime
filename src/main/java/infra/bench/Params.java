@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import think.domain.model.Puzzle;
@@ -34,6 +35,13 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, Duration durat
         final Class<R> reportClass,
         final Function<Stream<Proposal>, List<R>> createReports
     ) {
+        run(reportClass, (solveBeginNanos, stream) -> createReports.apply(stream));
+    }
+
+    public <R extends Record> void run(
+        final Class<R> reportClass,
+        final BiFunction<Long, Stream<Proposal>, List<R>> createReports
+    ) {
         final Map<SolverKind, List<TrialResult<R>>> reportsByKind = HashMap.newHashMap(
             solverKinds.size()
         );
@@ -46,9 +54,9 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, Duration durat
             for (final SolverKind solver : solverKinds) {
                 try (Manager manager = new Manager(List.of(solver))) {
                     System.gc();
-                    manager.solve(puzzle);
+                    final long solveBeginNanos = manager.solve(puzzle);
                     try (Stream<Proposal> stream = manager.streamFor(duration)) {
-                        final List<R> reports = createReports.apply(stream);
+                        final List<R> reports = createReports.apply(solveBeginNanos, stream);
                         for (final R report : reports) {
                             reportsByKind.get(solver).add(new TrialResult<>(trial, report));
                         }

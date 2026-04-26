@@ -60,10 +60,12 @@ public final class Manager implements AutoCloseable {
         this.solvers = new ArrayList<>(solverKinds.size());
     }
 
-    public synchronized void solve(final Puzzle puzzle) {
+    public synchronized long solve(final Puzzle puzzle) {
         stop();
         solverKinds.forEach(kind -> solvers.add(kind.create(this::insertOrBlock, puzzle)));
+        final long solveBeginNanos = System.nanoTime();
         solvers.forEach(solver -> executor.execute(solver::run));
+        return solveBeginNanos;
     }
 
     public List<Proposal> consumeNow() {
@@ -109,7 +111,7 @@ public final class Manager implements AutoCloseable {
         return StreamSupport.stream(spliterator, false);
     }
 
-    public synchronized void stop() {
+    public synchronized long stop() {
         requireExecutorAlive();
         final long startTimeNanos = System.nanoTime();
         // Buffer needs to be cleared before awaitTermination so solvers blocked on it can proceed
@@ -117,12 +119,14 @@ public final class Manager implements AutoCloseable {
         // number of solver threads, since in the worst case each solver can sneak in 1 (we depend
         // on each solver running on a single thread) element after termination requested.
         solvers.forEach(Solver::requestTermination);
+        final long solveEndNanos = System.nanoTime();
         buffer.clear();
         solvers.forEach(Solver::awaitTermination);
         buffer.clear();
         solvers.clear();
         final long endTimeNanos = System.nanoTime();
         Logger.debug("stop() in %d ms", Duration.ofNanos(endTimeNanos - startTimeNanos).toMillis());
+        return solveEndNanos;
     }
 
     @Override

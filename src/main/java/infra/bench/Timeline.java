@@ -15,11 +15,13 @@ public final class Timeline {
 
     private Timeline() {}
 
-    public static List<Report> createReports(final Stream<Proposal> proposals) {
-        final long startTimeNanos = System.nanoTime();
+    public static List<Report> createReports(
+        final long solveBeginNanos,
+        final Stream<Proposal> proposals
+    ) {
         final IntList counts = new IntList(0);
         for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
-            final long elapsedNanos = Math.max(0L, proposal.getCreatedAtNanos() - startTimeNanos);
+            final long elapsedNanos = proposal.getCreatedAtNanos() - solveBeginNanos;
             final long elapsedMillis = Duration.ofNanos(elapsedNanos).toMillis();
             final int bucket = (int) (elapsedMillis / BUCKET_MILLIS);
             while (counts.size() <= bucket) {

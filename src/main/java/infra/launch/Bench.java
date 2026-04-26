@@ -2,6 +2,7 @@ package infra.launch;
 
 import infra.bench.Agreement;
 import infra.bench.Distribution;
+import infra.bench.First;
 import infra.bench.Latency;
 import infra.bench.Optimality;
 import infra.bench.Params;
@@ -81,6 +82,7 @@ public final class Bench implements Runnable {
         switch (Objects.requireNonNull(benchKind)) {
             case AGREEMENT -> params.run(Agreement.Report.class, Agreement::createReports);
             case DISTRIBUTION -> params.run(Distribution.Report.class, Distribution::createReports);
+            case FIRST -> params.run(First.Report.class, First::createReports);
             case LATENCY -> params.run(Latency.Report.class, Latency::createReports);
             case OPTIMALITY -> params.run(Optimality.Report.class, Optimality::createReports);
             case SCORE -> params.run(Score.Report.class, Score::createReports);
@@ -103,6 +105,7 @@ public final class Bench implements Runnable {
     private enum BenchKind {
         AGREEMENT,
         DISTRIBUTION,
+        FIRST,
         LATENCY,
         OPTIMALITY,
         SCORE,
