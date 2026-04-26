@@ -13,14 +13,17 @@ public final class Proposal {
     private final long createdAtNanos;
 
     public Proposal(final String submitter, final Puzzle puzzle, final Tile[] state) {
+        // Grab creation time as early as possible (this matters on sufficiently big maps) because
+        // that's what I think of as creation time. Technically nanoTime emits no memory barrier so
+        // everything can be rearranged, but this is the best we can do.
+        this.createdAtNanos = System.nanoTime();
         this.submitter = submitter;
         this.puzzle = puzzle;
         this.state = state.clone();
-        this.score = new StandardEvaluator(puzzle).evaluate(state);
-        this.createdAtNanos = System.nanoTime();
-        if (!puzzle.isValid(state)) {
+        if (!puzzle.isValid(this.state)) {
             throw new IllegalArgumentException();
         }
+        this.score = new StandardEvaluator(puzzle).evaluate(this.state);
     }
 
     public String getSubmitter() {
