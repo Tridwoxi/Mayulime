@@ -19,9 +19,8 @@ public final class Timeline {
         final long startTimeNanos = System.nanoTime();
         final IntList counts = new IntList(0);
         for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
-            final long elapsedMillis = Duration.ofNanos(
-                proposal.getCreatedAtNanos() - startTimeNanos
-            ).toMillis();
+            final long elapsedNanos = Math.max(0L, proposal.getCreatedAtNanos() - startTimeNanos);
+            final long elapsedMillis = Duration.ofNanos(elapsedNanos).toMillis();
             final int bucket = (int) (elapsedMillis / BUCKET_MILLIS);
             while (counts.size() <= bucket) {
                 counts.add(0);
