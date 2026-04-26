@@ -3,7 +3,6 @@ package infra.bench;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import think.domain.codec.Serializer;
 import think.manager.Proposal;
