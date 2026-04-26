@@ -1,7 +1,7 @@
 # Plans
 
-There are some concurrency or lag issues in App or perhaps the GUI more generally. Usually, it is
-not a problem.
+For benchmarks, maybe it's easier to just dump information into a file then analyze it with Python
+instead of trying to analyze it in Java. Since half the time it goes to graph anyway...
 
 ---
 
@@ -34,18 +34,14 @@ Can StandardEvaluator run faster?
 
 ---
 
-Consider a puzzle where regions are separated by chokepoints. Then each region can be solved as an
-independent subproblem and resources can be distributed between them as long as the barriers
-between subproblems do not change.
-
----
-
 ClimbSolver-style seeding can happen in `O(bfs * log(budget))` since without teleports adding more
-walls can only increase score or disconnect.
+walls can only increase score or disconnect. Somehow this trick works for placeMoreWalls too (it
+really shouldn't). Overfill rearrangeWalls can early terminate.
 
 ---
 
 The graph usually looks like a tree in optimal solutions. There has to be information in here.
+Under unlimited wall supply, it can be made to look like a tree if it is not yet one.
 
 ---
 
