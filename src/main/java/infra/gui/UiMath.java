@@ -1,6 +1,7 @@
 package infra.gui;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Locale;
 import javafx.scene.paint.Color;
 import think.domain.model.Tile;
@@ -48,7 +49,7 @@ final class UiMath {
         if (startNanos <= 0L || nowNanos < startNanos) {
             return "-";
         }
-        final long elapsedSeconds = (nowNanos - startNanos) / 1_000_000_000L;
+        final long elapsedSeconds = Duration.ofNanos(nowNanos - startNanos).toSeconds();
         final long hours = elapsedSeconds / 3600L;
         final long minutes = (elapsedSeconds % 3600L) / 60L;
         final long seconds = elapsedSeconds % 60L;

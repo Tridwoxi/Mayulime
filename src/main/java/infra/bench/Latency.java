@@ -1,5 +1,6 @@
 package infra.bench;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,7 +25,8 @@ public final class Latency {
         for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
             final long createdAtNanos = proposal.getCreatedAtNanos();
             if (proposalsSeen >= 1) {
-                final int bucket = bucketIndex(createdAtNanos - lastNanos);
+                final Duration interval = Duration.ofNanos(createdAtNanos - lastNanos);
+                final int bucket = bucketIndex(interval);
                 counts[bucket] += 1;
                 if (bucket > maxBucket) {
                     maxBucket = bucket;
@@ -44,11 +46,11 @@ public final class Latency {
         return reports;
     }
 
-    private static int bucketIndex(final long intervalNanos) {
-        if (intervalNanos <= 0L) {
+    private static int bucketIndex(final Duration interval) {
+        if (!interval.isPositive()) {
             return 0;
         }
-        return Long.SIZE - Long.numberOfLeadingZeros(intervalNanos);
+        return Long.SIZE - Long.numberOfLeadingZeros(interval.toNanos());
     }
 
     private static long bucketLower(final int bucket) {

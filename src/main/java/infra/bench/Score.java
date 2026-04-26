@@ -1,5 +1,6 @@
 package infra.bench;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Stream;
 import think.domain.codec.Serializer;
@@ -27,7 +28,7 @@ public final class Score {
             new Report(
                 Serializer.serialize(best.getPuzzle(), best.getState()),
                 best.getScore(),
-                (best.getCreatedAtNanos() - startTimeNanos) / 1_000_000L
+                Duration.ofNanos(best.getCreatedAtNanos() - startTimeNanos).toMillis()
             )
         );
     }

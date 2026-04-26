@@ -10,6 +10,7 @@ import infra.bench.Throughput;
 import infra.bench.Timeline;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import picocli.CommandLine;
@@ -46,9 +47,9 @@ public final class Bench implements Runnable {
         index = "2",
         paramLabel = "<durationMillis>",
         description = "How long to run benchmark for.",
-        converter = StringToPositiveLong.class
+        converter = StringToPositiveDuration.class
     )
-    private Long durationMillis;
+    private Duration duration;
 
     @Parameters(
         index = "3",
@@ -74,7 +75,7 @@ public final class Bench implements Runnable {
         final Params params = new Params(
             Objects.requireNonNull(solverKinds),
             Objects.requireNonNull(mapCodeFile),
-            Objects.requireNonNull(durationMillis),
+            Objects.requireNonNull(duration),
             Objects.requireNonNull(trials)
         );
         switch (Objects.requireNonNull(benchKind)) {
@@ -117,12 +118,12 @@ public final class Bench implements Runnable {
         }
     }
 
-    private static final class StringToPositiveLong implements ITypeConverter<Long> {
+    private static final class StringToPositiveDuration implements ITypeConverter<Duration> {
 
         @Override
-        public Long convert(final String value) throws Exception {
-            final long result = Long.parseLong(value);
-            if (result <= 0L) {
+        public Duration convert(final String value) throws Exception {
+            final Duration result = Duration.ofMillis(Long.parseLong(value));
+            if (!result.isPositive()) {
                 throw new TypeConversionException("Duration must be strictly positive");
             }
             return result;

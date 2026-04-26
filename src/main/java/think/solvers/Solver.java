@@ -1,6 +1,7 @@
 package think.solvers;
 
 import infra.logging.Logger;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -48,13 +49,13 @@ public abstract class Solver implements Runnable {
             Logger.info(
                 "Terminated %s (returned normally, %d ms)",
                 getClass().getSimpleName(),
-                (System.nanoTime() - startNanos) / 1_000_000
+                Duration.ofNanos(System.nanoTime() - startNanos).toMillis()
             );
         } catch (KilledException _) {
             Logger.info(
                 "Terminated %s (killed, %d ms)",
                 getClass().getSimpleName(),
-                (System.nanoTime() - startNanos) / 1_000_000
+                Duration.ofNanos(System.nanoTime() - startNanos).toMillis()
             );
         } finally {
             latch.countDown();

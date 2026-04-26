@@ -18,14 +18,14 @@ import think.solvers.SolverKind;
 /**
     Run many trials of a benchmark for a set of solvers. Output tsv.
  */
-public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationMillis, int trials) {
+public record Params(List<SolverKind> solverKinds, Puzzle puzzle, Duration duration, int trials) {
     // It is easier to use tsv than it is to do csv escaping logic (both here and downstream).
     // Assume nobody ever passes a newline or tab.
     private static final String SEPARATOR = "\t";
 
     public Params {
         solverKinds = List.copyOf(solverKinds);
-        if (solverKinds.isEmpty() || durationMillis <= 0 || trials <= 0) {
+        if (solverKinds.isEmpty() || !duration.isPositive() || trials <= 0) {
             throw new IllegalArgumentException();
         }
     }
@@ -47,12 +47,11 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, long durationM
                 try (Manager manager = new Manager(List.of(solver))) {
                     System.gc();
                     manager.solve(puzzle);
-                    final Stream<Proposal> stream = manager.streamFor(
-                        Duration.ofMillis(durationMillis)
-                    );
-                    final List<R> reports = createReports.apply(stream);
-                    for (final R report : reports) {
-                        reportsByKind.get(solver).add(new TrialResult<>(trial, report));
+                    try (Stream<Proposal> stream = manager.streamFor(duration)) {
+                        final List<R> reports = createReports.apply(stream);
+                        for (final R report : reports) {
+                            reportsByKind.get(solver).add(new TrialResult<>(trial, report));
+                        }
                     }
                 }
             }

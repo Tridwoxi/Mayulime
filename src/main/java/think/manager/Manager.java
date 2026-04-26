@@ -122,7 +122,7 @@ public final class Manager implements AutoCloseable {
         buffer.clear();
         solvers.clear();
         final long endTimeNanos = System.nanoTime();
-        Logger.debug("stop() in %d ms", (endTimeNanos - startTimeNanos) / 1_000_000);
+        Logger.debug("stop() in %d ms", Duration.ofNanos(endTimeNanos - startTimeNanos).toMillis());
     }
 
     @Override
