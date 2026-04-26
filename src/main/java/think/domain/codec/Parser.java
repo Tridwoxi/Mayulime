@@ -63,6 +63,7 @@ public final class Parser {
 
         int consumedBudget = 0;
         int traversingIndex = 0;
+        ParserSafety.require(tokens[tokens.length - 1].isEmpty());
         for (int index = 0; index < tokens.length - 1; index += 1) {
             final ParserToken token = ParserToken.parse(tokens[index]);
             final int tileIndex = ParserSafety.sum(traversingIndex, token.numSkips());

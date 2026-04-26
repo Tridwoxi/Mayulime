@@ -26,7 +26,8 @@ public final class Codec {
         "1001.1001.0.DOS attack...:,s1.,f1.",
         "3.2.10.Out of bounds...:,s1.1,r1.,r3.2,c1.1,f1.",
         "3.3.10.Spurious comma...:,s1.1,r1.,r3,.2,c1.1,f1.",
-        "3.3.10.Spurious period...:s1.1,r1.,r3..2,c1.1,f1."
+        "3.3.10.Spurious period...:s1.1,r1.,r3..2,c1.1,f1.",
+        "3.2.10.Trailing token...:,s1.,f1.JUNK"
     );
 
     @Test
