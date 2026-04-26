@@ -1,15 +1,14 @@
 package think.common;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntQueue;
 
 /**
     Find what cells are visited by a shortest path through consecutive waypoints. Path obeys UP,
-    RIGHT, DOWN, LEFT snake preference order. If waypoints are disconnected, the resulting set
-    will be empty.
+    RIGHT, DOWN, LEFT snake preference order. If waypoints are disconnected, the resulting counts
+    will all be zero.
  */
 public final class PathTracer {
 
@@ -29,16 +28,17 @@ public final class PathTracer {
         this.distances = new int[size];
     }
 
-    public BitSet trace(final Tile[] state) {
+    public int[] trace(final Tile[] state) {
         if (state.length != size) {
             throw new IllegalArgumentException();
         }
-        final BitSet visited = new BitSet(size);
-        for (int seg = 0; seg < waypoints.length - 1; seg += 1) {
-            final int start = waypoints[seg];
-            final int finish = waypoints[seg + 1];
+        final int[] visited = new int[size];
+        visited[waypoints[0]] += 1;
+        for (int segment = 0; segment < waypoints.length - 1; segment += 1) {
+            final int start = waypoints[segment];
+            final int finish = waypoints[segment + 1];
             if (!traceSegment(state, start, finish, visited)) {
-                return new BitSet(size);
+                return new int[size];
             }
         }
         return visited;
@@ -48,7 +48,7 @@ public final class PathTracer {
         final Tile[] state,
         final int start,
         final int finish,
-        final BitSet visited
+        final int[] visited
     ) {
         if (state[start].isBlocked() || state[finish].isBlocked()) {
             return false;
@@ -59,7 +59,6 @@ public final class PathTracer {
         }
 
         int current = start;
-        visited.set(current);
         while (current != finish) {
             final int currentRow = current / numCols;
             final int currentCol = current % numCols;
@@ -81,7 +80,7 @@ public final class PathTracer {
             } else {
                 return false;
             }
-            visited.set(current);
+            visited[current] += 1;
         }
         return true;
     }

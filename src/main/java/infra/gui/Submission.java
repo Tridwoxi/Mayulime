@@ -1,7 +1,6 @@
 package infra.gui;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import think.common.PathTracer;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
@@ -16,7 +15,7 @@ public final class Submission {
     private final String submitter;
     private final Tile[] maze;
     private final int[] waypointOrderByIndex;
-    private final BitSet pathCells;
+    private final int[] pathVisits;
     private final int numRows;
     private final int numCols;
     private final int score;
@@ -35,7 +34,7 @@ public final class Submission {
         this.score = score;
         this.blockingBudget = puzzle.blockingBudget();
         this.waypointOrderByIndex = buildWaypointOrderByIndex(puzzle, this.maze.length);
-        this.pathCells = new PathTracer(puzzle).trace(this.maze);
+        this.pathVisits = new PathTracer(puzzle).trace(this.maze);
     }
 
     public String getSubmitter() {
@@ -67,7 +66,7 @@ public final class Submission {
     }
 
     public boolean isOnPath(final int row, final int col) {
-        return pathCells.get(row * numCols + col);
+        return pathVisits[row * numCols + col] > 0;
     }
 
     public int getBlockingBudget() {
