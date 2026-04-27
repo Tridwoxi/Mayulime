@@ -87,11 +87,16 @@ public abstract class Solver implements Runnable {
 
     // == Protected API. ==
 
-    protected static final class KilledException extends Exception {}
+    protected static final class KilledException extends Exception {
+
+        private static final KilledException INSTANCE = new KilledException();
+
+        private KilledException() {}
+    }
 
     protected final void checkAlive() throws KilledException {
         if (!alive) {
-            throw new KilledException();
+            throw KilledException.INSTANCE;
         }
     }
 
