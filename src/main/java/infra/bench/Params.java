@@ -6,6 +6,7 @@ import java.lang.reflect.RecordComponent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +25,7 @@ public record Params(List<SolverKind> solverKinds, Puzzle puzzle, Duration durat
     private static final String SEPARATOR = "\t";
 
     public Params {
-        solverKinds = List.copyOf(solverKinds);
+        solverKinds = List.copyOf(new LinkedHashSet<>(solverKinds));
         if (solverKinds.isEmpty() || !duration.isPositive() || trials <= 0) {
             throw new IllegalArgumentException();
         }
