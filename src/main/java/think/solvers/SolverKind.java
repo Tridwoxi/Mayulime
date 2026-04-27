@@ -2,9 +2,9 @@ package think.solvers;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import think.domain.model.Puzzle;
-import think.manager.Proposal;
+import think.domain.model.Tile;
 import think.solvers.compass.CompassSolver;
 import think.solvers.exact.EnumerateSolver;
 import think.solvers.local.ChokepointSolver;
@@ -40,7 +40,7 @@ public enum SolverKind {
 
     public static final class NoSuchSolverException extends Exception {}
 
-    public Solver create(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public Solver create(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         return switch (this) {
             case BASELINE -> new BaselineSolver(listener, puzzle);
             case CHOKEPOINT -> new ChokepointSolver(listener, puzzle);

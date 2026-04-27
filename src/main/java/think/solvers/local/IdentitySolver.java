@@ -1,12 +1,11 @@
 package think.solvers.local;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import think.common.DistanceFinder;
 import think.common.StandardEvaluator;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
-import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class IdentitySolver extends Solver {
@@ -16,7 +15,7 @@ public final class IdentitySolver extends Solver {
     private final int[] initiallyBlankCells;
     private final int[] waypoints;
 
-    public IdentitySolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public IdentitySolver(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
         this.distances = new DistanceFinder(puzzle);

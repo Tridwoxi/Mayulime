@@ -1,6 +1,5 @@
 package infra.bench;
 
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -13,17 +12,14 @@ public final class Score {
 
     private Score() {}
 
-    public static List<Report> createReports(
-        final long solveBeginNanos,
-        final Stream<Proposal> proposals
-    ) {
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
         return proposals
             .max(Comparator.comparingInt(Proposal::getScore))
             .map(best ->
                 new Report(
                     Serializer.serialize(best.getPuzzle(), best.getState()),
                     best.getScore(),
-                    Duration.ofNanos(best.getCreatedAtNanos() - solveBeginNanos).toMillis()
+                    best.getCreatedAfter().toMillis()
                 )
             )
             .stream()

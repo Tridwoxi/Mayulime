@@ -12,10 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import think.domain.model.Puzzle;
+import think.domain.model.Tile;
 import think.solvers.Solver;
 import think.solvers.SolverKind;
 
@@ -62,8 +64,11 @@ public final class Manager implements AutoCloseable {
 
     public synchronized long solve(final Puzzle puzzle) {
         stop();
-        solverKinds.forEach(kind -> solvers.add(kind.create(this::insertOrBlock, puzzle)));
         final long solveBeginNanos = System.nanoTime();
+        final BiConsumer<String, Tile[]> listener = (submitter, state) -> {
+            insertProposal(buildProposal(puzzle, submitter, state, solveBeginNanos));
+        };
+        solverKinds.forEach(kind -> solvers.add(kind.create(listener, puzzle)));
         solvers.forEach(solver -> executor.execute(solver::run));
         return solveBeginNanos;
     }
@@ -135,7 +140,17 @@ public final class Manager implements AutoCloseable {
         executor.shutdown();
     }
 
-    private void insertOrBlock(final Proposal proposal) {
+    private Proposal buildProposal(
+        final Puzzle puzzle,
+        final String submitter,
+        final Tile[] state,
+        final long solveBeginNanos
+    ) {
+        final Duration createdAfter = Duration.ofNanos(System.nanoTime() - solveBeginNanos);
+        return new Proposal(submitter, puzzle, state, createdAfter);
+    }
+
+    private void insertProposal(final Proposal proposal) {
         final int bufferSize = buffer.size();
         if (bufferSize > bufferCapacity / 2) {
             Logger.warning("buffer past half capacity with %d elements", bufferSize);

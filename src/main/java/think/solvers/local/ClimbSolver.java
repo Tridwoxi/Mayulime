@@ -1,11 +1,10 @@
 package think.solvers.local;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import think.common.StandardEvaluator;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
-import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class ClimbSolver extends Solver {
@@ -13,7 +12,7 @@ public final class ClimbSolver extends Solver {
     private final StandardEvaluator evaluator;
     private final int[] initiallyBlankCells;
 
-    public ClimbSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public ClimbSolver(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.evaluator = new StandardEvaluator(puzzle);
         this.initiallyBlankCells = getCellsWhere(puzzle.tiles(), Tile.BLANK);

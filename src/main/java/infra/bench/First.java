@@ -11,15 +11,12 @@ public final class First {
 
     private First() {}
 
-    public static List<Report> createReports(
-        final long solveBeginNanos,
-        final Stream<Proposal> proposals
-    ) {
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
         final Optional<Proposal> first = proposals.findFirst();
         if (first.isEmpty()) {
             return List.of();
         }
-        final long elapsedNanos = first.orElseThrow().getCreatedAtNanos() - solveBeginNanos;
+        final long elapsedNanos = first.orElseThrow().getCreatedAfter().toNanos();
         return List.of(new Report(elapsedNanos));
     }
 }

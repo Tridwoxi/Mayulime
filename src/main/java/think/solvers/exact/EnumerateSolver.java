@@ -1,13 +1,12 @@
 package think.solvers.exact;
 
 import infra.logging.Logger;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
 import think.common.StandardEvaluator;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
-import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class EnumerateSolver extends Solver {
@@ -15,7 +14,7 @@ public final class EnumerateSolver extends Solver {
     private final int[] blankCellIndices;
     private final StandardEvaluator evaluator;
 
-    public EnumerateSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public EnumerateSolver(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.blankCellIndices = getBlankCellIndices(puzzle.tiles());
         this.evaluator = new StandardEvaluator(puzzle);

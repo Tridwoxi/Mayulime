@@ -1,6 +1,5 @@
 package infra.bench;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -15,14 +14,10 @@ public final class Timeline {
 
     private Timeline() {}
 
-    public static List<Report> createReports(
-        final long solveBeginNanos,
-        final Stream<Proposal> proposals
-    ) {
+    public static List<Report> createReports(final Stream<Proposal> proposals) {
         final IntList counts = new IntList(0);
         for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
-            final long elapsedNanos = proposal.getCreatedAtNanos() - solveBeginNanos;
-            final long elapsedMillis = Duration.ofNanos(elapsedNanos).toMillis();
+            final long elapsedMillis = proposal.getCreatedAfter().toMillis();
             final int bucket = (int) (elapsedMillis / BUCKET_MILLIS);
             while (counts.size() <= bucket) {
                 counts.add(0);

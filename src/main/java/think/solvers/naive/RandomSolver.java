@@ -1,11 +1,10 @@
 package think.solvers.naive;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.IntPredicate;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
 import think.ints.IntArrays;
-import think.manager.Proposal;
 import think.solvers.Solver;
 
 public final class RandomSolver extends Solver {
@@ -13,7 +12,7 @@ public final class RandomSolver extends Solver {
     private final int[] blankCellIndices;
     private final RestrictedBinomial wallDistribution;
 
-    public RandomSolver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public RandomSolver(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         super(listener, puzzle);
         this.blankCellIndices = getBlankCellIndices(puzzle.tiles());
         this.wallDistribution = new RestrictedBinomial(

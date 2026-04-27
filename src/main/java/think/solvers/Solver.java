@@ -4,10 +4,9 @@ import infra.logging.Logger;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import think.domain.model.Puzzle;
 import think.domain.model.Tile;
-import think.manager.Proposal;
 
 /**
     Find maze configurations to solve Pathery puzzles. This abstract class provides getters and a
@@ -17,13 +16,13 @@ public abstract class Solver implements Runnable {
 
     private static final AtomicInteger ID = new AtomicInteger(0);
     private final String name;
-    private final Consumer<Proposal> listener;
+    private final BiConsumer<String, Tile[]> listener;
     private final Puzzle puzzle;
     private final CountDownLatch latch;
     private volatile Thread runner;
     private volatile boolean alive;
 
-    public Solver(final Consumer<Proposal> listener, final Puzzle puzzle) {
+    public Solver(final BiConsumer<String, Tile[]> listener, final Puzzle puzzle) {
         this.name = getClass().getSimpleName() + "~" + ID.getAndIncrement();
         this.listener = listener;
         this.puzzle = puzzle;
@@ -102,6 +101,6 @@ public abstract class Solver implements Runnable {
 
     protected final void propose(final Tile[] state) throws KilledException {
         checkAlive();
-        listener.accept(new Proposal(name, puzzle, state));
+        listener.accept(name, state);
     }
 }

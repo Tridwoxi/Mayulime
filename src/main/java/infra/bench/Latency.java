@@ -17,26 +17,26 @@ public final class Latency {
     private Latency() {}
 
     public static List<Report> createReports(final Stream<Proposal> proposals) {
-        long lastNanos = 0L;
+        Duration lastCreatedAfter = Duration.ZERO;
         int proposalsSeen = 0;
         int maxBucket = 0;
         final int[] counts = new int[Long.SIZE + 1];
 
         for (final Proposal proposal : (Iterable<Proposal>) proposals::iterator) {
-            final long createdAtNanos = proposal.getCreatedAtNanos();
+            final Duration createdAfter = proposal.getCreatedAfter();
             if (proposalsSeen >= 1) {
-                final Duration interval = Duration.ofNanos(createdAtNanos - lastNanos);
+                final Duration interval = createdAfter.minus(lastCreatedAfter);
                 final int bucket = bucketIndex(interval);
                 counts[bucket] += 1;
                 if (bucket > maxBucket) {
                     maxBucket = bucket;
                 }
             }
-            lastNanos = createdAtNanos;
+            lastCreatedAfter = createdAfter;
             proposalsSeen += 1;
         }
 
-        if (proposalsSeen < 2) {
+        if (proposalsSeen <= 1) {
             return List.of();
         }
         final List<Report> reports = new ArrayList<>(maxBucket + 1);
